@@ -1,0 +1,11 @@
+<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Email Open">
+<path id="Vector" d="M3.55556 6.81256L7.775 10.2032C8.50092 10.7865 9.49908 10.7865 10.225 10.2032L14.4444 6.81252M8.33899 2.83098L3.5751 5.66663C3.14299 5.92383 2.875 6.41182 2.875 6.94144V12.6459C2.875 13.4513 3.48439 14.1042 4.23611 14.1042H13.7639C14.5156 14.1042 15.125 13.4513 15.125 12.6459V6.94144C15.125 6.41182 14.857 5.92383 14.4249 5.66663L9.66101 2.83098C9.24993 2.58629 8.75007 2.58629 8.33899 2.83098Z" stroke="url(#paint0_linear_2499_16342)" strokeLinecap="round"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_2499_16342" x1="2.875" y1="14.1042" x2="16.8163" y2="11.4149" gradientUnits="userSpaceOnUse">
+<stop stop-color="#1975FF"/>
+<stop offset="1" stop-color="#33A9FF"/>
+</linearGradient>
+</defs>
+</svg>

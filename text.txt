@@ -1,0 +1,12 @@
+<div className="mx-auto w-full   flex justify-center items-center flex-col  text-[#8A8A8A] font-inter text-[15px] xl:text-[20px] font-normal leading-[16px]">
+        <h1 className="text-black xl:mb-12  flex justify- font-inter text-[22px] xl:text-[32px] font-normal leading-[36px] ">
+            <div>How would you like to get started?</div>
+        </h1>
+        <div className="xl:grid xl:grid-cols-2  xl:gap-x-16 xl:gap-y-10 flex flex-wrap gap-y-6   mt-4">
+            <button onClick={()=> setRole("STARTUP")} className="focus:border-blue-400 focus:text-[#0A64BC] xl:w-[233.003px] xl:h-[65.66px] w-[104px] h-[40px] 
+ flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)]">To Hire</button>
+            <button onClick={()=> setRole("MENTOR")} className=" focus:text-[#0A64BC] focus:border-blue-400 xl:w-[233.003px] ml-10 xl:ml-0 xl:h-[65.66px] w-[153px] h-[40px]  flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)]">To be a Mentor</button>
+            <button onClick={()=> setRole("STUDENT")} className=" focus:text-[#0A64BC] focus:border-blue-400 xl:w-[233.003px] xl:h-[65.66px] w-[188px] h-[40px]  flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)]">Placement Preparation</button>
+            <button onClick={()=> setRole("STUDENT")} className="focus:text-[#0A64BC] focus:border-blue-400 xl:w-[233.003px] xl:h-[65.66px] w-[94px] h-[40px] flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] ml-10 xl:ml-0">Find Jobs</button>
+        </div>
+        </div>
