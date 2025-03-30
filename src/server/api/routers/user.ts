@@ -11,6 +11,7 @@ export const userRouter = createTRPCRouter({
       name: z.string(),
       email : z.string().email(),
       avatarUrl : z.string().url().optional(),
+      username: z.string().min(3),
      }))
     .mutation(async ({ ctx, input }) => {
       return ctx?.db?.user.create({
@@ -19,6 +20,7 @@ export const userRouter = createTRPCRouter({
           name: input.name,
           email: input.email,
           avatarUrl: input.avatarUrl,
+          username: input.username,
         },
       });
     }),
@@ -29,6 +31,7 @@ export const userRouter = createTRPCRouter({
     avatarUrl: z.string().url().optional(),
     role: z.enum(["USER", "STUDENT", "MENTOR", "STARTUP"]).optional(),
     isRegistered : z.boolean().optional(),
+    username: z.string().min(3).optional(),
   }))
   
   .mutation(async ({ ctx, input }) => {
@@ -91,7 +94,27 @@ export const userRouter = createTRPCRouter({
   }
   ),
 
+  checkUsernameAvailability: publicProcedure
+  .input(z.object({
+    username: z.string().min(3),
+  }))
+  .query(async ({ ctx, input }) => {
+    const existingUser = await ctx?.db?.user.findUnique({
+      where: { username: input.username },
+    });
+    return { available: !existingUser };
+  }),
 
-    
+  checkUsernameAvailabilityMutation: publicProcedure
+  .input(z.object({
+    username: z.string().min(3),
+  }))
+  .mutation(async ({ ctx, input }) => {
+    const existingUser = await ctx?.db?.user.findUnique({
+      where: { username: input.username },
+    });
+    return { available: !existingUser };
+  }),
+  
   })
 

@@ -15,6 +15,7 @@ import {
 import { api } from "@/trpc/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface ProfileHeaderProps {
   name: string;
@@ -31,6 +32,7 @@ interface ProfileHeaderProps {
   experience?: string;
   industry?: string;
   companyType?: string;
+  userId?: string;
 }
 
 const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
@@ -134,6 +136,9 @@ const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
           ))}
         </div>
       </div>
+        <Link className="mt-4" href={`/mentors/${user?.userId}`}>
+            <Button>Preview Mentor Profile</Button>
+          </Link>
     </div>
   );
 };

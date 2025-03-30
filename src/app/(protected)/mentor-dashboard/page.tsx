@@ -12,8 +12,10 @@ const Page = async () => {
   const scheduledSessions =
     await api.scheduledMeetings.getMentorScheduledMeetings();
 
+  console.log("scheduledSessions", scheduledSessions);
+
   return (
-    <div className="min-h-screen  w-full p-4 md:p-8">
+    <div className="min-h-screen  w-full mx-auto  p-4 md:p-8">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">

@@ -53,21 +53,21 @@ const KeyBenefits = () => {
                 <img src='/plane.svg' className='w-[40px] h-[40px]' />
                 <div className='text-[#3D568F] mt-4 font-inter text-[20px] font-[600] leading-[28px]'>Personalized Career Growth</div>
                 <div className='text-[#3D568F] font-inter text-[16px] font-normal leading-[24px]'>
-                Lorem ipsum dolor sit amet consectetur eli mattis sit  sit nullam.
+                Get tailored guidance and mentorship that aligns with your unique career goals, ensuring you stand out in the competitive job market.
                 </div>
              </div>
                 <div className='flex  flex-col mt-12 pl-[66px] pr-[20px] '>
                 <img src='/phome.svg' className='w-[40px] h-[40px] p-2 rounded-[12px] bg-[#F0F6FF] ' />
-                <div className='text-[#3D568F]  mt-4 font-inter text-[20px] font-[600] leading-[28px]'>Personalized Career Growth</div>
+                <div className='text-[#3D568F]  mt-4 font-inter text-[20px] font-[600] leading-[28px]'>Complete Job Preparation</div>
                 <div className='text-[#3D568F] font-inter text-[16px] font-normal leading-[24px]'>
-                Lorem ipsum dolor sit amet consectetur eli mattis sit  sit nullam.
+                From mock interviews to resume reviews, we provide end-to-end support to help you secure your dream job or internship
                 </div>
              </div>
                 <div className='flex  flex-col mt-12 pl-[66px] pr-[20px] '>
                 <img src='/letter.svg' className='w-[40px] h-[40px] p-2  rounded-[12px] bg-[#F0F6FF]' />
-                <div className='text-[#3D568F] mt-4 font-inter text-[20px] font-[600] leading-[28px]'>Personalized Career Growth</div>
+                <div className='text-[#3D568F] mt-4 font-inter text-[20px] font-[600] leading-[28px]'>Thriving Community & Network</div>
                 <div className='text-[#3D568F] font-inter text-[16px] font-normal leading-[24px]'>
-                Lorem ipsum dolor sit amet consectetur eli mattis sit  sit nullam.
+                Join a supportive community of mentors, peers, and industry experts, offering insights, opportunities, and collaborations to accelerate your success.
                 </div>
              </div>
                 </div>

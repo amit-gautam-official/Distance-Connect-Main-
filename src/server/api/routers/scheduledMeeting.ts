@@ -108,4 +108,50 @@ export const scheduledMeetingsRouter = createTRPCRouter({
         };
       });
     }),
+
+    markMeetingCompleted: protectedProcedure
+    .input(z.object({ meetingId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const meeting = await ctx.db.scheduledMeetings.update({
+        where: { id: input.meetingId },
+        data: { completed: true },
+      });
+
+      return meeting;
+    }),
+
+    addFeedback: protectedProcedure
+    .input(z.object({ 
+      meetingId: z.string(),
+      feedback: z.string().min(1, "Feedback cannot be empty"),
+      starRating: z.number().min(1).max(5, "Rating must be between 1 and 5 stars")
+    }))
+    .mutation(async ({ ctx, input }) => {
+      // First verify that the meeting exists and belongs to the student
+      const meeting = await ctx.db.scheduledMeetings.findFirst({
+        where: {
+          id: input.meetingId,
+          studentUserId: ctx.dbUser!.id,
+          completed: true
+        }
+      });
+
+      if (!meeting) {
+        throw new Error("Meeting not found or you don't have permission to add feedback");
+      }
+
+      // Check if feedback already exists
+      if (meeting.feedback) {
+        throw new Error("Feedback has already been submitted for this meeting");
+      }
+
+      // Update the meeting with feedback and star rating
+      return await ctx.db.scheduledMeetings.update({
+        where: { id: input.meetingId },
+        data: { 
+          feedback: input.feedback,
+          star: input.starRating
+        },
+      });
+    }),
   })

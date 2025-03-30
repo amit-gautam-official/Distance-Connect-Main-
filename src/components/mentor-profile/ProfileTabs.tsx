@@ -35,7 +35,7 @@ interface Offering {
 }
 
 interface Review {
-  id: number;
+  id: string;
   name: string;
   avatar: string;
   role: string;

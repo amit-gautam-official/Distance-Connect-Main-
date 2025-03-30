@@ -1,127 +1,125 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+);
 
 interface SessionData {
   month: string;
   count: number;
 }
 
-const monthNames = [
-  "JAN",
-  "FEB",
-  "MAR",
-  "APR",
-  "MAY",
-  "JUN",
-  "JUL",
-  "AUG",
-  "SEP",
-  "OCT",
-  "NOV",
-  "DEC",
-];
-
 interface TrackSessionsProps {
   sessionData: SessionData[];
 }
 
 const TrackSessions: React.FC<TrackSessionsProps> = ({ sessionData }) => {
-  const [activeView, setActiveView] = useState<"Year" | "Month" | "Week">(
-    "Year",
-  );
+  // Prepare data for the chart
+  const labels = sessionData.map((item) => item.month.substring(0, 3));
+  const counts = sessionData.map((item) => item.count);
 
-  // Find the maximum count to scale the bars
-  const maxCount = Math.max(...sessionData.map((item) => item.count), 12);
+  // Chart data
+  const chartData = {
+    labels,
+    datasets: [
+      {
+        label: "Sessions",
+        data: counts,
+        backgroundColor: "#3b82f6", // blue-500
+        borderRadius: 4,
+        maxBarThickness: 20,
+      },
+    ],
+  };
+
+  // Chart options
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        backgroundColor: "#1f2937", // gray-800
+        padding: 10,
+        titleFont: {
+          size: 12,
+        },
+        bodyFont: {
+          size: 12,
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: Math.max(...counts, 12),
+        ticks: {
+          stepSize: 3,
+          font: {
+            size: 10,
+          },
+          color: "#6b7280", // gray-500
+        },
+        grid: {
+          color: "rgba(243, 244, 246, 0.6)", // gray-100 with opacity
+          borderDash: [5, 5],
+        },
+        border: {
+          dash: [5, 5],
+        },
+      },
+      x: {
+        ticks: {
+          font: {
+            size: 10,
+          },
+          color: "#6b7280", // gray-500
+        },
+        grid: {
+          display: false,
+        },
+      },
+    },
+  };
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-base font-medium">Track Sessions</CardTitle>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
+     
       </CardHeader>
       <CardContent>
-        <div className="mb-4 flex justify-end space-x-1">
-          {["Year", "Month", "Week"].map((view) => (
-            <Button
-              key={view}
-              variant={activeView === view ? "default" : "ghost"}
-              size="sm"
-              className={`h-7 px-3 text-xs ${
-                activeView === view ? "" : "text-muted-foreground"
-              }`}
-              onClick={() => setActiveView(view as "Year" | "Month" | "Week")}
-            >
-              {view}
-            </Button>
-          ))}
+        {/* Chart Container */}
+        <div className="h-60">
+          <Bar data={chartData} options={chartOptions} />
         </div>
 
-        <div className="mt-6 space-y-2">
-          {/* Y-axis labels */}
-          <div className="flex justify-end pb-2">
-            <div className="grid w-full grid-cols-6">
-              <div className="col-span-1 pr-2 text-right">
-                <div className="text-xs text-muted-foreground">12</div>
-              </div>
-              <div className="col-span-5"></div>
-            </div>
-          </div>
-          <div className="flex justify-end pb-2">
-            <div className="grid w-full grid-cols-6">
-              <div className="col-span-1 pr-2 text-right">
-                <div className="text-xs text-muted-foreground">9</div>
-              </div>
-              <div className="col-span-5 border-t border-dashed border-gray-200"></div>
-            </div>
-          </div>
-          <div className="flex justify-end pb-2">
-            <div className="grid w-full grid-cols-6">
-              <div className="col-span-1 pr-2 text-right">
-                <div className="text-xs text-muted-foreground">6</div>
-              </div>
-              <div className="col-span-5 border-t border-dashed border-gray-200"></div>
-            </div>
-          </div>
-          <div className="flex justify-end pb-2">
-            <div className="grid w-full grid-cols-6">
-              <div className="col-span-1 pr-2 text-right">
-                <div className="text-xs text-muted-foreground">3</div>
-              </div>
-              <div className="col-span-5 border-t border-dashed border-gray-200"></div>
-            </div>
-          </div>
-
-          {/* Chart */}
-          <div className="flex h-40 items-end space-x-2">
-            {sessionData.map((item, index) => (
-              <div key={index} className="flex flex-1 flex-col items-center">
-                <div
-                  className="w-full rounded-t bg-blue-500"
-                  style={{
-                    height: `${(item.count / maxCount) * 100}%`,
-                    maxWidth: "20px",
-                    margin: "0 auto",
-                  }}
-                ></div>
-                <div className="mt-2 text-xs text-muted-foreground">
-                  {item.month}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Legend */}
-          <div className="mt-4 flex items-center justify-center">
-            <div className="flex items-center">
-              <div className="mr-1 h-3 w-3 rounded-full bg-blue-500"></div>
-              <span className="text-xs text-muted-foreground">Sessions</span>
-            </div>
+        {/* Legend */}
+        <div className="mt-4 flex items-center justify-center">
+          <div className="flex items-center">
+            <div className="mr-1 h-3 w-3 rounded-full bg-blue-500"></div>
+            <span className="text-xs text-muted-foreground">Sessions</span>
           </div>
         </div>
       </CardContent>

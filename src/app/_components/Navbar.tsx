@@ -35,7 +35,10 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
   const components = top4Blogs?.map((blog: any) => ({
     title: blog?.fields?.title.trim().substring(0, 20).concat("..."),
     href: `/blog/${blog?.fields?.slug}`,
-    description: blog?.fields?.shortDescription.trim().substring(0, 50).concat("..."),
+    description: blog?.fields?.shortDescription
+      .trim()
+      .substring(0, 50)
+      .concat("..."),
     imageUrl: blog?.fields?.featuredImage?.fields?.file?.url,
     imageAlt: blog?.fields?.featuredImage?.fields?.title,
   }));
@@ -127,7 +130,7 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                     href="/blog"
                     className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
                   >
-                    Resources
+                    Blogs
                   </Link>
                   <div className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]">
                     Use Cases
@@ -155,12 +158,37 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                     </div>
                   </div>
                   <div className="flex flex-col items-center justify-center gap-4">
-                    <button className="flex w-[199px] items-center justify-center gap-1 rounded-lg border border-[#E1E4ED] bg-[#F8FAFF] p-[18px_22px]">
-                      Login
-                    </button>
-                    <button className="flex w-[199px] items-center justify-center gap-1 rounded-lg bg-[#6D758F] p-[18px_22px] text-white shadow-md">
-                      Sign up
-                    </button>
+                    {!loggedId ? (
+                      <>
+                        <Link
+                          href="/auth/login"
+                          className="flex w-[199px] items-center justify-center gap-1 rounded-lg border border-[#E1E4ED] bg-[#F8FAFF] p-[18px_22px]"
+                        >
+                          Login
+                        </Link>
+                        <Link
+                          href="/auth/login?screen_hint=signup"
+                          className="flex w-[199px] items-center justify-center gap-1 rounded-lg bg-[#6D758F] p-[18px_22px] text-white shadow-md"
+                        >
+                          Sign up
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          href="/register"
+                          className="flex w-[199px] items-center justify-center gap-1 rounded-lg border border-[#E1E4ED] bg-[#F8FAFF] p-[18px_22px]"
+                        >
+                          Dashboard
+                        </Link>
+                        <Link
+                          href="/auth/logout"
+                          className="flex w-[199px] items-center justify-center gap-1 rounded-lg bg-[#6D758F] p-[18px_22px] text-white shadow-md"
+                        >
+                          Logout
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -197,7 +225,11 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem className="">
-                <NavigationMenuTrigger>Solutions</NavigationMenuTrigger>
+                <NavigationMenuTrigger>
+                  <Link href="/solutions" className="cursor-pointer">
+                    Solutions
+                  </Link>
+                </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                     <li className="row-span-3">
@@ -224,17 +256,18 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                     <ListItem href="/solutions/mentor" title="Mentors">
                       How to install dependencies and structure your app.
                     </ListItem>
-                    <ListItem
-                      href="/solutions/student"
-                      title="Students"
-                    >
+                    <ListItem href="/solutions/student" title="Students">
                       Styles for headings, paragraphs, lists...etc
                     </ListItem>
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
+                <NavigationMenuTrigger>
+                  <Link href="/blog" className="cursor-pointer">
+                    Blogs
+                  </Link>
+                </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid w-[400px] gap-3 p-2 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                     {components.map((component: any) => (
@@ -273,27 +306,33 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
         </div>
         {!loggedId ? (
           <div className="flex items-center justify-center gap-4">
-            <a
+            <Link
               href="/auth/login"
               className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[25px] border-[0.5px] border-[rgba(94,127,203,0.6)] bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08)] lg:w-[100px] xl:w-[134px]"
             >
               Login
-            </a>
-            <a
+            </Link>
+            <Link
               href="/auth/login?screen_hint=signup"
               className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[25px] border-[0.5px] border-[rgba(94,127,203,0.6)] text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08)] lg:w-[100px] xl:w-[134px]"
             >
               Sign Up
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="flex items-center justify-center gap-4">
-            <a
+            <Link
+              href="/register"
+              className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[25px] border-[0.5px] border-[rgba(94,127,203,0.6)] bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08)] lg:w-[100px] xl:w-[134px]"
+            >
+              Dashboard
+            </Link>
+            <Link
               href="/auth/logout"
               className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[25px] border-[0.5px] border-[rgba(94,127,203,0.6)] bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08)] lg:w-[100px] xl:w-[134px]"
             >
               Logout
-            </a>
+            </Link>
           </div>
         )}
       </div>

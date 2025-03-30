@@ -7,6 +7,7 @@ export const studentRouter = createTRPCRouter({
 
   createStudentUpdateUser: protectedProcedure
     .input(z.object({ 
+      username: z.string().min(3),
       studentRole: z.enum(["HIGHSCHOOL", "COLLEGE", "WORKING"]),
       institutionName : z.string(),
       pinCode : z.number(),
@@ -46,6 +47,7 @@ export const studentRouter = createTRPCRouter({
         ctx.db.user.update({
           where: { id: ctx?.dbUser?.id! },
           data: {
+            username: input.username,
             name: input.name,
             role: input.role,
             isRegistered: input.isRegistered,

@@ -7,6 +7,7 @@ export const mentorRouter = createTRPCRouter({
 
   createMentorUpdateUser: protectedProcedure
     .input(z.object({ 
+      username: z.string().min(3),
       currentCompany : z.string(),
       jobTitle : z.string(),
       experience : z.string(),
@@ -42,11 +43,11 @@ export const mentorRouter = createTRPCRouter({
         ctx.db.user.update({
           where: { id: ctx?.dbUser?.id! },
           data: {
+            username: input.username,
             name: input.name,
             role: input.role,
             isRegistered: input.isRegistered,
             avatarUrl: input.avatarUrl,
-
           },
         })
       ])
@@ -55,7 +56,7 @@ export const mentorRouter = createTRPCRouter({
 
   updateMentor: protectedProcedure
   .input(z.object({
-    linkedinUrl : z.string().url(),
+    linkedinUrl : z.string(),
     companyType : z.string(),
     currentCompany : z.string(),
     pinCode : z.number(),

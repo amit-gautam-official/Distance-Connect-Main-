@@ -23,12 +23,26 @@ const StudentDashboardPage = async () => {
   }
   const student = await api.student.getStudent();
 
-  const mentorsData = Array.from(
-    new Set(student?.scheduledMeetings?.map((meeting) => meeting.mentor.id)),
-  ).map((mentorId) => {
-    const meeting = student?.scheduledMeetings?.find(
-      (m) => m.mentor.id === mentorId,
-    );
+  const filterMeetingList = (type: string) => {
+    const currentTimestamp = new Date().getTime();
+    if (type == "upcoming") {
+      return student?.scheduledMeetings?.filter(
+        (item) =>
+          Number(item?.formatedTimeStamp) >= Number(currentTimestamp) &&
+          !item?.completed,
+      );
+    } else if (type == "completed") {
+      return student?.scheduledMeetings?.filter((item) => item?.completed);
+    } else if (type == "missed") {
+      return student?.scheduledMeetings?.filter(
+        (item) =>
+          Number(item?.formatedTimeStamp) < Number(currentTimestamp) &&
+          !item?.completed,
+      );
+    }
+  };
+
+  const mentorsData = filterMeetingList("upcoming")?.map((meeting) => {
     return {
       id: meeting?.mentor.id ?? "",
       mentorUserId: meeting?.mentor.userId ?? "",
@@ -48,47 +62,50 @@ const StudentDashboardPage = async () => {
       userNote: meeting?.userNote ?? "",
     };
   });
+
+  console.log("mentorsData", mentorsData);
+
+  const completedSessions = student?.scheduledMeetings?.filter(
+    (m) => m.completed === true,
+  );
   // Mock data for stats
   const stats = {
-    sessionsCompleted: 75,
+    sessionsCompleted: completedSessions?.length ?? 0,
     sessionsCompletedTrend: "8.5%",
-    totalTimeSpent: 8900,
+    totalTimeSpent:
+      completedSessions?.reduce((acc, curr) => acc + curr.duration, 0) ?? 0,
     totalTimeSpentTrend: "4.3%",
-    totalPending: 2,
+    totalPending:
+      (student?.scheduledMeetings?.length ?? 0) -
+      (completedSessions?.length ?? 0),
   };
 
   // Mock data for session tracking
-  const sessionData = [
-    { month: "JAN", count: 8 },
-    { month: "FEB", count: 7 },
-    { month: "MAR", count: 12 },
-    { month: "APR", count: 5 },
-    { month: "MAY", count: 9 },
-    { month: "JUN", count: 7 },
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
+  const sessionData = months.map((month) => {
+    const count =
+      completedSessions?.filter((m) => m.formatedDate.includes(month)).length ??
+      0;
+    return { month, count };
+  });
 
-  // Mock data for mentors
-  const mentors = [
-    {
-      id: "1",
-      name: "Prashant Singh",
-      date: "25/2/2023",
-      courseType: "FRONTEND",
-      courseTitle: "Understanding Concept Of React",
-      image: undefined,
-    },
-    {
-      id: "2",
-      name: "Ravi Kumar",
-      date: "25/2/2023",
-      courseType: "FRONTEND",
-      courseTitle: "Understanding Concept Of React",
-      image: undefined,
-    },
-  ];
+  // console.log("sessionData", sessionData);
 
   return (
-    <div className="container mx-auto  w-full px-4 py-6">
+    <div className="container mx-auto w-full px-4 py-6">
       {/* Explore Mentors Banner */}
       <ExploreMentorsBanner />
 
@@ -103,7 +120,7 @@ const StudentDashboardPage = async () => {
         <TrackSessions sessionData={sessionData} />
 
         {/* Your Mentors */}
-        <YourMentors mentors={mentorsData} />
+        <YourMentors mentors={mentorsData!} />
       </div>
     </div>
   );

@@ -51,36 +51,27 @@ interface Mentor {
 
 const DashUpcoming = ({ mentorsData }: { mentorsData: Mentor[] }) => {
   const [mentors, setMentors] = useState<Mentor[]>(mentorsData);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("all");
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedExpertise, setSelectedExpertise] = useState<string[]>([]);
   const router = useRouter();
 
   useEffect(() => {
     setMentors(mentorsData);
   }, [mentorsData]);
 
-  console.log("mentorsData", mentorsData);
-  console.log("mentors", mentors);
 
-  const allExpertiseAreas = Array.from(
-    new Set(mentorsData?.flatMap((mentor) => mentor.expertise) || []),
-  );
+  
+
+ 
 
   return (
-    <Card className="overflow-hidden w-full">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle>Upcoming Meetings</CardTitle>
-        </div>
-      </CardHeader>
+    <div className="overflow-hidden w-full">
+
       <CardContent>
-        {mentors.length > 0 ? (
-          <div className="grid w-full">
+        {mentorsData?.length > 0 ? (
+          <div className="grid w-full gap-y-5">
+            
             {mentors.map((mentor) => (
               <div
-                key={mentor.id}
+                key={mentor.meetUrl}
                 className="flex h-full flex-col space-y-3 rounded-lg border p-4 transition-colors hover:bg-muted/50"
               >
                 <div className="flex items-start justify-between">
@@ -167,14 +158,14 @@ const DashUpcoming = ({ mentorsData }: { mentorsData: Mentor[] }) => {
             </p>
             <Button
               className="mt-4"
-              onClick={() => router.push("/find-mentors")}
+              onClick={() => router.push("/student-dashboard/mentors")}
             >
               Find Mentors
             </Button>
           </div>
         )}
       </CardContent>
-    </Card>
+    </div>
   );
 };
 

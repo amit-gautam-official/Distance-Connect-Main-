@@ -4,7 +4,7 @@ const Guide = () => {
   return (
     <div className='mt-10'>
         {/* Mobile View */}
-        <div className='lg:hidden h-[600px] md:h-[1000px] m-auto relative'>
+        {/* <div className='lg:hidden h-[600px] md:h-[1000px] m-auto relative'>
 
            <div className='w-full flex justify-center items-center'>
            <div className='text-[#3D568F] text-center font-inter text-[20px] md:text-[25px] font-medium leading-[23.917px] bg-[#EDFB90] px-2 py-1 w-[275px] '>
@@ -82,9 +82,9 @@ const Guide = () => {
             </div>
             
 
-        </div>
+        </div> */}
 
-        <img src='/roadDesk.svg' alt='road' className='hidden lg:block w-full'/>
+        <img src='/roadDesk.svg' alt='road' className=' w-full'/>
     </div>
   )
 }

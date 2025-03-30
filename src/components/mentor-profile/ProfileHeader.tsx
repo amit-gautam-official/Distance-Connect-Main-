@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -21,11 +20,18 @@ interface ProfileHeaderProps {
   menteeCount: number;
   skills: string[];
   userId: string;
+  averageRating?: number;
 }
 
-export async function ProfileHeader({ mentor, menteeCount, skills , userId}: ProfileHeaderProps) {
+export async function ProfileHeader({
+  mentor,
+  menteeCount,
+  skills,
+  userId,
+  averageRating = 5.0,
+}: ProfileHeaderProps) {
   const session = await auth0.getSession();
-  
+
   return (
     <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
       {/* Cover image - Blue gradient background */}
@@ -61,7 +67,7 @@ export async function ProfileHeader({ mentor, menteeCount, skills , userId}: Pro
             <div className="mt-2 flex items-center space-x-2 md:mt-0">
               <Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
               <span className="font-medium">
-                5.0 ({menteeCount}+ Mentees)
+                {averageRating.toFixed(1)} ({menteeCount}+ Mentees)
               </span>
             </div>
           </div>
@@ -89,8 +95,8 @@ export async function ProfileHeader({ mentor, menteeCount, skills , userId}: Pro
           <p className="mt-6 rounded-lg border border-gray-100 bg-gray-50 p-4 text-gray-600">
             <span className="font-medium text-gray-800">About Me: </span>
             Looking for a mentor who can help you navigate your career in{" "}
-            {mentor.industry}? I have {mentor.experience} of
-            experience and can provide guidance in various fields.
+            {mentor.industry}? I have {mentor.experience} of experience and can
+            provide guidance in various fields.
             <button className="ml-1 text-blue-600 hover:underline">
               read more
             </button>
@@ -101,7 +107,7 @@ export async function ProfileHeader({ mentor, menteeCount, skills , userId}: Pro
               <h3 className="mb-2 text-sm font-medium uppercase text-gray-500">
                 Skills
               </h3>
-                  <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2">
                 {skills.slice(0, 4).map((skill, index) => (
                   <Badge
                     key={index}
@@ -120,10 +126,14 @@ export async function ProfileHeader({ mentor, menteeCount, skills , userId}: Pro
                 )}
               </div>
             </div>
-            <div className="pt-4  flex justify-start space-x-3 sm:mt-0 sm:justify-end">
+            <div className="flex justify-start space-x-3 pt-4 sm:mt-0 sm:justify-end">
               <Link
-                href={session?.user?.email ? `/student-dashboard/inbox?mId=${userId}` : "/auth/login"}
-                className="bg-blue-600 px-4 py-2  m-auto rounded-md text-white shadow-sm hover:bg-blue-700"
+                href={
+                  session?.user?.email
+                    ? `/student-dashboard/inbox?mId=${userId}`
+                    : "/auth/login"
+                }
+                className="m-auto rounded-md bg-blue-600 px-4 py-2 text-white shadow-sm hover:bg-blue-700"
               >
                 Ask a Question
               </Link>
@@ -140,4 +150,4 @@ export async function ProfileHeader({ mentor, menteeCount, skills , userId}: Pro
       </div>
     </div>
   );
-} 
+}

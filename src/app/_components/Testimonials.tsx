@@ -5,6 +5,46 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import TestimonialCardDesk from './TestimonialCardDesk'
 
 const Testimonials = () => {
+
+        const testimonials = [
+                {
+                        testimonial: "This platform has been a game-changer for my career. The mentorship and job opportunities helped me land my dream role!",
+                        name: "Brian Clark",
+                        designation: "CEO & Founder",
+                        stars: 5,
+                },
+                {
+                        testimonial: "I've been able to connect with mentors who provided valuable insights and guidance. The platform is user-friendly and has a great community of learners.",
+                        name: "Sarah Johnson",
+                        designation: "Software Engineer",
+                        stars: 4,
+                },
+                {
+                                testimonial: "The platform's resources and community support have been instrumental in my professional growth. I highly recommend it to everyone.",
+                        name: "Michael Brown",
+                        designation: "Marketing Manager",
+                        stars: 3,
+                },
+                {
+                        testimonial: "The platform's resources and community support have been instrumental in my professional growth. I highly recommend it to everyone.",
+                        name: "Emily Davis",
+                        designation: "HR Manager",
+                        stars: 5,
+                },
+                {
+                        testimonial: "The platform's resources and community support have been instrumental in my professional growth. I highly recommend it to everyone.",
+                        name: "John Smith",
+                        designation: "Product Manager",     
+                        stars: 5,
+                },
+                {
+                        testimonial: "The platform's resources and community support have been instrumental in my professional growth. I highly recommend it to everyone.",
+                        name: "Sarah Johnson",
+                        designation: "Software Engineer",
+                        stars: 4,
+                },
+
+        ]
   return (
     <div>
         <div className='lg:hidden mt-12 w-[80%] m-auto'>
@@ -16,21 +56,11 @@ const Testimonials = () => {
             <div className='mt-6'>
             <Carousel className="w-[80%] m-auto ">
       <CarouselContent className="">
-        <CarouselItem  >
-                <TestiminialCard/>
-        </CarouselItem>
-        <CarouselItem  >
-                <TestiminialCard/>
-        </CarouselItem>
-        <CarouselItem  >
-                <TestiminialCard/>
-        </CarouselItem>
-        <CarouselItem  >
-                <TestiminialCard/>
-        </CarouselItem>
-        <CarouselItem  >
-                <TestiminialCard/>
-        </CarouselItem>
+        {testimonials.map((testimonial, index) => (
+                <CarouselItem key={index}>
+                        <TestiminialCard testimonial={testimonial}/>
+                </CarouselItem>
+        ))}
         
       </CarouselContent>
       <CarouselPrevious />
@@ -50,36 +80,12 @@ const Testimonials = () => {
             <div className='mt-12'>
             <Carousel className=" m-auto pl-12 ">
       <CarouselContent className="">
-        <CarouselItem  className="md:basis-1/2 xl:basis-1/3  ">
-                <TestimonialCardDesk/>
-        </CarouselItem>
-        <CarouselItem  className="md:basis-1/2 xl:basis-1/3   ">
-                <TestimonialCardDesk/>
-        </CarouselItem>
-        <CarouselItem  className="md:basis-1/2 xl:basis-1/3   ">
-                <TestimonialCardDesk/>
-        </CarouselItem>
-        <CarouselItem  className="md:basis-1/2  xl:basis-1/3 ">
-                <TestimonialCardDesk/>
-        </CarouselItem>
-        <CarouselItem  className="md:basis-1/2 xl:basis-1/3 ">
-                <TestimonialCardDesk/>
-        </CarouselItem>
-        <CarouselItem  className="md:basis-1/2 xl:basis-1/3 ">
-                <TestimonialCardDesk/>
-        </CarouselItem>
-        <CarouselItem  className="md:basis-1/2 xl:basis-1/3 ">
-                <TestimonialCardDesk/>
-        </CarouselItem>
-        <CarouselItem  className="md:basis-1/2 xl:basis-1/3 ">
-                <TestimonialCardDesk/>
-        </CarouselItem>
-        <CarouselItem  className="md:basis-1/2 xl:basis-1/3 ">
-                <TestimonialCardDesk/>
-        </CarouselItem>
-        <CarouselItem  className="md:basis-1/2 xl:basis-1/3 ">
-                <TestimonialCardDesk/>
-        </CarouselItem>
+
+        {testimonials.map((testimonial, index) => (
+              <CarouselItem key={index} className="md:basis-1/2 xl:basis-1/3  ">
+              <TestimonialCardDesk testimonial={testimonial}/>
+      </CarouselItem>
+        ))}
        
       </CarouselContent>
       <CarouselPrevious />

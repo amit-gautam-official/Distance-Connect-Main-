@@ -49,15 +49,7 @@ function Availability() {
   };
 
   const handleSave = async () => {
-    // //console.log(daysAvailable,startTime,endTime);
-    // const docRef=doc(db,'Business',user?.email);
-    // await updateDoc(docRef,{
-    //     daysAvailable:daysAvailable,
-    //     startTime:startTime,
-    //     endTime:endTime
-    // }).then(resp=>{
-    //     toast('Change Updated !')
-    // })
+
     await createAndUpdateAvailability.mutateAsync({
       daysAvailable: daysAvailable,
       startTime: startTime ?? "",

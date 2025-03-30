@@ -46,7 +46,7 @@ const page = async () => {
   );
 
   return (
-    <div className="mx-auto min-h-screen w-full bg-[#FDFDF5] pt-[50px] md:pt-[150px]">
+    <div className="mx-auto min-h-screen w-full bg-white pt-[50px] md:pt-[150px]">
       <div className="mb-20">
         <div className="text-center font-inter text-[20px] font-normal leading-normal tracking-[0.6px] [webkit-text-stroke-color:#000] [webkit-text-stroke-width:1px]">
           Find Your Inspiration Here

@@ -207,30 +207,50 @@ function MeetingTimeDateSelection({
   }
 
   const handleScheduleEvent = async () => {
-    setLoading(true);
-    const { meetLink } = await meetlinkGenerator.mutateAsync({
-      dateTime: convertToDateTime(date, selectedTime!).toString(),
-      duration: eventInfo.duration,
-      attendees: [{ email: eventInfo.meetEmail! }, { email: userEmail }],
-    });
-
-    if (!meetLink) {
-      toast.error("Error in generating meeting link");
+    // Validate email is a Gmail address
+    if (!userEmail.toLowerCase().endsWith("@gmail.com")) {
+      toast.error("Please provide a valid Gmail address for Google Meet");
       return;
     }
-    setMeetUrl(meetLink);
-    await createScheduledMeeting.mutateAsync({
-      mentorUserId: mentorUserDetails.mentorUserId,
-      selectedTime: selectedTime ?? "",
-      selectedDate: date,
-      formatedDate: format(date, "PPP"),
-      formatedTimeStamp: getCombinedTimestamp(date, selectedTime!).toString(),
-      duration: eventInfo.duration,
-      meetUrl: meetLink,
-      eventId: eventInfo.id,
-      userNote: userNote,
-      eventName: eventInfo.eventName,
-    });
+
+    // Check if name is provided
+    if (!userName.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { meetLink } = await meetlinkGenerator.mutateAsync({
+        dateTime: convertToDateTime(date, selectedTime!).toString(),
+        duration: eventInfo.duration,
+        attendees: [{ email: eventInfo.meetEmail! }, { email: userEmail }],
+      });
+
+      if (!meetLink) {
+        toast.error("Error in generating meeting link");
+        setLoading(false);
+        return;
+      }
+
+      setMeetUrl(meetLink);
+      await createScheduledMeeting.mutateAsync({
+        mentorUserId: mentorUserDetails.mentorUserId,
+        selectedTime: selectedTime ?? "",
+        selectedDate: date,
+        formatedDate: format(date, "PPP"),
+        formatedTimeStamp: getCombinedTimestamp(date, selectedTime!).toString(),
+        duration: eventInfo.duration,
+        meetUrl: meetLink,
+        eventId: eventInfo.id,
+        userNote: userNote,
+        eventName: eventInfo.eventName,
+      });
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+      toast.error("Failed to schedule meeting. Please try again.");
+    }
   };
 
   /**
@@ -259,63 +279,98 @@ function MeetingTimeDateSelection({
   };
 
   return (
-    <div className="md:mx-26 m-5 mx-10 my-10 border-t-8 p-5 py-10 shadow-lg lg:mx-56">
-      <Image src="/logo.svg" alt="logo" width={150} height={150} />
-      <div className="mt-5 grid grid-cols-1 md:grid-cols-3">
+    <div className="mx-auto w-full max-w-4xl rounded-lg border-t-4 border-primary p-4 py-6 shadow-lg sm:p-5 sm:py-8 md:p-6 md:py-10">
+      <div className="mb-6 flex items-center justify-between">
+        <Image
+          src="/logo.svg"
+          alt="logo"
+          width={120}
+          height={40}
+          className="h-auto"
+        />
+      </div>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {/* Meeting Info  */}
-        <div className="border-r p-4">
-          <h2>{mentorUserDetails?.name}</h2>
-          <h2 className="text-3xl font-bold">
+        <div className="rounded-lg bg-gray-50 p-4 md:border-r md:bg-transparent">
+          <h2 className="text-lg font-medium text-gray-700">
+            {mentorUserDetails?.name}
+          </h2>
+          <h2 className="mb-4 text-2xl font-bold text-primary sm:text-3xl">
             {eventInfo?.eventName ? eventInfo?.eventName : "Meeting Name"}
           </h2>
-          <div className="mt-5 flex flex-col gap-4">
-            <h2 className="flex gap-2">
-              <Clock />
-              {eventInfo?.duration} Min{" "}
-            </h2>
-            <h2 className="flex gap-2">
-              <MapPin />
-              <div className="text-primary">{"Google Meet"}</div>{" "}
-            </h2>
-            <h2 className="flex gap-2">
-              <CalendarCheck />
-              {format(date, "PPP")}{" "}
-            </h2>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <Clock className="h-5 w-5 text-primary" />
+              <span>{eventInfo?.duration} Min</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <MapPin className="h-5 w-5 text-primary" />
+              <div className="text-primary">{"Google Meet"}</div>
+            </div>
+            <div className="flex items-center gap-3">
+              <CalendarCheck className="h-5 w-5 text-primary" />
+              <span>{format(date, "PPP")}</span>
+            </div>
             {selectedTime && (
-              <h2 className="flex gap-2">
-                <Timer />
-                {selectedTime}{" "}
-              </h2>
+              <div className="flex items-center gap-3">
+                <Timer className="h-5 w-5 text-primary" />
+                <span>{selectedTime}</span>
+              </div>
             )}
           </div>
         </div>
-        {/* Time & Date Selction  */}
-        {step === 1 ? (
-          <TimeDateSelection
-            date={date}
-            enableTimeSlot={enableTimeSlot}
-            handleDateChange={handleDateChange}
-            setSelectedTime={setSelectedTime}
-            timeSlots={timeSlots}
-            selectedTime={selectedTime!}
-            prevBooking={prevBooking}
-          />
-        ) : (
-          <UserFormInfo
-            setUserEmail={setUserEmail}
-            setUserName={setUserName}
-            setUserNote={setUserNote}
-          />
-        )}
+        {/* Time & Date Selection  */}
+        <div className="md:col-span-2">
+          {step === 1 ? (
+            <TimeDateSelection
+              date={date}
+              enableTimeSlot={enableTimeSlot}
+              handleDateChange={handleDateChange}
+              setSelectedTime={setSelectedTime}
+              timeSlots={timeSlots}
+              selectedTime={selectedTime!}
+              prevBooking={prevBooking}
+            />
+          ) : (
+            <UserFormInfo
+              setUserEmail={setUserEmail}
+              setUserName={setUserName}
+              setUserNote={setUserNote}
+            />
+          )}
+        </div>
       </div>
-      <div className="flex justify-end gap-3">
+      <div className="mt-6 flex justify-center gap-3 md:justify-end">
         {step === 1 ? (
-          <Button onClick={() => setStep(2)}>
-            {loading ? <LoaderIcon className="animate-spin" /> : "Next"}
+          <Button
+            onClick={() => setStep(2)}
+            className="w-full px-6 py-2 text-sm font-medium transition-all hover:shadow-md active:scale-95 sm:w-auto"
+            disabled={!selectedTime}
+            aria-label="Proceed to next step"
+          >
+            {loading ? (
+              <>
+                <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
+                <span>Processing...</span>
+              </>
+            ) : (
+              "Next"
+            )}
           </Button>
         ) : (
-          <Button onClick={handleScheduleEvent}>
-            {loading ? <LoaderIcon className="animate-spin" /> : "Schedule"}
+          <Button
+            onClick={handleScheduleEvent}
+            className="w-full px-6 py-2 text-sm font-medium transition-all hover:shadow-md active:scale-95 sm:w-auto"
+            aria-label="Schedule meeting"
+          >
+            {loading ? (
+              <>
+                <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
+                <span>Processing...</span>
+              </>
+            ) : (
+              "Schedule"
+            )}
           </Button>
         )}
       </div>

@@ -28,10 +28,21 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { format, isValid, parse } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, MessageSquare, CheckCircle2, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import Link from "next/link";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 type MeetingStatus = "not-started" | "ongoing" | "completed" | "missed";
 type HistoryStatus = "Completed" | "Pending" | "Rejected";
@@ -45,15 +56,35 @@ type DateFilterType =
   | "Nov"
   | "Dec";
 
+interface Meeting {
+  id: string;
+  title: string;
+  mentor: string | null;
+  time: string;
+  date: string;
+  status: MeetingStatus;
+  duration: number;
+  meetUrl: string;
+  completed: boolean;
+  statusText: string;
+  feedback?: string;
+  starRating?: number;
+}
+
 const MeetingsPage = () => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [feedback, setFeedback] = useState("");
+  const [selectedMeeting, setSelectedMeeting] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [starRating, setStarRating] = useState(0);
+
+  const utils = api.useUtils();
   const { data: student } = api.student.getStudent.useQuery(undefined, {
     retry: 1,
     staleTime: 5 * 60 * 1000,
   });
-  console.log("student", student);
 
   const { data, isLoading, isError } =
     api.scheduledMeetings.getScheduledMeetingsListByStudent.useQuery(
@@ -63,6 +94,42 @@ const MeetingsPage = () => {
         staleTime: 5 * 60 * 1000,
       },
     );
+
+  const addFeedback = api.scheduledMeetings.addFeedback.useMutation({
+    onSuccess: () => {
+      utils.scheduledMeetings.getScheduledMeetingsListByStudent.invalidate();
+      toast.success("Feedback submitted successfully");
+      setFeedback("");
+      setSelectedMeeting(null);
+      setStarRating(0);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to submit feedback");
+    },
+  });
+
+  const handleSubmitFeedback = async () => {
+    if (
+      !selectedMeeting ||
+      !feedback.trim() ||
+      isSubmitting ||
+      starRating === 0
+    )
+      return;
+
+    setIsSubmitting(true);
+    try {
+      await addFeedback.mutateAsync({
+        meetingId: selectedMeeting,
+        feedback: feedback.trim(),
+        starRating: starRating,
+      });
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Split meetings into upcoming and expired based on the current date/time.
   // Adjust this logic as  needed (for example, consider the meeting time if needed).
@@ -89,57 +156,67 @@ const MeetingsPage = () => {
   console.log("expired", filterMeetingList("expired"));
 
   // Mock data for scheduled meetings
-  const notStartedMeetings = filterMeetingList("upcoming")?.map((item) => {
-    return {
-      id: item?.id,
-      title: item?.eventName,
-      mentor: item?.mentor?.mentorName,
-      time: item?.selectedTime,
-      date: item?.formatedDate,
-      status: "not-started" as MeetingStatus,
-      duration: item?.duration,
-      meetUrl: item?.meetUrl,
-      completed: item?.completed,
-      statusText: `Starting in: ${(() => {
-        const timeDiff =
-          new Date(item?.selectedDate).getTime() - new Date().getTime();
-        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor(
-          (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-        );
-        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+  const notStartedMeetings = filterMeetingList("upcoming")?.map(
+    (item): Meeting => {
+      return {
+        id: item?.id,
+        title: item?.eventName,
+        mentor: item?.mentor?.mentorName,
+        time: item?.selectedTime,
+        date: item?.formatedDate,
+        status: "not-started" as MeetingStatus,
+        duration: item?.duration,
+        meetUrl: item?.meetUrl,
+        completed: item?.completed,
+        statusText: `Starting in: ${(() => {
+          const timeDiff =
+            new Date(item?.selectedDate).getTime() - new Date().getTime();
+          const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor(
+            (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+          );
+          const minutes = Math.floor(
+            (timeDiff % (1000 * 60 * 60)) / (1000 * 60),
+          );
 
-        return `${days > 0 ? `${days} days, ` : ""}${hours > 0 ? `${hours} hours, ` : ""}${minutes} minutes`;
-      })()}`,
-    };
-  });
+          return `${days > 0 ? `${days} days, ` : ""}${hours > 0 ? `${hours} hours, ` : ""}${minutes} minutes`;
+        })()}`,
+      };
+    },
+  );
 
-  const completedMeetings = filterMeetingList("completed")?.map((item) => {
-    return {
-      id: item?.id,
-      title: item?.eventName,
-      mentor: item?.mentor?.mentorName,
-      time: item?.selectedTime,
-      date: item?.formatedDate,
-      status: "completed" as MeetingStatus,
-      duration: item?.duration,
-      meetUrl: item?.meetUrl,
-      completed: item?.completed,
-      statusText: `Starting in: ${(() => {
-        const timeDiff =
-          new Date(item?.selectedDate).getTime() - new Date().getTime();
-        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor(
-          (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-        );
-        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+  const completedMeetings = filterMeetingList("completed")?.map(
+    (item): Meeting => {
+      return {
+        id: item?.id,
+        title: item?.eventName,
+        mentor: item?.mentor?.mentorName,
+        time: item?.selectedTime,
+        date: item?.formatedDate,
+        status: "completed" as MeetingStatus,
+        duration: item?.duration,
+        meetUrl: item?.meetUrl,
+        completed: item?.completed,
+        feedback: item?.feedback || undefined,
+        starRating: item?.star || 0,
+        statusText: `Starting in: ${(() => {
+          const timeDiff =
+            new Date(item?.selectedDate).getTime() - new Date().getTime();
+          const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor(
+            (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+          );
+          const minutes = Math.floor(
+            (timeDiff % (1000 * 60 * 60)) / (1000 * 60),
+          );
 
-        return `${days > 0 ? `${days} days, ` : ""}${hours > 0 ? `${hours} hours, ` : ""}${minutes} minutes`;
-      })()}`,
-    };
-  });
+          return `${days > 0 ? `${days} days, ` : ""}${hours > 0 ? `${hours} hours, ` : ""}${minutes} minutes`;
+        })()}`,
+      };
+    },
+  );
 
-  const missedMeetings = filterMeetingList("missed")?.map((item) => {
+  const missedMeetings = filterMeetingList("missed")?.map((item): Meeting => {
     return {
       id: item?.id,
       title: item?.eventName,
@@ -170,10 +247,10 @@ const MeetingsPage = () => {
     ...(missedMeetings || []),
   ];
 
-  console.log("scheduledMeetings", scheduledMeetings);
-  console.log("completedMeetings", completedMeetings);
-  console.log("missedMeetings", missedMeetings);
-  console.log("notStartedMeetings", notStartedMeetings);
+  // console.log("scheduledMeetings", scheduledMeetings);
+  // console.log("completedMeetings", completedMeetings);
+  // console.log("missedMeetings", missedMeetings);
+  // console.log("notStartedMeetings", notStartedMeetings);
 
   // Mock data for meeting history
 
@@ -216,20 +293,6 @@ const MeetingsPage = () => {
         return "Missed";
       default:
         return "Unknown";
-    }
-  };
-
-  // Function to get history status badge color
-  const getHistoryStatusBadgeColor = (status: HistoryStatus) => {
-    switch (status) {
-      case "Completed":
-        return "bg-green-100 text-green-700";
-      case "Pending":
-        return "bg-blue-100 text-blue-700";
-      case "Rejected":
-        return "bg-red-100 text-red-700";
-      default:
-        return "bg-gray-200 text-gray-700";
     }
   };
 
@@ -319,57 +382,230 @@ const MeetingsPage = () => {
         </TabsList>
 
         <TabsContent value="scheduled" className="space-y-4 md:space-y-6">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
-            {scheduledMeetings.map((meeting) => (
-              <Card key={meeting.id} className="overflow-hidden">
-                <CardContent className="p-0">
-                  <div className="p-3 sm:p-4">
-                    <div className="mb-2 flex items-center justify-start">
-                      <Badge
-                        className={`${getStatusBadgeColor(meeting.status)} text-xs font-normal hover:bg-gray-100 sm:text-sm`}
-                      >
-                        {getStatusBadgeText(meeting.status)}
-                      </Badge>
+          {scheduledMeetings && scheduledMeetings.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
+              {scheduledMeetings.map((meeting) => (
+                <Card key={meeting.id} className="overflow-hidden">
+                  <CardContent className="p-0">
+                    <div className="p-3 sm:p-4">
+                      <div className="mb-2 flex items-center justify-start">
+                        <Badge
+                          className={`${getStatusBadgeColor(meeting.status)} text-xs font-normal hover:bg-gray-100 sm:text-sm`}
+                        >
+                          {getStatusBadgeText(meeting.status)}
+                        </Badge>
+                      </div>
+                      <h3 className="mb-1 line-clamp-1 text-base font-semibold sm:text-lg">
+                        {meeting.title}
+                      </h3>
+                      <p className="mb-2 text-xs text-gray-500 sm:text-sm">
+                        {meeting.mentor}
+                      </p>
+                      <div className="mb-1 flex items-center text-xs text-gray-500 sm:text-sm">
+                        <span className="mr-2 flex h-5 w-5 items-center justify-center rounded-full border border-gray-300">
+                          <span className="text-xs">⏰</span>
+                        </span>
+                        {meeting.time}
+                      </div>
+                      <div className="mb-2 flex items-center text-xs text-gray-500 sm:text-sm">
+                        <span className="mr-2 flex h-5 w-5 items-center justify-center rounded-full border border-gray-300">
+                          <span className="text-xs">📅</span>
+                        </span>
+                        {meeting.date}
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        {meeting.statusText}
+                      </p>
                     </div>
-                    <h3 className="mb-1 line-clamp-1 text-base font-semibold sm:text-lg">
-                      {meeting.title}
-                    </h3>
-                    <p className="mb-2 text-xs text-gray-500 sm:text-sm">
-                      {meeting.mentor}
-                    </p>
-                    <div className="mb-1 flex items-center text-xs text-gray-500 sm:text-sm">
-                      <span className="mr-2 flex h-5 w-5 items-center justify-center rounded-full border border-gray-300">
-                        <span className="text-xs">⏰</span>
-                      </span>
-                      {meeting.time}
+                    <div className="border-t border-gray-100 px-3 py-2 sm:px-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center text-xs text-gray-500 sm:text-sm">
+                          <span className="mr-2 flex h-5 w-5 items-center justify-center rounded-full border border-gray-300">
+                            <span className="text-xs">⏱️</span>
+                          </span>
+                          Duration: {meeting.duration} minutes
+                        </div>
+                        {meeting.status === "completed" &&
+                          (meeting.feedback ? (
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-green-600 hover:text-green-700"
+                                >
+                                  <CheckCircle2 className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Meeting Feedback</DialogTitle>
+                                  <DialogDescription>
+                                    Your feedback for the meeting with{" "}
+                                    {meeting.mentor}
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="py-4">
+                                  <div className="mb-4 flex items-center">
+                                    <span className="mr-2 text-sm font-medium text-gray-700">
+                                      Rating:
+                                    </span>
+                                    <div className="flex">
+                                      {[1, 2, 3, 4, 5].map((star) => (
+                                        <Star
+                                          key={star}
+                                          className={`h-5 w-5 ${
+                                            star <= (meeting.starRating || 0)
+                                              ? "fill-yellow-400 text-yellow-400"
+                                              : "text-gray-300"
+                                          }`}
+                                        />
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <div className="rounded-md bg-gray-50 p-4">
+                                    <p className="whitespace-pre-wrap text-sm text-gray-700">
+                                      {meeting?.feedback}
+                                    </p>
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          ) : (
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => {
+                                    setSelectedMeeting(meeting.id);
+                                    setStarRating(0);
+                                  }}
+                                >
+                                  <MessageSquare className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>
+                                    Add Meeting Feedback
+                                  </DialogTitle>
+                                  <DialogDescription>
+                                    Share your thoughts about the meeting with{" "}
+                                    {meeting.mentor}
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="py-4">
+                                  <div className="mb-4">
+                                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                                      Rate your experience (1-5 stars):
+                                    </label>
+                                    <div className="flex">
+                                      {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                          key={star}
+                                          type="button"
+                                          onClick={() => setStarRating(star)}
+                                          className="p-1"
+                                        >
+                                          <Star
+                                            className={`h-6 w-6 transition-colors ${
+                                              star <= starRating
+                                                ? "fill-yellow-400 text-yellow-400"
+                                                : "text-gray-300 hover:text-yellow-200"
+                                            }`}
+                                          />
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <Textarea
+                                    placeholder="How was the meeting? What did you learn? Any suggestions for improvement?"
+                                    value={feedback}
+                                    onChange={(e) =>
+                                      setFeedback(e.target.value)
+                                    }
+                                    className="min-h-[100px]"
+                                    disabled={isSubmitting}
+                                  />
+                                </div>
+                                <DialogFooter>
+                                  <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                      setFeedback("");
+                                      setSelectedMeeting(null);
+                                      setStarRating(0);
+                                      setIsSubmitting(false);
+                                    }}
+                                    disabled={isSubmitting}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    onClick={handleSubmitFeedback}
+                                    disabled={
+                                      !feedback.trim() ||
+                                      starRating === 0 ||
+                                      isSubmitting
+                                    }
+                                  >
+                                    {isSubmitting
+                                      ? "Submitting..."
+                                      : "Submit Feedback"}
+                                  </Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                          ))}
+                      </div>
                     </div>
-                    <div className="mb-2 flex items-center text-xs text-gray-500 sm:text-sm">
-                      <span className="mr-2 flex h-5 w-5 items-center justify-center rounded-full border border-gray-300">
-                        <span className="text-xs">📅</span>
-                      </span>
-                      {meeting.date}
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      {meeting.statusText}
-                    </p>
-                  </div>
-                  <div className="border-t border-gray-100 px-3 py-2 sm:px-4">
-                    <div className="flex items-center text-xs text-gray-500 sm:text-sm">
-                      <span className="mr-2 flex h-5 w-5 items-center justify-center rounded-full border border-gray-300">
-                        <span className="text-xs">⏱️</span>
-                      </span>
-                      Duration: {meeting.duration} minutes
-                    </div>
-                  </div>
-                  <Link target="_blank" href={meeting.meetUrl}>
-                    <Button className="w-full rounded-none bg-black py-2 text-xs text-white hover:bg-gray-800 sm:text-sm">
-                      Join Now
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    {meeting.status !== "completed" && (
+                      <Link target="_blank" href={meeting.meetUrl}>
+                        <Button className="w-full rounded-none bg-black py-2 text-xs text-white hover:bg-gray-800 sm:text-sm">
+                          Join Now
+                        </Button>
+                      </Link>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center rounded-lg  p-8 text-center">
+              <div className="mb-4 rounded-full bg-gray-100 p-4">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-gray-400"
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+              </div>
+              <h3 className="mb-2 text-xl font-semibold">
+                No Meetings Scheduled
+              </h3>
+              <p className="mb-6 text-gray-500">
+                You currently don't have any meetings scheduled with mentors.
+              </p>
+              <Link href="/student-dashboard/mentors">
+                <Button className="bg-black text-white hover:bg-gray-800">
+                  Find a Mentor
+                </Button>
+              </Link>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="history">

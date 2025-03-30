@@ -107,15 +107,37 @@ const InboxWrapper = ({
       {/* Mobile header with toggle button */}
       <div className="flex items-center justify-between border-b border-gray-200 bg-white p-3 md:hidden">
         <div className="flex items-center">
-          <button
-            onClick={() => setShowSidebar(!showSidebar)}
-            className="mr-3 rounded-full p-1 text-gray-500 hover:bg-gray-100"
-            aria-label="Toggle sidebar"
-          >
-            <Menu size={24} />
-          </button>
+          {selectedChatRoomId ? (
+            <button
+              onClick={() => setSelectedChatRoomId(null)}
+              className="mr-3 rounded-full p-1 text-gray-500 hover:bg-gray-100"
+              aria-label="Back to chat list"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowSidebar(!showSidebar)}
+              className="mr-3 rounded-full p-1 text-gray-500 hover:bg-gray-100"
+              aria-label="Toggle sidebar"
+            >
+              <Menu size={24} />
+            </button>
+          )}
           <h2 className="text-lg font-semibold text-gray-800">
-            {selectedChatRoom?.student.studentName || "Select a conversation"}
+            {selectedChatRoom?.student.studentName || "Messages"}
           </h2>
         </div>
         {totalUnread > 0 && (
@@ -128,7 +150,9 @@ const InboxWrapper = ({
       {/* Sidebar with chat rooms - toggleable on mobile */}
       <div
         className={`absolute inset-0 z-20 w-full transform overflow-y-auto border-r border-gray-200 bg-white transition-transform duration-300 ease-in-out md:static md:z-0 md:w-80 md:min-w-80 md:translate-x-0 ${
-          showSidebar ? "translate-x-0" : "-translate-x-full"
+          showSidebar || !selectedChatRoomId
+            ? "translate-x-0"
+            : "-translate-x-full"
         }`}
       >
         <div className="flex items-center justify-between border-b border-gray-200 p-4">
@@ -136,13 +160,6 @@ const InboxWrapper = ({
             <h2 className="text-xl font-bold text-gray-800">Messages</h2>
             <p className="text-sm text-gray-500">Chat with your students</p>
           </div>
-          <button
-            onClick={() => setShowSidebar(false)}
-            className="rounded-full p-1 text-gray-500 hover:bg-gray-100 md:hidden"
-            aria-label="Close sidebar"
-          >
-            <X size={24} />
-          </button>
         </div>
         <ChatRooms
           selectedChatRoom={selectedChatRoom}
@@ -160,7 +177,9 @@ const InboxWrapper = ({
       )}
 
       {/* Main chat area */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div
+        className={`flex flex-1 flex-col overflow-hidden ${selectedChatRoomId ? "block" : "hidden md:block"}`}
+      >
         <Chat
           chatRoomId={selectedChatRoomId || ""}
           initialMessages={messages || []}

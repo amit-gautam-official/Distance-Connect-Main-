@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Form,
   FormControl,
@@ -48,6 +48,9 @@ const hiringFields = [
 ] as const;
 
 const formSchema = z.object({
+  username: z.string().min(3, {
+    message: "Username must be at least 3 characters",
+  }),
   companyName: z.string().min(2, "Current company is required"),
   companyUrl: z.string().min(2, "Company URL is required"),
   industry: z.string().min(2, "Industry is required"),
@@ -62,6 +65,8 @@ const formSchema = z.object({
 export default function StartupForm() {
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [commandOpen, setCommandOpen] = useState(false);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
 
   const router = useRouter();
   const createStudentUpdateUser =
@@ -74,9 +79,13 @@ export default function StartupForm() {
       },
     });
 
+  const checkUsernameAvailability =
+    api.user.checkUsernameAvailabilityMutation.useMutation();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      username: "",
       companyName: "",
       companyUrl: "",
       industry: "",
@@ -87,9 +96,48 @@ export default function StartupForm() {
     },
   });
 
+  // Watch for username changes and validate
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "username" && value.username && value.username.length >= 3) {
+        setIsCheckingUsername(true);
+
+        const timer = setTimeout(async () => {
+          try {
+            // Make sure username exists and is a string before passing to the mutation
+            if (value.username) {
+              const result = await checkUsernameAvailability.mutateAsync({
+                username: value.username,
+              });
+
+              if (!result.available) {
+                setUsernameError("This username is already taken");
+              } else {
+                setUsernameError(null);
+              }
+            }
+          } catch (error) {
+            console.error("Error checking username:", error);
+          } finally {
+            setIsCheckingUsername(false);
+          }
+        }, 1000);
+
+        return () => clearTimeout(timer);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   function onSubmit(input: z.infer<typeof formSchema>) {
+    if (usernameError) {
+      return;
+    }
+
     const role: "STARTUP" = "STARTUP";
     const startupUserData = {
+      username: input.username,
       comapanyName: input.companyName,
       companyUrl: input.companyUrl,
       industry: input.industry,
@@ -105,7 +153,6 @@ export default function StartupForm() {
       createStudentUpdateUser.mutate(startupUserData);
       // router.push("/startup-dashboard");
       router.push("/post-register");
-
     } catch (error) {
       console.error(error);
     }
@@ -149,7 +196,29 @@ export default function StartupForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Previous form fields remain unchanged */}
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem className="relative flex flex-col">
+                  <FormLabel className="absolute left-[10px] top-[0px] bg-white px-1 font-inter text-[14px] font-normal leading-[16px] text-[#8A8A8A] peer-focus:text-black">
+                    Username
+                  </FormLabel>
+                  <FormControl className="floating-input peer w-full">
+                    <Input placeholder={""} type="text" {...field} required />
+                  </FormControl>
+                  {isCheckingUsername && (
+                    <p className="text-sm text-gray-500">
+                      Checking username...
+                    </p>
+                  )}
+                  {usernameError && (
+                    <p className="text-sm text-red-500">{usernameError}</p>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <FormField

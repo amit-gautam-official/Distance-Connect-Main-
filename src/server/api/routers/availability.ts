@@ -3,6 +3,38 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 
 export const availabilityRouter = createTRPCRouter({
+  getAvailability: protectedProcedure
+    .query(async ({ ctx }) => {
+      const availability = await ctx.db.availability.findUnique({
+        where: {
+          mentorUserId: ctx.dbUser!.id,
+        },
+        select: {
+          daysAvailable: true,
+          startTime: true,
+          endTime: true,
+        },
+      });
+
+      // Return default values if no availability is found
+      if (!availability) {
+        return {
+          daysAvailable: {
+            Sunday: false,
+            Monday: false,
+            Tuesday: false,
+            Wednesday: false,
+            Thursday: false,
+            Friday: false,
+            Saturday: false,
+          },
+          startTime: "",
+          endTime: "",
+        };
+      }
+
+      return availability;
+    }),
 
   createAndUpdateAvailability: protectedProcedure
     .input(z.object({ 

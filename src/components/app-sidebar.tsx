@@ -106,18 +106,14 @@ export function AppSidebar({ role }: { role: string }) {
       url: "/mentor-dashboard/services",
       icon: SquareChartGantt,
     },
-    {
-      title: "Feedback",
-      url: "/mentor-dashboard/feedback",
-      icon: MessageCircleReply,
-    },
+
   ];
 
   // Bottom navigation items
   const downItems = [
     {
       title: "Help & Support",
-      url: "/student-dashboard/help-support",
+      url: role === "student" ? "/student-dashboard/help-support" : "/mentor-dashboard/help-support",
       icon: MessageCircleQuestion,
     },
     {

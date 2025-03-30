@@ -18,7 +18,7 @@ const Potential = () => {
                 <div className='text-[#3D568F] font-inter text-[18px] font-normal leading-[114%]'>
                 Gain full access to personalized <br/> mentorship to transform your career.
                 </div>
-                <button className='text-white font-inter text-[19px] font-semibold leading-[46px] flex w-[251px] h-[54px] px-8 py-2 justify-center items-center gap-2 flex-shrink-0 rounded-[30px] bg-[#3D568F] shadow-md ' >
+                <button className='text-white font-inter text-[19px] font-semibold leading-[46px] flex w-[251px] h-[54px] px-8 py-2 justify-center items-center gap-2 flex-shrink-0 rounded-[30px] bg-[#39DB21] shadow-md ' >
                 Unlock All Features
                 </button>
 

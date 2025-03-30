@@ -3,15 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  Plus,
   Search,
   Filter,
   X,
-  UserCheck,
   MessageSquare,
-  Calendar,
   Star,
-  Clock,
   GraduationCap,
   Building,
 } from "lucide-react";
@@ -25,9 +21,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserPlus } from "lucide-react";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 
@@ -46,17 +40,12 @@ interface Student {
 const StudentList = ({ studentsData }: { studentsData: Student[] }) => {
   const [students, setStudents] = useState<Student[]>(studentsData);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("all");
-  const [showFilters, setShowFilters] = useState(false);
   const [selectedExpertise, setSelectedExpertise] = useState<string[]>([]);
   const router = useRouter();
 
   useEffect(() => {
     setStudents(studentsData);
   }, [studentsData]);
-
-  console.log("studentsData", studentsData);
-  console.log("students", students);
 
   const allExpertiseAreas = Array.from(
     new Set(studentsData?.flatMap((student) => student.expertise) || []),
@@ -80,17 +69,6 @@ const StudentList = ({ studentsData }: { studentsData: Student[] }) => {
     return matchesSearch && matchesExpertise;
   });
 
-  // Toggle follow status for a student
-  const toggleFollow = (studentId: string) => {
-    setStudents((prev) =>
-      prev.map((student) =>
-        student.id === studentId
-          ? { ...student, isFollowing: !student.isFollowing }
-          : student,
-      ),
-    );
-  };
-
   // Toggle expertise filter
   const toggleExpertiseFilter = (expertise: string) => {
     setSelectedExpertise((prev) =>
@@ -104,18 +82,6 @@ const StudentList = ({ studentsData }: { studentsData: Student[] }) => {
   const clearFilters = () => {
     setSearchQuery("");
     setSelectedExpertise([]);
-  };
-
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
   };
 
   return (
@@ -211,275 +177,60 @@ const StudentList = ({ studentsData }: { studentsData: Student[] }) => {
           )}
         </div>
 
-        {/* Tabs for different views */}
-        <Tabs
-          defaultValue="all"
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="w-full"
-        >
-          <TabsList className="mb-4 grid w-full grid-cols-3">
-            <TabsTrigger value="all" className="text-xs sm:text-sm">
-              All
-            </TabsTrigger>
-            <TabsTrigger value="following" className="text-xs sm:text-sm">
-              Following
-            </TabsTrigger>
-            <TabsTrigger value="scheduled" className="text-xs sm:text-sm">
-              Scheduled
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="all" className="mt-0">
-            {filteredStudents?.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8">
-                <p className="text-center text-gray-500">
-                  No students found. Try adjusting your filters.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredStudents?.map((student) => (
-                  <div
-                    key={student.id}
-                    className="rounded-lg border p-4 transition-all hover:shadow-md"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-4">
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage
-                            src={student.avatarUrl}
-                            alt={student.name}
-                          />
-                          <AvatarFallback className="bg-blue-100 text-blue-800">
-                            {student.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h3 className="font-medium">{student.name}</h3>
-                          <div className="flex flex-col space-y-1">
-                            <p className="text-sm text-gray-500">
-                              {student.role}
-                            </p>
-                            <div className="flex items-center text-sm text-gray-500">
-                              <GraduationCap
-                                size={14}
-                                className="mr-1 text-gray-400"
-                              />
-                              {student.instituteName}
-                            </div>
-                          </div>
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {student.expertise.slice(0, 3).map((exp) => (
-                              <Badge
-                                key={exp}
-                                variant="outline"
-                                className="text-xs"
-                              >
-                                {exp}
-                              </Badge>
-                            ))}
-                            {student.expertise.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{student.expertise.length - 3} more
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant={student.isFollowing ? "default" : "outline"}
-                          size="sm"
-                          className="flex h-8 items-center gap-1"
-                          onClick={() => toggleFollow(student.id)}
-                        >
-                          {student.isFollowing ? (
-                            <>
-                              <UserCheck size={14} /> Following
-                            </>
-                          ) : (
-                            <>
-                              <UserPlus size={14} /> Follow
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex items-center justify-between border-t pt-3">
-                      <div className="flex items-center space-x-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="flex items-center gap-1 text-xs"
-                          onClick={() =>
-                            router.push(`/chat/${student.studentUserId}`)
-                          }
-                        >
-                          <MessageSquare size={14} /> Message
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="flex items-center gap-1 text-xs"
-                          onClick={() =>
-                            router.push("/mentor-dashboard/meetings")
-                          }
-                        >
-                          <Calendar size={14} /> Schedule
-                        </Button>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            size={14}
-                            className={
-                              i < student.rating
-                                ? "fill-yellow-400 text-yellow-400"
-                                : "text-gray-300"
-                            }
-                          />
-                        ))}
+        {/* Student list */}
+        {filteredStudents?.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8">
+            <p className="text-center text-gray-500">
+              No students found. Try adjusting your filters.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredStudents?.map((student) => (
+              <div
+                key={student.id}
+                className="rounded-lg border p-4 transition-all hover:shadow-md"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-4">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={student.avatarUrl} alt={student.name} />
+                      <AvatarFallback>
+                        {student.name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3 className="font-medium">{student.name}</h3>
+                      <p className="text-sm text-gray-500">{student.role}</p>
+                      <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
+                        <GraduationCap className="h-4 w-4" />
+                        <span>{student.instituteName}</span>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="following" className="mt-0">
-            {filteredStudents?.filter((s) => s.isFollowing).length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8">
-                <p className="text-center text-gray-500">
-                  You are not following any students.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredStudents
-                  ?.filter((s) => s.isFollowing)
-                  .map((student) => (
-                    <div
-                      key={student.id}
-                      className="rounded-lg border p-4 transition-all hover:shadow-md"
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        router.push(`/mentor-dashboard/inbox`)
+                      }
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-4">
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage
-                              src={student.avatarUrl}
-                              alt={student.name}
-                            />
-                            <AvatarFallback className="bg-blue-100 text-blue-800">
-                              {student.name.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h3 className="font-medium">{student.name}</h3>
-                            <div className="flex flex-col space-y-1">
-                              <p className="text-sm text-gray-500">
-                                {student.role}
-                              </p>
-                              <div className="flex items-center text-sm text-gray-500">
-                                <GraduationCap
-                                  size={14}
-                                  className="mr-1 text-gray-400"
-                                />
-                                {student.instituteName}
-                              </div>
-                            </div>
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              {student.expertise.slice(0, 3).map((exp) => (
-                                <Badge
-                                  key={exp}
-                                  variant="outline"
-                                  className="text-xs"
-                                >
-                                  {exp}
-                                </Badge>
-                              ))}
-                              {student.expertise.length > 3 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{student.expertise.length - 3} more
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant={
-                              student.isFollowing ? "default" : "outline"
-                            }
-                            size="sm"
-                            className="flex h-8 items-center gap-1"
-                            onClick={() => toggleFollow(student.id)}
-                          >
-                            {student.isFollowing ? (
-                              <>
-                                <UserCheck size={14} /> Following
-                              </>
-                            ) : (
-                              <>
-                                <UserPlus size={14} /> Follow
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="mt-4 flex items-center justify-between border-t pt-3">
-                        <div className="flex items-center space-x-4">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="flex items-center gap-1 text-xs"
-                            onClick={() =>
-                              router.push(`/chat/${student.studentUserId}`)
-                            }
-                          >
-                            <MessageSquare size={14} /> Message
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="flex items-center gap-1 text-xs"
-                            onClick={() =>
-                              router.push("/mentor-dashboard/meetings")
-                            }
-                          >
-                            <Calendar size={14} /> Schedule
-                          </Button>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              size={14}
-                              className={
-                                i < student.rating
-                                  ? "fill-yellow-400 text-yellow-400"
-                                  : "text-gray-300"
-                              }
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                      <MessageSquare className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {student.expertise.map((exp) => (
+                    <Badge key={exp} variant="secondary">
+                      {exp}
+                    </Badge>
                   ))}
+                </div>
               </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="scheduled" className="mt-0">
-            <div className="flex flex-col items-center justify-center py-8">
-              <p className="text-center text-gray-500">
-                Coming soon: View students with scheduled meetings
-              </p>
-            </div>
-          </TabsContent>
-        </Tabs>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

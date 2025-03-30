@@ -12,12 +12,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Key, Loader2 } from "lucide-react";
+import { Key, Loader2, Calendar, User } from "lucide-react";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { User, Mentor } from "@prisma/client";
+import { User as UserType, Mentor } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import AvailabilitySettings from "./AvailabilitySettings";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 enum CompanyType {
   STARTUP = "STARTUP",
@@ -32,26 +34,47 @@ const UserSettings = () => {
     // Increase staleTime to reduce refetches
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
-  const { data: mentor } = api.mentor.getMentorDataById.useQuery(
-    undefined,
-    {
-      // Reduce retries to avoid rate limit issues
-      retry: 1,
-      // Increase staleTime to reduce refetches
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  );
+  const { data: mentor } = api.mentor.getMentorDataById.useQuery(undefined, {
+    // Reduce retries to avoid rate limit issues
+    retry: 1,
+    // Increase staleTime to reduce refetches
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
-  console.log("mentor", mentor);
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="space-y-6">
-      <ProfileSettings user={user!} mentor={mentor!} />
-    </div>
+    <Tabs defaultValue="profile" className="w-full">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="profile" className="flex items-center gap-2">
+          <User className="h-4 w-4" />
+          Profile Settings
+        </TabsTrigger>
+        <TabsTrigger value="availability" className="flex items-center gap-2">
+          <Calendar className="h-4 w-4" />
+          Availability
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="profile">
+        <ProfileSettings user={user!} mentor={mentor!} />
+      </TabsContent>
+      <TabsContent value="availability">
+        <AvailabilitySettings />
+      </TabsContent>
+    </Tabs>
   );
 };
 
 // Profile Settings Component
-const ProfileSettings = ({ user, mentor }: { user: User; mentor: Mentor }) => {
+const ProfileSettings = ({
+  user,
+  mentor,
+}: {
+  user: UserType;
+  mentor: Mentor;
+}) => {
   const router = useRouter();
   const updateUserMutation = api.user.updateUser.useMutation({
     onSuccess: () => {

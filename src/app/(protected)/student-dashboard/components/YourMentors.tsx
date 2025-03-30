@@ -31,9 +31,14 @@ interface YourMentorsProps {
 
 const YourMentors: React.FC<YourMentorsProps> = ({ mentors }) => {
   return (
-    <div className="w-full">
+    <Card className="w-full h-[360px]  overflow-y-auto">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle>Upcoming Meetings</CardTitle>
+        </div>
+      </CardHeader>
       <DashUpcoming mentorsData={mentors} />
-    </div>
+    </Card>
   );
 };
 

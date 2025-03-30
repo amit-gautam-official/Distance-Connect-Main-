@@ -51,7 +51,6 @@ async function getMentorData(
   mentorName: string,
 ): Promise<MentorWithRelations | null> {
   try {
-
     // Find the mentor by mentorName
     const mentor = await db.mentor.findFirst({
       where: {
@@ -122,9 +121,8 @@ export async function generateMetadata({
 }: {
   params: { mentorName: string };
 }) {
-  const mentorId =  await params.mentorName;
+  const mentorId = await params.mentorName;
   const mentor = await getMentorData(mentorId);
-
 
   if (!mentor) {
     return {
@@ -147,7 +145,7 @@ export default async function MentorProfilePage({
   const mentorId = await params.mentorName;
   const mentorData = await getMentorData(mentorId);
   console.log("mentorData", mentorData);
-  const session =  await auth0.getSession();
+  const session = await auth0.getSession();
   const userEmail = session?.user.email;
 
   if (!mentorData) {
@@ -208,11 +206,9 @@ export default async function MentorProfilePage({
     type: event.eventName,
     repliesIn: "2 days",
     priority: 134,
-    mentorUserId : mentorId,
-    userEmail : userEmail ?? ""
+    mentorUserId: mentorId,
+    userEmail: userEmail ?? "",
   }));
-
- 
 
   // Mock articles section - could be replaced with real data if available
   const articles = [
@@ -233,10 +229,27 @@ export default async function MentorProfilePage({
   // Get similar profiles - mentors in the same industry or with same job title
   const similarProfiles = await getSimilarMentors(mentorData);
 
-  // Mock reviews data
-  const reviews = [
+  // Get real reviews from completed meetings with feedback
+  const meetingReviews = mentorData.scheduledMeetings
+    .filter((meeting) => meeting.completed && meeting.feedback && meeting.star)
+    .map((meeting, index) => ({
+      id: meeting.id,
+      name: meeting.student.user.name || "Anonymous Student",
+      avatar: meeting.student.user.avatarUrl || "",
+      role: "Student", // Simplify to avoid type errors
+      rating: meeting.star || 5,
+      date: new Date(meeting.updatedAt).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
+      content: meeting.feedback || "",
+    }));
+
+  // Combine with mock reviews if needed (only if no real reviews)
+  const mockReviews = [
     {
-      id: 1,
+      id: "mock1",
       name: "Aditya Kumar",
       avatar: "",
       role: "Software Developer",
@@ -246,7 +259,7 @@ export default async function MentorProfilePage({
         "Excellent mentor! The mock interview session was incredibly helpful and provided detailed feedback on my SQL skills. Looking forward to another session.",
     },
     {
-      id: 2,
+      id: "mock2",
       name: "Priya Sharma",
       avatar: "",
       role: "Data Science Student",
@@ -256,6 +269,16 @@ export default async function MentorProfilePage({
         "Very insightful guidance on career progression in data analysis. Really appreciated the practical tips and industry insights.",
     },
   ];
+
+  // Use real reviews if available, otherwise use mock reviews
+  const reviews = meetingReviews.length > 0 ? meetingReviews : mockReviews;
+
+  // Calculate average rating from real feedback
+  const averageRating =
+    meetingReviews.length > 0
+      ? meetingReviews.reduce((acc, review) => acc + review.rating, 0) /
+        meetingReviews.length
+      : 5.0; // Default rating if no reviews
 
   // Availability data
   const availability = {
@@ -287,7 +310,7 @@ export default async function MentorProfilePage({
   };
 
   return (
-    <div className="mx-auto max-w-7xl pt-[150px]   px-4 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 pt-[150px]">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
         {/* Main content area - 2/3 width on desktop */}
         <div className="space-y-6 md:col-span-2">
@@ -303,15 +326,17 @@ export default async function MentorProfilePage({
                 ? { avatarUrl: mentorData.user.avatarUrl || "" }
                 : undefined,
             }}
-            
+            averageRating={averageRating}
             userId={mentorId || ""}
             menteeCount={menteeCount}
             skills={mentorData.hiringFields || []}
           />
-          
+
           {/* Availability Card */}
-          <AvailabilityCard 
-          avail={mentorData?.availability!} availability={availability} />
+          <AvailabilityCard
+            avail={mentorData?.availability!}
+            availability={availability}
+          />
 
           {/* Tabs Navigation */}
           <ProfileTabs
@@ -321,7 +346,7 @@ export default async function MentorProfilePage({
             skillGroups={skillGroups}
             tools={tools}
             offerings={offerings}
-            reviews={reviews}
+            reviews={reviews!}
           />
         </div>
 

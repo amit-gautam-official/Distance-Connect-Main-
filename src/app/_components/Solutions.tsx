@@ -60,12 +60,15 @@ const Solutions = () => {
                 strokeLinejoin="round"
               />
             </svg>
+            
           </div>
         </div>
       </div>
+
+
+
       <div className="mt-4 text-center font-inter text-[16px] font-normal leading-[24px] text-[#3D568F] lg:hidden">
-        Lorem ipsum dolor sit amet consectetur adipiscing eli mattis sit
-        phasellus mollis.
+      Unlock opportunities with expert guidance tailored to your goals.
       </div>
 
       <div className="relative mt-10 flex flex-col items-center gap-4 lg:hidden">
@@ -96,7 +99,7 @@ const Solutions = () => {
               </svg>
             </div>
             <div className="font-inter text-[12px] font-normal leading-[24px] text-[#3D568F]">
-              Personalized guidance
+            Personalized guidance
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -117,7 +120,7 @@ const Solutions = () => {
               </svg>
             </div>
             <div className="font-inter text-[12px] font-normal leading-[24px] text-[#3D568F]">
-              Resume/CV review
+            Resume & CV review
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -138,7 +141,7 @@ const Solutions = () => {
               </svg>
             </div>
             <div className="font-inter text-[12px] font-normal leading-[24px] text-[#3D568F]">
-              Internship/Job opportunities
+            Internship & Job opportunities
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -159,9 +162,11 @@ const Solutions = () => {
               </svg>
             </div>
             <div className="font-inter text-[12px] font-normal leading-[24px] text-[#3D568F]">
-              Networking strategies
+            Networking strategies
             </div>
           </div>
+          
+         
 
           <div className="mt-2 flex items-center gap-2 text-center font-inter text-[16px] font-semibold leading-[22px] text-[#3D568F]">
             <span>Learn more</span>
@@ -220,7 +225,7 @@ const Solutions = () => {
               </svg>
             </div>
             <div className="font-inter text-[12px] font-normal leading-[24px] text-[#3D568F]">
-              Growth planning
+            Market research insights
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -241,7 +246,7 @@ const Solutions = () => {
               </svg>
             </div>
             <div className="font-inter text-[12px] font-normal leading-[24px] text-[#3D568F]">
-              Funding guidance
+            Pitch deck & Funding guidance
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -262,7 +267,7 @@ const Solutions = () => {
               </svg>
             </div>
             <div className="font-inter text-[12px] font-normal leading-[24px] text-[#3D568F]">
-              Business strategies
+            Scaling & growth strategies 
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -284,6 +289,27 @@ const Solutions = () => {
             </div>
             <div className="font-inter text-[12px] font-normal leading-[24px] text-[#3D568F]">
               Personalized solutions
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="15"
+                height="13"
+                viewBox="0 0 15 13"
+                fill="none"
+              >
+                <path
+                  d="M5.50934 9.88456L13.4267 0.519427C13.7306 0.160154 14.2029 0.160248 14.5065 0.519368C14.8311 0.903426 14.8312 1.54097 14.5065 1.92543C14.5064 1.92545 14.5064 1.92547 14.5064 1.92549L5.45113 12.6367L0.559949 8.00854C0.207762 7.67517 0.141657 7.04286 0.433862 6.61124L0.433908 6.61117C0.710601 6.20217 1.18239 6.15325 1.50818 6.46185L1.50827 6.46194L5.1466 9.90474L5.33865 10.0865L5.50934 9.88456Z"
+                  fill="#0AC1A7"
+                  stroke="white"
+                  strokeWidth="0.5"
+                />
+              </svg>
+            </div>
+            <div className="font-inter text-[12px] font-normal leading-[24px] text-[#3D568F]">
+            Networking strategies
             </div>
           </div>
 
@@ -324,7 +350,7 @@ const Solutions = () => {
         />
         <div className="relative z-[100] mt-[-120px] h-[228px] w-[326px] rounded-[8px] border border-[#E1E4ED] bg-[#FFF] p-8 shadow-md">
           <div className="font-inter text-[22px] font-bold leading-[32px] text-[#3D568F]">
-            Mentors
+          Mentors
           </div>
           <div className="mt-2 flex items-center gap-2">
             <div>
@@ -365,7 +391,7 @@ const Solutions = () => {
               </svg>
             </div>
             <div className="font-inter text-[12px] font-normal leading-[24px] text-[#3D568F]">
-              Set your own rates
+            Set your own rates
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -386,7 +412,7 @@ const Solutions = () => {
               </svg>
             </div>
             <div className="font-inter text-[12px] font-normal leading-[24px] text-[#3D568F]">
-              Build professional network
+            Expand your network
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -407,9 +433,10 @@ const Solutions = () => {
               </svg>
             </div>
             <div className="font-inter text-[12px] font-normal leading-[24px] text-[#3D568F]">
-              Share your expertise with others
+            Gain Industry Recognition
             </div>
           </div>
+         
 
           <div className="mt-2 flex items-center gap-2 text-center font-inter text-[16px] font-semibold leading-[22px] text-[#3D568F]">
             <span>Learn more</span>
@@ -451,8 +478,8 @@ const Solutions = () => {
             Students & Beginners
           </div>
           <div className="font-inter text-[16px] font-normal leading-[125%] text-[#3D568F]">
-            Perfect for college students, working professionals, and beginners
-            looking to build strong foundations.
+            Designed for students and early professionals to build strong career foundations with expert guidance.
+
           </div>
           <div className="flex flex-col gap-2">
             <div className="mt-2 flex items-center gap-2">
@@ -473,7 +500,7 @@ const Solutions = () => {
                 </svg>
               </div>
               <div className="font-inter lg:text-[15px] xl:text-[20px] font-normal leading-[100%] text-[#3D568F]">
-                Skill development
+              Skill development
               </div>
             </div>
             <div className="mt-2 flex items-center gap-2">
@@ -670,7 +697,7 @@ const Solutions = () => {
                 </svg>
               </div>
               <div className="font-inter text-[20px] font-normal leading-[100%] text-[#3D568F]">
-                Personalized solutions
+              Market research insights
               </div>
             </div>
             <div className="mt-2 flex items-center gap-2">
@@ -691,7 +718,7 @@ const Solutions = () => {
                 </svg>
               </div>
               <div className="font-inter text-[20px] font-normal leading-[100%] text-[#3D568F]">
-                Funding guidance
+              Pitch deck & Fundraising support
               </div>
             </div>
             <div className="mt-2 flex items-center gap-2">
@@ -712,7 +739,49 @@ const Solutions = () => {
                 </svg>
               </div>
               <div className="font-inter text-[20px] font-normal leading-[100%] text-[#3D568F]">
-                Business strategies{" "}
+              Scaling & growth strategies 
+              </div>
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="15"
+                  height="13"
+                  viewBox="0 0 15 13"
+                  fill="none"
+                >
+                  <path
+                    d="M5.50934 9.88456L13.4267 0.519427C13.7306 0.160154 14.2029 0.160248 14.5065 0.519368C14.8311 0.903426 14.8312 1.54097 14.5065 1.92543C14.5064 1.92545 14.5064 1.92547 14.5064 1.92549L5.45113 12.6367L0.559949 8.00854C0.207762 7.67517 0.141657 7.04286 0.433862 6.61124L0.433908 6.61117C0.710601 6.20217 1.18239 6.15325 1.50818 6.46185L1.50827 6.46194L5.1466 9.90474L5.33865 10.0865L5.50934 9.88456Z"
+                    fill="#0AC1A7"
+                    stroke="white"
+                    strokeWidth="0.5"
+                  />
+                </svg>
+              </div>
+              <div className="font-inter text-[20px] font-normal leading-[100%] text-[#3D568F]">
+              Presonalized solutions
+              </div>
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="15"
+                  height="13"
+                  viewBox="0 0 15 13"
+                  fill="none"
+                >
+                  <path
+                    d="M5.50934 9.88456L13.4267 0.519427C13.7306 0.160154 14.2029 0.160248 14.5065 0.519368C14.8311 0.903426 14.8312 1.54097 14.5065 1.92543C14.5064 1.92545 14.5064 1.92547 14.5064 1.92549L5.45113 12.6367L0.559949 8.00854C0.207762 7.67517 0.141657 7.04286 0.433862 6.61124L0.433908 6.61117C0.710601 6.20217 1.18239 6.15325 1.50818 6.46185L1.50827 6.46194L5.1466 9.90474L5.33865 10.0865L5.50934 9.88456Z"
+                    fill="#0AC1A7"
+                    stroke="white"
+                    strokeWidth="0.5"
+                  />
+                </svg>
+              </div>
+              <div className="font-inter text-[20px] font-normal leading-[100%] text-[#3D568F]">
+              Networking strategies
               </div>
             </div>
           </div>
@@ -777,7 +846,7 @@ const Solutions = () => {
                 </svg>
               </div>
               <div className="font-inter text-[20px] font-normal leading-[100%] text-[#3D568F]">
-              Set your own rates
+              Earn on your own terms
               </div>
             </div>
             <div className="mt-2 flex items-center gap-2">
@@ -798,7 +867,49 @@ const Solutions = () => {
                 </svg>
               </div>
               <div className="font-inter text-[20px] font-normal leading-[100%] text-[#3D568F]">
-              Build your professional network
+              Expand your network
+              </div>
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="15"
+                  height="13"
+                  viewBox="0 0 15 13"
+                  fill="none"
+                >
+                  <path
+                    d="M5.50934 9.88456L13.4267 0.519427C13.7306 0.160154 14.2029 0.160248 14.5065 0.519368C14.8311 0.903426 14.8312 1.54097 14.5065 1.92543C14.5064 1.92545 14.5064 1.92547 14.5064 1.92549L5.45113 12.6367L0.559949 8.00854C0.207762 7.67517 0.141657 7.04286 0.433862 6.61124L0.433908 6.61117C0.710601 6.20217 1.18239 6.15325 1.50818 6.46185L1.50827 6.46194L5.1466 9.90474L5.33865 10.0865L5.50934 9.88456Z"
+                    fill="#0AC1A7"
+                    stroke="white"
+                    strokeWidth="0.5"
+                  />
+                </svg>
+              </div>
+              <div className="font-inter text-[20px] font-normal leading-[100%] text-[#3D568F]">
+              Guide future professional
+              </div>
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="15"
+                  height="13"
+                  viewBox="0 0 15 13"
+                  fill="none"
+                >
+                  <path
+                    d="M5.50934 9.88456L13.4267 0.519427C13.7306 0.160154 14.2029 0.160248 14.5065 0.519368C14.8311 0.903426 14.8312 1.54097 14.5065 1.92543C14.5064 1.92545 14.5064 1.92547 14.5064 1.92549L5.45113 12.6367L0.559949 8.00854C0.207762 7.67517 0.141657 7.04286 0.433862 6.61124L0.433908 6.61117C0.710601 6.20217 1.18239 6.15325 1.50818 6.46185L1.50827 6.46194L5.1466 9.90474L5.33865 10.0865L5.50934 9.88456Z"
+                    fill="#0AC1A7"
+                    stroke="white"
+                    strokeWidth="0.5"
+                  />
+                </svg>
+              </div>
+              <div className="font-inter text-[20px] font-normal leading-[100%] text-[#3D568F]">
+              Gain industry recognition
               </div>
             </div>
             

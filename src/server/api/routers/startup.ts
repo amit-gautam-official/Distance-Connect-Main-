@@ -14,14 +14,15 @@ export const startupRouter = createTRPCRouter({
 
   createStartupUpdateUser: protectedProcedure
     .input(z.object({ 
+      username: z.string().min(3),
       comapanyName  : z.string(),
       companyUrl    : z.string().url(),
       industry      : z.string(),
       pinCode       : z.number(),
       state         : z.string(),
       interestFields: z.array(z.string()),
-        role : z.enum(["STUDENT", "MENTOR", "STARTUP"]),
-        avatarUrl : z.string(),
+      role : z.enum(["STUDENT", "MENTOR", "STARTUP"]),
+      avatarUrl : z.string(),
      }))
     .mutation(async ({ ctx, input }) => {
       return await ctx.db.$transaction([
@@ -33,12 +34,13 @@ export const startupRouter = createTRPCRouter({
             pinCode: input.pinCode,
             state: input.state,
             interestFields: input.interestFields,
-              userId: ctx?.dbUser?.id!,
+            userId: ctx?.dbUser?.id!,
           },
         }),
         ctx.db.user.update({
           where: { id: ctx?.dbUser?.id! },
           data: {
+            username: input.username,
             name: ctx.user.given_name + " " + ctx.user.family_name,
             avatarUrl: input.avatarUrl,
             role: "STARTUP",
@@ -46,9 +48,6 @@ export const startupRouter = createTRPCRouter({
           },
         }),
       ])
-     
-        
-      
     }),
 
   // updateStartup: protectedProcedure

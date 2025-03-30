@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Form,
   FormControl,
@@ -40,10 +40,12 @@ import {
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 
-import {hiringFields} from "@/constants/hiringFirlds"
-
+import { hiringFields } from "@/constants/hiringFirlds";
 
 const formSchema = z.object({
+  username: z.string().min(3, {
+    message: "Username must be at least 3 characters",
+  }),
   firstName: z.string().min(2, {
     message: "First name must be at least 2 characters",
   }),
@@ -86,21 +88,15 @@ export default function MentorForm({
 }) {
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [commandOpen, setCommandOpen] = useState(false);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
 
   const router = useRouter();
-
-  const createMentorUpdateUser = api.mentor.createMentorUpdateUser.useMutation({
-    onSuccess: () => {
-      //console.log("Mentor created successfully");
-    },
-    onError: (error) => {
-      console.error(error);
-    },
-  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      username: "",
       firstName: user.firstName ?? "",
       lastName: user.lastName ?? "",
       currentCompany: "",
@@ -115,10 +111,61 @@ export default function MentorForm({
     },
   });
 
+  const createMentorUpdateUser = api.mentor.createMentorUpdateUser.useMutation({
+    onSuccess: () => {
+      //console.log("Mentor created successfully");
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
+  const checkUsernameAvailability =
+    api.user.checkUsernameAvailabilityMutation.useMutation();
+
+  // Watch for username changes and validate
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "username" && value.username && value.username.length >= 3) {
+        setIsCheckingUsername(true);
+
+        const timer = setTimeout(async () => {
+          try {
+            // Make sure username exists and is a string before passing to the mutation
+            if (value.username) {
+              const result = await checkUsernameAvailability.mutateAsync({
+                username: value.username,
+              });
+
+              if (!result.available) {
+                setUsernameError("This username is already taken");
+              } else {
+                setUsernameError(null);
+              }
+            }
+          } catch (error) {
+            console.error("Error checking username:", error);
+          } finally {
+            setIsCheckingUsername(false);
+          }
+        }, 500);
+
+        return () => clearTimeout(timer);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
+    if (usernameError) {
+      return;
+    }
+
     const role: "MENTOR" = "MENTOR";
 
     const mentorUserData = {
+      username: values.username,
       name: values?.firstName + " " + values?.lastName,
       currentCompany: values?.currentCompany,
       jobTitle: values?.jobTitle,
@@ -135,8 +182,8 @@ export default function MentorForm({
 
     try {
       createMentorUpdateUser.mutate(mentorUserData);
-      // router.push("/mentor-dashboard");
-      router.push("/post-register");
+      router.push("/mentor-dashboard");
+      // router.push("/post-register");
     } catch (error) {
       console.error(error);
     }
@@ -180,7 +227,29 @@ export default function MentorForm({
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Previous form fields remain unchanged */}
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem className="relative flex flex-col">
+                  <FormLabel className="absolute left-[10px] top-[0px] bg-white px-1 font-inter text-[14px] font-normal leading-[16px] text-[#8A8A8A] peer-focus:text-black">
+                    Username
+                  </FormLabel>
+                  <FormControl className="floating-input peer w-full">
+                    <Input placeholder={""} type="text" {...field} required />
+                  </FormControl>
+                  {isCheckingUsername && (
+                    <p className="text-sm text-gray-500">
+                      Checking username...
+                    </p>
+                  )}
+                  {usernameError && (
+                    <p className="text-sm text-red-500">{usernameError}</p>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <FormField
                 control={form.control}
@@ -213,7 +282,7 @@ export default function MentorForm({
                 )}
               />
 
-<FormField
+              <FormField
                 control={form.control}
                 name="experience"
                 render={({ field }) => (
@@ -231,10 +300,18 @@ export default function MentorForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="0-2">0-2 years (Entry-Level)</SelectItem>
-                        <SelectItem value="3-5">3-5 years (Mid-Level)</SelectItem>
-                        <SelectItem value="6-10">6-10 years (Senior-Level)</SelectItem>
-                        <SelectItem value="10+">10+ years (Expert / Executive)</SelectItem>
+                        <SelectItem value="0-2">
+                          0-2 years (Entry-Level)
+                        </SelectItem>
+                        <SelectItem value="3-5">
+                          3-5 years (Mid-Level)
+                        </SelectItem>
+                        <SelectItem value="6-10">
+                          6-10 years (Senior-Level)
+                        </SelectItem>
+                        <SelectItem value="10+">
+                          10+ years (Expert / Executive)
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -242,7 +319,7 @@ export default function MentorForm({
                 )}
               />
 
-                <FormField
+              <FormField
                 control={form.control}
                 name="industry"
                 render={({ field }) => (
@@ -260,35 +337,64 @@ export default function MentorForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Software Development">Software Development</SelectItem>
-                        <SelectItem value="Artificial Intelligence / Machine Learning">Artificial Intelligence / Machine Learning</SelectItem>
-                        <SelectItem value="Data Science & Analytics">Data Science & Analytics</SelectItem>
-                        <SelectItem value="Cloud Computing & DevOps">Cloud Computing & DevOps </SelectItem>
-                        <SelectItem value="Cybersecurity">Cybersecurity</SelectItem>
-                        <SelectItem value="Blockchain & Web3">Blockchain & Web3</SelectItem>
-                        <SelectItem value="IoT & Embedded Systems">IoT & Embedded Systems</SelectItem>
-                        <SelectItem value="UI/UX Design">UI/UX Design</SelectItem>
-                        <SelectItem value="Product Management">Product Management</SelectItem>
-                        <SelectItem value="Digital Marketing">Digital Marketing</SelectItem>
-                        <SelectItem value="Finance & Investment Banking">Finance & Investment Banking</SelectItem>    
-                        <SelectItem value="Consulting & Strategy">Consulting & Strategy</SelectItem>
-                        <SelectItem value="Mechanical & Automotive Engineering">Mechanical & Automotive Engineering</SelectItem>
-                        <SelectItem value="Civil & Construction Engineering">Civil & Construction Engineering</SelectItem>
-                        <SelectItem value="Electrical & Electronics Engineering">Electrical & Electronics Engineering</SelectItem>
-                        <SelectItem value="Biomedical & Healthcare Technology">Biomedical & Healthcare Technology</SelectItem>    
-
+                        <SelectItem value="Software Development">
+                          Software Development
+                        </SelectItem>
+                        <SelectItem value="Artificial Intelligence / Machine Learning">
+                          Artificial Intelligence / Machine Learning
+                        </SelectItem>
+                        <SelectItem value="Data Science & Analytics">
+                          Data Science & Analytics
+                        </SelectItem>
+                        <SelectItem value="Cloud Computing & DevOps">
+                          Cloud Computing & DevOps{" "}
+                        </SelectItem>
+                        <SelectItem value="Cybersecurity">
+                          Cybersecurity
+                        </SelectItem>
+                        <SelectItem value="Blockchain & Web3">
+                          Blockchain & Web3
+                        </SelectItem>
+                        <SelectItem value="IoT & Embedded Systems">
+                          IoT & Embedded Systems
+                        </SelectItem>
+                        <SelectItem value="UI/UX Design">
+                          UI/UX Design
+                        </SelectItem>
+                        <SelectItem value="Product Management">
+                          Product Management
+                        </SelectItem>
+                        <SelectItem value="Digital Marketing">
+                          Digital Marketing
+                        </SelectItem>
+                        <SelectItem value="Finance & Investment Banking">
+                          Finance & Investment Banking
+                        </SelectItem>
+                        <SelectItem value="Consulting & Strategy">
+                          Consulting & Strategy
+                        </SelectItem>
+                        <SelectItem value="Mechanical & Automotive Engineering">
+                          Mechanical & Automotive Engineering
+                        </SelectItem>
+                        <SelectItem value="Civil & Construction Engineering">
+                          Civil & Construction Engineering
+                        </SelectItem>
+                        <SelectItem value="Electrical & Electronics Engineering">
+                          Electrical & Electronics Engineering
+                        </SelectItem>
+                        <SelectItem value="Biomedical & Healthcare Technology">
+                          Biomedical & Healthcare Technology
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
             </div>
 
-
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <FormField
+              <FormField
                 control={form.control}
                 name="companyType"
                 render={({ field }) => (
@@ -306,12 +412,25 @@ export default function MentorForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="FAANG">FAANG (Facebook, Apple, Amazon, Netflix, Google)</SelectItem>
-                        <SelectItem value="Top Tech Companies">Top Tech Companies (Microsoft, Tesla, Adobe, IBM, Oracle, etc.)</SelectItem>
-                        <SelectItem value="Unicorn Startups">Unicorn Startups (Byju’s, Paytm, Zomato, etc.)</SelectItem>
-                        <SelectItem value="Consulting Firms">Consulting Firms (McKinsey, BCG, Bain, etc.)</SelectItem>
-                        <SelectItem value="Investment Banks & Financial Institutions">Investment Banks & Financial Institutions</SelectItem>
-                        <SelectItem value="Indian Startups & SMEs">Indian Startups & SMEs</SelectItem>
+                        <SelectItem value="FAANG">
+                          FAANG (Facebook, Apple, Amazon, Netflix, Google)
+                        </SelectItem>
+                        <SelectItem value="Top Tech Companies">
+                          Top Tech Companies (Microsoft, Tesla, Adobe, IBM,
+                          Oracle, etc.)
+                        </SelectItem>
+                        <SelectItem value="Unicorn Startups">
+                          Unicorn Startups (Byju's, Paytm, Zomato, etc.)
+                        </SelectItem>
+                        <SelectItem value="Consulting Firms">
+                          Consulting Firms (McKinsey, BCG, Bain, etc.)
+                        </SelectItem>
+                        <SelectItem value="Investment Banks & Financial Institutions">
+                          Investment Banks & Financial Institutions
+                        </SelectItem>
+                        <SelectItem value="Indian Startups & SMEs">
+                          Indian Startups & SMEs
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -351,25 +470,51 @@ export default function MentorForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Software Engineer / Developer">Software Engineer / Developer</SelectItem>
-                        <SelectItem value="Data Scientist / Data Analyst">Data Scientist / Data Analyst</SelectItem>
-                        <SelectItem value="Machine Learning Engineer">Machine Learning Engineer</SelectItem>
-                        <SelectItem value="Cloud Engineer / DevOps Engineer">Cloud Engineer / DevOps Engineer</SelectItem>
-                        <SelectItem value="Cybersecurity Analyst">Cybersecurity Analyst</SelectItem>
-                        <SelectItem value="UI/UX Designer">UI/UX Designer</SelectItem>
-                        <SelectItem value="Product Manager">Product Manager</SelectItem>
-                        <SelectItem value="Digital Marketing Specialist">Digital Marketing Specialist</SelectItem>
-                        <SelectItem value="Financial Analyst">Financial Analyst</SelectItem>
-                        <SelectItem value="Management Consultant">Management Consultant</SelectItem>
-                        <SelectItem value="Mechanical Engineer">Mechanical Engineer</SelectItem>
-                        <SelectItem value="Electrical Engineer">Electrical Engineer</SelectItem>
-                        <SelectItem value="Business Analyst">Business Analyst</SelectItem>
+                        <SelectItem value="Software Engineer / Developer">
+                          Software Engineer / Developer
+                        </SelectItem>
+                        <SelectItem value="Data Scientist / Data Analyst">
+                          Data Scientist / Data Analyst
+                        </SelectItem>
+                        <SelectItem value="Machine Learning Engineer">
+                          Machine Learning Engineer
+                        </SelectItem>
+                        <SelectItem value="Cloud Engineer / DevOps Engineer">
+                          Cloud Engineer / DevOps Engineer
+                        </SelectItem>
+                        <SelectItem value="Cybersecurity Analyst">
+                          Cybersecurity Analyst
+                        </SelectItem>
+                        <SelectItem value="UI/UX Designer">
+                          UI/UX Designer
+                        </SelectItem>
+                        <SelectItem value="Product Manager">
+                          Product Manager
+                        </SelectItem>
+                        <SelectItem value="Digital Marketing Specialist">
+                          Digital Marketing Specialist
+                        </SelectItem>
+                        <SelectItem value="Financial Analyst">
+                          Financial Analyst
+                        </SelectItem>
+                        <SelectItem value="Management Consultant">
+                          Management Consultant
+                        </SelectItem>
+                        <SelectItem value="Mechanical Engineer">
+                          Mechanical Engineer
+                        </SelectItem>
+                        <SelectItem value="Electrical Engineer">
+                          Electrical Engineer
+                        </SelectItem>
+                        <SelectItem value="Business Analyst">
+                          Business Analyst
+                        </SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                     {field.value === "other" && (
                       <FormControl className="mt-2">
-                        <Input placeholder="Please specify"  />
+                        <Input placeholder="Please specify" />
                       </FormControl>
                     )}
                     <FormMessage />
@@ -377,7 +522,7 @@ export default function MentorForm({
                 )}
               />
 
-<FormField
+              <FormField
                 control={form.control}
                 name="state"
                 render={({ field }) => (
@@ -395,44 +540,60 @@ export default function MentorForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        
-                        <SelectItem value="andaman-nicobar-islands">Andaman and Nicobar Islands</SelectItem>
-                          <SelectItem value="andhra-pradesh">Andhra Pradesh</SelectItem>
-                          <SelectItem value="arunachal-pradesh">Arunachal Pradesh</SelectItem>
-                          <SelectItem value="assam">Assam</SelectItem>
-                          <SelectItem value="bihar">Bihar</SelectItem>
-                          <SelectItem value="chandigarh">Chandigarh</SelectItem>
-                          <SelectItem value="chhattisgarh">Chhattisgarh</SelectItem>
-                          <SelectItem value="dadra-nagar-haveli-daman-diu">Dadra and Nagar Haveli and Daman and Diu</SelectItem>
-                          <SelectItem value="delhi">Delhi</SelectItem>
-                          <SelectItem value="goa">Goa</SelectItem>
-                          <SelectItem value="gujarat">Gujarat</SelectItem>
-                          <SelectItem value="haryana">Haryana</SelectItem>
-                          <SelectItem value="himachal-pradesh">Himachal Pradesh</SelectItem>
-                          <SelectItem value="jammu-kashmir">Jammu and Kashmir</SelectItem>
-                          <SelectItem value="jharkhand">Jharkhand</SelectItem>
-                          <SelectItem value="karnataka">Karnataka</SelectItem>
-                          <SelectItem value="kerala">Kerala</SelectItem>
-                          <SelectItem value="ladakh">Ladakh</SelectItem>
-                          <SelectItem value="lakshadweep">Lakshadweep</SelectItem>
-                          <SelectItem value="madhya-pradesh">Madhya Pradesh</SelectItem>
-                          <SelectItem value="maharashtra">Maharashtra</SelectItem>
-                          <SelectItem value="manipur">Manipur</SelectItem>
-                          <SelectItem value="meghalaya">Meghalaya</SelectItem>
-                          <SelectItem value="mizoram">Mizoram</SelectItem>
-                          <SelectItem value="nagaland">Nagaland</SelectItem>
-                          <SelectItem value="odisha">Odisha</SelectItem>
-                          <SelectItem value="puducherry">Puducherry</SelectItem>
-                          <SelectItem value="punjab">Punjab</SelectItem>
-                          <SelectItem value="rajasthan">Rajasthan</SelectItem>
-                          <SelectItem value="sikkim">Sikkim</SelectItem>
-                          <SelectItem value="tamil-nadu">Tamil Nadu</SelectItem>
-                          <SelectItem value="telangana">Telangana</SelectItem>
-                          <SelectItem value="tripura">Tripura</SelectItem>
-                          <SelectItem value="uttar-pradesh">Uttar Pradesh</SelectItem>
-                          <SelectItem value="uttarakhand">Uttarakhand</SelectItem>
-                          <SelectItem value="west-bengal">West Bengal</SelectItem>
-
+                        <SelectItem value="andaman-nicobar-islands">
+                          Andaman and Nicobar Islands
+                        </SelectItem>
+                        <SelectItem value="andhra-pradesh">
+                          Andhra Pradesh
+                        </SelectItem>
+                        <SelectItem value="arunachal-pradesh">
+                          Arunachal Pradesh
+                        </SelectItem>
+                        <SelectItem value="assam">Assam</SelectItem>
+                        <SelectItem value="bihar">Bihar</SelectItem>
+                        <SelectItem value="chandigarh">Chandigarh</SelectItem>
+                        <SelectItem value="chhattisgarh">
+                          Chhattisgarh
+                        </SelectItem>
+                        <SelectItem value="dadra-nagar-haveli-daman-diu">
+                          Dadra and Nagar Haveli and Daman and Diu
+                        </SelectItem>
+                        <SelectItem value="delhi">Delhi</SelectItem>
+                        <SelectItem value="goa">Goa</SelectItem>
+                        <SelectItem value="gujarat">Gujarat</SelectItem>
+                        <SelectItem value="haryana">Haryana</SelectItem>
+                        <SelectItem value="himachal-pradesh">
+                          Himachal Pradesh
+                        </SelectItem>
+                        <SelectItem value="jammu-kashmir">
+                          Jammu and Kashmir
+                        </SelectItem>
+                        <SelectItem value="jharkhand">Jharkhand</SelectItem>
+                        <SelectItem value="karnataka">Karnataka</SelectItem>
+                        <SelectItem value="kerala">Kerala</SelectItem>
+                        <SelectItem value="ladakh">Ladakh</SelectItem>
+                        <SelectItem value="lakshadweep">Lakshadweep</SelectItem>
+                        <SelectItem value="madhya-pradesh">
+                          Madhya Pradesh
+                        </SelectItem>
+                        <SelectItem value="maharashtra">Maharashtra</SelectItem>
+                        <SelectItem value="manipur">Manipur</SelectItem>
+                        <SelectItem value="meghalaya">Meghalaya</SelectItem>
+                        <SelectItem value="mizoram">Mizoram</SelectItem>
+                        <SelectItem value="nagaland">Nagaland</SelectItem>
+                        <SelectItem value="odisha">Odisha</SelectItem>
+                        <SelectItem value="puducherry">Puducherry</SelectItem>
+                        <SelectItem value="punjab">Punjab</SelectItem>
+                        <SelectItem value="rajasthan">Rajasthan</SelectItem>
+                        <SelectItem value="sikkim">Sikkim</SelectItem>
+                        <SelectItem value="tamil-nadu">Tamil Nadu</SelectItem>
+                        <SelectItem value="telangana">Telangana</SelectItem>
+                        <SelectItem value="tripura">Tripura</SelectItem>
+                        <SelectItem value="uttar-pradesh">
+                          Uttar Pradesh
+                        </SelectItem>
+                        <SelectItem value="uttarakhand">Uttarakhand</SelectItem>
+                        <SelectItem value="west-bengal">West Bengal</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -440,7 +601,6 @@ export default function MentorForm({
                 )}
               />
 
-            
               <FormField
                 control={form.control}
                 name="pinCode"
@@ -461,8 +621,6 @@ export default function MentorForm({
                   </FormItem>
                 )}
               />
-
-              
             </div>
             <FormField
               control={form.control}
