@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Clock, MapPin } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { api } from "@/trpc/react";
 
 type FormValue = {
   eventName: String;
@@ -10,29 +11,118 @@ type FormValue = {
   description: String;
 };
 
+type TimeSlot = {
+  startTime: string;
+  endTime: string;
+};
+
+type DayAvailability = {
+  enabled: boolean;
+  timeSlots: TimeSlot[];
+};
+
+type DaysAvailableType = {
+  Sunday: DayAvailability;
+  Monday: DayAvailability;
+  Tuesday: DayAvailability;
+  Wednesday: DayAvailability;
+  Thursday: DayAvailability;
+  Friday: DayAvailability;
+  Saturday: DayAvailability;
+};
+
 function PreviewMeeting({ formValue }: { formValue: FormValue }) {
   const [date, setDate] = useState(new Date());
   const [timeSlots, setTimeSlots] = useState<string[]>([]);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
+  const [availabilityData, setAvailabilityData] = useState<{
+    daysAvailable: DaysAvailableType;
+    bufferTime: number;
+  } | null>(null);
 
-  useEffect(() => {
-    formValue?.duration && createTimeSlot(formValue?.duration);
-  }, [formValue]);
-
-  const createTimeSlot = (interval: any) => {
-    const startTime = 8 * 60; // 8 AM in minutes
-    const endTime = 22 * 60; // 10 PM in minutes
-    const totalSlots = (endTime - startTime) / interval;
-    const slots = Array.from({ length: totalSlots }, (_, i) => {
-      const totalMinutes = startTime + i * interval;
-      const hours = Math.floor(totalMinutes / 60);
-      const minutes = totalMinutes % 60;
-      const formattedHours = hours > 12 ? hours - 12 : hours; // Convert to 12-hour format
-      const period = hours >= 12 ? "PM" : "AM";
-      return `${String(formattedHours).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${period}`;
+  // Fetch mentor's availability
+  const { data: mentorAvailability, isLoading } =
+    api.availability.getAvailability.useQuery(undefined, {
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
     });
 
-    setTimeSlots(slots);
+  useEffect(() => {
+    if (mentorAvailability) {
+      setAvailabilityData({
+        daysAvailable: mentorAvailability.daysAvailable as DaysAvailableType,
+        bufferTime: mentorAvailability.bufferTime,
+      });
+    }
+  }, [mentorAvailability]);
+
+  useEffect(() => {
+    if (formValue?.duration && availabilityData) {
+      generateAvailableTimeSlots(date, formValue.duration, availabilityData);
+    }
+  }, [formValue, date, availabilityData]);
+
+  const generateAvailableTimeSlots = (
+    selectedDate: Date,
+    meetingDuration: Number,
+    availability: { daysAvailable: DaysAvailableType; bufferTime: number },
+  ) => {
+    const dayNames = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    const dayName = dayNames[selectedDate.getDay()];
+    const dayAvailability =
+      availability.daysAvailable[dayName as keyof DaysAvailableType];
+
+    // If the day is not enabled or has no time slots, return empty array
+    if (!dayAvailability?.enabled || !dayAvailability?.timeSlots?.length) {
+      setTimeSlots([]);
+      return;
+    }
+
+    const durationInMinutes = Number(meetingDuration);
+    const bufferTimeInMinutes = availability.bufferTime;
+    const totalSlotDuration = durationInMinutes + bufferTimeInMinutes;
+    const availableSlots: string[] = [];
+
+    dayAvailability.timeSlots.forEach((slot) => {
+      // Convert start and end times to minutes since midnight
+      const [startHour, startMinute] = slot.startTime
+        .split(":")
+        .map(Number) || [0, 0];
+      const [endHour, endMinute] = slot.endTime.split(":").map(Number) || [
+        0, 0,
+      ];
+
+      const startTimeInMinutes = (startHour || 0) * 60 + (startMinute || 0);
+      const endTimeInMinutes = (endHour || 0) * 60 + (endMinute || 0);
+
+      // Calculate all possible meeting start times within this slot
+      for (
+        let slotStart = startTimeInMinutes;
+        slotStart + durationInMinutes <= endTimeInMinutes;
+        slotStart += totalSlotDuration
+      ) {
+        const hours = Math.floor(slotStart / 60);
+        const minutes = slotStart % 60;
+
+        const formattedHours =
+          hours > 12 ? hours - 12 : hours === 0 ? 12 : hours; // Convert to 12-hour format
+        const period = hours >= 12 ? "PM" : "AM";
+
+        availableSlots.push(
+          `${String(formattedHours).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${period}`,
+        );
+      }
+    });
+
+    setTimeSlots(availableSlots);
   };
 
   const handleTimeSlotSelect = (time: string) => {
@@ -42,7 +132,7 @@ function PreviewMeeting({ formValue }: { formValue: FormValue }) {
   return (
     <div className="relative m-2 flex min-h-[90vh] flex-col border-t-8 p-3 py-6 shadow-lg md:m-5 md:min-h-0 md:p-5 md:py-10">
       <div className="flex items-center text-xl font-bold md:text-2xl">
-        Distance Connect
+        <img src="/logo.png" alt="logo" className="w- h-[60px]" />
       </div>
       <div className="mt-3 flex flex-col gap-6 md:mt-5 md:grid md:grid-cols-3 md:gap-0">
         {/* Meeting Info  */}
@@ -84,29 +174,65 @@ function PreviewMeeting({ formValue }: { formValue: FormValue }) {
               selected={date}
               onSelect={(day) => day && setDate(day)}
               className="mt-2 self-center rounded-md border md:mt-5 md:self-start"
-              disabled={(date: Date) => date <= new Date()}
+              disabled={(date: Date) => {
+                // Disable dates in the past
+                if (date <= new Date()) return true;
+
+                // Disable days that don't have availability
+                if (availabilityData) {
+                  const dayNames = [
+                    "Sunday",
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                  ];
+                  const dayName = dayNames[date.getDay()];
+                  const dayAvailability =
+                    availabilityData.daysAvailable[
+                      dayName as keyof DaysAvailableType
+                    ];
+
+                  return (
+                    !dayAvailability?.enabled ||
+                    !dayAvailability?.timeSlots?.length
+                  );
+                }
+
+                return false;
+              }}
             />
           </div>
           <div className="mt-4 flex w-full flex-col md:mt-0">
             <h2 className="mb-2 text-lg font-bold md:hidden">Select Time</h2>
-            <div
-              className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:ml-4 md:flex md:flex-col md:gap-4 md:overflow-auto md:p-5 md:pl-0 md:pr-0"
-              style={{ maxHeight: "400px" }}
-            >
-              {timeSlots?.map((time, index) => (
-                <button
-                  key={index}
-                  className={`rounded-md border border-primary px-4 py-2 text-sm font-medium transition-colors ${
-                    selectedTimeSlot === time
-                      ? "bg-primary text-white"
-                      : "bg-transparent text-primary"
-                  }`}
-                  onClick={() => handleTimeSlotSelect(time)}
-                >
-                  {time}
-                </button>
-              ))}
-            </div>
+            {timeSlots.length > 0 ? (
+              <div
+                className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:ml-4 md:flex md:flex-col md:gap-4 md:overflow-auto md:p-5 md:pl-0 md:pr-0"
+                style={{ maxHeight: "400px" }}
+              >
+                {timeSlots?.map((time, index) => (
+                  <button
+                    key={index}
+                    className={`rounded-md border border-primary px-4 py-2 text-sm font-medium transition-colors ${
+                      selectedTimeSlot === time
+                        ? "bg-primary text-white"
+                        : "bg-transparent text-primary"
+                    }`}
+                    onClick={() => handleTimeSlotSelect(time)}
+                  >
+                    {time}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-2 flex items-center justify-center p-4 text-center text-gray-500 md:ml-4 md:h-full md:border">
+                {isLoading
+                  ? "Loading availability..."
+                  : "No available time slots for this day. Please select another day."}
+              </div>
+            )}
           </div>
         </div>
       </div>

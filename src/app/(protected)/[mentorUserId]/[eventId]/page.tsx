@@ -5,16 +5,15 @@ import { db } from "@/server/db";
 import { auth0 } from "@/lib/auth0";
 import { redirect } from "next/navigation";
 
-type Params = Promise<{ mentorUserId: string; eventId: string }>;
+type Params = {
+  mentorUserId: string;
+  eventId: string;
+};
 
-async function SharedMeetingEvent({ params }: { params: Params }) {
+export default async function Page({ params }: { params: Promise<Params> }) {
   const { mentorUserId, eventId } = await params;
 
- 
-
   const user = await api.user.getMe();
-
-
 
   // Check if the current user is the mentor for this event
   if (user?.role === "MENTOR" && user?.id === mentorUserId) {
@@ -44,7 +43,12 @@ async function SharedMeetingEvent({ params }: { params: Params }) {
       name: true,
       mentor: {
         select: {
-          availability: true,
+          availability: {
+            select: {
+              daysAvailable: true,
+              bufferTime: true,
+            },
+          },
         },
       },
     },
@@ -55,6 +59,7 @@ async function SharedMeetingEvent({ params }: { params: Params }) {
     email: mentorUserDetails?.email ?? "",
     name: mentorUserDetails?.name ?? "",
     daysAvailable: mentorUserDetails?.mentor?.availability?.daysAvailable ?? {},
+    bufferTime: mentorUserDetails?.mentor?.availability?.bufferTime ?? 15,
   };
 
   return (
@@ -68,5 +73,3 @@ async function SharedMeetingEvent({ params }: { params: Params }) {
     </div>
   );
 }
-
-export default SharedMeetingEvent;

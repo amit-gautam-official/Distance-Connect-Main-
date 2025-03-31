@@ -193,10 +193,10 @@ const EditProfileModal = ({ isOpen, onClose, user }: EditProfileModalProps) => {
             </Button>
             <Button
               type="submit"
-              disabled={updateUser.isLoading || isUploading}
+              disabled={updateUser.isPending || isUploading}
               className="mt-2"
             >
-              {updateUser.isLoading ? (
+              {updateUser.isPending ? (
                 <>
                   <Loader2 size={16} className="mr-2 animate-spin" />
                   Saving...

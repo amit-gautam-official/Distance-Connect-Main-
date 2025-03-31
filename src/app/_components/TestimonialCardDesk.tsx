@@ -10,7 +10,7 @@ interface Testimonial {
 const TestimonialCardDesk = ({ testimonial }: { testimonial: Testimonial }) => {
   return (
     <div>
-      <div className="flex h-[312px] w-[321px] flex-shrink-0 flex-col items-start justify-between gap-2 rounded-[8px] border border-[#C9D0E7] bg-white p-[24px_24px_27px_24px] shadow-[0px_1px_4px_rgba(25,33,61,0.08)]">
+      <div className="flex h-[400px] w-[321px] flex-shrink-0 flex-col items-start justify-between gap-2 rounded-[8px] border border-[#C9D0E7] bg-white p-[24px] shadow-[0px_1px_4px_rgba(25,33,61,0.08)]">
         <div className="mb-4 flex items-center">
           <div className="flex space-x-1 text-blue-700">
             {[...Array(testimonial.stars)].map((_, i) => (
@@ -23,15 +23,12 @@ const TestimonialCardDesk = ({ testimonial }: { testimonial: Testimonial }) => {
             ))}
           </div>
         </div>
-        <p className="italic text-gray-700">{testimonial?.testimonial}</p>
-        <div className="flex w-full justify-end">
-          <img
-            src="colon.svg"
-            className="absolute h-[50px] w-[50px] flex-shrink-0 flex-col items-start gap-[10px]"
-            alt=""
-          />
+        <div className="mb-auto max-h-[220px] overflow-y-auto">
+          <p className="mb-4 italic text-gray-700">
+            &quot;{testimonial?.testimonial}&quot;
+          </p>
         </div>
-        <div className="mt-4 flex pb-6 items-center">
+        <div className="mt-4 flex items-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200">
             <svg
               className="h-6 w-6 text-gray-500"
@@ -43,7 +40,7 @@ const TestimonialCardDesk = ({ testimonial }: { testimonial: Testimonial }) => {
           </div>
           <div className="ml-3">
             <p className="font-inter text-[17px] font-semibold leading-[22px] text-[#27417D]">
-              {testimonial?.name} 
+              {testimonial?.name}
             </p>
             <p className="font-inter text-[15px] font-normal leading-[20px] text-[#7979B9]">
               {testimonial?.designation}

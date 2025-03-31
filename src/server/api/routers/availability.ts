@@ -2,6 +2,28 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 
+// Define the new type for day availability with start and end times
+const dayAvailabilitySchema = z.object({
+  enabled: z.boolean().default(false),
+  timeSlots: z.array(
+    z.object({
+      startTime: z.string(),
+      endTime: z.string(),
+    })
+  ).default([]),
+});
+
+// Define the schema for all days
+const daysAvailabilitySchema = z.object({
+  Sunday: dayAvailabilitySchema,
+  Monday: dayAvailabilitySchema,
+  Tuesday: dayAvailabilitySchema,
+  Wednesday: dayAvailabilitySchema,
+  Thursday: dayAvailabilitySchema,
+  Friday: dayAvailabilitySchema,
+  Saturday: dayAvailabilitySchema,
+});
+
 export const availabilityRouter = createTRPCRouter({
   getAvailability: protectedProcedure
     .query(async ({ ctx }) => {
@@ -11,8 +33,7 @@ export const availabilityRouter = createTRPCRouter({
         },
         select: {
           daysAvailable: true,
-          startTime: true,
-          endTime: true,
+          bufferTime: true,
         },
       });
 
@@ -20,16 +41,15 @@ export const availabilityRouter = createTRPCRouter({
       if (!availability) {
         return {
           daysAvailable: {
-            Sunday: false,
-            Monday: false,
-            Tuesday: false,
-            Wednesday: false,
-            Thursday: false,
-            Friday: false,
-            Saturday: false,
+            Sunday: { enabled: false, timeSlots: [] },
+            Monday: { enabled: false, timeSlots: [] },
+            Tuesday: { enabled: false, timeSlots: [] },
+            Wednesday: { enabled: false, timeSlots: [] },
+            Thursday: { enabled: false, timeSlots: [] },
+            Friday: { enabled: false, timeSlots: [] },
+            Saturday: { enabled: false, timeSlots: [] },
           },
-          startTime: "",
-          endTime: "",
+          bufferTime: 15,
         };
       }
 
@@ -38,38 +58,24 @@ export const availabilityRouter = createTRPCRouter({
 
   createAndUpdateAvailability: protectedProcedure
     .input(z.object({ 
-      daysAvailable : z.object({
-        Sunday : z.boolean().optional(),
-        Monday : z.boolean().optional(),
-        Tuesday : z.boolean().optional(),
-        Wednesday : z.boolean().optional(),
-        Thursday : z.boolean().optional(),
-        Friday : z.boolean().optional(),
-        Saturday : z.boolean().optional()
-      }),
-      startTime : z.string(),
-      endTime : z.string()
-      
-     }))
+      daysAvailable: daysAvailabilitySchema,
+      bufferTime: z.number().min(0).default(15)
+    }))
     .mutation(async ({ ctx, input }) => {
-
-        return ctx.db.availability.upsert({
-            where :{
-                mentorUserId : ctx.dbUser!.id
-            },
-            create: {
-              daysAvailable: input.daysAvailable,
-              startTime: input.startTime,
-              endTime: input.endTime,
-              mentorUserId: ctx.dbUser!.id
-            },
-            update: {
-              daysAvailable: input.daysAvailable,
-              startTime: input.startTime,
-              endTime: input.endTime
-            
-            }
-          });
+      return ctx.db.availability.upsert({
+        where: {
+          mentorUserId: ctx.dbUser!.id
+        },
+        create: {
+          daysAvailable: input.daysAvailable,
+          bufferTime: input.bufferTime,
+          mentorUserId: ctx.dbUser!.id
+        },
+        update: {
+          daysAvailable: input.daysAvailable,
+          bufferTime: input.bufferTime
+        }
+      });
     }),
 
    

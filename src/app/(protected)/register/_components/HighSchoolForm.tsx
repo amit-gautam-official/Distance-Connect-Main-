@@ -120,7 +120,7 @@ export default function HighSchoolForm({
           } finally {
             setIsCheckingUsername(false);
           }
-        }, 500);
+        }, 1000);
 
         return () => clearTimeout(timer);
       }
@@ -157,8 +157,8 @@ export default function HighSchoolForm({
     //console.log(studentUserData)
     try {
       createStudentUpdateUser.mutate(studentUserData);
-      // router.push("/student-dashboard");
-      router.push("/post-register");
+      router.push("/student-dashboard");
+      // router.push("/post-register");
     } catch (error) {
       console.error(error);
     }

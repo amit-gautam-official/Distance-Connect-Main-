@@ -158,6 +158,67 @@ const MeetingsPage = () => {
   // Mock data for scheduled meetings
   const notStartedMeetings = filterMeetingList("upcoming")?.map(
     (item): Meeting => {
+      // Parse the meeting date and time correctly
+      const meetingDateStr = item?.selectedDate;
+      const meetingTimeStr = item?.selectedTime;
+
+      let meetingDateTime: Date;
+
+      try {
+        // Create a proper date object from the date and time strings
+        // This assumes selectedDate is in ISO format or similar
+        meetingDateTime = new Date(meetingDateStr);
+
+        // If the meeting time is available, parse and set it
+        if (meetingTimeStr) {
+          // Extract hours and minutes from time string (assuming format like "09:00 AM")
+          const timeRegex = /(\d+):(\d+)\s*(AM|PM)/i;
+          const timeParts = timeRegex.exec(meetingTimeStr);
+          if (timeParts && timeParts[1] && timeParts[2] && timeParts[3]) {
+            let hours = parseInt(timeParts[1]);
+            const minutes = parseInt(timeParts[2]);
+            const period = timeParts[3].toUpperCase();
+
+            // Convert to 24-hour format
+            if (period === "PM" && hours < 12) hours += 12;
+            if (period === "AM" && hours === 12) hours = 0;
+
+            // Set the time components
+            meetingDateTime.setHours(hours, minutes, 0, 0);
+          }
+        }
+      } catch (e) {
+        // If date parsing fails, use a fallback
+        console.error("Error parsing meeting date/time:", e);
+        meetingDateTime = new Date(); // Current time as fallback
+      }
+
+      // Calculate time difference
+      const timeDiff = meetingDateTime.getTime() - new Date().getTime();
+
+      // If timeDiff is negative, the meeting has already started
+      if (timeDiff < 0) {
+        return {
+          id: item?.id,
+          title: item?.eventName,
+          mentor: item?.mentor?.mentorName,
+          time: item?.selectedTime,
+          date: item?.formatedDate,
+          status: "ongoing" as MeetingStatus,
+          duration: item?.duration,
+          meetUrl: item?.meetUrl,
+          completed: item?.completed,
+          statusText: "In progress",
+        };
+      }
+
+      // Regular countdown for future meetings
+      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(
+        (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+      );
+      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+
       return {
         id: item?.id,
         title: item?.eventName,
@@ -168,19 +229,7 @@ const MeetingsPage = () => {
         duration: item?.duration,
         meetUrl: item?.meetUrl,
         completed: item?.completed,
-        statusText: `Starting in: ${(() => {
-          const timeDiff =
-            new Date(item?.selectedDate).getTime() - new Date().getTime();
-          const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-          const hours = Math.floor(
-            (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-          );
-          const minutes = Math.floor(
-            (timeDiff % (1000 * 60 * 60)) / (1000 * 60),
-          );
-
-          return `${days > 0 ? `${days} days, ` : ""}${hours > 0 ? `${hours} hours, ` : ""}${minutes} minutes`;
-        })()}`,
+        statusText: `Starting in: ${days > 0 ? `${days} days, ` : ""}${hours > 0 ? `${hours} hours, ` : ""}${minutes} minutes`,
       };
     },
   );
@@ -199,19 +248,7 @@ const MeetingsPage = () => {
         completed: item?.completed,
         feedback: item?.feedback || undefined,
         starRating: item?.star || 0,
-        statusText: `Starting in: ${(() => {
-          const timeDiff =
-            new Date(item?.selectedDate).getTime() - new Date().getTime();
-          const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-          const hours = Math.floor(
-            (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-          );
-          const minutes = Math.floor(
-            (timeDiff % (1000 * 60 * 60)) / (1000 * 60),
-          );
-
-          return `${days > 0 ? `${days} days, ` : ""}${hours > 0 ? `${hours} hours, ` : ""}${minutes} minutes`;
-        })()}`,
+        statusText: "Meeting completed",
       };
     },
   );
@@ -227,17 +264,7 @@ const MeetingsPage = () => {
       duration: item?.duration,
       meetUrl: item?.meetUrl,
       completed: item?.completed,
-      statusText: `Starting in: ${(() => {
-        const timeDiff =
-          new Date(item?.selectedDate).getTime() - new Date().getTime();
-        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor(
-          (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-        );
-        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-
-        return `${days > 0 ? `${days} days, ` : ""}${hours > 0 ? `${hours} hours, ` : ""}${minutes} minutes`;
-      })()}`,
+      statusText: "Meeting was missed",
     };
   });
 
@@ -573,7 +600,7 @@ const MeetingsPage = () => {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-lg  p-8 text-center">
+            <div className="flex flex-col items-center justify-center rounded-lg p-8 text-center">
               <div className="mb-4 rounded-full bg-gray-100 p-4">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -597,7 +624,8 @@ const MeetingsPage = () => {
                 No Meetings Scheduled
               </h3>
               <p className="mb-6 text-gray-500">
-                You currently don't have any meetings scheduled with mentors.
+                You currently don&apos;t have any meetings scheduled with
+                mentors.
               </p>
               <Link href="/student-dashboard/mentors">
                 <Button className="bg-black text-white hover:bg-gray-800">

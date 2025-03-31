@@ -26,7 +26,18 @@ export const env = createEnv({
       UPSTASH_REDIS_REST_URL: z.string().url(),
       UPSTASH_REDIS_REST_TOKEN: z.string(),
       SKIP_ENV_VALIDATION: z.number(),
+      CF_DELIVERY_ACCESS_TOKEN: z.string(),
+      EMAIL_HOST: z.string(),
+      EMAIL_PORT: z.number(),
+      EMAIL_USER: z.string(),
+      EMAIL_PASSWORD: z.string(),
+      EMAIL_FROM: z.string(),
+      SUPPORT_EMAIL: z.string(),
+      
   },
+  
+
+
 
   /**
    * Specify your client-side environment variables schema here. This way you can ensure the app
@@ -36,6 +47,8 @@ export const env = createEnv({
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_BASE_URL : z.string().url(),
+    NEXT_PUBLIC_GEMINI_API_KEY: z.string(),
+    NEXT_PUBLIC_RESEND_API_KEY: z.string(),
   },
 
   /**
@@ -61,6 +74,15 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     SKIP_ENV_VALIDATION: process.env.SKIP_ENV_VALIDATION,
+    CF_DELIVERY_ACCESS_TOKEN: process.env.CF_DELIVERY_ACCESS_TOKEN,
+    EMAIL_HOST: process.env.EMAIL_HOST,
+    EMAIL_PORT: process.env.EMAIL_PORT,
+    EMAIL_USER: process.env.EMAIL_USER,
+    EMAIL_PASSWORD: process.env.EMAIL_PASSWORD,
+    EMAIL_FROM: process.env.EMAIL_FROM,
+    SUPPORT_EMAIL: process.env.SUPPORT_EMAIL,
+    NEXT_PUBLIC_GEMINI_API_KEY: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
+    NEXT_PUBLIC_RESEND_API_KEY: process.env.NEXT_PUBLIC_RESEND_API_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -16,6 +16,27 @@ import Email from "@/../emails/index";
 import { toast } from "sonner";
 import { useUser } from "@auth0/nextjs-auth0";
 
+// Types for the new availability structure
+type TimeSlot = {
+  startTime: string;
+  endTime: string;
+};
+
+type DayAvailability = {
+  enabled: boolean;
+  timeSlots: TimeSlot[];
+};
+
+type DaysAvailableType = {
+  Sunday: DayAvailability;
+  Monday: DayAvailability;
+  Tuesday: DayAvailability;
+  Wednesday: DayAvailability;
+  Thursday: DayAvailability;
+  Friday: DayAvailability;
+  Saturday: DayAvailability;
+};
+
 type EventInfo = {
   id: string;
   eventName: string;
@@ -29,6 +50,7 @@ type MentorUserDetails = {
   email: string;
   daysAvailable: JSONValue;
   mentorUserId: string;
+  bufferTime?: number;
 };
 
 type ScheduledMeeting = {
@@ -67,6 +89,10 @@ function MeetingTimeDateSelection({
   const [userName, setUserName] = useState<string>("");
   const [userEmail, setUserEmail] = useState<string>("");
   const [step, setStep] = useState<number>(1);
+  const [mentorAvailability, setMentorAvailability] = useState<{
+    daysAvailable: DaysAvailableType;
+    bufferTime: number;
+  }>();
 
   const { data: prevBookingData } =
     api.scheduledMeetings.getScheduledMeetingsList.useQuery(
@@ -100,21 +126,28 @@ function MeetingTimeDateSelection({
   }, [prevBookingData]);
 
   useEffect(() => {
-    eventInfo?.duration && createTimeSlot(eventInfo?.duration);
-  }, [eventInfo]);
+    // Extract and sanitize mentor availability data
+    if (mentorUserDetails.daysAvailable) {
+      try {
+        const parsedAvailability = {
+          daysAvailable: mentorUserDetails.daysAvailable as DaysAvailableType,
+          bufferTime: mentorUserDetails.bufferTime || 15, // Default 15 min buffer if not specified
+        };
+        setMentorAvailability(parsedAvailability);
 
-  const createScheduledMeeting =
-    api.scheduledMeetings.createScheduledMeeting.useMutation({
-      onSuccess: async () => {
-        //console.log('Meeting Scheduled successfully!')
-        await sendEmail();
-        setLoading(false);
-        router.push("/confirmation");
-      },
-      onError: (error) => {
-        //console.log(error)
-      },
-    });
+        // Generate time slots for the current date
+        if (eventInfo?.duration) {
+          generateAvailableTimeSlots(
+            date,
+            eventInfo.duration,
+            parsedAvailability,
+          );
+        }
+      } catch (e) {
+        console.error("Error parsing mentor availability:", e);
+      }
+    }
+  }, [mentorUserDetails, eventInfo, date]);
 
   const meetlinkGenerator = api.meet.generateMeetLink.useMutation({
     onSuccess: (data) => {
@@ -127,21 +160,71 @@ function MeetingTimeDateSelection({
     },
   });
 
-  const createTimeSlot = (interval: number) => {
-    const startTime = 8 * 60; // 8 AM in minutes
-    const endTime = 22 * 60; // 10 PM in minutes
-    const totalSlots = (endTime - startTime) / interval;
-    const slots = Array.from({ length: totalSlots }, (_, i) => {
-      const totalMinutes = startTime + i * interval;
-      const hours = Math.floor(totalMinutes / 60);
-      const minutes = totalMinutes % 60;
-      const formattedHours = hours > 12 ? hours - 12 : hours; // Convert to 12-hour format
-      const period = hours >= 12 ? "PM" : "AM";
-      return `${String(formattedHours).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${period}`;
+  // Generate time slots based on mentor's availability for the selected day
+  const generateAvailableTimeSlots = (
+    selectedDate: Date,
+    meetingDuration: number,
+    availability: { daysAvailable: DaysAvailableType; bufferTime: number },
+  ) => {
+    const dayNames = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    const dayName = dayNames[selectedDate.getDay()];
+    const dayAvailability =
+      availability.daysAvailable[dayName as keyof DaysAvailableType];
+
+    // If the day is not enabled or has no time slots, return empty array
+    if (!dayAvailability?.enabled || !dayAvailability?.timeSlots?.length) {
+      setTimeSlots([]);
+      setEnabledTimeSlot(false);
+      return;
+    }
+
+    setEnabledTimeSlot(true);
+
+    const durationInMinutes = Number(meetingDuration);
+    const bufferTimeInMinutes = availability.bufferTime;
+    const totalSlotDuration = durationInMinutes + bufferTimeInMinutes;
+    const availableSlots: string[] = [];
+
+    dayAvailability.timeSlots.forEach((slot) => {
+      // Convert start and end times to minutes since midnight
+      const [startHour, startMinute] = slot?.startTime
+        ?.split(":")
+        ?.map(Number) || [0, 0];
+      const [endHour, endMinute] = slot?.endTime?.split(":")?.map(Number) || [
+        0, 0,
+      ];
+
+      const startTimeInMinutes = (startHour || 0) * 60 + (startMinute || 0);
+      const endTimeInMinutes = (endHour || 0) * 60 + (endMinute || 0);
+
+      // Calculate all possible meeting start times within this slot
+      for (
+        let slotStart = startTimeInMinutes;
+        slotStart + durationInMinutes <= endTimeInMinutes;
+        slotStart += totalSlotDuration
+      ) {
+        const hours = Math.floor(slotStart / 60);
+        const minutes = slotStart % 60;
+
+        // Format in 12-hour format with AM/PM
+        const formattedHours = hours % 12 || 12; // Convert 0 to 12 for 12 AM
+        const period = hours >= 12 ? "PM" : "AM";
+
+        availableSlots.push(
+          `${String(formattedHours).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${period}`,
+        );
+      }
     });
 
-    // //console.log(slots)
-    setTimeSlots(slots);
+    setTimeSlots(availableSlots);
   };
 
   /**
@@ -153,12 +236,9 @@ function MeetingTimeDateSelection({
       return;
     }
     setDate(date);
-    const day = format(date, "EEEE");
 
-    if ((mentorUserDetails?.daysAvailable as Record<string, any>)?.[day]) {
-      setEnabledTimeSlot(true);
-    } else {
-      setEnabledTimeSlot(false);
+    if (mentorAvailability && eventInfo?.duration) {
+      generateAvailableTimeSlots(date, eventInfo.duration, mentorAvailability);
     }
   };
 
@@ -248,132 +328,135 @@ function MeetingTimeDateSelection({
       });
     } catch (error) {
       console.error(error);
+      toast.error("Error scheduling meeting. Please try again later.");
       setLoading(false);
-      toast.error("Failed to schedule meeting. Please try again.");
     }
   };
 
-  /**
-   * Used to Send an email to User
-   * @param {*} user
-   */
-  const sendEmail = async () => {
-    if (
-      mentorUserDetails.name &&
-      date &&
-      eventInfo.duration &&
-      selectedTime &&
-      meetUrl &&
-      mentorUserDetails.email
-    ) {
-      sendEmaill.mutateAsync({
-        date: format(date, "PPP").toString(),
-        mentorName: mentorUserDetails?.name,
-        duration: eventInfo?.duration.toString(),
-        meetingTime: selectedTime,
-        meetingUrl: meetUrl,
-      });
-    } else {
-      alert("Email not sent");
-    }
-  };
+  const createScheduledMeeting =
+    api.scheduledMeetings.createScheduledMeeting.useMutation({
+      onSuccess: async () => {
+        //console.log('Meeting Scheduled successfully!')
+        setLoading(false);
+        router.push("/confirmation");
+      },
+      onError: (error) => {
+        setLoading(false);
+        toast.error("Failed to schedule meeting. Please try again.");
+      },
+    });
 
   return (
-    <div className="mx-auto w-full max-w-4xl rounded-lg border-t-4 border-primary p-4 py-6 shadow-lg sm:p-5 sm:py-8 md:p-6 md:py-10">
-      <div className="mb-6 flex items-center justify-between">
-        <Image
-          src="/logo.svg"
-          alt="logo"
-          width={120}
-          height={40}
-          className="h-auto"
-        />
-      </div>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {/* Meeting Info  */}
-        <div className="rounded-lg bg-gray-50 p-4 md:border-r md:bg-transparent">
-          <h2 className="text-lg font-medium text-gray-700">
-            {mentorUserDetails?.name}
-          </h2>
-          <h2 className="mb-4 text-2xl font-bold text-primary sm:text-3xl">
-            {eventInfo?.eventName ? eventInfo?.eventName : "Meeting Name"}
-          </h2>
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <Clock className="h-5 w-5 text-primary" />
-              <span>{eventInfo?.duration} Min</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <MapPin className="h-5 w-5 text-primary" />
-              <div className="text-primary">{"Google Meet"}</div>
-            </div>
-            <div className="flex items-center gap-3">
-              <CalendarCheck className="h-5 w-5 text-primary" />
-              <span>{format(date, "PPP")}</span>
-            </div>
-            {selectedTime && (
-              <div className="flex items-center gap-3">
-                <Timer className="h-5 w-5 text-primary" />
-                <span>{selectedTime}</span>
-              </div>
-            )}
+    <div className="rounded-lg border bg-white shadow-md">
+      <div className="border-b p-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {eventInfo.eventName}
+            </h1>
+            <p className="mt-2 flex items-center text-gray-700">
+              <Clock className="mr-1 h-4 w-4" />
+              {eventInfo.duration} minutes
+            </p>
+          </div>
+          <div className="ml-4 flex-shrink-0 rounded-full bg-primary/10 p-3">
+            <CalendarCheck className="h-6 w-6 text-primary" />
           </div>
         </div>
-        {/* Time & Date Selection  */}
-        <div className="md:col-span-2">
-          {step === 1 ? (
-            <TimeDateSelection
-              date={date}
-              enableTimeSlot={enableTimeSlot}
-              handleDateChange={handleDateChange}
-              setSelectedTime={setSelectedTime}
-              timeSlots={timeSlots}
-              selectedTime={selectedTime!}
-              prevBooking={prevBooking}
-            />
-          ) : (
-            <UserFormInfo
-              setUserEmail={setUserEmail}
-              setUserName={setUserName}
-              setUserNote={setUserNote}
-            />
-          )}
-        </div>
-      </div>
-      <div className="mt-6 flex justify-center gap-3 md:justify-end">
-        {step === 1 ? (
-          <Button
-            onClick={() => setStep(2)}
-            className="w-full px-6 py-2 text-sm font-medium transition-all hover:shadow-md active:scale-95 sm:w-auto"
-            disabled={!selectedTime}
-            aria-label="Proceed to next step"
-          >
-            {loading ? (
-              <>
-                <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
-                <span>Processing...</span>
-              </>
-            ) : (
-              "Next"
-            )}
-          </Button>
-        ) : (
-          <Button
-            onClick={handleScheduleEvent}
-            className="w-full px-6 py-2 text-sm font-medium transition-all hover:shadow-md active:scale-95 sm:w-auto"
-            aria-label="Schedule meeting"
-          >
-            {loading ? (
-              <>
-                <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
-                <span>Processing...</span>
-              </>
-            ) : (
-              "Schedule"
-            )}
-          </Button>
+        {eventInfo.description && (
+          <div className="mt-4">
+            <h2 className="font-medium text-gray-900">About</h2>
+            <p className="mt-1 text-gray-700">{eventInfo.description}</p>
+          </div>
         )}
       </div>
+
+      {step === 1 ? (
+        <div className="p-6">
+          <h2 className="mb-4 text-xl font-bold text-gray-900">
+            Select Date and Time
+          </h2>
+          <TimeDateSelection
+            date={date}
+            handleDateChange={handleDateChange}
+            timeSlots={timeSlots}
+            setSelectedTime={setSelectedTime}
+            enableTimeSlot={enableTimeSlot}
+            selectedTime={selectedTime!}
+            prevBooking={prevBooking}
+          />
+          <div className="mt-6 flex justify-end">
+            <Button
+              onClick={() => selectedTime && setStep(2)}
+              disabled={!selectedTime}
+              className="bg-primary text-white hover:bg-primary/90"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="p-6">
+          <div className="mb-4 flex items-center">
+            <Button
+              variant="ghost"
+              onClick={() => setStep(1)}
+              className="mr-4 h-8 w-8 p-0"
+            >
+              <span className="sr-only">Back</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4"
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+            </Button>
+            <h2 className="text-xl font-bold text-gray-900">Your Details</h2>
+          </div>
+
+          <div className="rounded-md bg-gray-50 p-4">
+            <div className="mb-2 flex items-center">
+              <CalendarCheck className="mr-2 h-4 w-4 text-primary" />
+              <span className="font-medium">
+                {format(date, "EEEE, MMMM d")}
+              </span>
+            </div>
+            <div className="flex items-center">
+              <Clock className="mr-2 h-4 w-4 text-primary" />
+              <span>{selectedTime}</span>
+            </div>
+          </div>
+
+          <UserFormInfo
+            setUserEmail={setUserEmail}
+            setUserName={setUserName}
+            setUserNote={setUserNote}
+          />
+
+          <div className="mt-6">
+            <Button
+              onClick={handleScheduleEvent}
+              className="w-full bg-primary text-white hover:bg-primary/90"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
+                  Scheduling...
+                </>
+              ) : (
+                "Schedule Meeting"
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

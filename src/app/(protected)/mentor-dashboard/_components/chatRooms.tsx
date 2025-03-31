@@ -7,6 +7,7 @@ type Room = {
   id: string;
   student: {
     studentName: string | null;
+    studentId: string;
   };
   lastMessage: string;
   mentorUnreadCount: number;

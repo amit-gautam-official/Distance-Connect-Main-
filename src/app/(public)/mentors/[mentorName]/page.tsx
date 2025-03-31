@@ -82,7 +82,7 @@ async function getMentorData(
 // Function to fetch similar mentors based on industry or job title
 async function getSimilarMentors(
   currentMentor: MentorWithRelations,
-  limit: number = 3,
+  limit = 3,
 ): Promise<SimilarMentorProfile[]> {
   if (!currentMentor) return [];
 
@@ -116,13 +116,9 @@ async function getSimilarMentors(
   }
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { mentorName: string };
-}) {
-  const mentorId = await params.mentorName;
-  const mentor = await getMentorData(mentorId);
+export async function generateMetadata({ params }: PageProps) {
+  const { mentorName } = await params;
+  const mentor = await getMentorData(mentorName);
 
   if (!mentor) {
     return {
@@ -137,13 +133,19 @@ export async function generateMetadata({
   };
 }
 
-export default async function MentorProfilePage({
-  params,
-}: {
-  params: { mentorName: string };
-}) {
-  const mentorId = await params.mentorName;
-  const mentorData = await getMentorData(mentorId);
+type SegmentParams = {
+  mentorName: string;
+};
+
+// Use this interface to match what Next.js expects
+interface PageProps {
+  params: Promise<SegmentParams>;
+  searchParams?: Promise<any>;
+}
+
+export default async function MentorProfilePage({ params }: PageProps) {
+  const { mentorName } = await params;
+  const mentorData = await getMentorData(mentorName);
   console.log("mentorData", mentorData);
   const session = await auth0.getSession();
   const userEmail = session?.user.email;
@@ -206,7 +208,7 @@ export default async function MentorProfilePage({
     type: event.eventName,
     repliesIn: "2 days",
     priority: 134,
-    mentorUserId: mentorId,
+    mentorUserId: mentorName,
     userEmail: userEmail ?? "",
   }));
 
@@ -327,7 +329,7 @@ export default async function MentorProfilePage({
                 : undefined,
             }}
             averageRating={averageRating}
-            userId={mentorId || ""}
+            userId={mentorName || ""}
             menteeCount={menteeCount}
             skills={mentorData.hiringFields || []}
           />
@@ -355,7 +357,7 @@ export default async function MentorProfilePage({
           mentorName={mentorData.mentorName || ""}
           articles={articles}
           similarProfiles={similarProfiles}
-          mentorUserId={mentorId || ""}
+          mentorUserId={mentorName || ""}
         />
       </div>
     </div>

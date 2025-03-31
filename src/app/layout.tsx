@@ -12,12 +12,14 @@ export const metadata: Metadata = {
 
 interface LayoutProps {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Record<string, string>;
 }
 
 export default function RootLayout({
   children,
-}:LayoutProps) {
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>

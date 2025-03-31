@@ -79,20 +79,8 @@ export default function CollegeForm({
       },
     });
 
-  const checkUsername = api.user.checkUsernameAvailability.useQuery(
-    { username: form.watch("username") || "" },
-    {
-      enabled: form.watch("username")?.length >= 3,
-      onSuccess: (data) => {
-        if (!data.available) {
-          setUsernameError("This username is already taken");
-        } else {
-          setUsernameError(null);
-        }
-        setIsCheckingUsername(false);
-      },
-    },
-  );
+  const checkUsernameAvailability =
+    api.user.checkUsernameAvailabilityMutation.useMutation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -109,16 +97,39 @@ export default function CollegeForm({
     },
   });
 
+  // Watch for username changes and validate
   useEffect(() => {
-    const username = form.watch("username");
-    if (username && username.length >= 3) {
-      setIsCheckingUsername(true);
-      const timer = setTimeout(() => {
-        checkUsername.refetch();
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [form.watch("username")]);
+    const subscription = form.watch((value, { name }) => {
+      if (name === "username" && value.username && value.username.length >= 3) {
+        setIsCheckingUsername(true);
+
+        const timer = setTimeout(async () => {
+          try {
+            // Make sure username exists and is a string before passing to the mutation
+            if (value.username) {
+              const result = await checkUsernameAvailability.mutateAsync({
+                username: value.username,
+              });
+
+              if (!result.available) {
+                setUsernameError("This username is already taken");
+              } else {
+                setUsernameError(null);
+              }
+            }
+          } catch (error) {
+            console.error("Error checking username:", error);
+          } finally {
+            setIsCheckingUsername(false);
+          }
+        }, 1000);
+
+        return () => clearTimeout(timer);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   function onSubmit(input: z.infer<typeof formSchema>) {
     if (usernameError) {
@@ -146,8 +157,8 @@ export default function CollegeForm({
     };
     try {
       createStudentUpdateUser.mutate(studentUserData);
-      // router.push("/student-dashboard");
-      router.push("/post-register");
+      router.push("/student-dashboard");
+      // router.push("/post-register");
     } catch (error) {
       console.error(error);
     }

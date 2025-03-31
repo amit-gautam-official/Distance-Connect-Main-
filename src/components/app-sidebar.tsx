@@ -157,7 +157,9 @@ export function AppSidebar({ role }: { role: string }) {
     <Sidebar className="overflow-visible">
       <SidebarContent className="overflow-visible">
         <SidebarGroup className="overflow-visible">
-          <SidebarGroupLabel>Distance Connect</SidebarGroupLabel>
+          <SidebarGroupLabel>
+          <img src="/logo.png" alt="logo" className="h-[60px] w-" />
+          </SidebarGroupLabel>
 
           <SidebarGroupContent className="flex h-[calc(100vh-4rem)] flex-col justify-between overflow-visible pl-2 pt-4">
             {/* Main navigation */}

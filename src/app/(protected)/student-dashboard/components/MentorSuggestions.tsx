@@ -33,7 +33,8 @@ const MentorSuggestions: React.FC<MentorSuggestionsProps> = ({
         </CardHeader>
         <CardContent className="py-6 text-center">
           <p className="text-sm text-muted-foreground">
-            We're finding the perfect mentors for you based on your interests.
+            We&apos;re finding the perfect mentors for you based on your
+            interests.
           </p>
         </CardContent>
       </Card>

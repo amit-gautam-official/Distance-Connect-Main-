@@ -281,7 +281,10 @@ const AIChatPage = () => {
             size="icon"
             className="mr-1 h-8 w-8"
             disabled={isLoading}
-            onClick={() => {}}
+            onClick={() => {
+              // Handle attachment or file sharing in the future
+              console.log("Attachment button clicked");
+            }}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

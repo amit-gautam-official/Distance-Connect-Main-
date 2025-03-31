@@ -177,7 +177,7 @@ export default function HelpSupportPage() {
               Is NoCode the future of the web?
             </AccordionTrigger>
             <AccordionContent>
-              NoCode is emerging as an important part of the web's future,
+              NoCode is emerging as an important part of the web&apos;s future,
               democratizing web development and enabling more people to create
               digital products without traditional coding skills.
             </AccordionContent>

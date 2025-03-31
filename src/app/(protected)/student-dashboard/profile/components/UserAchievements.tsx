@@ -102,13 +102,15 @@ const UserAchievements = () => {
                         {achievement.title}
                       </h3>
                       <Badge variant="outline" className="text-xs">
-                        {new Date(achievement.date).toLocaleDateString(
-                          "en-US",
-                          {
-                            month: "short",
-                            day: "numeric",
-                          },
-                        )}
+                        {achievement.date
+                          ? new Date(achievement.date).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                              },
+                            )
+                          : "No date"}
                       </Badge>
                     </div>
                     <p className="text-sm text-gray-500">
@@ -145,14 +147,18 @@ const UserAchievements = () => {
                         {achievement.title}
                       </h3>
                       <span className="text-xs text-gray-500">
-                        {achievement.progress}/{achievement.total}
+                        {achievement.progress ?? 0}/{achievement.total ?? 1}
                       </span>
                     </div>
                     <p className="text-sm text-gray-500">
                       {achievement.description}
                     </p>
                     <Progress
-                      value={(achievement.progress / achievement.total) * 100}
+                      value={
+                        ((achievement.progress ?? 0) /
+                          (achievement.total ?? 1)) *
+                        100
+                      }
                       className="mt-2 h-1.5"
                     />
                   </div>

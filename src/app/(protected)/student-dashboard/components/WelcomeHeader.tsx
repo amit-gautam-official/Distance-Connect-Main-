@@ -51,7 +51,8 @@ const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ user }) => {
             {getGreeting()}, {firstName}!
           </h1>
           <p className="text-muted-foreground">
-            Welcome to your learning dashboard. Here's what's happening today.
+            Welcome to your learning dashboard. Here&apos;s what&apos;s
+            happening today.
           </p>
         </div>
       </div>

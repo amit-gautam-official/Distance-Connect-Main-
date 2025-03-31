@@ -138,6 +138,20 @@ export const studentRouter = createTRPCRouter({
   }
   ),
 
+  getStudentByUserId: protectedProcedure
+  .input(z.object({ userId: z.string() }))
+  .query(async ({ ctx, input }) => {
+    return ctx.db.student.findUnique({
+      where: { userId: input.userId },
+      select: {
+        userId: true,
+        studentName: true,
+        institutionName: true,
+        interestFields: true,
+        studentRole: true,
+      }
+    });
+  }),
 
     
   })

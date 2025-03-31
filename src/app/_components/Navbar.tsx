@@ -67,15 +67,7 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
       <div className="relative flex h-[55px] w-full items-center justify-between bg-white p-6 shadow-[0px_1px_3.7px_0px_rgba(0,0,0,0.10)] lg:hidden">
         <Sheet>
           <Link href="/" className="flex items-center justify-center gap-2">
-            <img
-              src="/logo.png"
-              alt="logo"
-              className="m-auto h-[37px] w-[35px]"
-            />
-            <div className="mt-1 text-center font-inter text-[15px] font-semibold leading-normal text-black">
-              Distance Connect
-            </div>
-            <div></div>
+            <img src="/logo.png" alt="logo" className="m-auto h-[37px]" />
           </Link>
           <SheetTrigger>
             <svg
@@ -132,8 +124,49 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                   >
                     Blogs
                   </Link>
-                  <div className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]">
-                    Use Cases
+                  <div className="relative mt-2 w-full">
+                    <details className="group [&_summary::-webkit-details-marker]:hidden">
+                      <summary className="flex cursor-pointer items-center justify-between text-[18px] font-normal leading-[18px] text-[#5D5A88]">
+                        <span>Solutions</span>
+                        <span className="transition group-open:rotate-180">
+                          <svg
+                            width="10"
+                            height="6"
+                            viewBox="0 0 10 6"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M1 1L5 5L9 1"
+                              stroke="#5D5A88"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </span>
+                      </summary>
+                      <div className="ml-4 mt-3 space-y-2">
+                        <Link
+                          href="/solutions/student"
+                          className="block text-[16px] font-normal text-[#5D5A88]"
+                        >
+                          Students
+                        </Link>
+                        <Link
+                          href="/solutions/mentor"
+                          className="block text-[16px] font-normal text-[#5D5A88]"
+                        >
+                          Mentors
+                        </Link>
+                        <Link
+                          href="/solutions/startup"
+                          className="block text-[16px] font-normal text-[#5D5A88]"
+                        >
+                          Startups
+                        </Link>
+                      </div>
+                    </details>
                   </div>
                   <div className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]">
                     Pricing
@@ -201,21 +234,14 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
     xl--> desktop */}
 
       <div
-        className={`fixed left-[50%] z-[200] m-auto hidden h-[68px] w-[80%] translate-x-[-50%] items-center justify-between rounded-[50px] bg-[#9FBAF1] pl-4 pr-6 shadow-md transition-transform duration-300 lg:flex ${
+        className={`fixed left-[50%] z-[200] m-auto hidden h-[68px] w-[80%] translate-x-[-50%] items-center justify-between rounded-[50px] bg-[#7090dc] pl-4 pr-6 shadow-md transition-transform duration-300 lg:flex ${
           showNavbar
             ? "translate-y-[30px] transform"
             : "-translate-y-[100px] transform"
         }`}
       >
         <div className="flex items-center justify-center gap-2">
-          <img
-            src="/logo.png"
-            alt="logo"
-            className="m-auto h-[37px] w-[35px]"
-          />
-          <div className="cursor-pointer font-inter font-bold leading-[24px] tracking-[0.17px] text-white lg:text-[14px] xl:text-[17px]">
-            Distance Connect
-          </div>
+          <img src="/logo.png" alt="logo" className="m-auto w-full h-[70px]" />
         </div>
         <div className="flex items-center justify-center font-inter font-medium leading-normal text-white lg:gap-4 lg:text-[12px] xl:gap-8 xl:text-[16px]">
           {/* <div className="cursor-pointer">Solutions</div>
@@ -234,30 +260,32 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                   <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                     <li className="row-span-3">
                       <NavigationMenuLink asChild>
-                        <a
+                        <div
                           className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-                          href="/"
+                          
                         >
-                          <img src="/logo.png" alt="logo" className="h-6 w-6" />
+                          <img src="/logo.png" alt="logo" className="h- w-" />
                           <div className="mb-2 mt-4 text-lg font-medium">
                             Solutions offered
                           </div>
                           <p className="text-sm leading-tight text-muted-foreground">
-                            Beautifully designed components built with Radix UI
-                            and Tailwind CSS.
+                            Tailored solutions for students, mentors, and
+                            startups to connect and grow together.
                           </p>
-                        </a>
+                        </div>
                       </NavigationMenuLink>
                     </li>
                     <ListItem href="/solutions/startup" title="Startups">
-                      Re-usable components built using Radix UI and Tailwind
-                      CSS.
+                      Find the right talent, get expert guidance, and build a
+                      strong professional network to scale your startup.
                     </ListItem>
                     <ListItem href="/solutions/mentor" title="Mentors">
-                      How to install dependencies and structure your app.
+                      Monetize your expertise, build your personal brand, and
+                      mentor on your own terms with full flexibility.
                     </ListItem>
                     <ListItem href="/solutions/student" title="Students">
-                      Styles for headings, paragraphs, lists...etc
+                      Get AI-powered career guidance, connect with mentors, and
+                      ace your interviews with expert preparation.
                     </ListItem>
                   </ul>
                 </NavigationMenuContent>

@@ -14,7 +14,7 @@ datasource db {
 model User {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  username     String?  @unique
+  username     String? @unique
   kindeId      String  @unique
   email        String  @unique
   name         String?
@@ -143,8 +143,7 @@ model Availability {
   mentorUserId String @unique @db.ObjectId
 
   daysAvailable Json
-  startTime     String
-  endTime       String
+  bufferTime    Int  @default(15) // Default buffer time of 15 minutes between meetings
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

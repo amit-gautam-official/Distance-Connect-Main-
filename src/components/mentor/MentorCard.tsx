@@ -112,14 +112,14 @@ export function MentorCard({ mentor }: MentorCardProps) {
       <div className="mt-4 text-sm text-gray-600">
         {isExpanded ? (
           <>
-            Looking for a mentor who makes coding simple and practical? I've
-            spent {mentor.experience}+ years building web apps, mastering both
-            frontend and backend. I can help you write clean, efficient code,
-            break down complex topics, and guide you toward real-world
-            solutions. With a focus on practical learning, I'll help you
-            understand industry best practices, system design principles, and
-            how to write maintainable code. Let's work together to accelerate
-            your growth in tech.{" "}
+            Looking for a mentor who makes coding simple and practical?
+            I&apos;ve spent {mentor.experience}+ years building web apps,
+            mastering both frontend and backend. I can help you write clean,
+            efficient code, break down complex topics, and guide you toward
+            real-world solutions. With a focus on practical learning, I&apos;ll
+            help you understand industry best practices, system design
+            principles, and how to write maintainable code. Let&apos;s work
+            together to accelerate your growth in tech.{" "}
             <button
               onClick={() => setIsExpanded(false)}
               className="text-blue-600 hover:underline"
@@ -129,11 +129,11 @@ export function MentorCard({ mentor }: MentorCardProps) {
           </>
         ) : (
           <>
-            Looking for a mentor who makes coding simple and practical? I've
-            spent {mentor.experience}+ years building web apps, mastering both
-            frontend and backend. I can help you write clean, efficient code,
-            break down complex topics, and guide you toward real-world
-            solutions...{" "}
+            Looking for a mentor who makes coding simple and practical?
+            I&apos;ve spent {mentor.experience}+ years building web apps,
+            mastering both frontend and backend. I can help you write clean,
+            efficient code, break down complex topics, and guide you toward
+            real-world solutions...{" "}
             <button
               onClick={() => setIsExpanded(true)}
               className="text-blue-600 hover:underline"

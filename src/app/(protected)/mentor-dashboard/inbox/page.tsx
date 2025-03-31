@@ -3,8 +3,13 @@ import React from "react";
 import InboxWrapper from "./components/InboxWrapper";
 import { auth0 } from "@/lib/auth0";
 
-const page = async ({ searchParams }: { searchParams: { sId: string } }) => {
-  const sId = searchParams?.sId || "";
+type PageProps = {
+  params?: any;
+  searchParams?: any;
+};
+
+const page = async ({ searchParams }: PageProps) => {
+  const sId = await searchParams?.sId || "";
   const session = await auth0.getSession();
   const user = session?.user;
 

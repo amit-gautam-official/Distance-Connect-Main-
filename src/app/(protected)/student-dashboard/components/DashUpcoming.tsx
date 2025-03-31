@@ -57,18 +57,11 @@ const DashUpcoming = ({ mentorsData }: { mentorsData: Mentor[] }) => {
     setMentors(mentorsData);
   }, [mentorsData]);
 
-
-  
-
- 
-
   return (
-    <div className="overflow-hidden w-full">
-
+    <div className="w-full overflow-hidden">
       <CardContent>
         {mentorsData?.length > 0 ? (
           <div className="grid w-full gap-y-5">
-            
             {mentors.map((mentor) => (
               <div
                 key={mentor.meetUrl}
@@ -154,7 +147,7 @@ const DashUpcoming = ({ mentorsData }: { mentorsData: Mentor[] }) => {
             <Calendar className="mb-2 h-10 w-10 text-muted-foreground" />
             <h3 className="text-lg font-medium">No upcoming meetings</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              You don't have any scheduled meetings with mentors yet.
+              You don&apos;t have any scheduled meetings with mentors yet.
             </p>
             <Button
               className="mt-4"

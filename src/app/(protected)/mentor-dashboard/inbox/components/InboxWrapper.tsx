@@ -37,6 +37,15 @@ const InboxWrapper = ({
   const selectedChatRoom =
     chatRooms.find((room) => room.id === selectedChatRoomId) || null;
 
+  // Fetch student details when sId is provided
+  const { data: studentData } = api.student.getStudentByUserId.useQuery(
+    { userId: sId },
+    {
+      enabled: !!sId,
+      retry: 1,
+    },
+  );
+
   // Set the initial chat room when the component mounts
   useEffect(() => {
     if (chatRooms.length > 0 && chatRooms[0]) {
@@ -105,7 +114,7 @@ const InboxWrapper = ({
   return (
     <div className="relative flex h-full flex-col overflow-hidden bg-gray-50 md:flex-row">
       {/* Mobile header with toggle button */}
-      <div className="flex items-center justify-between border-b border-gray-200 bg-white p-3 md:hidden">
+      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-gray-200 bg-white p-3 md:hidden">
         <div className="flex items-center">
           {selectedChatRoomId ? (
             <button
@@ -137,7 +146,9 @@ const InboxWrapper = ({
             </button>
           )}
           <h2 className="text-lg font-semibold text-gray-800">
-            {selectedChatRoom?.student.studentName || "Messages"}
+            {sId && studentData?.studentName
+              ? studentData.studentName
+              : selectedChatRoom?.student.studentName || "Messages"}
           </h2>
         </div>
         {totalUnread > 0 && (
@@ -155,7 +166,7 @@ const InboxWrapper = ({
             : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between border-b border-gray-200 p-4">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white p-4">
           <div>
             <h2 className="text-xl font-bold text-gray-800">Messages</h2>
             <p className="text-sm text-gray-500">Chat with your students</p>
@@ -180,6 +191,16 @@ const InboxWrapper = ({
       <div
         className={`flex flex-1 flex-col overflow-hidden ${selectedChatRoomId ? "block" : "hidden md:block"}`}
       >
+        {/* Desktop header */}
+        <div className="sticky top-0 z-10 hidden items-center border-b border-gray-200 bg-white p-3 md:flex">
+          <h2 className="text-lg font-semibold text-gray-800">
+            {sId && studentData?.studentName
+              ? studentData.studentName
+              : selectedChatRoom?.student.studentName ||
+                "Select a conversation"}
+          </h2>
+        </div>
+
         <Chat
           chatRoomId={selectedChatRoomId || ""}
           initialMessages={messages || []}

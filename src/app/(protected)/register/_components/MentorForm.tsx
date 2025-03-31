@@ -148,7 +148,7 @@ export default function MentorForm({
           } finally {
             setIsCheckingUsername(false);
           }
-        }, 500);
+        }, 1000);
 
         return () => clearTimeout(timer);
       }
@@ -420,7 +420,7 @@ export default function MentorForm({
                           Oracle, etc.)
                         </SelectItem>
                         <SelectItem value="Unicorn Startups">
-                          Unicorn Startups (Byju's, Paytm, Zomato, etc.)
+                          Unicorn Startups (Byju&apos;s, Paytm, Zomato, etc.)
                         </SelectItem>
                         <SelectItem value="Consulting Firms">
                           Consulting Firms (McKinsey, BCG, Bain, etc.)

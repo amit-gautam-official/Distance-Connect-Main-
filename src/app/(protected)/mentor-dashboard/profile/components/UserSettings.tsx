@@ -316,8 +316,8 @@ const ProfileSettings = ({
                 className="min-h-[100px]"
               />
               <p className="text-xs text-gray-500">
-                Separate each field with a comma. For example: "Software
-                Engineering, Data Science, Product Management"
+                Separate each field with a comma. For example: &quot;Software
+                Engineering, Data Science, Product Management&quot;
               </p>
             </div>
 
