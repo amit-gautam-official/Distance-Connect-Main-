@@ -96,6 +96,8 @@ export default function StartupForm() {
     },
   });
 
+
+  //nice
   // Watch for username changes and validate
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
