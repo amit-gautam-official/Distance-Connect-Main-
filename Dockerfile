@@ -56,8 +56,38 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# ENV NEXT_TELEMETRY_DISABLED 1
+# Create .env file with all required environment variables
+RUN echo "DATABASE_URL=${DATABASE_URL}" > .env \
+    && echo "UPSTASH_REDIS_REST_URL=${UPSTASH_REDIS_REST_URL}" >> .env \
+    && echo "UPSTASH_REDIS_REST_TOKEN=${UPSTASH_REDIS_REST_TOKEN}" >> .env \
+    && echo "ACCESS_TOKEN=${ACCESS_TOKEN}" >> .env \
+    && echo "NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}" >> .env \
+    && echo "AUTH0_SECRET=${AUTH0_SECRET}" >> .env \
+    && echo "APP_BASE_URL=${APP_BASE_URL}" >> .env \
+    && echo "AUTH0_DOMAIN=${AUTH0_DOMAIN}" >> .env \
+    && echo "AUTH0_CLIENT_ID=${AUTH0_CLIENT_ID}" >> .env \
+    && echo "AUTH0_CLIENT_SECRET=${AUTH0_CLIENT_SECRET}" >> .env \
+    && echo "GOOGLE_SERVICE_ACCOUNT_EMAIL=${GOOGLE_SERVICE_ACCOUNT_EMAIL}" >> .env \
+    && echo "GOOGLE_PRIVATE_KEY=${GOOGLE_PRIVATE_KEY}" >> .env \
+    && echo "ABLY_API_KEY=${ABLY_API_KEY}" >> .env \
+    && echo "GCP_PROJECT_ID=${GCP_PROJECT_ID}" >> .env \
+    && echo "GCP_CHAT_IMAGE_BUCKET_NAME=${GCP_CHAT_IMAGE_BUCKET_NAME}" >> .env \
+    && echo "GCP_CLIENT_EMAIL=${GCP_CLIENT_EMAIL}" >> .env \
+    && echo "GCP_PRIVATE_KEY=${GCP_PRIVATE_KEY}" >> .env \
+    && echo "CF_SPACE_ID=${CF_SPACE_ID}" >> .env \
+    && echo "CF_DELIVERY_ACCESS_TOKEN=${CF_DELIVERY_ACCESS_TOKEN}" >> .env \
+    && echo "NEXT_PUBLIC_GEMINI_API_KEY=${NEXT_PUBLIC_GEMINI_API_KEY}" >> .env \
+    && echo "RESEND_API_KEY=${RESEND_API_KEY}" >> .env \
+    && echo "EMAIL_HOST=${EMAIL_HOST}" >> .env \
+    && echo "EMAIL_PORT=${EMAIL_PORT}" >> .env \
+    && echo "EMAIL_USER=${EMAIL_USER}" >> .env \
+    && echo "EMAIL_PASSWORD=${EMAIL_PASSWORD}" >> .env \
+    && echo "EMAIL_FROM=${EMAIL_FROM}" >> .env \
+    && echo "SUPPORT_EMAIL=${SUPPORT_EMAIL}" >> .env \
+    && echo "NODE_ENV=${NODE_ENV:-production}" >> .env \
+    && echo "SKIP_ENV_VALIDATION=1" >> .env
 
+# ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN \
     if [ -f yarn.lock ]; then SKIP_ENV_VALIDATION=1 yarn build; \
