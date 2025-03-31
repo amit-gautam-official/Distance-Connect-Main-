@@ -2,70 +2,7 @@ steps:
   # Build the container image
   - name: "gcr.io/cloud-builders/docker"
     args:
-      [
-        "build",
-        "--build-arg",
-        "DATABASE_URL=${_DATABASE_URL}",
-        "--build-arg",
-        "UPSTASH_REDIS_REST_URL=${_UPSTASH_REDIS_REST_URL}",
-        "--build-arg",
-        "UPSTASH_REDIS_REST_TOKEN=${_UPSTASH_REDIS_REST_TOKEN}",
-        "--build-arg",
-        "ACCESS_TOKEN=${_ACCESS_TOKEN}",
-        "--build-arg",
-        "NEXT_PUBLIC_BASE_URL=${_NEXT_PUBLIC_BASE_URL}",
-        "--build-arg",
-        "AUTH0_SECRET=${_AUTH0_SECRET}",
-        "--build-arg",
-        "APP_BASE_URL=${_APP_BASE_URL}",
-        "--build-arg",
-        "AUTH0_DOMAIN=${_AUTH0_DOMAIN}",
-        "--build-arg",
-        "AUTH0_CLIENT_ID=${_AUTH0_CLIENT_ID}",
-        "--build-arg",
-        "AUTH0_CLIENT_SECRET=${_AUTH0_CLIENT_SECRET}",
-        "--build-arg",
-        "GOOGLE_SERVICE_ACCOUNT_EMAIL=${_GOOGLE_SERVICE_ACCOUNT_EMAIL}",
-        "--build-arg",
-        "GOOGLE_PRIVATE_KEY=${_GOOGLE_PRIVATE_KEY}",
-        "--build-arg",
-        "ABLY_API_KEY=${_ABLY_API_KEY}",
-        "--build-arg",
-        "GCP_PROJECT_ID=${_GCP_PROJECT_ID}",
-        "--build-arg",
-        "GCP_CHAT_IMAGE_BUCKET_NAME=${_GCP_CHAT_IMAGE_BUCKET_NAME}",
-        "--build-arg",
-        "GCP_CLIENT_EMAIL=${_GCP_CLIENT_EMAIL}",
-        "--build-arg",
-        "GCP_PRIVATE_KEY=${_GCP_PRIVATE_KEY}",
-        "--build-arg",
-        "CF_SPACE_ID=${_CF_SPACE_ID}",
-        "--build-arg",
-        "CF_DELIVERY_ACCESS_TOKEN=${_CF_DELIVERY_ACCESS_TOKEN}",
-        "--build-arg",
-        "NEXT_PUBLIC_GEMINI_API_KEY=${_NEXT_PUBLIC_GEMINI_API_KEY}",
-        "--build-arg",
-        "RESEND_API_KEY=${_RESEND_API_KEY}",
-        "--build-arg",
-        "EMAIL_HOST=${_EMAIL_HOST}",
-        "--build-arg",
-        "EMAIL_PORT=${_EMAIL_PORT}",
-        "--build-arg",
-        "EMAIL_USER=${_EMAIL_USER}",
-        "--build-arg",
-        "EMAIL_PASSWORD=${_EMAIL_PASSWORD}",
-        "--build-arg",
-        "EMAIL_FROM=${_EMAIL_FROM}",
-        "--build-arg",
-        "SUPPORT_EMAIL=${_SUPPORT_EMAIL}",
-        "--build-arg",
-        "NODE_ENV=production",
-        "--build-arg",
-        "SKIP_ENV_VALIDATION=1",
-        "-t",
-        "gcr.io/$PROJECT_ID/distance-connect:$COMMIT_SHA",
-        ".",
-      ]
+      ["build", "-t", "gcr.io/$PROJECT_ID/distance-connect:$COMMIT_SHA", "."]
 
   # Push the container image to Container Registry
   - name: "gcr.io/cloud-builders/docker"
@@ -85,6 +22,8 @@ steps:
       - "--platform"
       - "managed"
       - "--allow-unauthenticated"
+      - "--set-env-vars"
+      
 
 images:
   - "gcr.io/$PROJECT_ID/distance-connect:$COMMIT_SHA"
@@ -95,4 +34,34 @@ substitutions:
   _DATABASE_URL: ""
   _UPSTASH_REDIS_REST_URL: ""
   _UPSTASH_REDIS_REST_TOKEN: ""
-  # Add all other required substitution variables here
+  _NEXT_PUBLIC_BASE_URL: ""
+  _NEXT_PUBLIC_GEMINI_API_KEY: ""
+  _RESEND_API_KEY: ""
+  _EMAIL_HOST: ""
+  _EMAIL_PORT: ""
+  _EMAIL_USER: ""
+  _EMAIL_PASSWORD: ""
+  _EMAIL_FROM: ""
+  _SUPPORT_EMAIL: ""
+  _AUTH0_SECRET: ""
+  _APP_BASE_URL: ""
+  _AUTH0_DOMAIN: ""
+  _AUTH0_CLIENT_ID: ""
+  _AUTH0_CLIENT_SECRET: ""
+  _GOOGLE_SERVICE_ACCOUNT_EMAIL: ""
+  _GOOGLE_PRIVATE_KEY: ""
+  _ABLY_API_KEY: ""
+  _GCP_PROJECT_ID: ""
+  _GCP_CHAT_IMAGE_BUCKET_NAME: ""
+  _GCP_CLIENT_EMAIL: ""
+  _GCP_PRIVATE_KEY: ""
+  _NODE_ENV: ""
+  _SKIP_ENV_VALIDATION: ""
+  _CF_SPACE_ID: ""
+  _CF_DELIVERY_ACCESS_TOKEN: ""   
+
+
+
+
+
+
