@@ -29,8 +29,8 @@ try {
 
 
     const redisClient = new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL!,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+        url: process.env.UPSTASH_REDIS_REST_URL! || 'https://intense-oarfish-11594.upstash.io',
+        token: process.env.UPSTASH_REDIS_REST_TOKEN! || 'AS1KAAIjcDExMmY0ZDRlNjUyZTI0MjgwYjZkYThiOTkzZDk2OTcwZHAxMA',
     });
     globalLimiter = new Ratelimit({
         redis: redisClient,
