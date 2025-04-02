@@ -1,7 +1,8 @@
 // lib/rateLimit.ts
+
 import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
-
+import { env } from "@/env";
 // Common rate limit configurations
 type RateLimitTier = {
   name: string;
@@ -40,7 +41,7 @@ const rateLimitTiers: Record<string, RateLimitTier> = {
 
 // 1. Pure In-Memory Limiter (No Redis)
 class LocalRateLimiter {
-  private caches: Map<string, Map<string, number>> = new Map();
+  private caches = new Map<string, Map<string, number>>();
   
   async limit(identifier: string, windowMs: number, max: number) {
     const cacheKey = `${windowMs}_${max}`;
@@ -64,8 +65,8 @@ class LocalRateLimiter {
     return { success: true, pending: max - current - 1 };
   }
   
-  async limitTier(identifier: string, tier: string = 'default', windowType: 'shortWindow' | 'mediumWindow' | 'longWindow' = 'shortWindow') {
-    const tierConfig = (rateLimitTiers[tier] ?? rateLimitTiers['default']) as RateLimitTier;
+  async limitTier(identifier: string, tier = 'default', windowType: 'shortWindow' | 'mediumWindow' | 'longWindow' = 'shortWindow') {
+    const tierConfig = (rateLimitTiers[tier] ?? rateLimitTiers.default) as RateLimitTier;
     const config = tierConfig[windowType];
     return this.limit(`${tier}_${windowType}_${identifier}`, config.window, config.max);
   }
@@ -77,13 +78,13 @@ class GlobalRateLimiter {
   private limiters: Record<string, Ratelimit> = {};
   
   constructor() {
-    if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+    if (!env.UPSTASH_REDIS_REST_URL || !env.UPSTASH_REDIS_REST_TOKEN) {
       throw new Error("Missing Redis credentials. Please set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN environment variables.");
     }
 
     this.redisClient = new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      url: env.UPSTASH_REDIS_REST_URL,
+      token: env.UPSTASH_REDIS_REST_TOKEN,
     });
   }
   
@@ -98,13 +99,13 @@ class GlobalRateLimiter {
     return this.limiters[key];
   }
   
-  async limit(identifier: string, windowMs: number = 10000, max: number = 10) {
+  async limit(identifier: string, windowMs = 10000, max = 10) {
     const limiter = this.getLimiter(windowMs, max);
     return limiter.limit(identifier);
   }
   
-  async limitTier(identifier: string, tier: string = 'default', windowType: 'shortWindow' | 'mediumWindow' | 'longWindow' = 'shortWindow') {
-    const tierConfig = (rateLimitTiers[tier] ?? rateLimitTiers['default']) as RateLimitTier;
+  async limitTier(identifier: string, tier = 'default', windowType: 'shortWindow' | 'mediumWindow' | 'longWindow' = 'shortWindow') {
+    const tierConfig = (rateLimitTiers[tier] ?? rateLimitTiers.default) as RateLimitTier;
     const config = tierConfig[windowType];
     const key = `${tier}_${windowType}`;
     

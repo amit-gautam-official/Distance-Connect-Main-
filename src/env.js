@@ -33,6 +33,7 @@ export const env = createEnv({
     EMAIL_PASSWORD: z.string(),
     EMAIL_FROM: z.string(),
     SUPPORT_EMAIL: z.string(),
+    CF_SPACE_ID: z.string(),
   },
 
   /**
@@ -79,6 +80,7 @@ export const env = createEnv({
     SUPPORT_EMAIL: process.env.SUPPORT_EMAIL,
     NEXT_PUBLIC_GEMINI_API_KEY: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
     NEXT_PUBLIC_RESEND_API_KEY: process.env.NEXT_PUBLIC_RESEND_API_KEY,
+    CF_SPACE_ID: process.env.CF_SPACE_ID,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

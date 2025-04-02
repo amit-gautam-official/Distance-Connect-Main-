@@ -1,36 +1,14 @@
-import { api } from "@/trpc/server";
-import React from "react";
-import Chat from "./_components/Chat";
-import { db } from "@/server/db";
-import { auth0 } from "@/lib/auth0";
-import dynamic from "next/dynamic";
+import React from 'react'
 
-type Params = Promise<{ chatRoomId: string }>;
-
-// Create a client-side only wrapper for the chat with Ably providers
-const ChatWithProviders = dynamic(
-  () => import("./_components/ChatWithProviders"),
-  { ssr: false },
-);
-
-const page = async ({ params }: { params: Params }) => {
-  const session = await auth0.getSession();
-  const userId = session?.user.sub;
-
-  const { chatRoomId } = await params;
-
-  const initialMessages = await api.chat.getMessages({ chatRoomId });
-  //console.log("initialMessages", initialMessages)
-
+const page = () => {
   return (
     <div>
-      <ChatWithProviders
-        chatRoomId={chatRoomId}
-        initialMessages={initialMessages ?? []}
-        userId={userId!}
-      />
+      {/* //not found */}
+      <div className="flex h-screen w-screen items-center justify-center">
+        <h1 className="text-4xl font-bold">404 - Page Not Found</h1>
+      </div>
     </div>
   );
-};
+}
 
-export default page;
+export default page

@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { useChannel } from "ably/react";
 import * as Ably from "ably";
-import { getSignedUrl } from "@/lib/getSignedUrl";
 
 type InitialMessage = {
   message: string | null;
