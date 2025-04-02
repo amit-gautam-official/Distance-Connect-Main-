@@ -8,14 +8,11 @@ import { MessageSquareMore } from "lucide-react";
 
 const Page = async () => {
   const chatRooms = await api.chatRoom.getChatRoomByMentorId();
-  // Get scheduled sessions (you may need to create an API endpoint for this)
   const scheduledSessions =
     await api.scheduledMeetings.getMentorScheduledMeetings();
 
-  console.log("scheduledSessions", scheduledSessions);
-
   return (
-    <div className="min-h-screen  w-full mx-auto  p-4 md:p-8">
+    <div className="mx-auto min-h-screen w-full p-4 md:p-8">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">
@@ -45,8 +42,6 @@ const Page = async () => {
           <ScheduledSessions sessions={scheduledSessions} />
         </div>
       </div>
-
-     
     </div>
   );
 };

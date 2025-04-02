@@ -8,9 +8,10 @@ import "./src/env.js";
 
 const config = {
   output: "standalone",
+  
+ 
+  serverExternalPackages: ['ably'],
+  
 };
-
-
-
 
 export default config;

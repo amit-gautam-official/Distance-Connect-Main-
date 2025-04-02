@@ -86,7 +86,6 @@ export const createTRPCRouter = t.router;
 
 const rateLimiter = t.middleware(async ({ ctx, next }) => {
   // Authenticated user
-
   const session = await auth0.getSession();
   const user = session?.user;
 
@@ -97,56 +96,87 @@ const rateLimiter = t.middleware(async ({ ctx, next }) => {
     });
   }
  
-   const dbUser = await ctx.db.user.findUnique({
-     where: { kindeId: user?.sub },
-   });
+  const dbUser = await ctx.db.user.findUnique({
+    where: { kindeId: user?.sub },
+  });
  
- 
-  if (user?.sub) {
-    const localLimit = await limiters.local.limit(`user:${user.sub}`, 10000, 10);
-    if (!localLimit.success) {
-      throw new TRPCError({ 
-        code: "TOO_MANY_REQUESTS",
-        message: `Local limit exceeded. Try again in ${Math.ceil(localLimit.pending/1000)}s`
-      });
-    }
-
-  const globalLimit = await limiters.global.limit(`user:${user.sub}`);
-  if (!globalLimit.success) {
-    throw new TRPCError({ 
-      code: "TOO_MANY_REQUESTS",
-      message: `Global limit exceeded. Try again in ${Math.ceil(globalLimit.reset/1000)}s`
+  if (!user.sub) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'Invalid user ID',
     });
   }
+
+  // Use premium tier for all users regardless of role
+  const userTier = 'premium';
+  
+  // Apply short-term rate limit (quick burst protection)
+  const shortTermLimit = await limiters.local.limitTier(`user:${user.sub}`, userTier, 'shortWindow');
+  if (!shortTermLimit.success) {
+    throw new TRPCError({ 
+      code: "TOO_MANY_REQUESTS",
+      message: `Rate limit exceeded. Try again in ${Math.ceil(shortTermLimit.pending/1000)}s`
+    });
+  }
+
+  // Apply medium-term rate limit (sustained usage)
+  const mediumTermLimit = await limiters.global.limitTier(`user:${user.sub}`, userTier, 'mediumWindow');
+  if (!mediumTermLimit.success) {
+    throw new TRPCError({ 
+      code: "TOO_MANY_REQUESTS",
+      message: `Sustained usage limit exceeded. Please slow down your requests.`
+    });
+  }
+  
+  return next({
+    ctx: {
+      ...ctx,
+      user,
+      dbUser,
+    },
+  });
+});
+
+const anonymousRatelimitMiddleware = t.middleware(async ({ ctx, next }) => {
+  // Default to a generic identifier
+  const identifier = 'anonymous-user';
+  
+  // Apply rate limiting using tiered system with premium tier
+  try {
+    // Short-term burst protection using premium tier
+    const shortTermLimit = await limiters.local.limitTier(identifier, 'premium', 'shortWindow');
+    if (!shortTermLimit.success) {
+      throw new TRPCError({ 
+        code: "TOO_MANY_REQUESTS",
+        message: `Rate limit exceeded. Try again in ${Math.ceil(shortTermLimit.pending/1000)}s`
+      });
+    }
+    
+    // Medium-term usage protection using premium tier
+    const mediumTermLimit = await limiters.global.limitTier(identifier, 'premium', 'mediumWindow');
+    if (!mediumTermLimit.success) {
+      throw new TRPCError({ 
+        code: "TOO_MANY_REQUESTS",
+        message: `Rate limit exceeded. Please slow down your requests.`
+      });
+    }
+    
     return next({
       ctx: {
         ...ctx,
-        user,
-        dbUser,
+        anonymousId: identifier,
       },
     });
+  } catch (error) {
+    if (error instanceof TRPCError) throw error;
+    
+    console.error("Rate limiting error:", error);
+    throw new TRPCError({ 
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Failed to apply rate limiting"
+    });
   }
-
-  // // Anonymous user (IP-based)
-  // if (ctx.ip) {
-  //   const { success } = await anonymousRatelimit.limit(`ip:${ctx.ip}`);
-  //   if (!success) throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
-  //   return next();
-  // }
-
-  // Fallback for missing IP (unlikely in production)
-  throw new TRPCError({ code: "BAD_REQUEST" });
 });
-
-
-const anonymousRatelimitMiddleware = t.middleware(async ({ next }) => {
-  
-  return next();
-});
-
-
-
-
 
 /**
  * Public (unauthenticated) procedure

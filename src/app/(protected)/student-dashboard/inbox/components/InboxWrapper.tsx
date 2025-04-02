@@ -4,6 +4,8 @@ import React, { useEffect, useState, useRef } from "react";
 import ChatRooms from "./ChatRooms";
 import { api } from "@/trpc/react";
 import { ChevronLeft } from "lucide-react";
+import { AblyProvider, ChannelProvider } from "ably/react";
+import * as Ably from "ably";
 
 interface ChatRoom {
   id: string;
@@ -18,7 +20,7 @@ interface ChatRoom {
 }
 
 const InboxWrapper = ({
-  chatRooms,
+  chatRooms: initialChatRooms,
   userId,
   mId,
 }: {
@@ -31,6 +33,13 @@ const InboxWrapper = ({
   );
   const [showChatView, setShowChatView] = useState(false);
   const hasCreatedRoom = useRef(false);
+  // Maintain local state of chat rooms to update when new messages arrive
+  const [chatRooms, setChatRooms] = useState<ChatRoom[]>(
+    // Sort initial chat rooms by unread count
+    [...initialChatRooms].sort(
+      (a, b) => b.studentUnreadCount - a.studentUnreadCount,
+    ),
+  );
 
   // Find the selected chat room object based on the ID
   const selectedChatRoom =
@@ -53,13 +62,22 @@ const InboxWrapper = ({
   }, [chatRooms]);
 
   // Only fetch messages when we have a valid chatRoomId
-  const { data: messages } = api.chat.getMessages.useQuery(
-    { chatRoomId: selectedChatRoomId || "" },
-    {
-      enabled: !!selectedChatRoomId,
-      retry: 1,
-    },
-  );
+  const { data: messages, refetch: refetchMessages } =
+    api.chat.getMessages.useQuery(
+      { chatRoomId: selectedChatRoomId || "" },
+      {
+        enabled: !!selectedChatRoomId,
+        retry: 1,
+      },
+    );
+
+  // Refetch messages when chatRoomId changes
+  useEffect(() => {
+    if (selectedChatRoomId) {
+      console.log("Fetching messages for room:", selectedChatRoomId);
+      void refetchMessages();
+    }
+  }, [selectedChatRoomId, refetchMessages]);
 
   const { data: defaultRoom, isLoading: isLoadingDefaultRoom } =
     api.chatRoom.getChatRoomByMentorAndStudentId.useQuery(
@@ -74,6 +92,29 @@ const InboxWrapper = ({
       setSelectedChatRoomId(data.id);
     },
   });
+
+  // Initialize Ably client only on the client side
+  const [client, setClient] = useState<Ably.Realtime | null>(null);
+
+  // Initialize Ably client on client-side only
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const ablyClient = new Ably.Realtime({
+        authUrl: "/api/ably",
+        autoConnect: true,
+      });
+      setClient(ablyClient);
+
+      // Cleanup function
+      return () => {
+        ablyClient.close();
+      };
+    }
+  }, []);
+
+  // Mark message as read when chat room is selected
+  const markAsReadMutation =
+    api.chatRoom.studentUnreadCountToZero.useMutation();
 
   useEffect(() => {
     // If we have a default room, select it
@@ -91,10 +132,93 @@ const InboxWrapper = ({
     }
   }, [defaultRoom, mId, isLoadingDefaultRoom]);
 
+  // Handle new messages from Ably to update chat room list
+  const updateChatRoomWithNewMessage = (message: any, roomId: string) => {
+    console.log(
+      "Updating chat room with new message:",
+      message,
+      "for room:",
+      roomId,
+    );
+
+    setChatRooms((currentRooms) => {
+      // Find the room that received the message
+      const updatedRooms = currentRooms.map((room) => {
+        if (room.id === roomId) {
+          // Extract message text (handle image messages)
+          const messageText =
+            typeof message.message === "string"
+              ? message.message
+              : message.type === "IMAGE" || message.type === "image"
+                ? "📷 Image"
+                : "New message";
+
+          console.log("Updating room:", room.id, "with message:", messageText);
+
+          // Only increase unread count if the message is not from the student
+          const newUnreadCount =
+            message.senderRole !== "STUDENT" && roomId !== selectedChatRoomId
+              ? room.studentUnreadCount + 1
+              : room.studentUnreadCount;
+
+          return {
+            ...room,
+            lastMessage: messageText,
+            studentUnreadCount: newUnreadCount,
+          };
+        }
+        return room;
+      });
+
+      // Sort rooms to show the one with the most recent message at the top
+      return [...updatedRooms].sort((a, b) => {
+        // Room with the message that just arrived should be at the top
+        if (a.id === roomId) return -1;
+        if (b.id === roomId) return 1;
+
+        // Otherwise sort by unread count
+        return b.studentUnreadCount - a.studentUnreadCount;
+      });
+    });
+  };
+
+  // Message handler for Ably messages
+  const handleMessage = (message: any) => {
+    if (selectedChatRoomId) {
+      updateChatRoomWithNewMessage(message.data, selectedChatRoomId);
+    }
+  };
+
+  // Set up Ably listener for the currently selected chat room
+  useEffect(() => {
+    if (!selectedChatRoomId || !client) return;
+
+    const channel = client.channels.get(selectedChatRoomId);
+    channel.subscribe(handleMessage);
+
+    return () => {
+      channel.unsubscribe(handleMessage);
+    };
+  }, [selectedChatRoomId, client]);
+
   // Handle chat room selection
   const handleSelectChatRoom = (room: ChatRoom) => {
     setSelectedChatRoomId(room.id);
     setShowChatView(true);
+
+    // Mark messages as read when selecting a chat room
+    if (room.studentUnreadCount > 0) {
+      markAsReadMutation.mutate({ chatRoomId: room.id });
+
+      // Update local state to reflect messages have been read
+      setChatRooms((currentRooms) =>
+        currentRooms.map((currentRoom) =>
+          currentRoom.id === room.id
+            ? { ...currentRoom, studentUnreadCount: 0 }
+            : currentRoom,
+        ),
+      );
+    }
   };
 
   // Handle back to chat list
@@ -181,11 +305,51 @@ const InboxWrapper = ({
 
         {/* Chat component - fills available space and handles its own scrolling */}
         <div className="flex-1 overflow-hidden">
-          <Chat
-            chatRoomId={selectedChatRoomId || ""}
-            initialMessages={messages || []}
-            userId={userId}
-          />
+          {client ? (
+            <AblyProvider client={client}>
+              <ChannelProvider channelName={selectedChatRoomId || ""}>
+                <Chat
+                  chatRoomId={selectedChatRoomId || ""}
+                  initialMessages={messages || []}
+                  userId={userId}
+                  onMessageSent={(message) => {
+                    if (selectedChatRoomId) {
+                      // Directly update the chat room with the new message
+                      // This ensures local messages are reflected immediately
+                      updateChatRoomWithNewMessage(
+                        {
+                          ...message,
+                          // Ensure we have the correct sender role
+                          senderRole: "STUDENT",
+                        },
+                        selectedChatRoomId,
+                      );
+
+                      // Reset unread count when sending a message
+                      if (selectedChatRoom?.studentUnreadCount) {
+                        markAsReadMutation.mutate({
+                          chatRoomId: selectedChatRoomId,
+                        });
+
+                        // Update local state to reflect messages have been read
+                        setChatRooms((currentRooms) =>
+                          currentRooms.map((currentRoom) =>
+                            currentRoom.id === selectedChatRoomId
+                              ? { ...currentRoom, studentUnreadCount: 0 }
+                              : currentRoom,
+                          ),
+                        );
+                      }
+                    }
+                  }}
+                />
+              </ChannelProvider>
+            </AblyProvider>
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <p className="text-gray-500">Connecting to chat service...</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

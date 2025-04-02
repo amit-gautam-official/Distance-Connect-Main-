@@ -9,7 +9,7 @@ type PageProps = {
 };
 
 const page = async ({ searchParams }: PageProps) => {
-  const sId = await searchParams?.sId || "";
+  const sId = searchParams?.sId || "";
   const session = await auth0.getSession();
   const user = session?.user;
 

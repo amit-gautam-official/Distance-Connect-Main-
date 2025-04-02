@@ -207,6 +207,7 @@ model chatMessage {
 
   imageName String?
   imagePath String?
+  fileName  String?
 
   type String @default("TEXT")
 

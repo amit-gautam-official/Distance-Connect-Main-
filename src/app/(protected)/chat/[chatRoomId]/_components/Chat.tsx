@@ -2,8 +2,18 @@
 
 import { useState, useRef, useEffect } from "react";
 import { api } from "@/trpc/react";
-import { Loader2, ImagePlus, Send, ChevronDown } from "lucide-react";
-import { getAblyChannel } from "@/lib/ably";
+import {
+  Loader2,
+  ImagePlus,
+  Send,
+  ChevronDown,
+  Paperclip,
+  FileText,
+  Download,
+} from "lucide-react";
+import { useChannel } from "ably/react";
+import * as Ably from "ably";
+import { getSignedUrl } from "@/lib/getSignedUrl";
 
 type InitialMessage = {
   message: string | null;
@@ -14,24 +24,33 @@ type InitialMessage = {
   senderRole: string;
   imagePath: string | null;
   imageUrl?: string;
+  fileName?: string | null;
 };
 
 export default function Chat({
   chatRoomId,
   initialMessages,
   userId,
+  onMessageSent,
 }: {
   chatRoomId: string;
   initialMessages: InitialMessage[];
   userId: string;
+  onMessageSent?: (message: any) => void;
 }) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState(initialMessages);
   const [isUploading, setIsUploading] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [fileType, setFileType] = useState<string | null>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [userRole, setUserRole] = useState<string>("");
+  const [isAblyConnected, setIsAblyConnected] = useState(false);
+  const [isSendingFile, setIsSendingFile] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -49,27 +68,100 @@ export default function Chat({
   const sendMessage = api.chat.sendMessage.useMutation({
     onSuccess: async () => {
       setMessage("");
-      setImagePreview(null);
+      setFilePreview(null);
+      setFileName(null);
+      setFileType(null);
     },
   });
 
+  // Create a client if needed for standalone use
+  const standaloneClient = useRef<Ably.Realtime | null>(null);
   useEffect(() => {
-    // Only subscribe to Ably channel if we have a valid chatRoomId
-    if (!chatRoomId) return;
-
-    const channel = getAblyChannel(chatRoomId);
-
-    // Subscribe to new messages
-    channel.subscribe("message", (message) => {
-      setMessages((prev) => [...prev, message.data]);
-    });
+    // Only create client on client-side
+    if (typeof window !== "undefined" && !standaloneClient.current) {
+      try {
+        standaloneClient.current = new Ably.Realtime({
+          authUrl: "/api/ably",
+          autoConnect: true,
+        });
+      } catch (err) {
+        console.error("Failed to initialize Ably:", err);
+      }
+    }
 
     return () => {
-      channel.unsubscribe();
+      // Cleanup
+      if (standaloneClient.current) {
+        standaloneClient.current.close();
+      }
     };
-  }, [chatRoomId, userId]);
+  }, []);
+
+  // Safely use the useChannel hook with error handling
+  let channel: any = null;
+  let ably: any = null;
+  try {
+    const result = useChannel(chatRoomId, (message) => {
+      // Avoid duplicating messages that we've already added to state locally
+      // Only add messages from other users
+      if (message.data && message.data.id) {
+        // Use a function inside setMessages to check for existing messages
+        setMessages((prev) => {
+          const messageExists = prev.some((msg) => msg.id === message.data.id);
+          if (!messageExists) {
+            return [...prev, message.data];
+          }
+          return prev;
+        });
+      } else {
+        setMessages((prev) => [...prev, message.data]);
+      }
+      setIsAblyConnected(true);
+    });
+    channel = result.channel;
+    ably = result.ably;
+  } catch (error) {
+    console.warn("Ably context not available, using standalone implementation");
+
+    // Use standalone implementation when not in context
+    useEffect(() => {
+      if (!standaloneClient.current || !chatRoomId) return;
+
+      try {
+        const ablyChannel = standaloneClient.current.channels.get(chatRoomId);
+
+        const handleMessage = (message: any) => {
+          // Avoid duplicating messages that we've already added to state locally
+          if (message.data && message.data.id) {
+            // Use a function inside setMessages to check for existing messages
+            setMessages((prev) => {
+              const messageExists = prev.some(
+                (msg) => msg.id === message.data.id,
+              );
+              if (!messageExists) {
+                return [...prev, message.data];
+              }
+              return prev;
+            });
+          } else {
+            setMessages((prev) => [...prev, message.data]);
+          }
+        };
+
+        ablyChannel.subscribe(handleMessage);
+        setIsAblyConnected(true);
+
+        return () => {
+          ablyChannel.unsubscribe(handleMessage);
+        };
+      } catch (err) {
+        console.error("Error with Ably channel:", err);
+      }
+    }, [chatRoomId]); // Remove messages from dependency array to prevent infinite re-renders
+  }
 
   useEffect(() => {
+    console.log("Initial messages updated:", initialMessages.length);
     setMessages(initialMessages);
   }, [initialMessages]);
 
@@ -92,36 +184,150 @@ export default function Chat({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleImageUpload = async (file: File) => {
-    setIsUploading(true);
-    try {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
+  const handleSendFile = () => {
+    if (!filePreview || !chatRoomId) return;
+    setIsSendingFile(true);
+    sendMessage.mutate(
+      {
+        chatRoomId,
+        message: fileType === "image" ? "📷 Image" : "📄 Document",
+        file: filePreview,
+        fileName: fileName || undefined,
+        fileType: fileType || undefined,
+      },
+      {
+        onSuccess: async (chatMessage) => {
+          // Get image URL if needed
+          let imageUrl = undefined;
+          if (chatMessage?.imagePath) {
+            try {
+              const response = await fetch("/api/storage/signed-url", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ imagePath: chatMessage.imagePath }),
+              });
+              const data = await response.json();
+              imageUrl = data.url;
+            } catch (error) {
+              console.error("Error getting signed URL:", error);
+            }
+          }
+          // Create file message object and add it to the local state
+          const messageObj: InitialMessage = {
+            message: chatMessage.message,
+            senderRole: chatMessage.senderRole,
+            createdAt: chatMessage.createdAt,
+            type: chatMessage.type,
+            id: chatMessage.id,
+            imagePath: chatMessage.imagePath || null,
+            fileName: chatMessage.fileName,
+            imageUrl: imageUrl || undefined,
+          };
+          try {
+            if (channel) {
+              channel.publish({
+                name: chatRoomId,
+                data: messageObj,
+              });
+            } else if (standaloneClient.current) {
+              const ablyChannel =
+                standaloneClient.current.channels.get(chatRoomId);
+              ablyChannel.publish({
+                name: chatRoomId,
+                data: messageObj,
+              });
+            }
+          } catch (err) {
+            console.error("Error publishing message:", err);
+          }
 
-      reader.onload = async () => {
-        const base64 = reader.result as string;
-        setImagePreview(base64);
-      };
-    } catch (error) {
-      console.error("Upload failed:", error);
-    } finally {
-      setIsUploading(false);
-    }
+          // Add to local messages
+          setMessages((prev) => [...prev, messageObj]);
+
+          // Notify parent component
+          if (onMessageSent) {
+            onMessageSent(messageObj);
+          }
+
+          setIsSendingFile(false);
+
+          // Clear file preview after successful send
+          setFilePreview(null);
+          setFileName(null);
+          setFileType(null);
+        },
+        onError: () => {
+          setIsSendingFile(false);
+          // Don't clear the preview on error so user can try again
+        },
+      },
+    );
   };
 
-  const handleSendImage = () => {
-    if (!imagePreview || !chatRoomId) return;
-    sendMessage.mutate({
-      chatRoomId,
-      message: "📷 Image",
-      file: imagePreview,
-    });
-    setImagePreview(null);
-  };
-
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!message.trim() || !chatRoomId) return;
-    sendMessage.mutate({ chatRoomId, message });
+
+    const chatMessage = await sendMessage.mutateAsync({ chatRoomId, message });
+
+    // Get image URL from server if necessary
+    let imageUrl = null;
+    if (chatMessage?.imagePath) {
+      try {
+        // Use the signed-url API route
+        const response = await fetch("/api/storage/signed-url", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ imagePath: chatMessage.imagePath }),
+        });
+        const data = await response.json();
+        imageUrl = data.url;
+      } catch (error) {
+        console.error("Error getting signed URL:", error);
+      }
+    }
+
+    // Create a message object for both Ably and the parent component
+    const messageObj: InitialMessage = {
+      message: chatMessage.message,
+      senderRole: chatMessage.senderRole,
+      createdAt: chatMessage.createdAt,
+      imageUrl: imageUrl || undefined,
+      type: chatMessage.type,
+      id: chatMessage.id,
+      imagePath: chatMessage.imagePath || null,
+      fileName: chatMessage.fileName,
+    };
+
+    // Immediately add the message to the local state to make it visible
+    setMessages((prev) => [...prev, messageObj]);
+
+    // Notify parent component about the new message
+    if (onMessageSent) {
+      onMessageSent(messageObj);
+    }
+
+    // Publish message to channel if available
+    try {
+      if (channel) {
+        channel.publish({
+          name: chatRoomId,
+          data: messageObj,
+        });
+      } else if (standaloneClient.current) {
+        const ablyChannel = standaloneClient.current.channels.get(chatRoomId);
+        ablyChannel.publish({
+          name: chatRoomId,
+          data: messageObj,
+        });
+      }
+    } catch (err) {
+      console.error("Error publishing message:", err);
+    }
+
     setMessage("");
   };
 
@@ -131,6 +337,30 @@ export default function Chat({
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const handleFileUpload = (file: File) => {
+    if (!file) return;
+
+    setIsUploading(true);
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setFilePreview(event.target.result as string);
+        setFileName(file.name);
+
+        if (file.type.startsWith("image/")) {
+          setFileType("image");
+        } else {
+          setFileType("document");
+        }
+
+        setIsUploading(false);
+      }
+    };
+
+    reader.readAsDataURL(file);
   };
 
   useEffect(scrollToBottom, [messages]);
@@ -239,6 +469,24 @@ export default function Chat({
                           loading="lazy"
                         />
                       </div>
+                    ) : msg.type === "DOCUMENT" ? (
+                      <div className="flex flex-col rounded-lg border bg-white p-2 text-gray-800">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-blue-500" />
+                          <span className="flex-1 truncate text-sm font-medium">
+                            {msg.fileName || "Document"}
+                          </span>
+                        </div>
+                        <a
+                          href={msg.imageUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 flex items-center justify-center gap-1 rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          Download
+                        </a>
+                      </div>
                     ) : (
                       <p className="break-words text-sm leading-relaxed md:text-base">
                         {msg.message}
@@ -277,17 +525,30 @@ export default function Chat({
 
       {/* Message input area */}
       <div className="border-t bg-white p-2 shadow-md md:p-4">
-        {imagePreview && (
+        {filePreview && (
           <div className="relative mb-3 rounded-lg bg-gray-50 p-3">
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="max-h-40 w-auto rounded-lg object-contain shadow-sm"
-            />
+            {fileType === "image" ? (
+              <img
+                src={filePreview}
+                alt="Preview"
+                className="max-h-40 w-auto rounded-lg object-contain shadow-sm"
+              />
+            ) : (
+              <div className="flex items-center gap-3 rounded-lg border bg-white p-3 shadow-sm">
+                <FileText className="h-8 w-8 text-blue-500" />
+                <span className="flex-1 truncate text-sm font-medium">
+                  {fileName || "Document"}
+                </span>
+              </div>
+            )}
             <button
-              onClick={() => setImagePreview(null)}
+              onClick={() => {
+                setFilePreview(null);
+                setFileName(null);
+                setFileType(null);
+              }}
               className="absolute right-2 top-2 rounded-full bg-gray-800 bg-opacity-70 p-2 text-white transition-colors hover:bg-opacity-100"
-              aria-label="Remove image"
+              aria-label="Remove file"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -303,27 +564,52 @@ export default function Chat({
               </svg>
             </button>
             <button
-              onClick={handleSendImage}
-              className="mt-2 w-full rounded-lg bg-blue-500 px-3 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 md:py-2"
+              onClick={handleSendFile}
+              disabled={isSendingFile}
+              className="mt-2 w-full rounded-lg bg-blue-500 px-3 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-blue-400 md:py-2"
             >
-              Send Image
+              {isSendingFile ? (
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Sending...</span>
+                </div>
+              ) : (
+                `Send ${fileType === "image" ? "Image" : "Document"}`
+              )}
             </button>
           </div>
         )}
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-            className="flex-shrink-0 rounded-full bg-gray-100 p-3 text-gray-600 transition-colors hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 md:p-2.5"
-            aria-label="Attach image"
-          >
-            {isUploading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <ImagePlus className="h-5 w-5" />
-            )}
-          </button>
+          <div className="flex flex-shrink-0">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="flex-shrink-0 rounded-l-full rounded-r-none bg-gray-100 p-3 text-gray-600 transition-colors hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 md:p-2.5"
+              aria-label="Attach image"
+              title="Attach Image"
+            >
+              {isUploading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <ImagePlus className="h-5 w-5" />
+              )}
+            </button>
+
+            <button
+              onClick={() => documentInputRef.current?.click()}
+              disabled={isUploading}
+              className="flex-shrink-0 rounded-l-none rounded-r-full bg-gray-100 p-3 text-gray-600 transition-colors hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 md:p-2.5"
+              aria-label="Attach document"
+              title="Attach Document"
+            >
+              {isUploading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Paperclip className="h-5 w-5" />
+              )}
+            </button>
+          </div>
 
           <input
             type="file"
@@ -332,7 +618,22 @@ export default function Chat({
             className="hidden"
             onChange={(e) => {
               const file = e.target.files?.[0];
-              if (file) handleImageUpload(file);
+              if (file && file.type.startsWith("image/")) {
+                handleFileUpload(file);
+              }
+            }}
+          />
+
+          <input
+            type="file"
+            ref={documentInputRef}
+            accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                handleFileUpload(file);
+              }
             }}
           />
 

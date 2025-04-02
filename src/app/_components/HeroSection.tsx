@@ -10,7 +10,7 @@ const HeroSection =() => {
 
 
   return (
-    <div className='lg:h-[640px]  flex flex-col m-auto  w-[80%] lg:flex-row '>
+    <div className='lg:h-[640px]   flex flex-col m-auto  w-[80%] lg:flex-row '>
     <div className='flex-col  gap-8 lg:mt-[200px] lg:w-[70%] m-auto flex mt-12 items-center  '>
         <h1 className='text-center lg:text-left text-[#3D568F] lg:text-[52px] lg:leading-[63px] font-inter text-[32px] md:text-[40px] font-bold leading-[39px]'>
         Find Your Perfect Mentor- Unlock Opportunities
