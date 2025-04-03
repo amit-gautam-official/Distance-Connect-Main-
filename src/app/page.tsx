@@ -42,7 +42,6 @@ export default async function Home() {
       new Date(b?.sys?.updatedAt).getTime() -
       new Date(a?.sys?.updatedAt).getTime(),
   );
-  console.log("initialBlogs");
 
   return (
     <div className="relative h-[4000px]">

@@ -1,11 +1,50 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, createContext, useContext } from "react";
 import ProfileHeader from "./components/ProfileHeader";
 import MentorList from "./components/MentorList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UserSettings from "./components/UserSettings";
 import { api } from "@/trpc/react";
+
+// Create a context for sharing profile state
+interface ProfileContextType {
+  avatarUrl: string;
+  updateAvatar: (newUrl: string) => void;
+  profileData: {
+    name: string;
+    state: string;
+    interestFields: string[];
+    institutionName: string;
+    courseSpecialization: string;
+    companyName: string;
+    jobTitle: string;
+    experience: string;
+    industry: string;
+    studentRole: string;
+  };
+  updateProfileField: (field: string, value: any) => void;
+}
+
+const ProfileContext = createContext<ProfileContextType>({
+  avatarUrl: "",
+  updateAvatar: () => {},
+  profileData: {
+    name: "",
+    state: "",
+    interestFields: [],
+    institutionName: "",
+    courseSpecialization: "",
+    companyName: "",
+    jobTitle: "",
+    experience: "",
+    industry: "",
+    studentRole: "",
+  },
+  updateProfileField: () => {},
+});
+
+export const useProfile = () => useContext(ProfileContext);
 
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("mentors");
@@ -15,6 +54,49 @@ const ProfilePage = () => {
     // Increase staleTime to reduce refetches
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string>("");
+  const [profileData, setProfileData] = useState({
+    name: "",
+    state: "",
+    interestFields: [] as string[],
+    institutionName: "",
+    courseSpecialization: "",
+    companyName: "",
+    jobTitle: "",
+    experience: "",
+    industry: "",
+    studentRole: "",
+  });
+
+  // Initialize avatar URL from student data when it loads
+  React.useEffect(() => {
+    if (student) {
+      if (student.user.avatarUrl) {
+        setCurrentAvatarUrl(student.user.avatarUrl);
+      }
+
+      setProfileData({
+        name: student.studentName || "",
+        state: student.state || "",
+        interestFields: student.interestFields || [],
+        institutionName: student.institutionName || "",
+        courseSpecialization: student.courseSpecialization || "",
+        companyName: student.companyName || "",
+        jobTitle: student.jobTitle || "",
+        experience: student.experience || "",
+        industry: student.industry || "",
+        studentRole: student.studentRole || "",
+      });
+    }
+  }, [student]);
+
+  const updateProfileField = (field: string, value: any) => {
+    setProfileData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
   const mentorsData = Array.from(
     new Set(student?.scheduledMeetings?.map((meeting) => meeting.mentor.id)),
@@ -36,72 +118,83 @@ const ProfilePage = () => {
   });
 
   const profileHeaderData = {
-    name: student?.studentName ?? "",
-    email: student?.user.email ?? "",
-    avatarUrl: student?.user.avatarUrl ?? "",
-    role: student?.user.role ?? "",
-    state: student?.state ?? "",
+    name: profileData.name || student?.studentName || "",
+    email: student?.user.email || "",
+    avatarUrl: currentAvatarUrl || student?.user.avatarUrl || "",
+    role: student?.user.role || "",
+    state: profileData.state || student?.state || "",
     createdAt: student?.user.createdAt!,
-    interestFields: student?.interestFields ?? [],
-    instituteName: student?.institutionName ?? "",
-    pinCode: student?.pinCode?.toString() ?? "",
-    courseSpecialization: student?.courseSpecialization ?? "",
-    companyName: student?.companyName ?? "",
-    jobTitle: student?.jobTitle ?? "",
-    experience: student?.experience ?? "",
-    industry: student?.industry ?? "",
-    studentRole: student?.studentRole ?? "",
+    interestFields: profileData.interestFields || student?.interestFields || [],
+    instituteName:
+      profileData.institutionName || student?.institutionName || "",
+    pinCode: student?.pinCode?.toString() || "",
+    courseSpecialization:
+      profileData.courseSpecialization || student?.courseSpecialization || "",
+    companyName: profileData.companyName || student?.companyName || "",
+    jobTitle: profileData.jobTitle || student?.jobTitle || "",
+    experience: profileData.experience || student?.experience || "",
+    industry: profileData.industry || student?.industry || "",
+    studentRole: profileData.studentRole || student?.studentRole || "",
   };
 
   const userSettingsData = {
-    name: student?.studentName ?? "",
-    email: student?.user.email ?? "",
-    avatarUrl: student?.user.avatarUrl ?? "",
-    role: student?.user.role ?? "",
-    state: student?.state ?? "",
+    name: profileData.name || student?.studentName || "",
+    email: student?.user.email || "",
+    avatarUrl: currentAvatarUrl || student?.user.avatarUrl || "",
+    role: student?.user.role || "",
+    state: profileData.state || student?.state || "",
   };
 
   return (
-    <div className="container mx-auto px-4 py-4 sm:py-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 lg:gap-8">
-        {/* Profile Header - Takes full width on mobile, 1/3 on desktop */}
-        <div className="col-span-1 md:sticky md:top-20 md:self-start">
-          <div className="rounded-lg border bg-card p-4 shadow-sm sm:p-6">
-            <ProfileHeader user={profileHeaderData!} />
+    <ProfileContext.Provider
+      value={{
+        avatarUrl: currentAvatarUrl || student?.user.avatarUrl || "",
+        updateAvatar: setCurrentAvatarUrl,
+        profileData,
+        updateProfileField,
+      }}
+    >
+      <div className="container mx-auto px-4 py-4 sm:py-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 lg:gap-8">
+          {/* Profile Header - Takes full width on mobile, 1/3 on desktop */}
+          <div className="col-span-1 md:sticky md:top-20 md:self-start">
+            <div className="rounded-lg border bg-card p-4 shadow-sm sm:p-6">
+              <ProfileHeader user={profileHeaderData!} />
+            </div>
+          </div>
+
+          {/* Main Content - Takes full width on mobile, 2/3 on desktop */}
+          <div className="col-span-1 space-y-4 md:col-span-2 md:space-y-6">
+            <Tabs
+              defaultValue="mentors"
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="mentors" className="text-sm sm:text-base">
+                  My Mentors
+                </TabsTrigger>
+                <TabsTrigger value="settings" className="text-sm sm:text-base">
+                  Settings
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Use a fixed height container for tab content */}
+              <div className="min-h-[500px] sm:min-h-[600px]">
+                <TabsContent value="mentors" className="mt-4 sm:mt-6">
+                  <MentorList mentorsData={mentorsData!} />
+                </TabsContent>
+
+                <TabsContent value="settings" className="mt-4 sm:mt-6">
+                  <UserSettings />
+                </TabsContent>
+              </div>
+            </Tabs>
           </div>
         </div>
-
-        {/* Main Content - Takes full width on mobile, 2/3 on desktop */}
-        <div className="col-span-1 space-y-4 md:col-span-2 md:space-y-6">
-          <Tabs
-            defaultValue="mentors"
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="mentors" className="text-sm sm:text-base">
-                My Mentors
-              </TabsTrigger>
-              <TabsTrigger value="settings" className="text-sm sm:text-base">
-                Settings
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Use a fixed height container for tab content */}
-            <div className="min-h-[500px] sm:min-h-[600px]">
-              <TabsContent value="mentors" className="mt-4 sm:mt-6">
-                <MentorList mentorsData={mentorsData!} />
-              </TabsContent>
-
-              <TabsContent value="settings" className="mt-4 sm:mt-6">
-                <UserSettings />
-              </TabsContent>
-            </div>
-          </Tabs>
-        </div>
       </div>
-    </div>
+    </ProfileContext.Provider>
   );
 };
 

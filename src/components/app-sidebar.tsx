@@ -32,6 +32,7 @@ import {
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { api } from "@/trpc/react";
+import Link from "next/link";
 
 export function AppSidebar({ role }: { role: string }) {
   const { data: user } = api.user.getMe.useQuery(undefined, {
@@ -158,7 +159,9 @@ export function AppSidebar({ role }: { role: string }) {
       <SidebarContent className="overflow-visible">
         <SidebarGroup className="overflow-visible">
           <SidebarGroupLabel>
+          <Link href="/" className="cursor-pointer">
           <img src="/logo.png" alt="logo" className="h-[60px] w-" />
+          </Link>
           </SidebarGroupLabel>
 
           <SidebarGroupContent className="flex h-[calc(100vh-4rem)] flex-col justify-between overflow-visible pl-2 pt-4">

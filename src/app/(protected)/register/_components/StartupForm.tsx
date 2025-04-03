@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/popover";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
+import ImageUpload from "./ImageUpload";
 
 const hiringFields = [
   { label: "Python", value: "python" },
@@ -62,11 +63,16 @@ const formSchema = z.object({
     .min(1, "Please select at least one hiring field"),
 });
 
-export default function StartupForm() {
+export default function StartupForm({
+  user,
+}: {
+  user: { firstName: string; lastName: string; id: string };
+}) {
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [commandOpen, setCommandOpen] = useState(false);
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState<string>("");
 
   const router = useRouter();
   const createStudentUpdateUser =
@@ -95,7 +101,6 @@ export default function StartupForm() {
       interestFields: [],
     },
   });
-
 
   //nice
   // Watch for username changes and validate
@@ -147,14 +152,12 @@ export default function StartupForm() {
       state: input.state,
       interestFields: input.interestFields,
       role: role,
-      avatarUrl: "", // Add appropriate value
-      isRegistered: true, // Add appropriate value
+      isRegistered: true,
     };
 
     try {
       createStudentUpdateUser.mutate(startupUserData);
       router.push("/startup-dashboard");
-      // router.push("/post-register");
     } catch (error) {
       console.error(error);
     }
@@ -198,6 +201,12 @@ export default function StartupForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="mb-6">
+              <ImageUpload
+                userId={user.id}
+                isSubmitting={form.formState.isSubmitting}
+              />
+            </div>
             <FormField
               control={form.control}
               name="username"

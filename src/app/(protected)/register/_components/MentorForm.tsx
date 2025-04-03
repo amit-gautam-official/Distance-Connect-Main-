@@ -39,6 +39,8 @@ import {
 } from "@/components/ui/popover";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
+import ImageUpload from "./ImageUpload";
+import { toast } from "sonner";
 
 import { hiringFields } from "@/constants/hiringFirlds";
 
@@ -84,7 +86,7 @@ const formSchema = z.object({
 export default function MentorForm({
   user,
 }: {
-  user: { firstName: string; lastName: string };
+  user: { firstName: string; lastName: string; id: string };
 }) {
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [commandOpen, setCommandOpen] = useState(false);
@@ -164,6 +166,7 @@ export default function MentorForm({
 
     const role: "MENTOR" = "MENTOR";
 
+
     const mentorUserData = {
       username: values.username,
       name: values?.firstName + " " + values?.lastName,
@@ -177,15 +180,14 @@ export default function MentorForm({
       hiringFields: selectedFields,
       isRegistered: true,
       companyType: values?.companyType,
-      avatarUrl: "https://i.sstatic.net/l60Hf.png",
     };
 
     try {
       createMentorUpdateUser.mutate(mentorUserData);
       router.push("/mentor-dashboard");
-      // router.push("/post-register");
     } catch (error) {
       console.error(error);
+      toast.error("Failed to create mentor profile");
     }
   }
 
@@ -227,6 +229,12 @@ export default function MentorForm({
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="mb-6">
+              <ImageUpload
+                userId={user?.id}
+                isSubmitting={form.formState.isSubmitting}
+              />
+            </div>
             <FormField
               control={form.control}
               name="username"

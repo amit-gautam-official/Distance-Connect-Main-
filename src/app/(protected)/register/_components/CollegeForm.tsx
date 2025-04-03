@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/popover";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
+import ImageUpload from "./ImageUpload";
 
 import { hiringFields } from "@/constants/hiringFirlds";
 
@@ -61,12 +62,13 @@ const formSchema = z.object({
 export default function CollegeForm({
   user,
 }: {
-  user: { firstName: string; lastName: string };
+  user: { firstName: string; lastName: string; id: string };
 }) {
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [commandOpen, setCommandOpen] = useState(false);
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState<string>("");
 
   const router = useRouter();
   const createStudentUpdateUser =
@@ -136,6 +138,7 @@ export default function CollegeForm({
       return;
     }
 
+
     const role: "STUDENT" = "STUDENT";
     const studentRole: "COLLEGE" = "COLLEGE";
     const studentUserData = {
@@ -152,13 +155,11 @@ export default function CollegeForm({
       courseSpecialization: input.courseSpecialization,
       role: role,
       isRegistered: true,
-      avatarUrl: "",
       name: input.firstName + " " + input.lastName,
     };
     try {
       createStudentUpdateUser.mutate(studentUserData);
       router.push("/student-dashboard");
-      // router.push("/post-register");
     } catch (error) {
       console.error(error);
     }
@@ -202,6 +203,12 @@ export default function CollegeForm({
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="mb-6">
+              <ImageUpload
+                userId={user.id}
+                isSubmitting={form.formState.isSubmitting}
+              />
+            </div>
             <FormField
               control={form.control}
               name="username"
@@ -466,8 +473,12 @@ export default function CollegeForm({
               )}
             />
 
-            <Button type="submit" className="w-full">
-              Submit
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? "Submitting..." : "Submit"}
             </Button>
           </form>
         </Form>

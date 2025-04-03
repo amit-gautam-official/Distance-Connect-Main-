@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 
 const Solutions = () => {
@@ -169,7 +170,7 @@ const Solutions = () => {
          
 
           <div className="mt-2 flex items-center gap-2 text-center font-inter text-[16px] font-semibold leading-[22px] text-[#3D568F]">
-            <span>Learn more</span>
+            <Link href="/solutions/student">Learn more</Link>
             <div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -314,7 +315,7 @@ const Solutions = () => {
           </div>
 
           <div className="mt-2 flex items-center gap-2 text-center font-inter text-[16px] font-semibold leading-[22px] text-[#3D568F]">
-            <span>Learn more</span>
+            <Link href="/solutions/startup">Learn more</Link>
             <div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -439,7 +440,7 @@ const Solutions = () => {
          
 
           <div className="mt-2 flex items-center gap-2 text-center font-inter text-[16px] font-semibold leading-[22px] text-[#3D568F]">
-            <span>Learn more</span>
+            <Link href="/solutions/mentor">Learn more</Link>
             <div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -610,7 +611,7 @@ const Solutions = () => {
             </div>
           </div>
           <button className="relative z-[40] mt-6 h-[45px] w-[183px] flex-shrink-0 rounded-[30px] bg-[#3D568F] font-inter text-[18px] font-medium leading-[110%] text-white">
-            Learn more
+            <Link href="/solutions/student">Learn more</Link>
           </button>
         </div>
         <div className="flex w-[50%] flex-col items-center justify-center">
@@ -786,7 +787,7 @@ const Solutions = () => {
             </div>
           </div>
           <button className="relative z-[40] mt-6 h-[45px] w-[183px] flex-shrink-0 rounded-[30px] bg-[#3D568F] font-inter text-[18px] font-medium leading-[110%] text-white">
-            Learn more
+            <Link href="/solutions/startup">Learn more</Link>
           </button>
         </div>
       </div>
@@ -917,7 +918,7 @@ const Solutions = () => {
            
           </div>
           <button className="relative z-[40] mt-6 h-[45px] w-[183px] flex-shrink-0 rounded-[30px] bg-[#3D568F] font-inter text-[18px] font-medium leading-[110%] text-white">
-            Learn more
+            <Link href="/solutions/mentor">Learn more</Link>
           </button>
         </div>
         <div className="flex relative w-[50%] flex-col items-center justify-center">

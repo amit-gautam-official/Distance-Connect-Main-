@@ -39,8 +39,10 @@ import {
 } from "@/components/ui/popover";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
+import ImageUpload from "./ImageUpload";
 
 import { hiringFields } from "@/constants/hiringFirlds";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   username: z.string().min(3, {
@@ -63,12 +65,13 @@ const formSchema = z.object({
 export default function WorkingForm({
   user,
 }: {
-  user: { firstName: string; lastName: string };
+  user: { firstName: string; lastName: string; id: string };
 }) {
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [commandOpen, setCommandOpen] = useState(false);
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);  
 
   const router = useRouter();
   const createStudentUpdateUser =
@@ -156,17 +159,19 @@ export default function WorkingForm({
       courseSpecialization: "",
       role: role,
       isRegistered: true,
-      avatarUrl: "https://i.sstatic.net/l60Hf.png",
       name: input.firstName + " " + input.lastName,
     };
 
-    //console.log(studentUserData)
     try {
+      setIsSubmitting(true);
       createStudentUpdateUser.mutate(studentUserData);
       router.push("/student-dashboard");
       // router.push("/post-register");
     } catch (error) {
       console.error(error);
+      toast.error("Something went wrong");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -208,6 +213,12 @@ export default function WorkingForm({
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="mb-6">
+              <ImageUpload
+                userId={user.id}
+                isSubmitting={form.formState.isSubmitting}
+              />
+            </div>
             <FormField
               control={form.control}
               name="username"
@@ -517,8 +528,8 @@ export default function WorkingForm({
               )}
             />
 
-            <Button type="submit" className="w-full">
-              Submit
+            <Button disabled={isSubmitting} type="submit" className="w-full">
+              {isSubmitting ? "Submitting..." : "Submit"}
             </Button>
           </form>
         </Form>

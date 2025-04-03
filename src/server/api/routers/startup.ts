@@ -22,7 +22,7 @@ export const startupRouter = createTRPCRouter({
       state         : z.string(),
       interestFields: z.array(z.string()),
       role : z.enum(["STUDENT", "MENTOR", "STARTUP"]),
-      avatarUrl : z.string(),
+      avatarUrl : z.string().optional(),
      }))
     .mutation(async ({ ctx, input }) => {
       return await ctx.db.$transaction([

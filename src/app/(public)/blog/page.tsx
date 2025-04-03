@@ -61,7 +61,7 @@ const page = async () => {
 
       <div className="mx-auto mb-10 mt-20 grid w-[80%] grid-cols-1 gap-y-10 md:grid-cols-2 md:pl-8 xl:grid-cols-3">
         {blogsInDescendingOrder.map((blog: any) => (
-          <Link key={blog?.fileds?.slug} href={`/blog/${blog?.fields?.slug}`}>
+          <Link key={blog?.fields?.slug} href={`/blog/${blog?.fields?.slug}`}>
             <BlogCard blog={blog?.fields} />
           </Link>
         ))}

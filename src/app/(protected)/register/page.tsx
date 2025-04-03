@@ -32,6 +32,7 @@ export default async function RegisterPage() {
   }
 
   const userInfo = {
+    id: user?.sub ?? "",
     firstName: user?.given_name ?? "",
     lastName: user?.family_name ?? "",
   };

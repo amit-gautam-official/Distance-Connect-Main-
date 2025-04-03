@@ -81,15 +81,26 @@ export const scheduledMeetingsRouter = createTRPCRouter({
       const meetings = await ctx.db.scheduledMeetings.findMany({
         where: {
           mentorUserId: ctx.dbUser!.id,
-          completed: false,
         },
         orderBy: {
           selectedDate: 'asc',
         },
-        include: {
-          student: true,
-        },
-        take: 3, // Limit to 3 most recent upcoming meetings
+        
+        select: {
+          id: true,
+          selectedDate: true,
+          selectedTime: true,
+          eventName: true,
+          userNote: true,
+          meetUrl: true,
+          completed: true,
+          formatedTimeStamp: true,
+          student : {
+            select : {
+              studentName : true,
+            }
+          }
+        }
       });
 
       // Transform the data to match our ScheduledSessions component format
@@ -104,7 +115,10 @@ export const scheduledMeetingsRouter = createTRPCRouter({
           description: meeting.userNote || `Meeting with ${meeting.student.studentName || 'Student'}`,
           date: `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`,
           time: meeting.selectedTime,
-          meetUrl: meeting.meetUrl
+          meetUrl: meeting.meetUrl,
+          completed: meeting.completed,
+          formatedTimeStamp: meeting.formatedTimeStamp,
+          selectedDate: meeting.selectedDate,
         };
       });
     }),

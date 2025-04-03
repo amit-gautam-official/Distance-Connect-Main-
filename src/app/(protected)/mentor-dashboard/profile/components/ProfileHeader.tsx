@@ -60,6 +60,10 @@ const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
               ? "Mentor"
               : "User"}
         </p>
+
+        <Link className="mt-4" href={`/mentors/${user?.userId}`}>
+          <Button>Preview Mentor Profile</Button>
+        </Link>
       </div>
 
       {/* User details */}
@@ -136,9 +140,6 @@ const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
           ))}
         </div>
       </div>
-        <Link className="mt-4" href={`/mentors/${user?.userId}`}>
-            <Button>Preview Mentor Profile</Button>
-          </Link>
     </div>
   );
 };

@@ -20,7 +20,7 @@ export const studentRouter = createTRPCRouter({
       courseSpecialization : z.string(),
       role : z.enum(["STUDENT", "MENTOR", "STARTUP"]),
       isRegistered : z.boolean(),
-      avatarUrl : z.string(),
+      avatarUrl : z.string().optional(),
       name : z.string(),
      }))
     .mutation(async ({ ctx, input }) => {

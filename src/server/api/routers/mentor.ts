@@ -17,7 +17,7 @@ export const mentorRouter = createTRPCRouter({
       name : z.string(),
       role : z.enum(["STUDENT", "MENTOR", "STARTUP"]),
       isRegistered : z.boolean(),
-      avatarUrl : z.string(),
+      avatarUrl : z.string().optional(),
       companyType : z.string(),
       hiringFields : z.array(z.string()),
      }))

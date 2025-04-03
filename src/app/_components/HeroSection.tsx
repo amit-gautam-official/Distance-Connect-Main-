@@ -1,12 +1,12 @@
 "use client"
 import { api } from '@/trpc/react';
 import React from 'react'
-
+import { useRouter } from 'next/navigation';
 
 
 
 const HeroSection =() => {
-  
+  const router = useRouter();
 
 
   return (
@@ -19,10 +19,18 @@ const HeroSection =() => {
         Book your first free demo session and connect with professionals, gain insights, and achieve your goals
         </h2>
         <div className='flex gap-4 lg:justify-start justify-center w-full'>
-          <button className='flex h-[42px] lg:w-[208px] lg:h-[50px] p-[18px_24px] justify-center items-center gap-4 self-stretch rounded-[30px] bg-[#3D568F] text-center font-inter text-[13px] lg:text-[19px] font-bold leading-[18px] text-white'>
+          <button
+          onClick={() => {
+            router.push('/mentors');
+          }}
+           className='flex h-[42px] lg:w-[208px] lg:h-[50px] p-[18px_24px] justify-center items-center gap-4 self-stretch rounded-[30px] bg-[#3D568F] text-center font-inter text-[13px] lg:text-[19px] font-bold leading-[18px] text-white'>
           Book Free Demo
           </button>
-          <button className=' h-[42px] lg:w-[240px] lg:h-[50px] lg:text-[19px]  px-6  gap-2 self-stretch rounded-[30px] border border-[#D4D2E3] bg-white text-[#3D568F] text-center font-inter text-[13px] font-normal leading-[18px]'>
+          <button 
+          onClick={() => {
+            router.push('/solutions/mentor');
+          }}
+          className=' h-[42px] lg:w-[240px] lg:h-[50px] lg:text-[19px]  px-6  gap-2 self-stretch rounded-[30px] border border-[#D4D2E3] bg-white text-[#3D568F] text-center font-inter text-[13px] font-normal leading-[18px]'>
             Learn more
           </button>
         </div>

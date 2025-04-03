@@ -241,7 +241,9 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
         }`}
       >
         <div className="flex items-center justify-center gap-2">
-          <img src="/logo.png" alt="logo" className="m-auto w-full h-[70px]" />
+          <Link href="/" className="cursor-pointer">
+            <img src="/logo.png" alt="logo" className="m-auto h-[70px]" />
+          </Link>
         </div>
         <div className="flex items-center justify-center font-inter font-medium leading-normal text-white lg:gap-4 lg:text-[12px] xl:gap-8 xl:text-[16px]">
           {/* <div className="cursor-pointer">Solutions</div>

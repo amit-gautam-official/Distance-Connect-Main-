@@ -20,6 +20,8 @@ import { User as UserType, Mentor } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import AvailabilitySettings from "./AvailabilitySettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ImageUpload from "@/app/(protected)/register/_components/ImageUpload";
+import { useProfile } from "../page";
 
 enum CompanyType {
   STARTUP = "STARTUP",
@@ -76,16 +78,17 @@ const ProfileSettings = ({
   mentor: Mentor;
 }) => {
   const router = useRouter();
-  const updateUserMutation = api.user.updateUser.useMutation({
-    onSuccess: () => {
-      toast.success("User updated successfully");
-      // Force a hard refresh of the page to ensure data is reloaded
-      window.location.reload();
+  const { updateAvatar, updateProfileField } = useProfile();
 
+  const updateUserMutation = api.user.updateUser.useMutation({
+    onSuccess: (data) => {
+      toast.success("User updated successfully");
+      // Don't force reload as it interrupts image upload
       setIsSubmitting(false);
     },
     onError: () => {
       toast.error("Failed to update user");
+      setIsSubmitting(false);
     },
   });
   const updateMentorMutation = api.mentor.updateMentor.useMutation({
@@ -144,10 +147,30 @@ const ProfileSettings = ({
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Update context state for immediate UI updates
+    if (name === "name") {
+      updateProfileField("name", value);
+    } else if (name === "currentCompany") {
+      updateProfileField("currentCompany", value);
+    } else if (name === "jobTitle") {
+      updateProfileField("jobTitle", value);
+    } else if (name === "experience") {
+      updateProfileField("experience", value);
+    } else if (name === "industry") {
+      updateProfileField("industry", value);
+    } else if (name === "state") {
+      updateProfileField("state", value);
+    } else if (name === "hiringFields") {
+      // Split by comma and trim spaces for array fields
+      const fields = value.split(",").map((field) => field.trim());
+      updateProfileField("hiringFields", fields);
+    }
   };
 
   const handleCompanyTypeChange = (value: string) => {
     setCompanyType(value as CompanyType);
+    updateProfileField("companyType", value);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -184,6 +207,16 @@ const ProfileSettings = ({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Profile Picture */}
+            <div className="mb-6 flex justify-center">
+              <ImageUpload
+                userId={user.id}
+                isSubmitting={isSubmitting}
+                onAvatarUpdate={updateAvatar}
+                initialAvatarUrl={user.avatarUrl || undefined}
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input

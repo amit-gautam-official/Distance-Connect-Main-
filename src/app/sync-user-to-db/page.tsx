@@ -3,6 +3,7 @@ import { db } from "@/server/db";
 import { notFound, redirect } from "next/navigation";
 import { auth0 } from "@/lib/auth0";
 
+
 const SyncUser = async () => {
   const session = await auth0.getSession();
   const user = session?.user;
@@ -15,6 +16,7 @@ const SyncUser = async () => {
   }
 
   try {
+
     await db.user.upsert({
       where: {
         kindeId: user.sub,
@@ -29,6 +31,7 @@ const SyncUser = async () => {
         email: user.email,
         name: user.given_name + " " + user.family_name,
         avatarUrl: user.picture,
+        username : user.sub,
       },
     });
 
