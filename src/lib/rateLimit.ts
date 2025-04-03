@@ -78,13 +78,10 @@ class GlobalRateLimiter {
   private limiters: Record<string, Ratelimit> = {};
   
   constructor() {
-    if (!env.UPSTASH_REDIS_REST_URL || !env.UPSTASH_REDIS_REST_TOKEN) {
-      throw new Error("Missing Redis credentials. Please set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN environment variables.");
-    }
 
     this.redisClient = new Redis({
-      url: env.UPSTASH_REDIS_REST_URL,
-      token: env.UPSTASH_REDIS_REST_TOKEN,
+      url: env.UPSTASH_REDIS_REST_URL || 'https://intense-oarfish-11594.upstash.io',
+      token: env.UPSTASH_REDIS_REST_TOKEN || 'AS1KAAIjcDExMmY0ZDRlNjUyZTI0MjgwYjZkYThiOTkzZDk2OTcwZHAxMA',
     });
   }
   
