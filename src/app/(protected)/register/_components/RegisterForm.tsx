@@ -46,7 +46,10 @@ export default function RegisterForm({
             </h1>
             <div className="mt-4 flex flex-wrap gap-y-6 xl:grid xl:grid-cols-2 xl:gap-x-16 xl:gap-y-10">
               <button
-                onClick={() => setRole("STARTUP")}
+                onClick={() => {
+                  setRole("STARTUP");
+                  setStep(2);
+                }}
                 className="h-[40px] w-[104px] flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] focus:border-blue-400 focus:text-[#0A64BC] xl:h-[65.66px] xl:w-[233.003px]"
               >
                 To Hire
@@ -88,12 +91,18 @@ export default function RegisterForm({
           </div>
         )}
         <div>
-          {/* <div className={`w-full flex items-center mt-8 ${step === 1 ? "justify-end" : "justify-between"}`}>
-              {step == 1 && <button onClick={() => setStep((prev) =>  prev === 2 ? 3 : 2 )} className="text-[#4D7CD6] font-inter text-[26px] font-normal leading-[24px] underline decoration-solid decoration-0 underline-offset-auto">Next {">"}</button>}
-            {step === 2 && <button onClick={() => setStep((prev) => prev === 2 ? 1 : 3)} className="text-[#4D7CD6] font-inter text-[26px] font-normal leading-[24px] underline decoration-solid decoration-0 underline-offset-auto">{"<"} Back</button>}
-            {step === 2 && role==="STUDENT" && <button onClick={() => setStep((prev) => prev === 2 ? 3 : 2)} className="text-[#4D7CD6] font-inter text-[26px] font-normal leading-[24px] underline decoration-solid decoration-0 underline-offset-auto">Next {">"}</button>}
-            {step === 3 && role==="STUDENT" && <button onClick={() => setStep((prev) => prev === 2 ? 3 : 2)} className="text-[#4D7CD6] font-inter text-[26px] font-normal leading-[24px] underline decoration-solid decoration-0 underline-offset-auto">{"<"} Back</button>}
-          </div> */}
+          <div
+            className={`mt-8 flex w-full items-center ${step === 1 ? "justify-end" : "justify-start"}`}
+          >
+            {step > 1 && (
+              <button
+                onClick={() => setStep(step - 1)}
+                className="font-inter text-[16px] font-normal leading-[24px] text-[#4D7CD6] underline decoration-solid decoration-0 underline-offset-auto md:text-[20px] lg:text-[26px]"
+              >
+                {"<"} Back
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

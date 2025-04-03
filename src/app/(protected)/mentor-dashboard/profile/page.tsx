@@ -64,6 +64,7 @@ const ProfileContext = createContext<ProfileContextType>({
   updateProfileField: () => {},
 });
 
+// Export the hook to use the profile context
 export const useProfile = () => useContext(ProfileContext);
 
 const ProfilePage = () => {
