@@ -14,7 +14,7 @@ export default async function RegisterPage() {
   }
 
   const dbUser = await api?.user?.checkUser({ kindeId: user?.sub! });
-  //console.log("--------------------- ",dbUser)
+  console.log("--------------------- ",dbUser)
   if (user && dbUser?.isRegistered) {
     if (dbUser?.role === "STUDENT") {
       // return redirect("/student-dashboard");
