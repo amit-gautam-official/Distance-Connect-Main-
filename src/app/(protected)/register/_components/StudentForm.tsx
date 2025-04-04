@@ -50,19 +50,19 @@ export default function StudentForm({
   const [step, setStep] = useState<number>(2);
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-2xl">
       {step === 2 && (
         <div className="mx-auto flex w-full flex-col items-center justify-center font-inter text-[15px] font-normal leading-[16px] text-[#8A8A8A] xl:text-[20px]">
-          <h1 className="justify- flex font-inter text-[22px] font-normal leading-[36px] text-black xl:mb-12 xl:text-[32px]">
+          <h1 className="mb-6 text-center font-inter text-xl font-normal leading-normal text-black sm:text-2xl md:mb-8 xl:mb-12 xl:text-[32px]">
             <div>How would you like to get started?</div>
           </h1>
-          <div className="mt-4 flex flex-wrap gap-y-6 xl:grid xl:grid-cols-2 xl:gap-x-16 xl:gap-y-10">
+          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:gap-x-16 xl:gap-y-10">
             <button
               onClick={() => {
                 setStudentRole("HIGHSCHOOL");
                 setStep(3);
               }}
-              className="h-[40px] w-[104px] flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] focus:border-blue-400 focus:text-[#0A64BC] xl:h-[65.66px] xl:w-[233.003px]"
+              className="h-[45px] w-full flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] transition-colors hover:border-blue-400 hover:text-[#0A64BC] focus:border-blue-400 focus:text-[#0A64BC] xl:h-[65.66px]"
             >
               High School
             </button>
@@ -71,7 +71,7 @@ export default function StudentForm({
                 setStudentRole("COLLEGE");
                 setStep(3);
               }}
-              className="ml-10 h-[40px] w-[153px] flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] focus:border-blue-400 focus:text-[#0A64BC] xl:ml-0 xl:h-[65.66px] xl:w-[233.003px]"
+              className="h-[45px] w-full flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] transition-colors hover:border-blue-400 hover:text-[#0A64BC] focus:border-blue-400 focus:text-[#0A64BC] xl:h-[65.66px]"
             >
               College
             </button>
@@ -80,28 +80,28 @@ export default function StudentForm({
                 setStudentRole("WORKING");
                 setStep(3);
               }}
-              className="h-[40px] w-[188px] flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] focus:border-blue-400 focus:text-[#0A64BC] xl:h-[65.66px] xl:w-[233.003px]"
+              className="h-[45px] w-full flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] transition-colors hover:border-blue-400 hover:text-[#0A64BC] focus:border-blue-400 focus:text-[#0A64BC] xl:h-[65.66px]"
             >
               Working
             </button>
           </div>
         </div>
       )}
-      {/* High ScHool Form  */}
+      {/* High School Form */}
       {studentRole === "HIGHSCHOOL" && step === 3 && (
-        <div>
+        <div className="w-full">
           <HighSchoolForm user={user} />
         </div>
       )}
-      {/* College Form  */}
+      {/* College Form */}
       {studentRole === "COLLEGE" && step === 3 && (
-        <div>
+        <div className="w-full">
           <CollegeForm user={user} />
         </div>
       )}
-      {/* Working Form  */}
+      {/* Working Form */}
       {studentRole === "WORKING" && step === 3 && (
-        <div>
+        <div className="w-full">
           <WorkingForm user={user} />
         </div>
       )}

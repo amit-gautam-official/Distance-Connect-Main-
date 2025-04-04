@@ -166,7 +166,6 @@ export default function MentorForm({
 
     const role: "MENTOR" = "MENTOR";
 
-
     const mentorUserData = {
       username: values.username,
       name: values?.firstName + " " + values?.lastName,
@@ -222,14 +221,17 @@ export default function MentorForm({
   return (
     <div className="mx-auto w-full max-w-2xl">
       <CardHeader>
-        <CardTitle className="font-inter text-[32px] font-medium leading-[36px] text-black">
+        <CardTitle className="text-center font-inter text-2xl font-medium leading-tight text-black sm:text-left sm:text-[28px] sm:leading-[36px] md:text-[32px]">
           Give your Brief Introduction
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 sm:px-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="mb-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-5 sm:space-y-6"
+          >
+            <div className="mb-4 flex justify-center sm:mb-6 sm:justify-start">
               <ImageUpload
                 userId={user?.id}
                 isSubmitting={form.formState.isSubmitting}
