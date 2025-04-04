@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function CodeOfConduct() {
   return (
-    <div className="container mx-auto px-4 md:pt-36 py-10 md:px-6 lg:px-8">
+    <div className="container mx-auto px-4 py-10 md:px-6 md:pt-36 lg:px-8">
       <article className="mx-auto max-w-4xl">
         <header className="mb-8">
           <h1 className="mb-4 text-center text-3xl font-bold md:text-4xl">
@@ -13,11 +13,13 @@ export default function CodeOfConduct() {
             <strong>Effective Date:</strong> 26/02/2024
           </p>
           <p className="mb-4 text-gray-700">
-            <strong>Distance Connect ("the Platform")</strong> is committed to
-            maintaining a professional, respectful, and supportive environment
-            for both mentors and mentees. This{" "}
-            <strong>Mentor and Mentee Code of Conduct ("Code")</strong> sets
-            forth the standards of professional behavior and ethical
+            <strong>Distance Connect (&quot;the Platform&quot;)</strong> is
+            committed to maintaining a professional, respectful, and supportive
+            environment for both mentors and mentees. This{" "}
+            <strong>
+              Mentor and Mentee Code of Conduct (&quot;Code&quot;)
+            </strong>{" "}
+            sets forth the standards of professional behavior and ethical
             responsibilities expected from all users engaged in mentorship
             activities on the platform.
           </p>
@@ -125,8 +127,8 @@ export default function CodeOfConduct() {
             <li>
               <strong>No Monetary Demands Outside Platform:</strong> All{" "}
               <strong>
-                session payments must be processed through Distance Connect's
-                payment gateway
+                session payments must be processed through Distance
+                Connect&apos;s payment gateway
               </strong>
               . Mentors must not demand or accept direct payments from mentees.
             </li>
@@ -172,11 +174,12 @@ export default function CodeOfConduct() {
               for genuine learning, career development, and skill-building.
             </li>
             <li>
-              <strong>No Exploitation of Mentor's Time:</strong>
+              <strong>No Exploitation of Mentor&apos;s Time:</strong>
               <ul className="ml-6 mt-2 list-disc space-y-1">
                 <li>
-                  Respect the mentor's availability and do not demand excessive,
-                  free, or unsolicited guidance outside scheduled sessions.
+                  Respect the mentor&apos;s availability and do not demand
+                  excessive, free, or unsolicited guidance outside scheduled
+                  sessions.
                 </li>
               </ul>
             </li>

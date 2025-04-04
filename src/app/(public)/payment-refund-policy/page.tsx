@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function PaymentRefundPolicy() {
   return (
-    <div className="container md:pt-36 mx-auto px-4 py-10 md:px-6 lg:px-8">
+    <div className="container mx-auto px-4 py-10 md:px-6 md:pt-36 lg:px-8">
       <article className="mx-auto max-w-4xl">
         <header className="mb-8">
           <h1 className="mb-4 text-center text-3xl font-bold md:text-4xl">
@@ -13,8 +13,9 @@ export default function PaymentRefundPolicy() {
             <strong>Effective Date:</strong> 26/02/2025
           </p>
           <p className="mb-4 text-gray-700">
-            At <strong>Distance Connect ("the Platform")</strong>, we operate as
-            a <strong>marketplace model</strong>, facilitating payments between{" "}
+            At <strong>Distance Connect (&quot;the Platform&quot;)</strong>, we
+            operate as a <strong>marketplace model</strong>, facilitating
+            payments between{" "}
             <strong>mentees (students) and mentors (professionals)</strong>.
             Mentors set their own prices for mentorship sessions, and Distance
             Connect acts as a <strong>secure payment intermediary</strong>,
@@ -48,7 +49,7 @@ export default function PaymentRefundPolicy() {
             </li>
             <li>
               Distance Connect <strong>deducts a service commission (%)</strong>{" "}
-              from the mentor's earnings before processing payouts.
+              from the mentor&apos;s earnings before processing payouts.
             </li>
             <li>
               Payments are securely processed via a third-party{" "}
@@ -171,7 +172,7 @@ export default function PaymentRefundPolicy() {
             <li>
               <strong>Technical Issues:</strong> If a session is disrupted due
               to <strong>verified technical issues</strong> on Distance
-              Connect's platform, a refund or reschedule may be offered.
+              Connect&apos;s platform, a refund or reschedule may be offered.
             </li>
             <li>
               <strong>Non-Refundable Cases:</strong>
@@ -239,7 +240,7 @@ export default function PaymentRefundPolicy() {
           <ul className="ml-6 list-disc space-y-2 text-gray-700">
             <li>
               If a <strong>payment dispute</strong> is raised with a bank
-              (chargeback request), the user's{" "}
+              (chargeback request), the user&apos;s{" "}
               <strong>Distance Connect account may be suspended</strong> until
               the issue is resolved.
             </li>

@@ -108,7 +108,7 @@ export default function ImageUpload({
   }, [isSubmitting]);
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col  items-center gap-4">
       <div className="relative">
         <Avatar className="h-32 w-32">
           <AvatarImage src={previewUrl} />

@@ -216,7 +216,7 @@ export default function WorkingForm({
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-5 sm:space-y-6"
           >
-            <div className="mb-4 flex justify-center sm:mb-6 sm:justify-start">
+            <div className="mb-4 flex md:justify-center sm:mb-6 justify-start">
               <ImageUpload
                 userId={user?.id}
                 isSubmitting={form.formState.isSubmitting}

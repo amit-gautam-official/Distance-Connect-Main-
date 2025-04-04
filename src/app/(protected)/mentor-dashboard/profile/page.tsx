@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, createContext, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import ProfileHeader from "./components/ProfileHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UserSettings from "./components/UserSettings";
 import { api } from "@/trpc/react";
 import ProfileSkeleton from "./components/ProfileSkeleton";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { ProfileContext } from "./context";
 
 // Define proper type for mentor data
 interface MentorData {
@@ -30,42 +30,6 @@ interface MentorData {
     createdAt: Date;
   };
 }
-
-// Create a context for sharing profile state
-interface ProfileContextType {
-  avatarUrl: string;
-  updateAvatar: (newUrl: string) => void;
-  profileData: {
-    name: string;
-    currentCompany: string;
-    jobTitle: string;
-    experience: string;
-    industry: string;
-    hiringFields: string[];
-    state: string;
-    companyType: string;
-  };
-  updateProfileField: (field: string, value: any) => void;
-}
-
-const ProfileContext = createContext<ProfileContextType>({
-  avatarUrl: "",
-  updateAvatar: () => {},
-  profileData: {
-    name: "",
-    currentCompany: "",
-    jobTitle: "",
-    experience: "",
-    industry: "",
-    hiringFields: [],
-    state: "",
-    companyType: "",
-  },
-  updateProfileField: () => {},
-});
-
-// Export the hook to use the profile context
-export const useProfile = () => useContext(ProfileContext);
 
 const ProfilePage = () => {
   const { data: mentor, isLoading } = api.mentor.getMentorDataById.useQuery(

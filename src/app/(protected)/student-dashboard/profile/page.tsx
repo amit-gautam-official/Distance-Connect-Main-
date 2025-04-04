@@ -1,50 +1,12 @@
 "use client";
 
-import React, { useState, createContext, useContext } from "react";
+import React, { useState } from "react";
 import ProfileHeader from "./components/ProfileHeader";
 import MentorList from "./components/MentorList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UserSettings from "./components/UserSettings";
 import { api } from "@/trpc/react";
-
-// Create a context for sharing profile state
-interface ProfileContextType {
-  avatarUrl: string;
-  updateAvatar: (newUrl: string) => void;
-  profileData: {
-    name: string;
-    state: string;
-    interestFields: string[];
-    institutionName: string;
-    courseSpecialization: string;
-    companyName: string;
-    jobTitle: string;
-    experience: string;
-    industry: string;
-    studentRole: string;
-  };
-  updateProfileField: (field: string, value: any) => void;
-}
-
-const ProfileContext = createContext<ProfileContextType>({
-  avatarUrl: "",
-  updateAvatar: () => {},
-  profileData: {
-    name: "",
-    state: "",
-    interestFields: [],
-    institutionName: "",
-    courseSpecialization: "",
-    companyName: "",
-    jobTitle: "",
-    experience: "",
-    industry: "",
-    studentRole: "",
-  },
-  updateProfileField: () => {},
-});
-
-export const useProfile = () => useContext(ProfileContext);
+import { ProfileContext } from "./context";
 
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("mentors");

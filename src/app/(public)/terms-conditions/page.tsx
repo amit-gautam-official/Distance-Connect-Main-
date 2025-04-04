@@ -17,10 +17,11 @@ export default function TermsConditions() {
           </h2>
           <p className="mb-4 text-gray-700">
             We are SKILLZIA EDUCATION TECHNOLOGIES PRIVATE LIMITED, doing
-            business as Distance Connect ("Company," "we," "us," "our"), a
-            company registered in India at C/o UmedSinghRana Vill &, PO Shahbad
-            Daulatpur City, Shahbad Daulatpur, North West Delhi- 110042,
-            support@distanceconnect.in, Shahbad Daulatpur, Delhi 110042.
+            business as Distance Connect (&quot;Company,&quot; &quot;we,&quot;
+            &quot;us,&quot; &quot;our&quot;), a company registered in India at
+            C/o UmedSinghRana Vill &, PO Shahbad Daulatpur City, Shahbad
+            Daulatpur, North West Delhi- 110042, support@distanceconnect.in,
+            Shahbad Daulatpur, Delhi 110042.
           </p>
           <p className="mb-4 text-gray-700">
             We operate the website{" "}
@@ -30,10 +31,10 @@ export default function TermsConditions() {
             >
               https://distanceconnect.in
             </a>{" "}
-            (the "Site"), the mobile application Distance Connect (the "App"),
-            as well as any other related products and services that refer or
-            link to these legal terms (the "Legal Terms") (collectively, the
-            "Services").
+            (the &quot;Site&quot;), the mobile application Distance Connect (the
+            &quot;App&quot;), as well as any other related products and services
+            that refer or link to these legal terms (the &quot;Legal
+            Terms&quot;) (collectively, the &quot;Services&quot;).
           </p>
           <p className="mb-4 text-gray-700">
             Distance Connect is an AI-powered career development and mentorship
@@ -80,13 +81,13 @@ export default function TermsConditions() {
           </p>
           <p className="mb-4 text-gray-700">
             These Legal Terms constitute a legally binding agreement made
-            between you, whether personally or on behalf of an entity ("you"),
-            and SKILLZIA EDUCATION TECHNOLOGIES PRIVATE LIMITED, concerning your
-            access to and use of the Services. You agree that by accessing the
-            Services, you have read, understood, and agreed to be bound by all
-            of these Legal Terms. IF YOU DO NOT AGREE WITH ALL OF THESE LEGAL
-            TERMS, THEN YOU ARE EXPRESSLY PROHIBITED FROM USING THE SERVICES AND
-            YOU MUST DISCONTINUE USE IMMEDIATELY.
+            between you, whether personally or on behalf of an entity
+            (&quot;you&quot;), and SKILLZIA EDUCATION TECHNOLOGIES PRIVATE
+            LIMITED, concerning your access to and use of the Services. You
+            agree that by accessing the Services, you have read, understood, and
+            agreed to be bound by all of these Legal Terms. IF YOU DO NOT AGREE
+            WITH ALL OF THESE LEGAL TERMS, THEN YOU ARE EXPRESSLY PROHIBITED
+            FROM USING THE SERVICES AND YOU MUST DISCONTINUE USE IMMEDIATELY.
           </p>
           <p className="mb-4 text-gray-700">
             We will provide you with prior notice of any scheduled changes to
@@ -300,8 +301,8 @@ export default function TermsConditions() {
             in our Services, including all source code, databases,
             functionality, software, website designs, audio, video, text,
             photographs, and graphics in the Services (collectively, the
-            "Content"), as well as the trademarks, service marks, and logos
-            contained therein (the "Marks").
+            &quot;Content&quot;), as well as the trademarks, service marks, and
+            logos contained therein (the &quot;Marks&quot;).
           </p>
           <p className="mb-4 text-gray-700">
             Our Content and Marks are protected by copyright and trademark laws
@@ -310,8 +311,8 @@ export default function TermsConditions() {
             world.
           </p>
           <p className="mb-4 text-gray-700">
-            The Content and Marks are provided in or through the Services "AS
-            IS" for your personal, non-commercial use only.
+            The Content and Marks are provided in or through the Services
+            &quot;AS IS&quot; for your personal, non-commercial use only.
           </p>
 
           <h3 className="mb-2 text-xl font-semibold">
@@ -319,8 +320,8 @@ export default function TermsConditions() {
           </h3>
           <p className="mb-4 text-gray-700">
             Subject to your compliance with these Legal Terms, including the
-            "PROHIBITED ACTIVITIES" section below, we grant you a non-exclusive,
-            non-transferable, revocable license to:
+            &quot;PROHIBITED ACTIVITIES&quot; section below, we grant you a
+            non-exclusive, non-transferable, revocable license to:
           </p>
           <ul className="mb-4 ml-6 list-disc text-gray-700">
             <li>access the Services; and</li>
@@ -364,19 +365,19 @@ export default function TermsConditions() {
             Your submissions and contributions
           </h3>
           <p className="mb-4 text-gray-700">
-            Please review this section and the "PROHIBITED ACTIVITIES" section
-            carefully prior to using our Services to understand the (a) rights
-            you give us and (b) obligations you have when you post or upload any
-            content through the Services.
+            Please review this section and the &quot;PROHIBITED ACTIVITIES&quot;
+            section carefully prior to using our Services to understand the (a)
+            rights you give us and (b) obligations you have when you post or
+            upload any content through the Services.
           </p>
           <p className="mb-4 text-gray-700">
             <strong>Submissions:</strong> By directly sending us any question,
             comment, suggestion, idea, feedback, or other information about the
-            Services ("Submissions"), you agree to assign to us all intellectual
-            property rights in such Submission. You agree that we shall own this
-            Submission and be entitled to its unrestricted use and dissemination
-            for any lawful purpose, commercial or otherwise, without
-            acknowledgment or compensation to you.
+            Services (&quot;Submissions&quot;), you agree to assign to us all
+            intellectual property rights in such Submission. You agree that we
+            shall own this Submission and be entitled to its unrestricted use
+            and dissemination for any lawful purpose, commercial or otherwise,
+            without acknowledgment or compensation to you.
           </p>
           <p className="mb-4 text-gray-700">
             <strong>Contributions:</strong> The Services may invite you to chat,
@@ -386,8 +387,9 @@ export default function TermsConditions() {
             and materials to us or through the Services, including but not
             limited to text, writings, video, audio, photographs, music,
             graphics, comments, reviews, rating suggestions, personal
-            information, or other material ("Contributions"). Any Submission
-            that is publicly posted shall also be treated as a Contribution.
+            information, or other material (&quot;Contributions&quot;). Any
+            Submission that is publicly posted shall also be treated as a
+            Contribution.
           </p>
           <p className="mb-4 text-gray-700">
             You understand that Contributions may be viewable by other users of
@@ -426,13 +428,13 @@ export default function TermsConditions() {
           </p>
           <ul className="mb-4 ml-6 list-disc text-gray-700">
             <li>
-              confirm that you have read and agree with our "PROHIBITED
-              ACTIVITIES" and will not post, send, publish, upload, or transmit
-              through the Services any Submission nor post any Contribution that
-              is illegal, harassing, hateful, harmful, defamatory, obscene,
-              bullying, abusive, discriminatory, threatening to any person or
-              group, sexually explicit, false, inaccurate, deceitful, or
-              misleading;
+              confirm that you have read and agree with our &quot;PROHIBITED
+              ACTIVITIES&quot; and will not post, send, publish, upload, or
+              transmit through the Services any Submission nor post any
+              Contribution that is illegal, harassing, hateful, harmful,
+              defamatory, obscene, bullying, abusive, discriminatory,
+              threatening to any person or group, sexually explicit, false,
+              inaccurate, deceitful, or misleading;
             </li>
             <li>
               to the extent permissible by applicable law, waive any and all
@@ -454,7 +456,8 @@ export default function TermsConditions() {
             You are solely responsible for your Submissions and/or Contributions
             and you expressly agree to reimburse us for any and all losses that
             we may suffer because of your breach of (a) this section, (b) any
-            third party's intellectual property rights, or (c) applicable law.
+            third party&apos;s intellectual property rights, or (c) applicable
+            law.
           </p>
           <p className="mb-4 text-gray-700">
             <strong>We may remove or edit your Content:</strong> Although we
@@ -471,7 +474,7 @@ export default function TermsConditions() {
             We respect the intellectual property rights of others. If you
             believe that any material available on or through the Services
             infringes upon any copyright you own or control, please immediately
-            refer to the "COPYRIGHT INFRINGEMENTS" section below.
+            refer to the &quot;COPYRIGHT INFRINGEMENTS&quot; section below.
           </p>
         </section>
 

@@ -16,13 +16,14 @@ import { Key, Loader2, Calendar, User } from "lucide-react";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { User as UserType, Mentor } from "@prisma/client";
+import { User as PrismaUser, Mentor } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import AvailabilitySettings from "./AvailabilitySettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ImageUpload from "@/app/(protected)/register/_components/ImageUpload";
-import { useProfile } from "../page";
+import { useProfile } from "../context";
 
+// Define CompanyType enum locally
 enum CompanyType {
   STARTUP = "STARTUP",
   SME = "SME",
@@ -74,7 +75,7 @@ const ProfileSettings = ({
   user,
   mentor,
 }: {
-  user: UserType;
+  user: PrismaUser;
   mentor: Mentor;
 }) => {
   const router = useRouter();

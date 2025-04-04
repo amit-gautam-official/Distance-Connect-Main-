@@ -19,7 +19,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { User, Student } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import ImageUpload from "@/app/(protected)/register/_components/ImageUpload";
-import { useProfile } from "../page";
+import { useProfile } from "../context";
 
 enum StudentRole {
   HIGHSCHOOL = "HIGHSCHOOL",
