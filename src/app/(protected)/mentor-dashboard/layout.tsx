@@ -17,7 +17,11 @@ export default async function Layout({
 
   const user = await api.user.getMe();
 
-  if (!user || user.role !== "MENTOR") {
+  if(!user){
+    redirect("/sync-user-to-db");
+  }
+
+  if (user.role !== "MENTOR") {
     redirect("/register");
   }
 

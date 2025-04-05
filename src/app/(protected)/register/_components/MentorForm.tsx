@@ -115,7 +115,7 @@ export default function MentorForm({
 
   const createMentorUpdateUser = api.mentor.createMentorUpdateUser.useMutation({
     onSuccess: () => {
-      //console.log("Mentor created successfully");
+      router.push("/mentor-dashboard");
     },
     onError: (error) => {
       console.error(error);
@@ -183,7 +183,7 @@ export default function MentorForm({
 
     try {
       createMentorUpdateUser.mutate(mentorUserData);
-      router.push("/mentor-dashboard");
+      
     } catch (error) {
       console.error(error);
       toast.error("Failed to create mentor profile");

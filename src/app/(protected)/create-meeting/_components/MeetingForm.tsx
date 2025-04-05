@@ -30,6 +30,8 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
   const [description, setDescription] = useState<string>();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+
   const createMeetingEvent = api.meetingEvent.createMeetingEvent.useMutation({
     onSuccess: () => {
       toast("New Meeting Event Created!");
@@ -53,6 +55,13 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
   const onCreateClick = async () => {
     setLoading(true);
 
+    // Verify that the email is a Gmail address
+    if (!email.endsWith("@gmail.com")) {
+      toast.error("Please use a Gmail address for Google Meet integration.");
+      setLoading(false);
+      return;
+    }
+
     await createMeetingEvent.mutateAsync({
       eventName: eventName as string,
       duration: duration as number,
@@ -65,11 +74,14 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
     <div className="flex h-full flex-col">
       {/* Header Section */}
       <div className="border-b bg-white p-6">
-          <h2 className="flex items-center gap-2 text-gray-600 transition-colors hover:text-gray-900">
-            <Link className="flex items-center gap-2" href={"/mentor-dashboard/services"}>
+        <h2 className="flex items-center gap-2 text-gray-600 transition-colors hover:text-gray-900">
+          <Link
+            className="flex items-center gap-2"
+            href={"/mentor-dashboard/services"}
+          >
             <ChevronLeft className="h-5 w-5" /> Back to Services
-            </Link>
-          </h2>
+          </Link>
+        </h2>
         <div className="mt-4">
           <h2 className="text-2xl font-bold text-gray-900">Create New Event</h2>
           <p className="mt-1 text-sm text-gray-600">

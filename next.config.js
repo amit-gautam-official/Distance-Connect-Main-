@@ -13,12 +13,14 @@ const config = {
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     CF_SPACE_ID: process.env.CF_SPACE_ID,
-    CF_DELIVERY_ACCESS_TOKEN: process.env.CF_DELIVERY_ACCESS_TOKEN
+    CF_DELIVERY_ACCESS_TOKEN: process.env.CF_DELIVERY_ACCESS_TOKEN,
   },
-  
- 
-  serverExternalPackages: ['ably'],
-  
+
+  images: {
+    domains: ["storage.googleapis.com"],
+  },
+
+  serverExternalPackages: ["ably"],
 };
 
 export default config;

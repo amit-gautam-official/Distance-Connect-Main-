@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { api } from "@/trpc/react";
+import { useRouter } from "next/navigation";
 
 type MeetingEvent = {
   description: string | null;
@@ -21,6 +22,7 @@ type MeetingEvent = {
   mentorUserId: string;
 };
 function MeetingEventList() {
+  const router = useRouter();
   const { data, isError, isLoading, refetch } =
     api.meetingEvent.getMeetingEventList.useQuery(undefined, {
       // Reduce retries to avoid rate limit issues
@@ -96,12 +98,14 @@ function MeetingEventList() {
               >
                 <Copy className="h-4 w-4" /> Copy Link{" "}
               </h2>
-              
             </div>
           </div>
         ))
       ) : (
-        <h2>Loading...</h2>
+        //add no service available
+        <div className="flex flex-col items-center justify-center">
+          <h2>Create a new meeting type</h2>
+        </div>
       )}
     </div>
   );

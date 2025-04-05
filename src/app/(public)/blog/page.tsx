@@ -67,7 +67,6 @@ const page = async () => {
         ))}
       </div>
 
-      <PaginationComponent />
     </div>
   );
 };
