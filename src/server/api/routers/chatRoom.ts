@@ -132,6 +132,7 @@ getChatRoomById: protectedProcedure
                 id: true,
                 lastMessage: true,
                 mentorUnreadCount: true,
+                
                 mentor : {
                     select : {
                         mentorName : true,
@@ -139,7 +140,13 @@ getChatRoomById: protectedProcedure
                 },
                 student : {
                     select : {
+                        id: true,
                         studentName : true,
+                        user : {
+                            select : {
+                                avatarUrl : true
+                            }
+                        }
                     }
                 }
             }
@@ -159,6 +166,7 @@ getChatRoomById: protectedProcedure
                 student : {
                     select : {
                         studentName : true,
+                        id: true
                     }
                 },
                 lastMessage : true,
@@ -166,6 +174,7 @@ getChatRoomById: protectedProcedure
                 mentor : {
                     select : {
                         mentorName : true,
+                        id: true
                     }
                 }
             }   

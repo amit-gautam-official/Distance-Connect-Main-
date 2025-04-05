@@ -11,11 +11,13 @@ interface ChatRoom {
   id: string;
   student: {
     studentName: string | null;
+    id:string | null;
   };
   lastMessage: string;
   studentUnreadCount: number;
   mentor: {
     mentorName: string | null;
+    id: string | null;
   };
 }
 
@@ -31,7 +33,6 @@ const InboxWrapper = ({
   const [selectedChatRoomId, setSelectedChatRoomId] = useState<string | null>(
     null,
   );
-  const [showChatView, setShowChatView] = useState(false);
   const hasCreatedRoom = useRef(false);
   // Maintain local state of chat rooms to update when new messages arrive
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>(
@@ -56,10 +57,17 @@ const InboxWrapper = ({
 
   // Set the initial chat room when the component mounts
   useEffect(() => {
-    if (chatRooms.length > 0 && chatRooms[0]) {
+    if (mId && chatRooms.length > 0) {
+      const currentChatroom = chatRooms.filter(
+        (chatroom) => chatroom.mentor.id === mId,
+      );
+      console.log("Setting initial chat room:", currentChatroom[0]?.id);
+      if (!currentChatroom[0]) return;
+      setSelectedChatRoomId(currentChatroom[0]?.id);
+    } else if (chatRooms.length > 0 && chatRooms[0]) {
       setSelectedChatRoomId(chatRooms[0].id);
     }
-  }, [chatRooms]);
+  }, [chatRooms, mId]);
 
   // Only fetch messages when we have a valid chatRoomId
   const { data: messages, refetch: refetchMessages } =
@@ -204,7 +212,6 @@ const InboxWrapper = ({
   // Handle chat room selection
   const handleSelectChatRoom = (room: ChatRoom) => {
     setSelectedChatRoomId(room.id);
-    setShowChatView(true);
 
     // Mark messages as read when selecting a chat room
     if (room.studentUnreadCount > 0) {
@@ -221,11 +228,6 @@ const InboxWrapper = ({
     }
   };
 
-  // Handle back to chat list
-  const handleBackToList = () => {
-    setShowChatView(false);
-  };
-
   // Calculate total unread messages
   const totalUnread = chatRooms.reduce(
     (sum, room) => sum + room.studentUnreadCount,
@@ -233,69 +235,86 @@ const InboxWrapper = ({
   );
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white md:flex-row">
-      {/* Mobile header - only shows on mobile */}
-      <div className="flex h-14 items-center justify-between border-b border-gray-200 bg-white p-3 md:hidden">
-        {showChatView ? (
-          <div className="flex w-full items-center justify-between">
-            <button
-              onClick={handleBackToList}
-              className="flex items-center text-gray-600 focus:outline-none"
-              aria-label="Back to chat list"
-            >
-              <ChevronLeft className="mr-1 h-5 w-5" />
-              <span className="font-medium">Back</span>
-            </button>
-            <h2 className="text-lg font-semibold text-gray-800">
-              {mId && mentorData?.mentorName
-                ? mentorData.mentorName
-                : selectedChatRoom?.mentor.mentorName || ""}
-            </h2>
-          </div>
-        ) : (
-          <>
-            <h2 className="text-lg font-semibold text-gray-800">Messages</h2>
-            {totalUnread > 0 && (
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
-                {totalUnread > 99 ? "99+" : totalUnread}
-              </span>
-            )}
-          </>
+    <div className="relative flex h-full flex-col overflow-hidden bg-gray-50 md:flex-row">
+      {/* Mobile header with toggle button */}
+      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-gray-200 bg-white p-3 md:hidden">
+        <div className="flex items-center">
+          {selectedChatRoomId ? (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSelectedChatRoomId(null)}
+                className="mr-2 rounded-full p-1 text-gray-500 hover:bg-gray-100"
+                aria-label="Back to messages"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <h2 className="text-lg font-semibold text-gray-800">
+                {mId && mentorData?.mentorName
+                  ? mentorData.mentorName
+                  : selectedChatRoom?.mentor.mentorName || "Messages"}
+              </h2>
+            </div>
+          ) : (
+            <div className="mb-[-20px]"></div>
+          )}
+        </div>
+        {totalUnread > 0 && (
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+            {totalUnread > 99 ? "99+" : totalUnread}
+          </span>
         )}
       </div>
 
-      {/* Chat list - left sidebar (always visible on desktop, conditional on mobile) */}
+      {/* Sidebar with chat rooms - always visible but transforms on mobile */}
       <div
-        className={`h-[calc(100vh-3.5rem)] w-full overflow-hidden border-r border-gray-200 bg-gray-50 md:flex md:h-screen md:w-80 md:flex-col ${
-          showChatView ? "hidden md:flex" : "flex"
+        className={`w-full overflow-y-auto border-r border-gray-200 bg-white transition-all duration-300 ease-in-out md:w-80 md:min-w-80 ${
+          selectedChatRoomId ? "hidden md:block" : "block"
         }`}
       >
-        {/* Desktop header - only shows on desktop */}
-        <div className="hidden items-center justify-between border-b border-gray-200 p-4 md:flex">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white p-4">
           <div>
             <h2 className="text-xl font-bold text-gray-800">Messages</h2>
             <p className="text-sm text-gray-500">Chat with your mentors</p>
           </div>
+          <div className="md:hidden">
+            {chatRooms.length > 0 && (
+              <button
+                onClick={() =>
+                  chatRooms[0] && handleSelectChatRoom(chatRooms[0])
+                }
+                className="rounded-full p-1 text-gray-500 hover:bg-gray-100"
+                aria-label="Open first chat"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
-
-        {/* Chat rooms list - scrollable */}
-        <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent flex-1 overflow-y-auto">
-          <ChatRooms
-            selectedChatRoom={selectedChatRoom}
-            chatRooms={chatRooms}
-            setSelectedChatRoom={handleSelectChatRoom}
-          />
-        </div>
+        <ChatRooms
+          selectedChatRoom={selectedChatRoom}
+          chatRooms={chatRooms}
+          setSelectedChatRoom={handleSelectChatRoom}
+        />
       </div>
 
-      {/* Chat view - right side (always visible on desktop, conditional on mobile) */}
+      {/* Main chat area */}
       <div
-        className={`flex h-[calc(100vh-3.5rem)] flex-1 flex-col overflow-hidden md:h-screen ${
-          showChatView ? "flex" : "hidden md:flex"
-        }`}
+        className={`flex flex-1 flex-col overflow-hidden transition-all duration-300 ease-in-out ${selectedChatRoomId ? "block" : "hidden md:block"}`}
       >
-        {/* Show mentor name in chat view on desktop */}
-        <div className="hidden h-14 items-center border-b border-gray-200 px-4 md:flex">
+        {/* Desktop header */}
+        <div className="sticky top-0 z-10 hidden items-center border-b border-gray-200 bg-white p-3 md:flex">
           <h2 className="text-lg font-semibold text-gray-800">
             {mId && mentorData?.mentorName
               ? mentorData.mentorName
@@ -305,17 +324,16 @@ const InboxWrapper = ({
 
         {/* Chat component - fills available space and handles its own scrolling */}
         <div className="flex-1 overflow-hidden">
-          {client ? (
+          {client && selectedChatRoomId ? (
             <AblyProvider client={client}>
-              <ChannelProvider channelName={selectedChatRoomId || ""}>
+              <ChannelProvider channelName={selectedChatRoomId}>
                 <Chat
-                  chatRoomId={selectedChatRoomId || ""}
+                  chatRoomId={selectedChatRoomId}
                   initialMessages={messages || []}
                   userId={userId}
                   onMessageSent={(message) => {
                     if (selectedChatRoomId) {
                       // Directly update the chat room with the new message
-                      // This ensures local messages are reflected immediately
                       updateChatRoomWithNewMessage(
                         {
                           ...message,
@@ -347,7 +365,11 @@ const InboxWrapper = ({
             </AblyProvider>
           ) : (
             <div className="flex h-full items-center justify-center">
-              <p className="text-gray-500">Connecting to chat service...</p>
+              <p className="text-gray-500">
+                {selectedChatRoomId
+                  ? "Connecting to chat service..."
+                  : "Select a conversation to start chatting"}
+              </p>
             </div>
           )}
         </div>

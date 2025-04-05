@@ -25,9 +25,8 @@ export default async function Layout({
     <SidebarProvider>
       <AppSidebar role="student" />
       <main>
-        <SidebarTrigger className="p-4 md:hidden" />
-        <div className="flex w-screen justify-center md:w-[calc(100vw-280px)]">
-          <div className="w-[calc(100vw-10%)] md:w-[calc(100vw-280px)]">
+        <div className="flex w-screen h-[calc(100vh-69px)] justify-center md:w-[calc(100vw-280px)]">
+          <div className="w-[calc(100vw-10%)] pb-20 md:w-[calc(100vw-280px)] md:pb-0">
             {children}
           </div>
         </div>

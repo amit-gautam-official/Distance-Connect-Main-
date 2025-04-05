@@ -1,14 +1,16 @@
 import React, { useEffect } from "react";
-import ChatRoom from "../../ChatRooms";
+import ChatRoom from "./ChatRoom";
 interface ChatRoom {
   id: string;
   student: {
     studentName: string | null;
+    id:string | null;
   };
   lastMessage: string;
   studentUnreadCount: number;
   mentor: {
     mentorName: string | null;
+    id: string | null;
   };
 }
 

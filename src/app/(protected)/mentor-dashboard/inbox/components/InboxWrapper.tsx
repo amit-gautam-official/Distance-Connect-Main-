@@ -12,12 +12,17 @@ interface ChatRoom {
   id: string;
   student: {
     studentName: string | null;
+    id: string | null;
+    user : {
+      avatarUrl : string | null;
+    }
   };
   lastMessage: string;
   mentorUnreadCount: number;
   mentor: {
     mentorName: string | null;
   };
+
 }
 
 const InboxWrapper = ({
@@ -33,7 +38,6 @@ const InboxWrapper = ({
   const [selectedChatRoomId, setSelectedChatRoomId] = useState<string | null>(
     null,
   );
-  const [showSidebar, setShowSidebar] = useState(false);
   const hasCreatedRoom = useRef(false);
   // Maintain local state of chat rooms to update when new messages arrive
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>(
@@ -77,9 +81,13 @@ const InboxWrapper = ({
 
   // Set the initial chat room when the component mounts
   useEffect(() => {
-    if (chatRooms.length > 0 && chatRooms[0]) {
-      console.log("Setting initial chat room:", chatRooms[0].id);
-      setSelectedChatRoomId(chatRooms[0].id);
+    if (sId && chatRooms.length > 0) {
+      const currentChatroom = chatRooms.filter(
+        (chatroom) => chatroom.student.id === sId,
+      );
+      console.log("Setting initial chat room:", currentChatroom[0]?.id);
+      if (!currentChatroom[0]) return;
+      setSelectedChatRoomId(currentChatroom[0]?.id);
     }
   }, [chatRooms]);
 
@@ -143,7 +151,6 @@ const InboxWrapper = ({
   const handleSelectChatRoom = (room: ChatRoom) => {
     console.log("Selecting chat room:", room.id);
     setSelectedChatRoomId(room.id);
-    setShowSidebar(false); // Close sidebar on mobile after selection
 
     // Mark messages as read when selecting a chat room
     if (room.mentorUnreadCount > 0) {
@@ -241,39 +248,35 @@ const InboxWrapper = ({
       <div className="sticky top-0 z-30 flex items-center justify-between border-b border-gray-200 bg-white p-3 md:hidden">
         <div className="flex items-center">
           {selectedChatRoomId ? (
-            <button
-              onClick={() => setSelectedChatRoomId(null)}
-              className="mr-3 rounded-full p-1 text-gray-500 hover:bg-gray-100"
-              aria-label="Back to chat list"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSelectedChatRoomId(null)}
+                className="mr-2 rounded-full p-1 text-gray-500 hover:bg-gray-100"
+                aria-label="Back to messages"
               >
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <h2 className="text-lg font-semibold text-gray-800">
+                {sId && studentData?.studentName
+                  ? studentData.studentName
+                  : selectedChatRoom?.student.studentName || "Messages"}
+              </h2>
+            </div>
           ) : (
-            <button
-              onClick={() => setShowSidebar(!showSidebar)}
-              className="mr-3 rounded-full p-1 text-gray-500 hover:bg-gray-100"
-              aria-label="Toggle sidebar"
-            >
-              <Menu size={24} />
-            </button>
+          <div className="mb-[-20px]"></div>
           )}
-          <h2 className="text-lg font-semibold text-gray-800">
-            {sId && studentData?.studentName
-              ? studentData.studentName
-              : selectedChatRoom?.student.studentName || "Messages"}
-          </h2>
         </div>
         {totalUnread > 0 && (
           <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
@@ -282,18 +285,41 @@ const InboxWrapper = ({
         )}
       </div>
 
-      {/* Sidebar with chat rooms - toggleable on mobile */}
+      {/* Sidebar with chat rooms - always visible but transforms on mobile */}
       <div
-        className={`absolute inset-0 z-20 w-full transform overflow-y-auto border-r border-gray-200 bg-white transition-transform duration-300 ease-in-out md:static md:z-0 md:w-80 md:min-w-80 md:translate-x-0 ${
-          showSidebar || !selectedChatRoomId
-            ? "translate-x-0"
-            : "-translate-x-full"
+        className={`w-full overflow-y-auto border-r border-gray-200 bg-white transition-all duration-300 ease-in-out md:w-80 md:min-w-80 ${
+          selectedChatRoomId ? "hidden md:block" : "block"
         }`}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white p-4">
           <div>
             <h2 className="text-xl font-bold text-gray-800">Messages</h2>
             <p className="text-sm text-gray-500">Chat with your students</p>
+          </div>
+          <div className="md:hidden">
+            {chatRooms.length > 0 && (
+              <button
+                onClick={() =>
+                  chatRooms[0] && handleSelectChatRoom(chatRooms[0])
+                }
+                className="rounded-full p-1 text-gray-500 hover:bg-gray-100"
+                aria-label="Open first chat"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
         <ChatRooms
@@ -303,17 +329,9 @@ const InboxWrapper = ({
         />
       </div>
 
-      {/* Overlay to close sidebar when clicking outside on mobile */}
-      {showSidebar && (
-        <div
-          className="absolute inset-0 z-10 bg-black bg-opacity-50 md:hidden"
-          onClick={() => setShowSidebar(false)}
-        />
-      )}
-
       {/* Main chat area */}
       <div
-        className={`flex flex-1 flex-col overflow-hidden ${selectedChatRoomId ? "block" : "hidden md:block"}`}
+        className={`flex flex-1 flex-col overflow-hidden transition-all duration-300 ease-in-out ${selectedChatRoomId ? "block" : "hidden md:block"}`}
       >
         {/* Desktop header */}
         <div className="sticky top-0 z-10 hidden items-center border-b border-gray-200 bg-white p-3 md:flex">

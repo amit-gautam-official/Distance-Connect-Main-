@@ -44,6 +44,20 @@ export function AppSidebar({ role }: { role: string }) {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLDivElement>(null);
+  // Initialize with null to avoid hydration mismatch
+  const [windowWidth, setWindowWidth] = useState<number | null>(null);
+
+  useEffect(() => {
+    // Set initial window width after component mounts (client-side only)
+    setWindowWidth(window.innerWidth);
+
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Student navigation items
   const Studentitems = [
@@ -80,8 +94,8 @@ export function AppSidebar({ role }: { role: string }) {
     },
   ];
 
-   // Student navigation items
-   const Mentoritems = [
+  // Student navigation items
+  const Mentoritems = [
     {
       title: "Dashboard",
       url: "/mentor-dashboard",
@@ -107,14 +121,16 @@ export function AppSidebar({ role }: { role: string }) {
       url: "/mentor-dashboard/services",
       icon: SquareChartGantt,
     },
-
   ];
 
   // Bottom navigation items
   const downItems = [
     {
       title: "Help & Support",
-      url: role === "student" ? "/student-dashboard/help-support" : "/mentor-dashboard/help-support",
+      url:
+        role === "student"
+          ? "/student-dashboard/help-support"
+          : "/mentor-dashboard/help-support",
       icon: MessageCircleQuestion,
     },
     {
@@ -154,14 +170,61 @@ export function AppSidebar({ role }: { role: string }) {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
   };
 
+  // Render mobile view only on client-side when windowWidth is available and less than 768px
+  if (windowWidth !== null && windowWidth < 768) {
+    const navigationItems = role === "student" ? Studentitems : Mentoritems;
+    const limitedItems = [...navigationItems.slice(0, 5)]; // Limit to 5 items for mobile
+
+    if (!limitedItems.some((item) => item.title === "Profile")) {
+      limitedItems.push({
+        title: "Profile",
+        url:
+          role === "student"
+            ? "/student-dashboard/profile"
+            : "/mentor-dashboard/profile",
+        icon: UserRound,
+      });
+    }
+
+    return (
+      <div className="fixed bottom-0 left-0 z-50 w-full border-t border-sidebar-border bg-sidebar">
+        <div className="flex h-16 items-center justify-around">
+          {limitedItems.map((item) => (
+            <Link
+              key={item.title}
+              href={item.url}
+              className={`flex w-1/5 flex-col items-center justify-center py-2 ${
+                item.url === activePath
+                  ? "text-sidebar-primary"
+                  : "text-sidebar-foreground"
+              }`}
+            >
+              <item.icon className="h-6 w-6" />
+              <span className="mt-1 w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-xs">
+                {item.title}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // If windowWidth is null (during SSR) or windowWidth >= 768, render desktop sidebar
   return (
-    <Sidebar className="overflow-visible">
-      <SidebarContent className="overflow-visible">
+    <Sidebar
+      className="group peer hidden text-sidebar-foreground md:block"
+      data-state="expanded"
+      data-collapsible=""
+      data-variant="sidebar"
+      data-side="left"
+    >
+      <SidebarContent className="relative h-svh w-[--sidebar-width] overflow-visible bg-transparent transition-[width] duration-200 ease-linear">
         <SidebarGroup className="overflow-visible">
           <SidebarGroupLabel>
-          <Link href="/" className="cursor-pointer">
-          <img src="/logo.png" alt="logo" className="h-[60px] w-" />
-          </Link>
+            <Link href="/" className="cursor-pointer">
+              <img src="/logo.png" alt="logo" className="w- h-[60px]" />
+            </Link>
           </SidebarGroupLabel>
 
           <SidebarGroupContent className="flex h-[calc(100vh-4rem)] flex-col justify-between overflow-visible pl-2 pt-4">
@@ -182,8 +245,7 @@ export function AppSidebar({ role }: { role: string }) {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
-                {
-                role === "mentor" &&
+              {role === "mentor" &&
                 Mentoritems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
@@ -192,7 +254,7 @@ export function AppSidebar({ role }: { role: string }) {
                       asChild
                     >
                       <a href={item.url}>
-                      <item.icon />
+                        <item.icon />
                         <span>{item.title}</span>
                       </a>
                     </SidebarMenuButton>

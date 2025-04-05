@@ -396,7 +396,7 @@ export default function Chat({
 
   return (
     <div
-      className="flex h-full w-full flex-col bg-gradient-to-b from-gray-50 to-white"
+      className="flex md:h-[calc(100vh-55px)] h-[calc(100vh-130px)]  w-full flex-col bg-gradient-to-b from-gray-50 to-white"
       ref={chatContainerRef}
     >
       {/* Chat messages area with subtle pattern background */}
@@ -411,7 +411,7 @@ export default function Chat({
           WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
         }}
       >
-        <div className="space-y-3 md:space-y-4">
+        <div className="space-y-3 overflow-y-auto md:space-y-4">
           {messages?.map((msg, idx) => {
             const isCurrentUser = msg.senderRole === userRole;
             const prevMsg = idx > 0 ? messages[idx - 1] : null;
@@ -523,7 +523,7 @@ export default function Chat({
       )}
 
       {/* Message input area */}
-      <div className="border-t bg-white p-2 shadow-md md:p-4">
+      <div className="border-t bg-white   shadow-md md:p-4">
         {filePreview && (
           <div className="relative mb-3 rounded-lg bg-gray-50 p-3">
             {fileType === "image" ? (
@@ -579,7 +579,7 @@ export default function Chat({
           </div>
         )}
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full">
           <div className="flex flex-shrink-0">
             <button
               onClick={() => fileInputRef.current?.click()}
@@ -643,7 +643,7 @@ export default function Chat({
               e.key === "Enter" && !e.shiftKey && handleSendMessage()
             }
             placeholder="Type a message..."
-            className="flex-1 rounded-full border border-gray-300 bg-white px-4 py-3 text-base transition-shadow focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 md:py-2.5 md:text-sm"
+            className="flex-1 rounded-full border border-gray-300 bg-white px-4 py-3 transition-shadow focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500  md:text-sm text-xs w-[calc(100vw-235)] "
           />
 
           <button

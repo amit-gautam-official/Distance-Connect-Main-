@@ -6,16 +6,14 @@ type Room = {
   id: string;
   student: {
     studentName: string | null;
-    id: string | null;
-    user : {
-      avatarUrl : string | null;
-    }
+    id : string | null;
   };
   mentor: {
     mentorName: string | null;
+    id: string | null;
   };
   lastMessage: string;
-  mentorUnreadCount: number;
+  studentUnreadCount: number;
 };
 
 const ChatRoom = ({
@@ -27,8 +25,8 @@ const ChatRoom = ({
   selectedChatRoom: Room | null;
   setSelectedChatRoom: (room: Room) => void;
 }) => {
-  const mentorUnreadCountToZeroMutation =
-    api.chatRoom.mentorUnreadCountToZero.useMutation();
+  const studentUnreadCountToZeroMutation =
+    api.chatRoom.studentUnreadCountToZero.useMutation();
 
   // Truncate long messages
   const truncateMessage = (message: string) => {
@@ -38,20 +36,20 @@ const ChatRoom = ({
       : message;
   };
 
-  // Format the student's initial for the avatar
-  const getStudentInitial = () => {
-    if (!room.student.studentName) return "S";
-    const nameParts = room.student.studentName.split(" ");
+  // Format the mentor's initial for the avatar
+  const getMentorInitial = () => {
+    if (!room.mentor.mentorName) return "M";
+    const nameParts = room.mentor.mentorName.split(" ");
     if (nameParts.length > 1 && nameParts[0] && nameParts[1]) {
       return `${nameParts[0].charAt(0)}${nameParts[1].charAt(0)}`;
     }
-    return room.student.studentName.charAt(0);
+    return room.mentor.mentorName.charAt(0);
   };
 
   return (
     <button
       onClick={async () => {
-        await mentorUnreadCountToZeroMutation.mutateAsync({
+        await studentUnreadCountToZeroMutation.mutateAsync({
           chatRoomId: room.id,
         });
         setSelectedChatRoom(room);
@@ -70,13 +68,14 @@ const ChatRoom = ({
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600 sm:h-12 sm:w-12">
-            
-            <img src={room.student.user.avatarUrl!} />
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 sm:h-12 sm:w-12">
+            <span className="text-sm font-medium sm:text-base">
+              {getMentorInitial()}
+            </span>
           </div>
           <div>
             <h3 className="text-sm font-medium text-gray-900 sm:text-base">
-              {room.student.studentName || "Student"}
+              {room.mentor.mentorName || "Mentor"}
             </h3>
             <p className="mt-1 text-xs text-gray-500 sm:text-sm">
               {truncateMessage(room.lastMessage)}
@@ -84,9 +83,9 @@ const ChatRoom = ({
           </div>
         </div>
 
-        {room.mentorUnreadCount > 0 && (
+        {room.studentUnreadCount > 0 && (
           <span className="ml-2 inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white sm:h-7 sm:w-7">
-            {room.mentorUnreadCount > 99 ? "99+" : room.mentorUnreadCount}
+            {room.studentUnreadCount > 99 ? "99+" : room.studentUnreadCount}
           </span>
         )}
       </div>

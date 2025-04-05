@@ -17,6 +17,10 @@ interface ChatRoom {
   id: string;
   student: {
     studentName: string | null;
+    id: string | null;
+    user : {
+      avatarUrl : string | null;
+    }
   };
   lastMessage: string;
   mentorUnreadCount: number;

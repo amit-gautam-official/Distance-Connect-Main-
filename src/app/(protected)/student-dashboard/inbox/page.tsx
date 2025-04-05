@@ -9,14 +9,14 @@ type PageProps = {
 };
 
 const page = async ({ searchParams }: PageProps) => {
-  const mId = await searchParams?.mId || "";
+  const mId = (await searchParams?.mId) || "";
   const session = await auth0.getSession();
   const user = session?.user;
 
   const chatRooms = await api.chatRoom.getChatRoomByStudentBackendId();
 
   return (
-    <div className="h-screen w-full bg-gray-50">
+    <div className="h-full w-full bg-gray-50">
       <div className="container mx-auto h-full px-0">
         <InboxWrapper
           mId={mId}
