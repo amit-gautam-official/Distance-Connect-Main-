@@ -11,7 +11,8 @@ import {
   ChevronDown,
   Paperclip,
   FileText,
-  Download
+  Download,
+  X
 } from "lucide-react"
 import { useMobile } from "@/hooks/use-mobile"
 import { api } from "@/trpc/react"
@@ -72,6 +73,42 @@ interface ChatWindowProps {
   userId: string
 }
 
+// Image Modal Component
+const ImageModal = ({ imageUrl, onClose }: { imageUrl: string, onClose: () => void }) => {
+  // Prevent clicks inside the modal from closing it
+  const handleModalClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  return (
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="relative bg-white rounded-lg p-2 max-w-3xl max-h-[90vh] w-full overflow-hidden"
+        onClick={handleModalClick}
+      >
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="absolute top-2 right-2 z-10 bg-white rounded-full"
+          onClick={onClose}
+        >
+          <X size={20} />
+        </Button>
+        <div className="overflow-auto h-full flex items-center justify-center">
+          <img 
+            src={imageUrl} 
+            alt="Full size image" 
+            className="max-w-full max-h-[85vh] object-contain" 
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function ChatWindow({ 
   chatRoom, 
   onMessageSent, 
@@ -89,6 +126,8 @@ export default function ChatWindow({
   const [isAblyConnected, setIsAblyConnected] = useState(false)
   const [isSendingFile, setIsSendingFile] = useState(false)
   const [newMessages, setNewMessages] = useState<Message[]>([])
+  // State for image modal
+  const [modalImage, setModalImage] = useState<string | null>(null)
 
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -425,6 +464,24 @@ export default function ChatWindow({
     })
   }
 
+  // Handle image click to open modal
+  const handleImageClick = (imageUrl: string) => {
+    setModalImage(imageUrl);
+  };
+
+  // Handle modal close
+  const closeModal = () => {
+    setModalImage(null);
+  };
+
+  if(messageQuery.isPending){
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="animate-spin" size={24} />
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col h-full">
       {/* Chat header */}
@@ -443,9 +500,6 @@ export default function ChatWindow({
             <h2 className="font-medium">{contact.user.name || "User"}</h2>
           </div>
         </div>
-        {/* {isAblyConnected && (
-          <div className="text-xs text-green-600">Connected</div>
-        )} */}
       </div>
 
       {/* Messages */}
@@ -462,41 +516,40 @@ export default function ChatWindow({
               className={`flex ${message.senderRole === viewerRole ? 'justify-end' : 'justify-start'}`}
             >
               <div 
-                className={`max-w-[70%] p-3 rounded-lg ${
+                className={`max-w-[70%] p-3 rounded-lg overflow-hidden ${
                   message.senderRole === viewerRole 
                     ? 'bg-blue-600 text-white' 
                     : 'bg-gray-200 text-gray-800'
                 }`}
               >
-                {message.type === "TEXT" && <div>{message.message}</div>}
+                {message.type === "TEXT" && <div className="break-words">{message.message}</div>}
                 
                 {message.type === "IMAGE" && (
                   <div className="space-y-2">
-                    <img 
-                      src={message?.imageUrl! || ""} 
-                      alt="Shared image" 
-                      className="rounded-md max-w-[300px] max-h-[300px] cursor-pointer object-contain"
-
-                    />
-                    {message.message && <div>{message.message}</div>}
+                    <div className="max-w-full overflow-hidden">
+                      <img 
+                        src={message?.imageUrl! || ""} 
+                        alt="Shared image" 
+                        className="rounded-md w-full h-auto max-h-64 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => handleImageClick(message?.imageUrl!)}
+                      />
+                    </div>
+                    {message.message && <div className="break-words">{message.message}</div>}
                   </div>
                 )}
                 
                 {message.type === "DOCUMENT" && (
                   <div className="flex items-center gap-2">
-                    <FileText size={20} />
-                    <span className="text-sm break-all">{message.fileName}</span>
-                 
-                       <a 
-                       target="_blank"
-                       href={message?.imageUrl!}
-                       download={message.imageUrl}
-                       className="ml-2 cursor-pointer"
-                     >
-                       <Download size={16} />
-                     </a>
-                
-                 
+                    <FileText size={20} className="shrink-0" />
+                    <span className="text-sm break-all truncate">{message.fileName}</span>
+                    <a 
+                      target="_blank"
+                      href={message?.imageUrl!}
+                      download={message.imageUrl}
+                      className="ml-auto shrink-0 cursor-pointer"
+                    >
+                      <Download size={16} />
+                    </a>
                   </div>
                 )}
                 
@@ -532,7 +585,7 @@ export default function ChatWindow({
           <div className="flex items-center justify-between bg-white p-2 rounded-md border">
             {fileType === "image" ? (
               <div className="flex items-center">
-                <div className="h-12 w-12 rounded overflow-hidden mr-2">
+                <div className="h-12 w-12 rounded overflow-hidden mr-2 shrink-0">
                   <img 
                     src={filePreview} 
                     alt="Preview" 
@@ -543,11 +596,11 @@ export default function ChatWindow({
               </div>
             ) : (
               <div className="flex items-center">
-                <FileText size={24} className="mr-2 text-blue-500" />
+                <FileText size={24} className="mr-2 text-blue-500 shrink-0" />
                 <span className="text-sm truncate max-w-[200px]">{fileName}</span>
               </div>
             )}
-            <div className="flex gap-2">
+            <div className="flex gap-2 shrink-0">
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -574,13 +627,13 @@ export default function ChatWindow({
 
       {/* Message input */}
       <div className="p-4 border-t bg-white">
-        <div className="flex items-end gap-2">
+        <div className="flex items-center gap-2">
           <div className="flex-1 relative">
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type a message..."
-              className="w-full border rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
+              className="w-full border rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 pr-16"
               rows={1}
               style={{ minHeight: "44px", maxHeight: "120px" }}
               onKeyDown={(e) => {
@@ -594,14 +647,14 @@ export default function ChatWindow({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="text-gray-500 hover:text-blue-500"
+                className="text-gray-500 hover:text-blue-500 p-2"
               >
                 <ImagePlus size={20} />
               </button>
               <button
                 type="button"
                 onClick={() => documentInputRef.current?.click()}
-                className="text-gray-500 hover:text-blue-500"
+                className="text-gray-500 hover:text-blue-500 p-2"
               >
                 <Paperclip size={20} />
               </button>
@@ -639,6 +692,11 @@ export default function ChatWindow({
           }}
         />
       </div>
+
+      {/* Image Modal */}
+      {modalImage && (
+        <ImageModal imageUrl={modalImage} onClose={closeModal} />
+      )}
     </div>
   )
 }

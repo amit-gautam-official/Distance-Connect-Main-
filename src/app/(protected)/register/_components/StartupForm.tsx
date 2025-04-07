@@ -78,6 +78,7 @@ export default function StartupForm({
   const createStudentUpdateUser =
     api.startup.createStartupUpdateUser.useMutation({
       onSuccess: () => {
+        router.push("/startup-dashboard");
         //console.log("Student created successfully")
       },
       onError: (error) => {

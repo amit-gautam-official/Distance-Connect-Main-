@@ -8,7 +8,7 @@ import { Mail, Phone, MapPin } from 'lucide-react'
 export default function ContactForm() {
   return (
    <div className="relative">
-     <div className="mx-auto hidden lg:flex xl:pt-[150px] flex-col justify-center w-[80%] max-w-6x min-h-[calc(100vh-450px)] px-4 py-12">
+     <div className="mx-auto hidden lg:flex xl:pt-[150px] flex-col justify-center w-[80%] max-w-6x min-h-[calc(100dvh-450px)] px-4 py-12">
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Contact Form */}
         <div className="rounded-3xl bg-[#EEF3FF] p-6 md:p-8">
@@ -97,7 +97,7 @@ export default function ContactForm() {
      
     </div>
 
-    <div className="lg:hidden min-h-[100vh]">
+    <div className="lg:hidden min-h-[100dvh]">
       <div>
         <img src="/img.jpg" alt="contactus" className="w-full h-full  top-0 left-0 rotate-180 object-cover" />
         {/* Contact Form */}

@@ -59,7 +59,7 @@ export default function ContactList({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => (window.location.href = "/dashboard")}
+            onClick={() => (window.location.href = userRole === "MENTOR" ? "/mentor-dashboard" : "/student-dashboard")}
             className="flex items-center gap-1"
           >
             <ArrowLeft size={16} />

@@ -116,6 +116,7 @@ export default function MentorForm({
   const createMentorUpdateUser = api.mentor.createMentorUpdateUser.useMutation({
     onSuccess: () => {
       router.push("/mentor-dashboard");
+
     },
     onError: (error) => {
       console.error(error);

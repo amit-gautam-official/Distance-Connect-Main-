@@ -86,7 +86,6 @@ export function AppSidebar({ role }: { role: string }) {
       url: "/chat",
       icon: Inbox,
     },
-
     {
       title: "AI career assistant",
       url: "/student-dashboard/ai",
@@ -113,7 +112,7 @@ export function AppSidebar({ role }: { role: string }) {
     },
     {
       title: "Inbox",
-      url: "chat",
+      url: "/chat",
       icon: Inbox,
     },
     {
@@ -170,6 +169,20 @@ export function AppSidebar({ role }: { role: string }) {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
   };
 
+  // Fixed function to check if a URL matches the active path
+  const isActive = (url: string) => {
+    // For dashboard, only match exact path to prevent it from being active everywhere
+    if (url === "/student-dashboard" || url === "/mentor-dashboard") {
+      return activePath === url;
+    }
+    
+    // For other URLs, check for exact match or if it's a nested route
+    return activePath === url || 
+           (url !== "/" && 
+            url.length > 1 && 
+            activePath.startsWith(url + "/"));
+  };
+
   // Render mobile view only on client-side when windowWidth is available and less than 768px
   if (windowWidth !== null && windowWidth < 768) {
     const navigationItems = role === "student" ? Studentitems : Mentoritems;
@@ -192,22 +205,25 @@ export function AppSidebar({ role }: { role: string }) {
     return (
       <div className="fixed bottom-0 left-0 z-50 w-full border-t border-sidebar-border bg-sidebar">
         <div className="flex h-16 items-center justify-around">
-          {limitedItems.map((item) => (
-            <Link
-              key={item.title}
-              href={item.url}
-              className={`flex w-1/5 flex-col items-center justify-center py-2 ${
-                item.url === activePath
-                  ? "text-sidebar-primary"
-                  : "text-sidebar-foreground"
-              }`}
-            >
-              <item.icon className="h-6 w-6" />
-              <span className="mt-1 w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-xs">
-                {item.title}
-              </span>
-            </Link>
-          ))}
+          {limitedItems.map((item) => {
+            const active = isActive(item.url);
+            return (
+              <Link
+                key={item.title}
+                href={item.url}
+                className={`flex w-1/5 flex-col items-center justify-center py-2 ${
+                  active
+                    ? "text-sidebar-primary"
+                    : "text-sidebar-foreground"
+                }`}
+              >
+                <item.icon className={`h-6 w-6 ${active ? "text-[#5580D6]" : ""}`} />
+                <span className={`mt-1 w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-xs ${active ? "font-medium  text-[#5580D6]" : ""}`}>
+                  {item.title}
+                </span>
+              </Link>
+            );
+          })}
           {logoutItem && (
             <Link
               key={logoutItem.title}
@@ -242,7 +258,7 @@ export function AppSidebar({ role }: { role: string }) {
             </Link>
           </SidebarGroupLabel>
 
-          <SidebarGroupContent className="flex h-[calc(100vh-4rem)] flex-col justify-between overflow-visible pl-2 pt-4">
+          <SidebarGroupContent className="flex h-[calc(100dvh-4rem)] flex-col justify-between overflow-visible pl-2 pt-4">
             {/* Main navigation */}
             <SidebarMenu>
               {role === "student" &&
@@ -250,7 +266,7 @@ export function AppSidebar({ role }: { role: string }) {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       size="lg"
-                      isActive={item.url === activePath}
+                      isActive={isActive(item.url)}
                       asChild
                     >
                       <a href={item.url}>
@@ -265,7 +281,7 @@ export function AppSidebar({ role }: { role: string }) {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       size="lg"
-                      isActive={item.url === activePath}
+                      isActive={isActive(item.url)}
                       asChild
                     >
                       <a href={item.url}>
@@ -281,7 +297,10 @@ export function AppSidebar({ role }: { role: string }) {
             <SidebarMenu>
               {downItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton 
+                    isActive={isActive(item.url)}
+                    asChild
+                  >
                     <a href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>

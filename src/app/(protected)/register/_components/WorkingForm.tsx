@@ -78,6 +78,7 @@ export default function WorkingForm({
     api.student.createStudentUpdateUser.useMutation({
       onSuccess: () => {
         //console.log("Student created successfully")
+        router.push("/student-dashboard");
       },
       onError: (error) => {
         console.error(error);

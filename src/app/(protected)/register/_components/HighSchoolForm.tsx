@@ -73,7 +73,7 @@ export default function HighSchoolForm({
   const createStudentUpdateUser =
     api.student.createStudentUpdateUser.useMutation({
       onSuccess: () => {
-        //console.log("Student created successfully")
+        router.push("/student-dashboard") 
       },
       onError: (error) => {
         console.error(error);
@@ -158,7 +158,7 @@ export default function HighSchoolForm({
     //console.log(studentUserData)
     try {
       createStudentUpdateUser.mutate(studentUserData);
-      router.push("/student-dashboard");
+      // router.push("/student-dashboard");
       // router.push("/post-register");
     } catch (error) {
       console.error(error);

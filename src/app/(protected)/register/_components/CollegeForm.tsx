@@ -74,6 +74,7 @@ export default function CollegeForm({
   const createStudentUpdateUser =
     api.student.createStudentUpdateUser.useMutation({
       onSuccess: () => {
+        router.push("/student-dashboard");
         //console.log("Student created successfully")
       },
       onError: (error) => {
