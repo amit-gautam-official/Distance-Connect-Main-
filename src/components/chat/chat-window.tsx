@@ -434,7 +434,7 @@ export default function ChatWindow({
             <Button variant="ghost" size="sm" onClick={handleBackToContacts} className="flex items-center gap-1">
               <ArrowLeft size={16} />
             </Button>
-          )}
+          )}  
           <Avatar>
             <AvatarImage src={contact.user.avatarUrl || ""} alt={contact.user.name || "User"} />
             <AvatarFallback>{contact.user.name?.charAt(0) || "U"}</AvatarFallback>
@@ -443,9 +443,9 @@ export default function ChatWindow({
             <h2 className="font-medium">{contact.user.name || "User"}</h2>
           </div>
         </div>
-        {isAblyConnected && (
+        {/* {isAblyConnected && (
           <div className="text-xs text-green-600">Connected</div>
-        )}
+        )} */}
       </div>
 
       {/* Messages */}

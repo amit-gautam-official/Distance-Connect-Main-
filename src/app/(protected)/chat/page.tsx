@@ -161,7 +161,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-[100dvh] bg-gray-50">
       {/* Contacts panel */}
       {(!isMobile || !showChat) && (
         <div className="w-full border-r border-gray-200 bg-white md:w-1/3">
