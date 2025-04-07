@@ -27,7 +27,7 @@ export default async function RegisterPage() {
     if (dbUser.role === "STARTUP") {
       // return redirect("/startup-dashboard");
       return redirect("/startup-dashboard");
-    }
+    } 
     return redirect("/");
   }
 

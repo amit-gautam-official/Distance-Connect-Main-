@@ -130,7 +130,7 @@ export async function ProfileHeader({
               <Link
                 href={
                   session?.user?.email
-                    ? `/student-dashboard/inbox?mId=${userId}`
+                    ? `/chat?mentorId=${userId}`
                     : "/auth/login"
                 }
                 className="m-auto rounded-md bg-blue-600 px-4 py-2 text-white shadow-sm hover:bg-blue-700"

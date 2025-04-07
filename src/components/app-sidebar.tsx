@@ -83,7 +83,7 @@ export function AppSidebar({ role }: { role: string }) {
     },
     {
       title: "Inbox",
-      url: "/student-dashboard/inbox",
+      url: "/chat",
       icon: Inbox,
     },
 
@@ -113,7 +113,7 @@ export function AppSidebar({ role }: { role: string }) {
     },
     {
       title: "Inbox",
-      url: "/mentor-dashboard/inbox",
+      url: "chat",
       icon: Inbox,
     },
     {
@@ -173,7 +173,7 @@ export function AppSidebar({ role }: { role: string }) {
   // Render mobile view only on client-side when windowWidth is available and less than 768px
   if (windowWidth !== null && windowWidth < 768) {
     const navigationItems = role === "student" ? Studentitems : Mentoritems;
-    const limitedItems = [...navigationItems.slice(0, 5)]; // Limit to 5 items for mobile
+    const limitedItems = [...navigationItems.slice(0, 4)]; // Limit to 4 items for mobile (reduced from 5 to make room for logout)
 
     if (!limitedItems.some((item) => item.title === "Profile")) {
       limitedItems.push({
@@ -185,6 +185,9 @@ export function AppSidebar({ role }: { role: string }) {
         icon: UserRound,
       });
     }
+
+    // Add the logout item
+    const logoutItem = downItems.find((item) => item.title === "Logout");
 
     return (
       <div className="fixed bottom-0 left-0 z-50 w-full border-t border-sidebar-border bg-sidebar">
@@ -205,6 +208,18 @@ export function AppSidebar({ role }: { role: string }) {
               </span>
             </Link>
           ))}
+          {logoutItem && (
+            <Link
+              key={logoutItem.title}
+              href={logoutItem.url}
+              className="flex w-1/5 flex-col items-center justify-center py-2 text-sidebar-foreground"
+            >
+              <logoutItem.icon className="h-6 w-6" />
+              <span className="mt-1 w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-xs">
+                {logoutItem.title}
+              </span>
+            </Link>
+          )}
         </div>
       </div>
     );

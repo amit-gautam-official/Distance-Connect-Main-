@@ -132,6 +132,7 @@ export const chatRouter = createTRPCRouter({
           imagePath: imagePath || null, 
           type: type,
           fileName: fileName || null,
+          userId: ctx.dbUser.id,
         },
       }),
 
@@ -151,7 +152,7 @@ export const chatRouter = createTRPCRouter({
 
     getMessages: protectedProcedure
     .input(z.object({
-      chatRoomId: z.string(),
+      chatRoomId: z.string().optional(),
     }))
     .query(async ({ input, ctx }) => {
       const { chatRoomId } = input;
@@ -170,6 +171,16 @@ export const chatRouter = createTRPCRouter({
           imagePath: true,
           type: true,
           fileName: true,
+          senderId: true,
+          imageName: true,
+          updatedAt  : true,
+          chatRoomId: true,
+          user : {
+            select : {
+              avatarUrl: true,
+              name: true,
+            }
+          }
         }
       });
       const messages = await Promise.all(

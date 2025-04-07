@@ -26,7 +26,7 @@ export async function Connect({ mentorName , mentorUserId}: ConnectProps) {
           </Button>
         </Link>
         <Link
-          href={session?.user?.email ? `/student-dashboard/inbox?mId=${mentorUserId}` : "/auth/login"}
+          href={session?.user?.email ? `/chat?mentorId=${mentorUserId}` : "/auth/login"}
               >
         <Button
           variant="outline"

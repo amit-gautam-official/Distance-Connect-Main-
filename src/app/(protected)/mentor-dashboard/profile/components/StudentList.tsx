@@ -213,7 +213,7 @@ const StudentList = ({ studentsData }: { studentsData: Student[] }) => {
                       variant="ghost"
                       size="icon"
                       onClick={() =>
-                        router.push(`/mentor-dashboard/inbox`)
+                        router.push(`/chat?studentId=${student.studentUserId}`)
                       }
                     >
                       <MessageSquare className="h-4 w-4" />
