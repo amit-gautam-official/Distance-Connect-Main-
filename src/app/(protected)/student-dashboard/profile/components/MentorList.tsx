@@ -127,8 +127,8 @@ const MentorList = ({ mentorsData }: { mentorsData: Mentor[] }) => {
     setMentors(mentorsData);
   }, [mentorsData]);
 
-  console.log("mentorsData", mentorsData);
-  console.log("mentors", mentors);
+  // console.log("mentorsData", mentorsData);
+  // console.log("mentors", mentors);
 
   const allExpertiseAreas = Array.from(
     new Set(mentorsData?.flatMap((mentor) => mentor.expertise) || []),

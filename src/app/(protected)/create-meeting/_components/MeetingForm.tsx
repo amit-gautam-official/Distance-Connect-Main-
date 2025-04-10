@@ -29,6 +29,7 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
   const [email, setEmail] = useState<string>("example@gmail.com");
   const [description, setDescription] = useState<string>();
   const [loading, setLoading] = useState(false);
+  const [customEventName, setCustomEventName] = useState<boolean>(false);
   const router = useRouter();
 
 
@@ -107,43 +108,60 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
                   <Calendar className="h-4 w-4 text-gray-500" />
                   Event Name *
                 </label>
+               { !customEventName && 
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="h-11 w-full justify-start text-left font-normal"
-                    >
-                      {eventName || "Select meeting type"}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-full">
-                    <DropdownMenuItem
-                      onClick={() => setEventName("One-on-One Mentorship")}
-                    >
-                      One-on-One Mentorship
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setEventName("Group Mentorship")}
-                    >
-                      Group Mentorship
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setEventName("Career Guidance")}
-                    >
-                      Career Guidance
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setEventName("Interview Preparation")}
-                    >
-                      Interview Preparation
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setEventName("Mock Interview Prep")}
-                    >
-                      Mock Interview Prep
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="h-11 w-full justify-start text-left font-normal"
+                  >
+                    {eventName || "Select meeting type"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full">
+                  <DropdownMenuItem
+                    onClick={() => setEventName("One-on-One Mentorship")}
+                  >
+                    One-on-One Mentorship
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setEventName("Group Mentorship")}
+                  >
+                    Group Mentorship
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setEventName("Career Guidance")}
+                  >
+                    Career Guidance
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setEventName("Interview Preparation")}
+                  >
+                    Interview Preparation
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setEventName("Mock Interview Prep")}
+                  >
+                    Mock Interview Prep
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setCustomEventName(true)}
+
+                  >
+                    Custom
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              }
+                {
+                  customEventName && (
+                    <Input
+                      placeholder="Enter custom meeting type"
+                      onChange={(event) => setEventName(event.target.value)}
+                      className="h-11"
+                    />
+                  ) 
+                }
               </div>
 
               <div className="space-y-2">
@@ -172,6 +190,7 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+              
               </div>
             </div>
           </div>

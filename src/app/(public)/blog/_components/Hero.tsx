@@ -2,7 +2,7 @@ import React from 'react'
 
 const Hero = ({blog} : any) => {
  
-  console.log(blog.fields?.slug)
+  // console.log(blog.fields?.slug)
   const blogThumbnailImageUrl = blog.fields.featuredImage.fields.file.url;
   const blogThumbnailImageFileName = blog.fields.featuredImage.fields.title;
   const blogTitle = blog.fields.title;

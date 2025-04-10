@@ -26,7 +26,7 @@ blogs {
 
 
   export const getBlogs = async () => {
-    console.log("getBlogs")
+    // console.log("getBlogs")
     const { data } = await client.query({
         query: GET_BLOGS,
       });

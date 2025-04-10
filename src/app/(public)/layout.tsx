@@ -35,7 +35,7 @@ export default async function RootLayout({
       new Date(b?.sys?.updatedAt).getTime() -
       new Date(a?.sys?.updatedAt).getTime(),
   );
-  console.log("initialBlogs");
+  // console.log("initialBlogs");
 
   return (
     <>

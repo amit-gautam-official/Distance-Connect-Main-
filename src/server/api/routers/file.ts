@@ -18,11 +18,12 @@ export const fileRouter = createTRPCRouter({
         bucketName: z.string(),
         fileName: z.string(),
         fileType: z.string(),
+        folderName: z.string().optional(),
         fileContent: z.string(), // Base64 encoded file content
       })
     )
     .mutation(async ({ input }) => {
-      const { bucketName, fileName, fileType, fileContent } = input;
+      const { bucketName, fileName, fileType, fileContent,folderName } = input;
       const bucket = storage.bucket(bucketName);
 
       // Convert base64 to buffer
@@ -38,9 +39,9 @@ export const fileRouter = createTRPCRouter({
         .toBuffer();
 
       // Use userId as filename with .webp extension
-
       const uniqueFileName = `${fileName}-${uuidv4()}.webp`;
-      const file = bucket.file(uniqueFileName);
+      const filePath = folderName ? `${folderName}/${uniqueFileName}` : uniqueFileName;
+      const file = bucket.file(filePath);
 
       // Upload processed file
       await file.save(processedBuffer, {
@@ -51,7 +52,8 @@ export const fileRouter = createTRPCRouter({
       });
 
       // Get the public URL (without making the file public)
-      const publicUrl = `https://storage.googleapis.com/${bucketName}/${uniqueFileName}`;
+     
+      const publicUrl = `https://storage.googleapis.com/${bucketName}/${filePath}`;
 
       return {
         success: true,

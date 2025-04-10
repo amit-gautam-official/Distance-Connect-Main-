@@ -146,7 +146,7 @@ interface PageProps {
 export default async function MentorProfilePage({ params }: PageProps) {
   const { mentorName } = await params;
   const mentorData = await getMentorData(mentorName);
-  console.log("mentorData", mentorData);
+  // console.log("mentorData", mentorData);
   const session = await auth0.getSession();
   const userEmail = session?.user.email;
 
@@ -161,37 +161,49 @@ export default async function MentorProfilePage({ params }: PageProps) {
   const menteeCount = uniqueMentees.size;
 
   // Format experience data from scheduled meetings
-  const experiences = [
-    {
-      title: mentorData.jobTitle || "Senior Product Designer",
-      company: mentorData.currentCompany || "PayPal",
-      period: `Present - November, ${new Date().getFullYear()}`,
-      duration: "(7yr 9M)",
-    },
-    {
-      title: "Senior Product Designer",
-      company: "PayPal",
-      period: "December, 2023 - September, 2022",
-      duration: "(1yr 3M)",
-    },
-    {
-      title: "Senior Product Designer",
-      company: "PayPal",
-      period: "August, 2022 - July, 2021",
-      duration: "(1yr 1M)",
-    },
-  ];
+  
+  //dynamic exp
+  const experiences = mentorData?.wholeExperience ? mentorData.wholeExperience.map((exp: any) => ({
+    title: exp?.position || "",
+    description: exp?.description || "",
+    company: exp?.company || "",
+    period: (exp?.startDate || "") + " - " + (exp?.endDate || ""),
+    duration: (() => {
+      // Parse the dates from strings
+      if (!exp?.startDate) return "(Unknown duration)";
+      
+      const startDate = new Date(exp.startDate);
+      const endDate = exp?.current ? new Date() : new Date(exp?.endDate || startDate);
+      
+      // Calculate differences
+      let years = endDate.getFullYear() - startDate.getFullYear();
+      let months = endDate.getMonth() - startDate.getMonth();
+      
+      // Adjust for negative months
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+      
+      // Format the output
+      if (years === 0) {
+        return months === 1 ? `(${months} Month)` : `(${months} Months)`;
+      } else if (months === 0) {
+        return years === 1 ? `(${years} Year)` : `(${years} Years)`;
+      } else {
+        const yearStr = years === 1 ? "Year" : "Years";
+        const monthStr = months === 1 ? "Month" : "Months";
+        return `(${years} ${yearStr} ${months} ${monthStr})`;
+      }
+    })(),
+    isCurrent: exp?.current || false,
+  })) : [];
+  // Check if experiences is empty or undefined
+
+ 
 
   // Extended skills with categories from the image
-  const skillGroups = [
-    { category: "Programming", skills: ["C++", "C#", "JavaScript", "Python"] },
-    {
-      category: "Design",
-      skills: ["UI Designs", "UX Research", "Wireframing"],
-    },
-    { category: "Data", skills: ["Data Structure", "Algorithms", "SQL"] },
-    { category: "Others", skills: mentorData.hiringFields || [] },
-  ];
+  const skillGroups = mentorData?.skills || [];
 
   // Tools the mentor uses
   const tools = ["Figma", "VS Code", "Photoshop"];
@@ -273,7 +285,7 @@ export default async function MentorProfilePage({ params }: PageProps) {
   ];
 
   // Use real reviews if available, otherwise use mock reviews
-  const reviews = meetingReviews.length > 0 ? meetingReviews : mockReviews;
+  const reviews = meetingReviews.length > 0 ? meetingReviews : [];
 
   // Calculate average rating from real feedback
   const averageRating =
@@ -282,16 +294,30 @@ export default async function MentorProfilePage({ params }: PageProps) {
         meetingReviews.length
       : 5.0; // Default rating if no reviews
 
-  // Availability data
-  const availability = {
-    timezone: "Asia/Kolkata (GMT+5:30)",
-    availableDays: ["Monday", "Wednesday", "Friday"],
-    availableHours: "7:00 PM - 10:00 PM",
-    nextAvailable: "Tomorrow",
-  };
 
-  // Professional background data
-  const professionalBackground = {
+// Professional background data
+// Define interfaces for Education and Experience
+interface Education {
+  id: string;
+  institution: string;
+  degree: string;
+  field: string;
+  startYear: string;
+  endYear: string;
+}
+
+const professionalBackground = {
+  education: mentorData?.education 
+    ? (mentorData.education as any[]).map(edu => ({
+        institution: edu?.institution || "",
+        degree: edu?.degree || "",
+        field: edu?.field || "",
+        year: `${edu?.startYear || ""} - ${edu?.endYear || ""}`,
+      }))
+    : []
+};
+
+  const professionalBackgrounda = {
     education: [
       {
         degree: "Master of Computer Science",
@@ -312,39 +338,42 @@ export default async function MentorProfilePage({ params }: PageProps) {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 pt-[150px]">
+    <div className="mx-auto max-w-7xl px-4 py-8 md:pt-[150px]">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
         {/* Main content area - 2/3 width on desktop */}
         <div className="space-y-6 md:col-span-2">
           {/* Profile header */}
           <ProfileHeader
             mentor={{
+              profileBanner: mentorData?.profileBanner || "",
               mentorName: mentorData.mentorName || "Unnamed Mentor",
-              jobTitle: mentorData.jobTitle || "Mentor",
-              currentCompany: mentorData.currentCompany || "Company",
-              experience: mentorData.experience || "0 years",
-              industry: mentorData.industry || "Technology",
+              jobTitle: mentorData.jobTitle || "",
+              currentCompany: mentorData.currentCompany || "",
+              experience: mentorData.experience || "",
+              industry: mentorData.industry || "",
+              bio: mentorData.bio || "",
               user: mentorData.user
                 ? { avatarUrl: mentorData.user.avatarUrl || "" }
                 : undefined,
             }}
+            userEmail={userEmail || ""}
             averageRating={averageRating}
             userId={mentorName || ""}
             menteeCount={menteeCount}
             skills={mentorData.hiringFields || []}
+
           />
 
           {/* Availability Card */}
           <AvailabilityCard
             avail={mentorData?.availability!}
-            availability={availability}
+
           />
 
           {/* Tabs Navigation */}
           <ProfileTabs
             experiences={experiences}
             education={professionalBackground.education}
-            certifications={professionalBackground.certifications}
             skillGroups={skillGroups}
             tools={tools}
             offerings={offerings}

@@ -3,52 +3,45 @@
 import { useState } from "react";
 import { api } from "@/trpc/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera } from "lucide-react";
+import { Ban, Camera } from "lucide-react";
 import { toast } from "sonner";
 import React from "react";
 
 interface ImageUploadProps {
   userId: string;
   isSubmitting: boolean;
-  onAvatarUpdate?: (url: string) => void;
-  initialAvatarUrl?: string;
+  initialBannerUrl?: string;
 }
 
-export const ImageUpload = ({
+export const BannerUpload = ({
   userId,
   isSubmitting,
-  onAvatarUpdate,
-  initialAvatarUrl,
+  initialBannerUrl,
 }: ImageUploadProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>(
-    initialAvatarUrl || "https://i.sstatic.net/l60Hf.png",
-  );
+    initialBannerUrl || "") ;
   const [isUploading, setIsUploading] = useState(false);
 
   // Update preview URL when initialAvatarUrl changes
   React.useEffect(() => {
-    if (initialAvatarUrl) {
-      setPreviewUrl(initialAvatarUrl);
+    if (initialBannerUrl) {
+      setPreviewUrl(initialBannerUrl);
     }
-  }, [initialAvatarUrl]);
+  }, [initialBannerUrl]);
 
-  const updateUser = api.user.updateUser.useMutation({
+  const updateMentorBanner = api.mentor.updateMentorBanner.useMutation({
     onSuccess: (data) => {
-      // console.log("User updated successfully");
+      toast.success("Image uploaded successfully");
     },
   });
 
   const uploadImage = api.file.upload.useMutation({
-    onSuccess: (data) => {
-      updateUser.mutate({
-        avatarUrl: data?.url,
+    onSuccess: async (data) => {
+      updateMentorBanner.mutate({
+        profileBanner: data?.url,
       });
-      if (data?.url && onAvatarUpdate) {
-        onAvatarUpdate(data.url);
-      }
       setIsUploading(false);
-      toast.success("Image uploaded successfully");
     },
     onError: (error) => {
       setIsUploading(false);
@@ -89,8 +82,10 @@ export const ImageUpload = ({
       const base64String = reader.result as string;
       const base64Content = base64String.split(",")[1]; // Remove the data URL prefix
       if (!base64Content) return;
+
       uploadImage.mutate({
         bucketName: "dc-profile-image",
+        folderName: "dc-banner-image",
         fileName: userId,
         fileType: selectedFile.type,
         fileContent: base64Content,
@@ -108,20 +103,32 @@ export const ImageUpload = ({
   }, [isSubmitting]);
 
   return (
-    <div className="flex flex-col  items-center gap-4">
+    <div className="flex flex-col items-center gap-4">
       <div className="relative">
-        <Avatar className="h-32 w-32">
-          <AvatarImage src={previewUrl} />
-          <AvatarFallback>CN</AvatarFallback>
-        </Avatar>
+        <div className="w-full overflow-hidden rounded-lg shadow-md">
+          {previewUrl ? (
+            <img
+              src={previewUrl}
+              alt="Preview"
+              className="aspect-[4/1] h-32 object-cover"
+            />
+          ) : (
+            <div className="flex h-32 w-full items-center justify-center rounded-lg bg-gray-200">
+              <Ban className="h-8 w-8 text-gray-400 pr-2" />
+              <p className="text-sm text-gray-500">
+                No banner image uploaded.
+              </p>
+            </div>
+          )}
+        </div>
         <label
-          htmlFor="image-upload"
+          htmlFor="banner-upload"
           className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-primary text-white hover:bg-primary/90"
         >
           <Camera className="h-4 w-4" />
         </label>
         <input
-          id="image-upload"
+          id="banner-upload"
           type="file"
           accept="image/*"
           className="hidden"
@@ -136,4 +143,4 @@ export const ImageUpload = ({
       )}
     </div>
   );
-}
+};

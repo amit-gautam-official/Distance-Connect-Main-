@@ -34,18 +34,19 @@ export default function RegisterForm({
       {/* Left Section */}
       <div className="no-scrollbar relative z-20 flex min-h-screen w-full flex-col justify-between overflow-y-auto p-4 sm:p-6 md:p-8 xl:w-[55%]">
         <div className="mb-6 flex items-center justify-center md:mb-8 md:justify-between">
-          <div className="w-[200px] bg-gradient-to-r from-[#496F74] via-[#6E9195] to-[#2D4F61] bg-clip-text text-center font-inter text-xl font-bold leading-[24px] text-transparent sm:w-[250px] sm:text-2xl md:w-[300px] xl:text-left">
+          {/* <div className="w-[200px] bg-gradient-to-r from-[#496F74] via-[#6E9195] to-[#2D4F61] bg-clip-text text-center font-inter text-xl font-bold leading-[24px] text-transparent sm:w-[250px] sm:text-2xl md:w-[300px] xl:text-left">
             Distance Connect
-          </div>
+          </div> */}
+          <img src="/logo.png" className=" w-auto h-[80px]" alt="Logo" />
         </div>
 
         {step === 1 ? (
-          <div className="mx-auto flex w-full max-w-xl flex-col items-center justify-center font-inter text-[15px] font-normal leading-[16px] text-[#8A8A8A] xl:text-[20px]">
-            <h1 className="mb-6 flex text-center font-inter text-xl font-normal leading-normal text-black sm:text-2xl md:mb-8 xl:mb-12 xl:text-[32px]">
+          <div className="mx-auto flex w-full max-w-xl flex-col items-center justify-center font-inter text-[15px] font-normal leading-[16px] text-black xl:text-[20px]">
+            <h1 className="mb-6 flex text-center font-medium font-inter text-xl  leading-normal text-black sm:text-2xl md:mb-8 xl:mb-12 xl:text-[32px]">
               <div>How would you like to get started?</div>
             </h1>
             <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:gap-x-16 xl:gap-y-10">
-              <button
+              {/* <button
                 onClick={() => {
                   setRole("STARTUP");
                   setStep(2);
@@ -53,7 +54,7 @@ export default function RegisterForm({
                 className="h-[45px] w-full flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] transition-colors hover:border-blue-400 hover:text-[#0A64BC] focus:border-blue-400 focus:text-[#0A64BC] xl:h-[65.66px]"
               >
                 To Hire
-              </button>
+              </button> */}
               <button
                 onClick={() => {
                   setRole("MENTOR");
@@ -87,7 +88,7 @@ export default function RegisterForm({
           <div className="mx-auto w-full max-w-2xl flex-grow">
             {role === "MENTOR" && <MentorForm user={user} />}
             {role === "STUDENT" && <StudentForm user={user} />}
-            {role === "STARTUP" && <StartupForm user={user} />}
+            {/* {role === "STARTUP" && <StartupForm user={user} />} */}
           </div>
         )}
         <div>
@@ -107,12 +108,12 @@ export default function RegisterForm({
       </div>
 
       {/* Right Section - Only show on desktop/large tablets */}
-      <div className="relative hidden bg-[#0A64BC] md:flex md:min-h-screen md:w-full md:items-center md:justify-center xl:w-[45%]">
+      <div className="relative hidden bg-[#0A64BC] lg:flex md:min-h-screen md:w-full md:items-center md:justify-center xl:w-[45%]">
         <div className="absolute left-0 right-0 top-0 p-8">
-          <div className="flex items-center gap-4">
+          <Link href={"/contact-us"} className="flex items-center gap-4">
             <img src="/support.svg" className="cursor-pointer" alt="Support" />
-            <span className="text-lg font-medium text-[#F7FAFC]">Support</span>
-          </div>
+            <span className="text-lg font-medium text-[#F7FAFC] mt-[2px]">Contact Us</span>
+          </Link>
         </div>
         <img
           className="absolute right-0 top-[-70px] h-auto w-full max-w-[350px] xl:max-w-[450px]"

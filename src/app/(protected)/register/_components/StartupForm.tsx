@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/popover";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
-import ImageUpload from "./ImageUpload";
+import {ImageUpload} from "./ImageUpload";
 
 const hiringFields = [
   { label: "Python", value: "python" },

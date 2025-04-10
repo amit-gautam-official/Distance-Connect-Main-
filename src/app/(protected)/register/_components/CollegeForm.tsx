@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/popover";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
-import ImageUpload from "./ImageUpload";
+import {ImageUpload} from "./ImageUpload";
 
 import { hiringFields } from "@/constants/hiringFirlds";
 

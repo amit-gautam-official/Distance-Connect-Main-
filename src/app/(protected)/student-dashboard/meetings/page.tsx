@@ -152,8 +152,8 @@ const MeetingsPage = () => {
       );
     }
   };
-  console.log("upcoming", filterMeetingList("upcoming"));
-  console.log("expired", filterMeetingList("expired"));
+  // console.log("upcoming", filterMeetingList("upcoming"));
+  // console.log("expired", filterMeetingList("expired"));
 
   // Mock data for scheduled meetings
   const notStartedMeetings = filterMeetingList("upcoming")?.map(
@@ -408,7 +408,7 @@ const MeetingsPage = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="scheduled" className="space-y-4 md:space-y-6">
+        <TabsContent value="scheduled" className="space-y-4 md:space-y-6 md:mb-0 mb-20">
           {scheduledMeetings && scheduledMeetings.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
               {scheduledMeetings.map((meeting) => (

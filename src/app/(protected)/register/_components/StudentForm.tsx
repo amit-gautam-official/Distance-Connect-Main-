@@ -50,10 +50,10 @@ export default function StudentForm({
   const [step, setStep] = useState<number>(2);
 
   return (
-    <div className="mx-auto w-full max-w-2xl">
+    <div className="mx-auto w-full h-full max-w-2xl">
       {step === 2 && (
-        <div className="mx-auto flex w-full flex-col items-center justify-center font-inter text-[15px] font-normal leading-[16px] text-[#8A8A8A] xl:text-[20px]">
-          <h1 className="mb-6 text-center font-inter text-xl font-normal leading-normal text-black sm:text-2xl md:mb-8 xl:mb-12 xl:text-[32px]">
+        <div className="mx-auto flex  h-full w-full flex-col items-center justify-center font-inter text-[15px] font-normal leading-[16px] text-black xl:text-[20px]">
+          <h1 className="mb-6 text-center font-inter text-xl font-medium leading-normal text-black sm:text-2xl md:mb-8 xl:mb-12 xl:text-[32px]">
             <div>How would you like to get started?</div>
           </h1>
           <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:gap-x-16 xl:gap-y-10">

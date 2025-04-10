@@ -21,7 +21,10 @@ export const config = {
     "/student-dashboard",
     "/mentor-dashboard", 
     "/startup-dashboard", 
-    "/register"
+    "/register",
+    "/[mentorUserId]",
+    "/[mentorUserId]/[eventId]",
+    
   ],
 };
 

@@ -94,6 +94,11 @@ model Mentor {
   state          String?
   hiringFields   String[]
   companyType    String
+  bio     String?
+  education    Json[]
+  wholeExperience Json[]  // Array of objects
+  skills       String[]
+  profileBanner String?
 
   meetingEvents     MeetingEvent[]
   availability      Availability?

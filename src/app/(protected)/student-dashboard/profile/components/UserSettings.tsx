@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { User, Student } from "@prisma/client";
 import { useRouter } from "next/navigation";
-import ImageUpload from "@/app/(protected)/register/_components/ImageUpload";
+import {ImageUpload} from "@/app/(protected)/register/_components/ImageUpload";
 import { useProfile } from "../context";
 
 enum StudentRole {
@@ -41,7 +41,7 @@ const UserSettings = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  console.log("student", student);
+  // console.log("student", student);
   return (
     <div className="space-y-6">
       <ProfileSettings user={user!} student={student!} />
@@ -186,7 +186,7 @@ const ProfileSettings = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 md:mb-0 mb-20">
       {/* Profile Information */}
       <Card>
         <CardHeader>
@@ -248,22 +248,23 @@ const ProfileSettings = ({
               <RadioGroup
                 value={studentRole}
                 onValueChange={handleRoleChange}
-                className="flex space-x-4"
+                className="flex space-x-2"
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
                     value={StudentRole.HIGHSCHOOL}
                     id="highschool"
+                    
                   />
-                  <Label htmlFor="highschool">High School Student</Label>
+                  <Label className="text-sm" htmlFor="highschool">High School Student</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value={StudentRole.COLLEGE} id="college" />
-                  <Label htmlFor="college">College Student</Label>
+                  <Label className="text-sm" htmlFor="college">College Student</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value={StudentRole.WORKING} id="working" />
-                  <Label htmlFor="working">Working Professional</Label>
+                  <Label className="text-sm" htmlFor="working">Working Professional</Label>
                 </div>
               </RadioGroup>
             </div>

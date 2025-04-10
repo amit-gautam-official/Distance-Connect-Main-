@@ -165,19 +165,7 @@ const MeetingsPage = () => {
         completed: item?.completed,
         feedback: item?.feedback || undefined,
         starRating: item?.star || 0,
-        statusText: `Starting in: ${(() => {
-          const timeDiff =
-            new Date(item?.selectedDate).getTime() - new Date().getTime();
-          const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-          const hours = Math.floor(
-            (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-          );
-          const minutes = Math.floor(
-            (timeDiff % (1000 * 60 * 60)) / (1000 * 60),
-          );
-
-          return `${days > 0 ? `${days} days, ` : ""}${hours > 0 ? `${hours} hours, ` : ""}${minutes} minutes`;
-        })()}`,
+        statusText: "Completed",
       };
     },
   );
@@ -391,7 +379,7 @@ const MeetingsPage = () => {
                 </TabsList>
 
                 <TabsContent value="scheduled">
-                  <div className="grid gap-6">
+                  <div className="grid gap-6 mb-20 md:mb-0">
                     {scheduledMeetings.length === 0 ? (
                       <div className="rounded-lg border p-6 text-center">
                         <p className="text-gray-500">
@@ -438,16 +426,20 @@ const MeetingsPage = () => {
                                       Rating:
                                     </span>
                                     <div className="flex">
-                                      {[1, 2, 3, 4, 5].map((star) => (
+                                      {meeting?.starRating ? [1, 2, 3, 4, 5].map((star) => (
                                         <Star
                                           key={star}
                                           className={`h-3 w-3 ${
-                                            star <= (meeting.starRating || 0)
+                                            star <= (meeting?.starRating!)
                                               ? "fill-yellow-400 text-yellow-400"
                                               : "text-gray-300"
                                           }`}
                                         />
-                                      ))}
+                                      )) : 
+                                        <span className="text-xs text-gray-500">
+                                          No rating available
+                                        </span>
+                                    }
                                     </div>
                                   </div>
                                 )}
@@ -554,7 +546,7 @@ const MeetingsPage = () => {
                 </TabsContent>
 
                 <TabsContent value="history">
-                  <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end">
+                  <div className=" flex flex-col gap-4 sm:flex-row sm:items-end ">
                     <div className="flex flex-1 flex-col gap-2">
                       <label className="text-sm font-medium">Search</label>
                       <Input
@@ -612,7 +604,7 @@ const MeetingsPage = () => {
                     </Button>
                   </div>
 
-                  <div className="rounded-md border">
+                  <div className="rounded-md border mb-20 md:mb-0">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -662,7 +654,7 @@ const MeetingsPage = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="students" className="mt-4 sm:mt-6">
+          <TabsContent value="students" className="mt-4 sm:mt-6 mb-20 md:mb-0">
             <StudentList studentsData={studentsData!} />
           </TabsContent>
         </div>

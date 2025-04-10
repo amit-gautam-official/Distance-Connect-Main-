@@ -40,15 +40,109 @@ export default function Footer() {
           </div>
 
           {/* Contact Us */}
-          <div className="flex flex-col items-center justify-center">
+          <div className="flex flex-col items-start justify-start ">
             <ul className="mt-3 space-y-2">
               <h3 className="font-inter text-[16px] font-semibold leading-[22px] text-[#3D568F] lg:text-[#EAF3B2]">
                 Contact us
               </h3>
-              <li>Information</li>
-              <li>Request a quote</li>
-              <li>Consultation</li>
-              <li>Help center</li>
+              <li>
+                <Link
+                  href="/contact-us"
+                  className="hover:text-[#EAF3B2] hover:underline"
+                >
+                  Request a quote
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact-us"
+                  className="hover:text-[#EAF3B2] hover:underline"
+                >
+                  Consultation
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact-us"
+                  className="hover:text-[#EAF3B2] hover:underline"
+                >
+                  Help center
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Solutions */}
+          <div className="flex flex-col items-start justify-start">
+            <ul className="mt-3 space-y-2">
+              <h3 className="font-inter text-[16px] font-semibold leading-[22px] text-[#3D568F] lg:text-[#EAF3B2]">
+                Solutions
+              </h3>
+              <li>
+                <Link
+                  href="/solutions/student"
+                  className="hover:text-[#EAF3B2] hover:underline"
+                >
+                  Students
+                </Link>
+              </li>
+              <li>
+                {" "}
+                <Link
+                  href="/solutions/mentor"
+                  className="hover:text-[#EAF3B2] hover:underline"
+                >
+                  Mentor
+                </Link>
+              </li>
+         
+            </ul>
+          </div>
+
+          {/* Services */}
+          <div className="flex flex-col items-start justify-start">
+            <ul className="mt-3 space-y-2">
+              <h3 className="font-inter text-[16px] font-semibold leading-[22px] text-[#3D568F] lg:text-[#EAF3B2]">
+                To Explore
+              </h3>
+              <li>
+              <Link
+                  href="/auth/login"
+                  className="hover:text-[#EAF3B2] hover:underline"
+                >
+                  Login
+                </Link>
+              </li>
+              <li>
+ 
+              <Link
+                  href="/auth/login?screen_hint=signup"
+                  className="hover:text-[#EAF3B2] hover:underline"
+                >
+                  Sign Up
+                </Link>
+              </li>
+              <li>
+                {" "}
+                <Link
+                  href="/blog"
+                  className="hover:text-[#EAF3B2] hover:underline"
+                >
+                  Blogs
+                </Link>
+              </li>
+
+            
+           
+            </ul>
+          </div>
+
+          {/* Policies */}
+          <div className="flex flex-col items-start justify-start">
+            <ul className="mt-3 space-y-2">
+              <h3 className="font-inter text-[16px] font-semibold leading-[22px] text-[#3D568F] lg:text-[#EAF3B2]">
+                Policies
+              </h3>
               <li>
                 <Link
                   href="/terms-conditions"
@@ -65,18 +159,6 @@ export default function Footer() {
                   Payment & Refund Policy
                 </Link>
               </li>
-            </ul>
-          </div>
-
-          {/* About Us */}
-          <div className="flex flex-col items-center justify-center">
-            <ul className="mt-3 space-y-2">
-              <h3 className="font-inter text-[16px] font-semibold leading-[22px] text-[#3D568F] lg:text-[#EAF3B2]">
-                About us
-              </h3>
-              <li>Mission</li>
-              <li>Our team</li>
-              <li>Awards</li>
               <li>
                 <Link
                   href="/code-of-conduct"
@@ -93,34 +175,6 @@ export default function Footer() {
                   Privacy policy
                 </Link>
               </li>
-            </ul>
-          </div>
-
-          {/* Services */}
-          <div className="flex flex-col items-center justify-center">
-            <ul className="mt-3 space-y-2">
-              <h3 className="font-inter text-[16px] font-semibold leading-[22px] text-[#3D568F] lg:text-[#EAF3B2]">
-                Services
-              </h3>
-              <li>Web design</li>
-              <li>Web development</li>
-              <li>Mobile design</li>
-              <li>UI/UX design</li>
-              <li>Branding design</li>
-            </ul>
-          </div>
-
-          {/* Portfolio */}
-          <div className="flex flex-col items-center justify-center">
-            <ul className="mt-3 space-y-2">
-              <h3 className="font-inter text-[16px] font-semibold leading-[22px] text-[#3D568F] lg:text-[#EAF3B2]">
-                Portfolio
-              </h3>
-              <li>Websites</li>
-              <li>E-commerce</li>
-              <li>Mobile apps</li>
-              <li>Landing pages</li>
-              <li>UI/UX projects</li>
             </ul>
           </div>
           {/* Newsletter */}
@@ -158,11 +212,21 @@ export default function Footer() {
             Copyright &copy; 2025 Distance Connect | All Rights Reserved
           </p>
           <div className="mt-4 flex space-x-4 md:mt-0">
+            <Link href={"https://www.facebook.com/profile.php?id=61554968862419&mibextid=zLoPMf"} target="_blank">
             <Facebook className="cursor-pointer hover:text-[#EAF3B2]" />
+            </Link>
+            <Link href={"https://twitter.com/distanceConnec"} target="_blank">
             <Twitter className="cursor-pointer hover:text-[#EAF3B2]" />
+            </Link>
+            <Link href={"https://www.instagram.com/distanceconnect?igsh=dnV2ZDk5OXFscG1o"} target="_blank">
             <Instagram className="cursor-pointer hover:text-[#EAF3B2]" />
-            <Linkedin className="cursor-pointer hover:text-[#EAF3B2]" />
+            </Link>
+            <Link href={"https://youtube.com/@DistanceConnect?si=118TnBciDdcSi_zP"} target="_blank">
             <Youtube className="cursor-pointer hover:text-[#EAF3B2]" />
+            </Link>
+            <Link href={"https://www.linkedin.com/company/distance-connnect/"} target="_blank">
+            <Linkedin className="cursor-pointer hover:text-[#EAF3B2]" />
+            </Link>
           </div>
         </div>
       </div>

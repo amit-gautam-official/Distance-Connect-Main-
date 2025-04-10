@@ -54,20 +54,72 @@ export const mentorRouter = createTRPCRouter({
       
     }),
 
-  updateMentor: protectedProcedure
+  updateMentorBanner : protectedProcedure
   .input(z.object({
-    linkedinUrl : z.string(),
-    companyType : z.string(),
-    currentCompany : z.string(),
-    pinCode : z.number(),
-    state : z.string(),
-  hiringFields : z.array(z.string()),
-  jobTitle : z.string(),
-  experience : z.string(),
-  mentorName : z.string(),
-  industry : z.string(),
- 
+    profileBanner : z.string(),
   }))
+  .mutation(async ({ ctx, input }) => {
+    return ctx.db.mentor.update({
+      where: { userId: ctx?.dbUser?.id },
+      data: {
+        profileBanner : input.profileBanner,
+      },
+    });
+  }
+  ),
+
+  updateMentor: protectedProcedure
+  .input(
+    z.object({
+      linkedinUrl: z
+        .string({ required_error: "LinkedIn URL is required" })
+        .url("Please enter a valid LinkedIn URL"),
+      companyType: z.string({ required_error: "Company type is required" }),
+      currentCompany: z.string({ required_error: "Current company is required" }),
+      pinCode: z
+        .number({ required_error: "Pin code is required" })
+        .min(100000, "Pin code must be at least 6 digits")
+        .max(999999, "Pin code must be at most 6 digits"),
+      state: z.string({ required_error: "State is required" }),
+      skills: z
+        .array(z.string({ required_error: "Skill must be a string" }))
+        .min(1, "Please provide at least one skill"),
+      hiringFields: z
+        .array(z.string({ required_error: "Hiring field must be a string" }))
+        .min(1, "Please provide at least one hiring field"),
+      jobTitle: z.string({ required_error: "Job title is required" }),
+      experience: z.string({ required_error: "Experience is required" }),
+      mentorName: z.string({ required_error: "Mentor name is required" }),
+      industry: z.string({ required_error: "Industry is required" }),
+      bio: z.string().optional(),
+  
+      education: z
+        .array(
+          z.object({
+            institution: z.string({ required_error: "Institution name is required" }),
+            degree: z.string({ required_error: "Degree is required" }),
+            field: z.string({ required_error: "Field of study is required" }),
+            startYear: z.string({ required_error: "Start year is required" }),
+            endYear: z.string({ required_error: "End year is required" }),
+          })
+        )
+        .optional(),
+  
+      wholeExperience: z
+        .array(
+          z.object({
+            company: z.string({ required_error: "Company name is required" }),
+            position: z.string({ required_error: "Position is required" }),
+            description: z.string({ required_error: "Description is required" }),
+            startDate: z.string({ required_error: "Start date is required" }),
+            endDate: z.string({ required_error: "End date is required" }),
+            current: z.boolean({ required_error: "Current employment status is required" }),
+          })
+        )
+        .optional(),
+    })
+  )
+  
   .mutation(async ({ ctx, input }) => {
     return ctx.db.mentor.update({
       where: { userId: ctx?.dbUser?.id },
@@ -96,7 +148,9 @@ export const mentorRouter = createTRPCRouter({
   .query(async ({ ctx }) => {
     return ctx.db.mentor.findMany({
       select: {
+        availability: true,
         userId: true,
+        bio: true,
         mentorName: true,
         currentCompany: true,
         jobTitle: true,
@@ -105,6 +159,11 @@ export const mentorRouter = createTRPCRouter({
         hiringFields: true,
         companyType: true,
         state : true,
+        user : {
+          select : {
+            avatarUrl : true,
+          }
+        },
         meetingEvents: {
           select: {
             id: true,

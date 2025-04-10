@@ -43,9 +43,9 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
     imageAlt: blog?.fields?.featuredImage?.fields?.title,
   }));
 
-  console.log(blogs);
+  // console.log(blogs);
 
-  console.log(components);
+  // console.log(components);
 
   const handleScroll = () => {
     if (window.scrollY > lastScrollY) {
@@ -127,7 +127,7 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                   <div className="relative mt-2 w-full">
                     <details className="group [&_summary::-webkit-details-marker]:hidden">
                       <summary className="flex cursor-pointer items-center justify-between text-[18px] font-normal leading-[18px] text-[#5D5A88]">
-                        <span>Solutions</span>
+                        <Link href="/solutions/student">Solutions</Link>
                         <span className="transition group-open:rotate-180">
                           <svg
                             width="10"
@@ -159,12 +159,7 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                         >
                           Mentors
                         </Link>
-                        <Link
-                          href="/solutions/startup"
-                          className="block text-[16px] font-normal text-[#5D5A88]"
-                        >
-                          Startups
-                        </Link>
+                       
                       </div>
                     </details>
                   </div>
@@ -254,7 +249,7 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
             <NavigationMenuList className="text-black">
               <NavigationMenuItem className="">
                 <NavigationMenuTrigger>
-                  <Link href="/solutions" className="cursor-pointer ">
+                  <Link href="/solutions/student" className="cursor-pointer ">
                     Solutions
                   </Link>
                 </NavigationMenuTrigger>
@@ -263,24 +258,20 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                     <li className="row-span-3">
                       <NavigationMenuLink asChild>
                         <div
-                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-4 no-underline outline-none focus:shadow-md"
                           
                         >
-                          <img src="/logo.png" alt="logo" className="h- w-" />
-                          <div className="mb-2 mt-4 text-lg font-medium">
+                          <img src="/logo.png" alt="logo" className="h-20 w- object-cover"  />
+                          <div className="mb-2 mt-4 text-sm font-medium">
                             Solutions offered
                           </div>
-                          <p className="text-sm leading-tight text-muted-foreground">
-                            Tailored solutions for students, mentors, and
-                            startups to connect and grow together.
+                          <p className="text-xs leading-tight text-muted-foreground">
+                            Tailored solutions for students and mentors to connect and grow together.
                           </p>
                         </div>
                       </NavigationMenuLink>
                     </li>
-                    <ListItem href="/solutions/startup" title="Startups">
-                      Find the right talent, get expert guidance, and build a
-                      strong professional network to scale your startup.
-                    </ListItem>
+                 
                     <ListItem href="/solutions/mentor" title="Mentors">
                       Monetize your expertise, build your personal brand, and
                       mentor on your own terms with full flexibility.

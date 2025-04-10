@@ -41,12 +41,17 @@ export function Reviews({ reviews }: ReviewsProps) {
       </div>
 
       <div className="space-y-6">
+        {totalReviews === 0 && (
+          <p className="text-gray-500 border-l-2 pl-6">
+            No reviews available.
+            </p>
+              )}
         {displayedReviews.map((review) => (
           <div key={review.id} className="border-b border-gray-100 pb-6">
             <div className="mb-3 flex items-start justify-between">
               <div className="flex items-center">
-                <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 font-medium text-blue-700">
-                  {review.avatar || review.name.charAt(0)}
+                <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-full  font-medium text-blue-700">
+                  {review.avatar ? (<img src={review.avatar} alt={review.name} className="h-10 w-10 rounded-full" />) : review.name.charAt(0)}
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900">{review.name}</h3>

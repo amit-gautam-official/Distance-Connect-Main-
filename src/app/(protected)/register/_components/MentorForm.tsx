@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/popover";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
-import ImageUpload from "./ImageUpload";
+import {ImageUpload} from "./ImageUpload";
 import { toast } from "sonner";
 
 import { hiringFields } from "@/constants/hiringFirlds";
@@ -222,7 +222,7 @@ export default function MentorForm({
   return (
     <div className="mx-auto w-full max-w-2xl">
       <CardHeader>
-        <CardTitle className="text-center font-inter text-2xl font-medium leading-tight text-black sm:text-left sm:text-[28px] sm:leading-[36px] md:text-[32px]">
+        <CardTitle className="text-center mb-12 w-full font-inter text-2xl font-medium leading-tight text-black sm:text-left sm:text-[28px] sm:leading-[36px] md:text-[32px]">
           Give your Brief Introduction
         </CardTitle>
       </CardHeader>

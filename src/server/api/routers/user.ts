@@ -28,11 +28,22 @@ export const userRouter = createTRPCRouter({
   updateUser: protectedProcedure
   .input(z.object({
     name: z.string().optional(),
-    avatarUrl: z.string().url().optional(),
-    role: z.enum(["USER", "STUDENT", "MENTOR", "STARTUP"]).optional(),
-    isRegistered : z.boolean().optional(),
-    username: z.string().min(3).optional(),
+  
+    avatarUrl: z.string()
+      .url("Please provide a valid avatar URL")
+      .optional(),
+  
+    role: z.enum(["USER", "STUDENT", "MENTOR", "STARTUP"], {
+      errorMap: () => ({ message: "Invalid role selected" })
+    }).optional(),
+  
+    isRegistered: z.boolean().optional(),
+  
+    username: z.string()
+      .min(3, "Username must be at least 3 characters long")
+      .optional(),
   }))
+  
   
   .mutation(async ({ ctx, input }) => {
     return ctx.db.user.update({

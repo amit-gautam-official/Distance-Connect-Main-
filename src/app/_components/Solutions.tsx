@@ -198,7 +198,7 @@ const Solutions = () => {
           </div>
         </div>
       </div>
-      <div className="relative mt-10 flex flex-col items-center gap-4 lg:hidden">
+      {/* <div className="relative mt-10 flex flex-col items-center gap-4 lg:hidden">
         <img
           src="/bg6.jpg"
           className="relative z-[10] h-[369px] w-[336px] rounded-sm object-cover"
@@ -342,7 +342,7 @@ const Solutions = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       <div className="relative mt-10 flex flex-col items-center gap-4 lg:hidden">
         <img
           src="/bg7.jpg"
@@ -470,7 +470,7 @@ const Solutions = () => {
       </div>
 
       {/* desktop section */}
-      <div className="lg:flex h-[610px] hidden  w-full flex-shrink-0 rounded-[30px] bg-[linear-gradient(0deg,#FFFDEB_0%,#FFFDEB_100%),conic-gradient(from_196deg_at_78.23%_63.56%,rgba(245,246,255,0)_0deg,rgba(197,192,216,0)_360deg)]">
+      <div className="lg:flex mb-6 h-[610px] hidden  w-full flex-shrink-0 rounded-[30px] bg-[linear-gradient(0deg,#FFFDEB_0%,#FFFDEB_100%),conic-gradient(from_196deg_at_78.23%_63.56%,rgba(245,246,255,0)_0deg,rgba(197,192,216,0)_360deg)]">
         <div className="flex w-[50%] flex-col gap-4 px-[68px] pt-[60px]">
           <button className="h-[30px] w-[98px] flex-shrink-0 rounded-[20px] border border-white bg-[rgba(246,212,207,0.30)] font-inter text-[12px] font-medium leading-[110%] text-black backdrop-blur-[25px]">
             Student
@@ -622,7 +622,7 @@ const Solutions = () => {
           />
         </div>
       </div>
-      <div className="lg:flex hidden h-[564px] w-full flex-shrink-0">
+      {/* <div className="lg:flex hidden h-[564px] w-full flex-shrink-0">
         <div className="relative flex w-[50%] flex-col items-center justify-center">
           <div className="absolute right-[-50px]">
             <svg
@@ -790,12 +790,12 @@ const Solutions = () => {
             <Link href="/solutions/startup">Learn more</Link>
           </button>
         </div>
-      </div>
+      </div> */}
 
 
 
 
-      <div className="hidden lg:flex h-[564px] w-full flex-shrink-0 rounded-[30px] bg-[linear-gradient(0deg,#FFFDEB_0%,#FFFDEB_100%),conic-gradient(from_196deg_at_78.23%_63.56%,rgba(245,246,255,0)_0deg,rgba(197,192,216,0)_360deg)]">
+      <div className="hidden mt-6 lg:flex h-[564px] w-full flex-shrink-0 rounded-[30px] bg-[linear-gradient(0deg,#FFFDEB_0%,#FFFDEB_100%),conic-gradient(from_196deg_at_78.23%_63.56%,rgba(245,246,255,0)_0deg,rgba(197,192,216,0)_360deg)]">
         <div className="flex w-[50%] flex-col gap-4 px-[68px] pt-[60px]">
           <button className="w-[98px] h-[30px] flex-shrink-0 rounded-[20px] border border-white bg-[rgba(202,189,255,0.30)] backdrop-blur-[25px] text-black font-inter text-[12px] font-medium leading-[110%]">
           Mentors

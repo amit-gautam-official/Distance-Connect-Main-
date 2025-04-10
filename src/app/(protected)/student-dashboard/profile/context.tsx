@@ -24,7 +24,7 @@ export interface ProfileContextType {
 export const ProfileContext = createContext<ProfileContextType>({
   avatarUrl: "",
   updateAvatar: (newUrl: string) => {
-    console.log("Avatar update not implemented in context consumer", newUrl);
+    // console.log("Avatar update not implemented in context consumer", newUrl);
   },
   profileData: {
     name: "",
@@ -39,11 +39,11 @@ export const ProfileContext = createContext<ProfileContextType>({
     studentRole: "",
   },
   updateProfileField: (field: string, value: any) => {
-    console.log(
-      "Profile field update not implemented in context consumer",
-      field,
-      value,
-    );
+    // console.log(
+    //   "Profile field update not implemented in context consumer",
+    //   field,
+    //   value,
+    // );
   },
 });
 

@@ -63,7 +63,7 @@ const StudentDashboardPage = async () => {
     };
   });
 
-  console.log("mentorsData", mentorsData);
+  // console.log("mentorsData", mentorsData);
 
   const completedSessions = student?.scheduledMeetings?.filter(
     (m) => m.completed === true,
@@ -105,7 +105,7 @@ const StudentDashboardPage = async () => {
   // console.log("sessionData", sessionData);
 
   return (
-    <div className="container mx-auto w-full px-4 py-6">
+    <div className="container mx-auto w-full px-4 py-6 ">
       {/* Explore Mentors Banner */}
       <ExploreMentorsBanner />
 
@@ -115,7 +115,7 @@ const StudentDashboardPage = async () => {
       </div>
 
       {/* Main Content */}
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2 md:mb-0 mb-20">
         {/* Track Sessions Chart */}
         <TrackSessions sessionData={sessionData} />
 

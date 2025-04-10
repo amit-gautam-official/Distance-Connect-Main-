@@ -7,6 +7,7 @@ export interface SupportRequest {
   email: string;
   username?: string;
   message: string;
+  phone?: string; 
 }
 
 export class SupportEmailService extends EmailService {
@@ -24,7 +25,7 @@ export class SupportEmailService extends EmailService {
    * @returns Promise with email send result
    */
   async sendSupportEmail(requestData: SupportRequest): Promise<any> {
-    const { name, email, username, message } = requestData;
+    const { name, email, username, message, phone } = requestData;
 
     // Create HTML content for email
     const htmlContent = this.generateSupportEmailHtml(requestData);
@@ -52,7 +53,7 @@ Message: ${message}`,
    * @returns HTML string
    */
   private generateSupportEmailHtml(data: SupportRequest): string {
-    const { name, email, username, message } = data;
+    const { name, email, username, message, phone } = data;
     
     return `
       <!DOCTYPE html>
@@ -110,7 +111,8 @@ Message: ${message}`,
             </div>
             
             <div class="field">
-              <span class="label">Username:</span> ${username || 'Not provided'}
+              ${username? `<span class="label">Username:</span> ${username || 'Not provided'}` : ''}
+              ${phone ? `<br /><span class="label">Phone:</span> ${phone}` : ''}
             </div>
             
             <div class="field">

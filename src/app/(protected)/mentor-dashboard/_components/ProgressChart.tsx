@@ -62,8 +62,8 @@ const ProgressChart = () => {
     const completedSessions = scheduledSessions.filter(
       (session) => session?.completed,
     );
-    console.log("scheduledSessions", scheduledSessions);
-    console.log("completedSessions", completedSessions);
+    // console.log("scheduledSessions", scheduledSessions);
+    // console.log("completedSessions", completedSessions);
     const sessionsByMonth = completedSessions.reduce(
       (acc, session) => {
         const date = new Date(session?.selectedDate);
@@ -76,7 +76,7 @@ const ProgressChart = () => {
       {} as Record<number, number>,
     );
 
-    console.log("sessionsByMonth", sessionsByMonth);
+    // console.log("sessionsByMonth", sessionsByMonth);
 
     // Update months data with actual values
     const updatedData = months.map((month, index) => ({

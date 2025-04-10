@@ -20,7 +20,7 @@ export async function Connect({ mentorName , mentorUserId}: ConnectProps) {
         growth.
       </p>
       <div className="space-y-3">
-        <Link href="#offerings" className="block mb-2 w-full">
+        <Link href={`/mentors/${mentorUserId}/offerings`} className="block mb-2 w-full">
           <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">
             Schedule a Call
           </Button>

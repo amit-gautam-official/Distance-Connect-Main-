@@ -264,8 +264,11 @@ export default function ChatWindow({
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "instant" })
-  }, [chatRoom.id])
+    const timeout = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto" })
+    }, 500)
+    return () => clearTimeout(timeout)
+  }, [chatRoom.id, newMessages])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })

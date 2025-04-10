@@ -35,6 +35,7 @@ const SyncUser = async () => {
       },
     });
 
+
     //console.log("User Synced", user)
   } catch (error) {
     //console.log(error);

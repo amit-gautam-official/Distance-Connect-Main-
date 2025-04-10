@@ -116,7 +116,7 @@ const ProfilePage = () => {
         updateProfileField,
       }}
     >
-      <div className="container mx-auto px-4 py-4 sm:py-6">
+      <div className="container mx-auto px-2 py-4 sm:py-6 ">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 lg:gap-8">
           {/* Profile Header - Takes full width on mobile, 1/3 on desktop */}
           <div className="col-span-1 md:sticky md:top-20 md:self-start">

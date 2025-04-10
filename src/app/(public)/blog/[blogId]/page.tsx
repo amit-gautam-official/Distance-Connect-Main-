@@ -83,7 +83,7 @@ export default async function BlogPost({ params }: Props) {
     notFound();
   }
 
-  console.log(blog?.fields);
+  // console.log(blog?.fields);
 
   return (
     <div className="mx-auto min-h-screen w-[80%] pt-[150px]">

@@ -208,7 +208,7 @@ const StudentList = ({ studentsData }: { studentsData: Student[] }) => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  {/* <div className="flex items-center gap-2">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -218,7 +218,7 @@ const StudentList = ({ studentsData }: { studentsData: Student[] }) => {
                     >
                       <MessageSquare className="h-4 w-4" />
                     </Button>
-                  </div>
+                  </div> */}
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {student.expertise.map((exp) => (

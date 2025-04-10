@@ -21,6 +21,9 @@ interface MentorData {
   companyType: string;
   state: string;
   pinCode: number;
+  bio: string;
+  education: JSON[];
+  wholeExperience: JSON[];
   user: {
     id: string;
     name: string;
@@ -50,6 +53,9 @@ const ProfilePage = () => {
     hiringFields: [] as string[],
     state: "",
     companyType: "",
+    bio: "",
+    education: [] as JSON[],
+    wholeExperience: [] as JSON[],
   });
 
   // Initialize data from mentor data when it loads
@@ -68,6 +74,9 @@ const ProfilePage = () => {
         hiringFields: mentor.hiringFields || [],
         state: mentor.state || "",
         companyType: mentor.companyType || "",
+        bio: mentor.bio || "",
+        education: mentor.education || [] as JSON[],
+        wholeExperience: mentor.wholeExperience || [] as JSON[],
       });
     }
   }, [mentor]);
@@ -98,6 +107,10 @@ const ProfilePage = () => {
     industry: profileData.industry || mentor?.industry || "",
     companyType: profileData.companyType || mentor?.companyType || "",
     userId: mentor?.user?.id || "",
+    bio: mentor?.bio || "",
+    education: mentor?.education || [] as JSON[],
+    wholeExperience: mentor?.wholeExperience || [] as JSON[],
+    
   };
 
   return (
@@ -112,7 +125,7 @@ const ProfilePage = () => {
       <div className="container mx-auto px-4 py-4 sm:py-6 md:pb-0 pb-[100px]">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 lg:gap-8">
           {/* Profile Header - Takes full width on mobile, 1/3 on desktop */}
-          <div className="col-span-1 md:sticky md:top-20 md:self-start">
+          <div className="col-span-1 pb-12 md:sticky md:top-20 md:self-start">
             <div className="rounded-lg border bg-card p-4 shadow-sm sm:p-6">
               <ProfileHeader user={profileHeaderData!} />
             </div>

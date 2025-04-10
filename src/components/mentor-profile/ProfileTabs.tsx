@@ -10,15 +10,15 @@ import { Reviews } from "./Reviews";
 
 interface Experience {
   title: string;
-  company: string;
+  company : string;
+  description: string;
   period: string;
   duration: string;
+  isCurrent: boolean;
 }
 
-interface SkillGroup {
-  category: string;
-  skills: string[];
-}
+
+
 
 interface Offering {
   id: string;
@@ -53,8 +53,8 @@ interface EducationItem {
 interface ProfileTabsProps {
   experiences: Experience[];
   education: EducationItem[];
-  certifications: string[];
-  skillGroups: SkillGroup[];
+  // certifications: string[];
+  skillGroups: string[];
   tools: string[];
   offerings: Offering[];
   reviews: Review[];
@@ -63,7 +63,7 @@ interface ProfileTabsProps {
 export function ProfileTabs({
   experiences,
   education,
-  certifications,
+  // certifications,
   skillGroups,
   tools,
   offerings,
@@ -101,16 +101,15 @@ export function ProfileTabs({
           <Education education={education} />
           
           {/* Certifications */}
-          <Certifications certifications={certifications} />
+          {/* <Certifications certifications={certifications} /> */}
           
           {/* Skills */}
           <Skills skillGroups={skillGroups} />
           
-          {/* Tools */}
-          <Tools tools={tools} />
+         
         </TabsContent>
 
-        <TabsContent value="offerings" className="p-6">
+        <TabsContent id="offerings" value="offerings" className="p-6">
           <Offerings offerings={offerings} />
         </TabsContent>
 

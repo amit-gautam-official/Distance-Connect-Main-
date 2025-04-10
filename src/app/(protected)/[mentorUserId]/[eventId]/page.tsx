@@ -4,6 +4,7 @@ import { api } from "@/trpc/server";
 import { db } from "@/server/db";
 import { auth0 } from "@/lib/auth0";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 
 type Params = {
   mentorUserId: string;
@@ -13,6 +14,11 @@ type Params = {
 export default async function Page({ params }: { params: Promise<Params> }) {
   const { mentorUserId, eventId } = await params;
 
+  const session = await auth0.getSession();
+  if (!session?.user?.email) {
+    // Redirect to login if not authenticated
+    return redirect("/auth/login");
+  }
   const user = await api.user.getMe();
 
   // Check if the current user is the mentor for this event
@@ -65,6 +71,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white px-4 py-6 sm:px-6 md:px-8 md:py-10">
       <div className="mx-auto max-w-7xl">
+       
         <MeetingTimeDateSelection
           eventInfo={updatedEventDetails}
           mentorUserDetails={updatedMentorUserDetails}

@@ -101,7 +101,7 @@ export default function ChatPage() {
   useEffect(() => {
     if (chatRoomsQuery.status === "success") {
       setChatRooms(chatRoomsQuery.data);
-      console.log("Chat rooms:", chatRoomsQuery.data);
+      // console.log("Chat rooms:", chatRoomsQuery.data);
     }
     if(mentorId){
       if (getChatRoomByBothIdQuery.status === "success") {
@@ -126,7 +126,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (userQuery.status === "success" && userQuery.data?.role) {
-      console.log("User role:", userQuery.data.role);
+      // console.log("User role:", userQuery.data.role);
       setUserRole(userQuery.data.role);
     }
   }, [userQuery.status]);
@@ -196,7 +196,7 @@ export default function ChatPage() {
 
                   onMessageSent={(message) => {
                     // In a real app, this would send the message to the backend
-                    console.log("Message sent:", message);
+                    // console.log("Message sent:", message);
                     setChatRooms((prevRooms) =>
                       prevRooms?.map((room) =>
                         room.id === selectedChatRoom?.id

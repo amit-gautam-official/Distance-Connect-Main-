@@ -359,8 +359,15 @@ function MeetingTimeDateSelection({
               {eventInfo.duration} minutes
             </p>
           </div>
-          <div className="ml-4 flex-shrink-0 rounded-full bg-primary/10 p-3">
-            <CalendarCheck className="h-6 w-6 text-primary" />
+          <div className="ml-4 p-3">
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={150}
+            height={50}
+            className="h-auto"
+            priority
+          />
           </div>
         </div>
         {eventInfo.description && (
