@@ -5,7 +5,7 @@ const OurStory = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   return (
     <div>
-      <div className="m-auto mt-12 w-[80%] lg:hidden">
+      <div className="m-auto mt-12 w-[90%] lg:hidden">
         <div className="flex h-[620px] w-full flex-col justify-between rounded-[30px] border border-black bg-[#9FBAF1]">
           <div className="flex items-center gap-4 px-6 pb-6 pt-10">
             <img src="/star.svg" className="h-[27px] w-[25px] flex-shrink-0" />
@@ -37,8 +37,8 @@ const OurStory = () => {
               )}
             </div>
             <button
-              className="font-inter text-[12px] font-normal leading-[19px] text-[#3D568F]"
-              onClick={() => setIsExpanded(!isExpanded)}
+              className="font-inter text-[12px] font-normal leading-[19px] bg-[#EDFB90] rounded-sm px-1 text-[#3D568F]"
+              onClick={() => setIsExpanded(!isExpanded)} 
             >
               {isExpanded ? "Read Less" : "Read More"}
             </button>

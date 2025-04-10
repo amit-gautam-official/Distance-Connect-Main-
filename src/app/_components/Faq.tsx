@@ -9,7 +9,7 @@ import {
 const Faq = () => {
   return (
     <div className="py-8 sm:py-12 md:py-16">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6">
+      <div className="mx-auto w-[90%] max-w-3xl px-4 sm:px-6">
         <h2 className="mb-4 text-center text-xl font-bold text-[#3D568F] sm:mb-6 sm:text-2xl">
           Frequently Asked Questions
         </h2>

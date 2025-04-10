@@ -229,24 +229,24 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
     xl--> desktop */}
 
       <div
-        className={`fixed left-[50%] z-[200] m-auto hidden h-[68px] w-[80%] translate-x-[-50%] items-center justify-between rounded-[50px] bg-gray-100 border border-[#E1E4ED] pl-4 pr-6 shadow-md transition-transform duration-300 lg:flex ${
+        className={`fixed shadow-md left-[50%] z-[200] w-full   m-auto hidden h-[78px]  translate-x-[-50%] items-center justify-between  bg-white px-[15%]  transition-transform duration-300 lg:flex ${
           showNavbar
-            ? "translate-y-[30px] transform"
+            ? "translate-y-[0px] transform"
             : "-translate-y-[100px] transform"
         }`}
       >
         <div className="flex items-center justify-center gap-2">
           <Link href="/" className="cursor-pointer">
-            <img src="/logo.png" alt="logo" className="m-auto h-[70px]" />
+            <img src="/logo.png" alt="logo" className="m-auto h-[80px]" />
           </Link>
         </div>
-        <div className="flex items-center justify-center font-inter font-medium leading-normal text-white lg:gap-4 lg:text-[12px] xl:gap-8 xl:text-[16px]">
+        <div className="flex items-center justify-center font-inter leading-normal text-white lg:gap-4 lg:text-[16px] xl:gap-8 xl:text-[16px] font-[500]">
           {/* <div className="cursor-pointer">Solutions</div>
         <Link href="/blog" className='cursor-pointer'>Resources</Link>
         <div>Pricing</div>
         <Link href="/contact-us" className='cursor-pointer'>Contact Us</Link> */}
           <NavigationMenu>
-            <NavigationMenuList className="text-black">
+            <NavigationMenuList className="text-black text-[16px] font-[500]">
               <NavigationMenuItem className="">
                 <NavigationMenuTrigger>
                   <Link href="/solutions/student" className="cursor-pointer ">
@@ -329,13 +329,14 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
           <div className="flex items-center justify-center gap-4">
             <Link
               href="/auth/login"
-              className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[25px] border-[0.5px] border-black bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08)] lg:w-[100px] xl:w-[134px]"
+              className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[25px] border-[0.5px] border-[rgba(94,127,203,0.6)] bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-md lg:w-[100px] xl:w-[134px]"
             >
               Login
             </Link>
             <Link
               href="/auth/login?screen_hint=signup"
-              className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[25px] border-[0.5px] border-black text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08)] lg:w-[100px] xl:w-[134px]"
+              className="flex w-[102px] h-[41px] p-3 flex-col justify-center items-center shrink-0 rounded-[31px] bg-[#3D568F] shadow-md text-white font-roboto text-[16px] not-italic font-medium leading-[24px]
+"
             >
               Sign Up
             </Link>
@@ -344,13 +345,13 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
           <div className="flex items-center justify-center gap-4">
             <Link
               href="/register"
-              className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[25px] border-[0.5px] border-[rgba(94,127,203,0.6)] bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08)] lg:w-[100px] xl:w-[134px]"
+              className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[31px] border-[0.5px] border-[rgba(94,127,203,0.6)] bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-md lg:w-[100px] xl:w-[134px]"
             >
               Dashboard
             </Link>
             <Link
               href="/auth/logout"
-              className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[25px] border-[0.5px] border-[rgba(94,127,203,0.6)] bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08)] lg:w-[100px] xl:w-[134px]"
+              className="flex w-[102px] h-[41px] p-3 flex-col justify-center items-center shrink-0 rounded-[31px] bg-[#3D568F] shadow-md  text-white font-roboto text-[16px] not-italic font-medium leading-[24px]"
             >
               Logout
             </Link>

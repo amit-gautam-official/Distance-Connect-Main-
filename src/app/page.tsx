@@ -45,7 +45,7 @@ export default async function Home() {
 
   return (
     <div className="relative h-[4000px]">
-      <img src="/bg.png" alt="bg" className="absolute right-[0] top-0" />
+      {/* <img src="/bg.png" alt="bg" className="absolute right-[0] top-0" /> */}
 
       <div className="relative flex w-full items-center justify-center">
         <Navbar blogs={initialBlogs} loggedId={loggedId} />

@@ -3,32 +3,31 @@ import React from 'react'
 const KeyBenefits = () => {
   return (
     <div>
-        <div className='w-[80%] m-auto  lg:hidden'>
-            <div className='w-full h-[620px]  rounded-[30px] border border-black bg-[#9FBAF1]' >
+        <div className='w-[90%] m-auto  lg:hidden'>
+            <div className='w-full h-[620px] px-4  rounded-[30px] border border-black bg-[#9FBAF1]' >
             <div className='flex gap-4 px-6 pb-6 pt-10   items-center'> 
                 <img src='/star.svg' className='w-[25px] h-[27px] flex-shrink-0' />
                 <div className='text-[#EDFB90] font-inter text-[24px] font-semibold leading-[28px]'>Key Benifits</div>
              </div>
-             <div className='flex  flex-col mt-6 pl-[66px] pr-[40px] '>
-                <img src='/plane.svg' className='w-[28px] h-[30px]' />
+             <div className='flex text-center flex-col justify-center items-center mt-6  '>
+                <img src='/plane.svg' className='w-[28px] h-[30px]  ' />
                 <div className='text-[#3D568F] mt-4 font-inter text-[16px] font-medium leading-[18px]'>Personalized Career Growth</div>
                 <div className='text-white font-inter text-[13px] font-normal leading-[18px]'>
-                Lorem ipsum dolor sit amet consectetur eli mattis sit  sit nullam.
+                Get tailored guidance and mentorship that aligns with your unique career goals, ensuring you stand out in the competitive job market.
                 </div>
              </div>
-             <div className='flex mt-10 flex-col  pl-[66px] pr-[20px] '>
-                <img src='/phome.svg' className='w-[28px] h-[30px] flex p-[6px_4px_4px_5px] flex-col justify-center items-center rounded-[8px] bg-[#F0F6FF]
-' />
-                <div className='text-[#3D568F] mt-4 font-inter text-[16px] font-medium leading-[18px]'>Personalized Career Growth</div>
+             <div className='flex text-center mt-10 flex-col justify-center items-center   '>
+                <img src='/phome.svg' className='w-[28px] h-[30px] flex p-[6px_4px_4px_5px] flex-col justify-center items-center rounded-[8px] bg-[#F0F6FF]' />
+                <div className='text-[#3D568F] mt-4 font-inter text-[16px] font-medium leading-[18px]'>Complete Job Preparation</div>
                 <div className='text-white font-inter text-[13px] font-normal leading-[18px]'>
-                Lorem ipsum dolor sit amet consectetur eli mattis sit  sit nullam.
+                From mock interviews to resume reviews, we provide end-to-end support to help you secure your dream job or internship.
                 </div>
              </div>
-             <div className='flex mt-10 flex-col  pl-[66px] pr-[20px] '>
+             <div className='flex text-center mt-10 flex-col items-center justify-center   '>
                 <img src='/letter.svg' className=' h-[30px] flex w-[28px] p-[6px_4px_4px_5px] flex-col justify-center items-center rounded-[8px] bg-[#F0F6FF]' />
-                <div className='text-[#3D568F] mt-4 font-inter text-[16px] font-medium leading-[18px]'>Personalized Career Growth</div>
+                <div className='text-[#3D568F] mt-4 font-inter text-[16px] font-medium leading-[18px]'>Thriving Community & Network</div>
                 <div className='text-white font-inter text-[13px] font-normal leading-[18px]'>
-                Lorem ipsum dolor sit amet consectetur eli mattis sit  sit nullam.
+                Join a supportive community of mentors, peers, and industry experts, offering insights, opportunities, and collaborations to accelerate your success.
                 </div>
              </div>
              
