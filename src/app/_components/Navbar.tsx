@@ -112,17 +112,11 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
 
               <div className="flex h-full flex-col justify-between gap-4">
                 <div className="mt-4 flex flex-col items-center justify-start gap-4 text-left">
-                  <div className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]">
-                    Home
-                  </div>
-                  <div className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]">
-                    About
-                  </div>
-                  <Link
-                    href="/blog"
+                <Link
+                    href="/mentors"
                     className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
                   >
-                    Blogs
+                    Mentors
                   </Link>
                   <div className="relative mt-2 w-full">
                     <details className="group [&_summary::-webkit-details-marker]:hidden">
@@ -163,8 +157,18 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                       </div>
                     </details>
                   </div>
+                  <Link
+                    href="/blog"
+                    className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
+                  >
+                    Blogs
+                  </Link>
+                
                   <div className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]">
                     Pricing
+                  </div>
+                  <div className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]">
+                    AI Tutors (Coming Soon)
                   </div>
                   <Link
                     href="/contact-us"
@@ -174,17 +178,7 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                   </Link>
                 </div>
                 <div className="flex flex-col gap-16">
-                  <div className="flex flex-col gap-6">
-                    <div className="flex items-center gap-2 text-[16px] font-medium leading-[16px] text-[#5D5A88]">
-                      <CircleHelp /> <span>FAQs</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[16px] font-medium leading-[16px] text-[#5D5A88]">
-                      <Headphones /> <span>Support</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[16px] font-medium leading-[16px] text-[#5D5A88]">
-                      <Settings /> <span>Settings</span>
-                    </div>
-                  </div>
+                 
                   <div className="flex flex-col items-center justify-center gap-4">
                     {!loggedId ? (
                       <>
@@ -229,9 +223,9 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
     xl--> desktop */}
 
       <div
-        className={`fixed shadow-md left-[50%] z-[200] w-full   m-auto hidden h-[78px]  translate-x-[-50%] items-center justify-between  bg-white px-[15%]  transition-transform duration-300 lg:flex ${
+        className={`fixed left-[50%] z-[200] w-full   m-auto hidden h-[78px]  translate-x-[-50%] items-center justify-between  bg-white px-[10%]  transition-transform duration-300 lg:flex ${
           showNavbar
-            ? "translate-y-[0px] transform"
+            ? "translate-y-[0px] transform "
             : "-translate-y-[100px] transform"
         }`}
       >
@@ -247,6 +241,13 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
         <Link href="/contact-us" className='cursor-pointer'>Contact Us</Link> */}
           <NavigationMenu>
             <NavigationMenuList className="text-black text-[16px] font-[500]">
+            <NavigationMenuItem>
+                <Link href="/mentors" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Mentors
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
               <NavigationMenuItem className="">
                 <NavigationMenuTrigger>
                   <Link href="/solutions/student" className="cursor-pointer ">
@@ -315,6 +316,21 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link href="/ai-tutors" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    AI Tutors
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link href="/" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Pricing
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              
               <NavigationMenuItem>
                 <Link href="/contact-us" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>

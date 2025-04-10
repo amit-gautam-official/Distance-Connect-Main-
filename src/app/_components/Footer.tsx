@@ -191,8 +191,7 @@ export default function Footer() {
                 Subscribe to our newsletter
               </div>
               <div className="text-center font-[Inter] text-[14px] font-normal leading-[22px] text-[#3D568F]">
-                Donec eget dignissim id sit egestas in consequat volutpat
-                elementum donec et.
+                Join our newsletter to get the latest updates.
               </div>
               <div className="flex gap-2">
                 <Input

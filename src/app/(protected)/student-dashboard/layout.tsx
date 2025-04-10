@@ -3,6 +3,13 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { api } from "@/trpc/server";
 import { redirect } from "next/navigation";
 import { auth0 } from "@/lib/auth0";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Distance Connect",
+  description: "A platform for connecting students and mentors.",
+  icons: [{ rel: "icon", url: "/favicon.ico" }],
+};
 
 export default async function Layout({
   children,

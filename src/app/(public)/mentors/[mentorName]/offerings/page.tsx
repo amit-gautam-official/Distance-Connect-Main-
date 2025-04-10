@@ -101,7 +101,7 @@ export default async function OfferingsPage({ params }: PageProps) {
   }));
 
   return (
-    <div className="container mx-auto px-4 md:py-8 md:px-6 lg:px-8">
+    <div className="container mx-auto lg:pt-[100px]  px-4  md:px-6 lg:px-8">
       <div className="mb-8 rounded-lg bg-white p-6 shadow-md">
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
           <Avatar className="h-16 w-16 border-2 border-blue-100 shadow-sm">
