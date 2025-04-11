@@ -40,14 +40,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html >
-      <head>
-    <link rel="canonical" href="https://distanceconnect.in/mentors" />
-  </head>
-      <body>
-        
+      <>
         {children}
-      </body>
-    </html>
+      </>
+        
   );
 }

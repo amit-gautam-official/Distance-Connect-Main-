@@ -12,19 +12,7 @@ import { AvailabilityCard } from "@/components/mentor-profile/AvailabilityCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BadgeCheck, MapPin, Briefcase, Star } from "lucide-react";
 
-interface Offering {
-  id: string;
-  title: string;
-  description: string;
-  rating: number;
-  duration: string;
-  price: string;
-  type: string;
-  repliesIn: string;
-  priority: number;
-  mentorUserId: string;
-  userEmail: string;
-}
+
 
 type ScheduledMeetingsWithRelations = ScheduledMeetings & {
   student: {

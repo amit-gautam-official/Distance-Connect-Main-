@@ -58,11 +58,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
-      <head>
-    <link rel="canonical" href="https://distanceconnect.in" />
-  </head>
       <body>
-        
         <TRPCReactProvider>{children}</TRPCReactProvider>
         <Toaster />
       </body>
