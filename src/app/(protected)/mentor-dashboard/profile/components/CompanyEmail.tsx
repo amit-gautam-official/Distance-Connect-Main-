@@ -27,7 +27,7 @@ export default function CompanyEmail({ company, companyEmail }: { company: strin
       // Success is handled in the handleOtp function
     },
     onError: (error) => {
-      setError(error.message);
+      setError("Failed to update company email. Please try again.");
     },
   });
 
@@ -54,7 +54,7 @@ export default function CompanyEmail({ company, companyEmail }: { company: strin
       setStep('otp');
       handleResendCooldown();
     } catch (err: any) {
-      setError(err.message || 'Failed to verify email. Please try again.');
+      setError('Failed to verify email. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -82,7 +82,7 @@ export default function CompanyEmail({ company, companyEmail }: { company: strin
       setError('');
       handleResendCooldown();
     } catch (err: any) {
-      setError(err.message || 'Failed to resend OTP. Please try again.');
+      setError('Failed to resend OTP. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -107,7 +107,7 @@ export default function CompanyEmail({ company, companyEmail }: { company: strin
       setError('');
       setStep('done');
     } catch (err: any) {
-      setError(err.message || 'Invalid OTP. Please try again.');
+      setError('Invalid OTP. Please try again.');
     } finally {
       setIsLoading(false);
     }
