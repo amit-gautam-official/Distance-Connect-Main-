@@ -114,7 +114,7 @@ function MeetingEventList() {
     const meetingEventUrl =
       process.env.NODE_ENV === "development"
         ? "http://localhost:3000" + "/" + event.mentorUserId + "/" + event.id
-        : "https://dictanceconnect.in" +
+        : "https://distanceconnect.in" +
           "/" +
           event.mentorUserId +
           "/" +
