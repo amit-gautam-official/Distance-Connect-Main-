@@ -54,7 +54,7 @@ export default function CompanyEmail({ company, companyEmail }: { company: strin
       setStep('otp');
       handleResendCooldown();
     } catch (err: any) {
-      setError('Failed to verify email. Please try again.');
+      setError('Company email domain does not match the company name');
     } finally {
       setIsLoading(false);
     }
