@@ -69,6 +69,7 @@ export const mentorRouter = createTRPCRouter({
   ),
 
   
+   
 
   updateMentorCompanyEmail : protectedProcedure
   .input(z.object({
@@ -78,11 +79,11 @@ export const mentorRouter = createTRPCRouter({
     return ctx.db.mentor.update({
       where: { userId: ctx?.dbUser?.id },
       data: {
+        companyEmailVerified : true,
         companyEmail : input.companyEmail,
       },
     });
-  }
-  ),
+  }),
   updateMentor: protectedProcedure
   .input(
     z.object({
@@ -136,6 +137,23 @@ export const mentorRouter = createTRPCRouter({
   )
   
   .mutation(async ({ ctx, input }) => {
+
+    const currentCompany = await ctx.db.mentor.findUnique({
+      where: { userId: ctx?.dbUser?.id },
+      select: { currentCompany: true },
+    });
+
+    if(currentCompany){
+      if(currentCompany.currentCompany !== input.currentCompany){
+        await ctx.db.mentor.update({
+          where: { userId: ctx?.dbUser?.id },
+          data: {
+            companyEmailVerified : false,
+          },
+        });
+      }
+    }
+
     return ctx.db.mentor.update({
       where: { userId: ctx?.dbUser?.id },
       data: input,

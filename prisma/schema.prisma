@@ -100,6 +100,7 @@ model Mentor {
   skills       String[]
   profileBanner String?
   companyEmail String?
+  companyEmailVerified Boolean @default(false)
 
   meetingEvents     MeetingEvent[]
   availability      Availability?

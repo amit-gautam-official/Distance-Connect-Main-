@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { verifyCompanyEmail } from '../actions/verifyEmail';
 import { validateOtp } from '../actions/validateOtp';
 import { api } from '@/trpc/react';
@@ -10,17 +10,31 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle, AlertCircle, Mail, Loader2 } from "lucide-react";
 
-export default function CompanyEmail({ company, companyEmail }: { company: string, companyEmail: string }) {
+export default function CompanyEmail({ 
+  company, 
+  companyEmail, 
+  companyEmailVerified = false 
+}: { 
+  company: string, 
+  companyEmail: string, 
+  companyEmailVerified: boolean 
+}) {
   const [email, setEmail] = useState(companyEmail || '');
   const [otp, setOtp] = useState('');
-  const [step, setStep] = useState<'form' | 'otp' | 'done' | 'verified'>(() => {
-    // If company email exists and we're not changing it, show verified state
-    return companyEmail ? 'verified' : 'form';
-  });
+  const [step, setStep] = useState<'form' | 'otp' | 'done' | 'verified'>('form');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [resendDisabled, setResendDisabled] = useState(false);
   const [countdown, setCountdown] = useState(0);
+
+  // Set the initial state based on companyEmailVerified and companyEmail
+  useEffect(() => {
+    if (companyEmailVerified && companyEmail) {
+      setStep('verified');
+    } else {
+      setStep('form');
+    }
+  }, [companyEmailVerified, companyEmail]);
 
   const updateMentorCompanyEmailMutation = api.mentor.updateMentorCompanyEmail.useMutation({
     onSuccess: () => {
