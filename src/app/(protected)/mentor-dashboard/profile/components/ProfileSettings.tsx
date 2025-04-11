@@ -274,6 +274,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, mentor }) => {
               </TabsContent>
               <TabsContent value="verifyEmail" className="mt-12 md:mt-6">
                 <CompanyEmail
+                  companyEmailVerified={mentor.companyEmailVerified}
                   company={formData.currentCompany}
                   companyEmail={mentor.companyEmail || ""}
                 />
