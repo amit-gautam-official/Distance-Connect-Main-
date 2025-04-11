@@ -712,7 +712,7 @@ export default function PrivacyPolicy() {
               <p>
                 By visiting this page on our website:{" "}
                 <a
-                  href="https://www.distanceconnect.in/contact"
+                  href="https://distanceconnect.in/contact"
                   rel="external nofollow noopener"
                   target="_blank"
                   className="text-blue-600 hover:underline"

@@ -15,6 +15,7 @@ export const fileRouter = createTRPCRouter({
   upload: protectedProcedure
     .input(
       z.object({
+        initialAvatarUrl: z.string().optional(),
         bucketName: z.string(),
         fileName: z.string(),
         fileType: z.string(),
@@ -23,8 +24,33 @@ export const fileRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      const { bucketName, fileName, fileType, fileContent,folderName } = input;
+      const { bucketName, fileName, fileType, fileContent,folderName, initialAvatarUrl } = input;
       const bucket = storage.bucket(bucketName);
+      if (!bucket) {
+        throw new Error("Bucket not found");
+      }
+      // delete initial image if exists
+if (initialAvatarUrl) {
+  const bucketName = 'dc-profile-image';
+  const url = new URL(initialAvatarUrl);
+  console.log("URL:", url);
+  const pathname = url.pathname; // e.g. '/dc-profile-image/dc-banner-image/file.webp'
+
+  // Remove leading slash and bucket name to get the full object path
+  const objectPath = pathname.replace(`/${bucketName}/`, '');
+
+  console.log("Object path to delete:", objectPath);
+
+  const initialFile = bucket.file(objectPath);
+
+  await initialFile.delete()
+    .then(() => {
+      console.log("Initial image deleted successfully");
+    })
+    .catch((err) => {
+      console.error("Error deleting initial image:", err);
+    });
+}
 
       // Convert base64 to buffer
       const buffer = Buffer.from(fileContent, "base64");

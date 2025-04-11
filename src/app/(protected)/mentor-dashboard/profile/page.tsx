@@ -122,18 +122,18 @@ const ProfilePage = () => {
         updateProfileField,
       }}
     >
-      <div className="container mx-auto px-4 py-4 sm:py-6 md:pb-0 pb-[100px]">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 lg:gap-8">
+      <div className="container mx-auto px-1 py-4 sm:py-6 md:pb-6 pb-24">
+        <div className="grid grid-cols-1 justify-center   gap-4 md:grid-cols-3 md:gap-6 lg:gap-8">
           {/* Profile Header - Takes full width on mobile, 1/3 on desktop */}
-          <div className="col-span-1 pb-12 md:sticky md:top-20 md:self-start">
-            <div className="rounded-lg border bg-card p-4 shadow-sm sm:p-6">
+          <div className="col-span-1 md:mt-[150px] flex justify-center   ">
+            <div className="rounded-lg  bg-card p-4 shadow-sm sm:p-6">
               <ProfileHeader user={profileHeaderData!} />
             </div>
           </div>
 
           {/* Main Content - Takes full width on mobile, 2/3 on desktop */}
           <div className="col-span-1 space-y-4 md:col-span-2 md:space-y-6">
-            <div className="min-h-[500px] sm:min-h-[600px]">
+            <div className="rounded-lg  bg-card p-1 min-h-[500px] sm:min-h-[600px] sm:p-6">
               <UserSettings />
             </div>
           </div>

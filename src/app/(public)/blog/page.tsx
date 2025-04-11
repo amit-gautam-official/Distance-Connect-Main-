@@ -16,7 +16,7 @@ export const metadata: Metadata = {
       "Explore our blog for insights, experiences, and lessons from the Distance Connect community. Find inspiration and share your stories.",
     images: [
       {
-        url: "/blog.jpg", // You'll need to add this image to your public folder
+        url: "/logo.png", 
         width: 1200,
         height: 630,
         alt: "Distance Connect Blog",
@@ -29,13 +29,15 @@ export const metadata: Metadata = {
     title: "Blog | Distance Connect",
     description:
       "Explore our blog for insights, experiences, and lessons from the Distance Connect community. Find inspiration and share your stories.",
-    images: ["/og-blog.jpg"], // Same image as OpenGraph
+    images: ["/logo.png"], // Same image as OpenGraph
   },
   robots: {
     index: true,
     follow: true,
   },
 };
+
+
 
 const page = async () => {
   const response = await client.getEntries({ content_type: "pageBlogPost" });

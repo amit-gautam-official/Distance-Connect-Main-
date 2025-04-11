@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import MeetingEventList from "../meeting/meeting-type/_components/MeetingEventList";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -7,10 +7,12 @@ import { useRouter } from "next/navigation";
 
 const ServicesPage = () => {
   const router = useRouter();
+ 
 
   return (
     <div className="container mx-auto px-4 py-4 sm:px-6 sm:py-8">
-      <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between mt-4 md:mt-0">
+ 
+           <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold sm:text-3xl">Meeting Services</h1>
           <p className="mt-2 text-gray-600">Manage your meeting types</p>
@@ -24,9 +26,10 @@ const ServicesPage = () => {
         </Button>
       </div>
 
-      <div className="rounded-lg sm:p-6 mb-20 md:mb-0">
-        <MeetingEventList />
-      </div>
+          <div className="mb-20 rounded-lg sm:p-6 md:mb-0">
+            <MeetingEventList />
+          </div>
+
     </div>
   );
 };

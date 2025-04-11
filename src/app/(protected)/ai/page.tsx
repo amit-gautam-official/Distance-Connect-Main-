@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { gemini } from "@/lib/services/gemini";
 
 interface Message {
   text: string;
@@ -34,9 +35,7 @@ const AIChatPage = () => {
   const generateGeminiResponse = async (prompt: string) => {
     try {
       // Initialize the Gemini API
-      const genAI = new GoogleGenerativeAI(
-        process.env.NEXT_PUBLIC_GEMINI_API_KEY || "AIzaSyDAyKyppuLVnd8mLyYpIudOe3STcVw2Qng",
-      );
+      const genAI = gemini;
 
       // For text-only input, use the gemini-pro model
       const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });

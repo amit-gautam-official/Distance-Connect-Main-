@@ -73,6 +73,12 @@ export default function WorkingForm({
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+      const [checked, setChecked] = useState(false);
+      
+        const handleChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
+          setChecked(e.target.checked);
+        }
+
   const router = useRouter();
   const createStudentUpdateUser =
     api.student.createStudentUpdateUser.useMutation({
@@ -143,6 +149,10 @@ export default function WorkingForm({
     if (usernameError) {
       return;
     }
+         if (!checked) {
+              toast.error("Please agree to the Terms and Conditions and Privacy Policy");
+              return;
+            }
 
     const role: "STUDENT" = "STUDENT";
     const studentRole: "WORKING" = "WORKING";
@@ -531,6 +541,25 @@ export default function WorkingForm({
                 </FormItem>
               )}
             />
+              <div className="flex items-center space-x-2">
+    <input
+      type="checkbox"
+      id="agree"
+      className="h-4 w-4 accent-blue-600"
+      checked={checked}
+        onChange={handleChecked}
+    />
+    <label htmlFor="agree" className="text-sm text-[#8A8A8A]">
+      I agree to the&nbsp;
+      <a href="/terms-conditions" className="text-blue-600 hover:underline">
+        Terms and Conditions
+      </a>
+      &nbsp;and&nbsp;
+      <a href="/privacy-policy" className="text-blue-600 hover:underline">
+        Privacy Policy
+      </a>
+    </label>
+  </div>
 
             <Button disabled={isSubmitting} type="submit" className="w-full">
               {isSubmitting ? "Submitting..." : "Submit"}

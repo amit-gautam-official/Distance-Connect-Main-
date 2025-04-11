@@ -42,6 +42,7 @@ import { useRouter } from "next/navigation";
 import {ImageUpload} from "./ImageUpload";
 
 import { hiringFields } from "@/constants/hiringFirlds";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   username: z.string().min(3, {
@@ -70,6 +71,12 @@ export default function HighSchoolForm({
   const [profileImageUrl, setProfileImageUrl] = useState<string>("");
 
   const router = useRouter();
+   const [checked, setChecked] = useState(false);
+  
+    const handleChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setChecked(e.target.checked);
+    }
+
   const createStudentUpdateUser =
     api.student.createStudentUpdateUser.useMutation({
       onSuccess: () => {
@@ -135,6 +142,10 @@ export default function HighSchoolForm({
     if (usernameError) {
       return;
     }
+     if (!checked) {
+          toast.error("Please agree to the Terms and Conditions and Privacy Policy");
+          return;
+        }
 
     const role: "STUDENT" = "STUDENT";
     const studentRole: "HIGHSCHOOL" = "HIGHSCHOOL";
@@ -462,6 +473,27 @@ export default function HighSchoolForm({
                 )}
               />
             </div>
+                     
+  <div className="flex items-center space-x-2">
+    <input
+      type="checkbox"
+      id="agree"
+      className="h-4 w-4 accent-blue-600"
+      checked={checked}
+        onChange={handleChecked}
+    />
+    <label htmlFor="agree" className="text-sm text-[#8A8A8A]">
+      I agree to the&nbsp;
+      <a href="/terms-conditions" className="text-blue-600 hover:underline">
+        Terms and Conditions
+      </a>
+      &nbsp;and&nbsp;
+      <a href="/privacy-policy" className="text-blue-600 hover:underline">
+        Privacy Policy
+      </a>
+    </label>
+  </div>
+
 
             <Button type="submit" className="w-full">
               Submit

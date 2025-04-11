@@ -1,4 +1,4 @@
-import React from "react";
+import React, { cache } from "react";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -79,6 +79,8 @@ async function getMentorData(
   }
 }
 
+const getCachedMentorData =  cache(getMentorData)
+
 // Function to fetch similar mentors based on industry or job title
 async function getSimilarMentors(
   currentMentor: MentorWithRelations,
@@ -116,9 +118,14 @@ async function getSimilarMentors(
   }
 }
 
+
+const getCachedSimilarMentors = cache(getSimilarMentors)
+
+
+
 export async function generateMetadata({ params }: PageProps) {
   const { mentorName } = await params;
-  const mentor = await getMentorData(mentorName);
+  const mentor = await getCachedMentorData(mentorName);
 
   if (!mentor) {
     return {
@@ -129,7 +136,7 @@ export async function generateMetadata({ params }: PageProps) {
 
   return {
     title: `${mentor.mentorName} | Mentor Profile`,
-    description: `Connect with ${mentor.mentorName}, a ${mentor.jobTitle} at ${mentor.currentCompany} with ${mentor.experience}   ence.`,
+    description: `Connect with ${mentor.mentorName}, a ${mentor.jobTitle} at ${mentor.currentCompany} with ${mentor.experience} experience.`,
   };
 }
 
@@ -145,7 +152,7 @@ interface PageProps {
 
 export default async function MentorProfilePage({ params }: PageProps) {
   const { mentorName } = await params;
-  const mentorData = await getMentorData(mentorName);
+  const mentorData = await getCachedMentorData(mentorName);
   // console.log("mentorData", mentorData);
   const session = await auth0.getSession();
   const userEmail = session?.user.email;
@@ -241,7 +248,7 @@ export default async function MentorProfilePage({ params }: PageProps) {
   ];
 
   // Get similar profiles - mentors in the same industry or with same job title
-  const similarProfiles = await getSimilarMentors(mentorData);
+  const similarProfiles = await getCachedSimilarMentors(mentorData);
 
   // Get real reviews from completed meetings with feedback
   const meetingReviews = mentorData.scheduledMeetings

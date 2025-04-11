@@ -99,6 +99,7 @@ model Mentor {
   wholeExperience Json[]  // Array of objects
   skills       String[]
   profileBanner String?
+  companyEmail String?
 
   meetingEvents     MeetingEvent[]
   availability      Availability?

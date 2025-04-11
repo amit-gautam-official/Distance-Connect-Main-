@@ -84,6 +84,7 @@ export const BannerUpload = ({
       if (!base64Content) return;
 
       uploadImage.mutate({
+        initialAvatarUrl: initialBannerUrl,
         bucketName: "dc-profile-image",
         folderName: "dc-banner-image",
         fileName: userId,
@@ -103,8 +104,8 @@ export const BannerUpload = ({
   }, [isSubmitting]);
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="relative">
+    <div className="flex flex-col w-full  items-center gap-4">
+      <div className="relative w-[80%]">
         <div className="w-full overflow-hidden rounded-lg shadow-md">
           {previewUrl ? (
             <img
@@ -113,7 +114,7 @@ export const BannerUpload = ({
               className="aspect-[4/1] h-32 object-cover"
             />
           ) : (
-            <div className="flex h-32 w-full items-center justify-center rounded-lg bg-gray-200">
+            <div className="flex px-[10%]  h-32 w-full items-center justify-center rounded-lg bg-gray-200">
               <Ban className="h-8 w-8 text-gray-400 pr-2" />
               <p className="text-sm text-gray-500">
                 No banner image uploaded.

@@ -68,6 +68,21 @@ export const mentorRouter = createTRPCRouter({
   }
   ),
 
+  
+
+  updateMentorCompanyEmail : protectedProcedure
+  .input(z.object({
+    companyEmail : z.string(),
+  }))
+  .mutation(async ({ ctx, input }) => {
+    return ctx.db.mentor.update({
+      where: { userId: ctx?.dbUser?.id },
+      data: {
+        companyEmail : input.companyEmail,
+      },
+    });
+  }
+  ),
   updateMentor: protectedProcedure
   .input(
     z.object({

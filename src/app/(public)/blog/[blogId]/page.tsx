@@ -1,4 +1,4 @@
-import React from "react";
+import React, { cache } from "react";
 import client from "@/lib/contentful";
 import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
@@ -16,7 +16,7 @@ export async function generateMetadata(
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const { blogId } = await params;
-  const blog: any = await getBlogPost(blogId);
+  const blog: any = await cachedGetBlogPost(blogId);
   const seoFields = blog?.fields?.seoFields?.fields;
  
 
@@ -28,7 +28,7 @@ export async function generateMetadata(
 
   return {
     metadataBase: new URL(
-      process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
+      "https://www.distanceconnect.in",
     ),
     title: `${seoFields?.internalName} | Distance Connect`,
     description: seoFields?.pageDescription || "Blog Distance Connect",
@@ -65,19 +65,25 @@ interface BlogPost {
   // Add other fields as needed
 }
 
+
+
 // Helper function to fetch blog post
 async function getBlogPost(slug: string) {
   const response = await client.getEntries({
     content_type: "pageBlogPost",
     "fields.slug": slug,
   });
-
+  
   return response.items[0];
 }
 
+const cachedGetBlogPost = cache(getBlogPost);
+
+
+
 export default async function BlogPost({ params }: Props) {
   const { blogId } = await params;
-  const blog: any = await getBlogPost(blogId);
+  const blog: any = await cachedGetBlogPost(blogId);
   // console.log(blog?.fields?.seoFields?.fields.shareImage);
   if (!blog) {
     notFound();

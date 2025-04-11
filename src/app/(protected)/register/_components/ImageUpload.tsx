@@ -90,6 +90,7 @@ export const ImageUpload = ({
       const base64Content = base64String.split(",")[1]; // Remove the data URL prefix
       if (!base64Content) return;
       uploadImage.mutate({
+        initialAvatarUrl: initialAvatarUrl,
         bucketName: "dc-profile-image",
         fileName: userId,
         fileType: selectedFile.type,

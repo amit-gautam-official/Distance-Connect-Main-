@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Clock, Copy, MapPin, Pen, Settings, Trash } from "lucide-react";
+import { Clock, Copy, MapPin, Pen, Plus, Settings, Trash } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type MeetingEvent = {
   description: string | null;
@@ -122,10 +123,43 @@ function MeetingEventList() {
     toast("Copied to Clipboard");
   };
 
+  // Loading skeleton component
+  const EventSkeleton = () => (
+    <div className="flex flex-col gap-3 rounded-lg border border-t-8 p-5 shadow-md animate-pulse">
+      <div className="flex justify-end">
+        <div className="h-5 w-5 rounded-full bg-gray-200"></div>
+      </div>
+      <div className="h-6 w-3/4 rounded-md bg-gray-200"></div>
+      <div className="flex justify-between">
+        <div className="h-4 w-1/4 rounded-md bg-gray-200"></div>
+      </div>
+      <div className="h-4 w-full rounded-md bg-gray-200"></div>
+      <div className="h-4 w-11/12 rounded-md bg-gray-200"></div>
+      <hr className="my-1"></hr>
+      <div className="flex justify-between">
+        <div className="h-4 w-1/4 rounded-md bg-gray-200"></div>
+      </div>
+    </div>
+  );
+
   return (
     <>
       <div className="mt-10 grid grid-cols-1 gap-7 md:grid-cols-2 lg:grid-cols-3">
-        {data && data?.length > 0 ? (
+        {isLoading ? (
+          // Display skeletons while loading
+          <>
+            <EventSkeleton />
+            <EventSkeleton />
+            <EventSkeleton />
+          </>
+        ) : data?.length === 0 ? (
+          <div className="flex flex-col items-center justify-center">
+            <h2 className="text-lg font-semibold">No Meeting Events Found</h2>
+            <p className="text-sm text-gray-500">
+              Create a new meeting type to get started.
+            </p>
+          </div>
+        ) : (
           data?.map((event, index) => (
             <div
               key={index}
@@ -174,9 +208,17 @@ function MeetingEventList() {
               </div>
             </div>
           ))
-        ) : (
-          <div className="flex flex-col items-center justify-center">
-            <h2>Create a new meeting type</h2>
+        )}
+        
+        {isError && (
+          <div className="col-span-full flex flex-col items-center justify-center p-8 text-center">
+            <h2 className="text-lg font-semibold text-red-500">Error Loading Meeting Events</h2>
+            <p className="text-sm text-gray-500">
+              There was a problem loading your meeting events. Please try again later.
+            </p>
+            <Button onClick={() => refetch()} className="mt-4">
+              Retry
+            </Button>
           </div>
         )}
       </div>

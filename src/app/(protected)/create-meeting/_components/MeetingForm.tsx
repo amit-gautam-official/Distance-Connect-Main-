@@ -9,6 +9,7 @@ import {
   FileText,
   Users,
   Video,
+  ChevronDown,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import {
@@ -168,11 +169,12 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                   <Clock className="h-4 w-4 text-gray-500" />
                   Duration *
+
                 </label>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="h-11 w-40">
-                      {duration.toString()} Min
+                      {duration.toString()} Min  <ChevronDown className="h-4 w-4 text-gray-500" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
