@@ -225,7 +225,7 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
     xl--> desktop */}
 
       <div
-        className={`fixed left-[50%] z-[200] w-full   m-auto hidden h-[78px]  translate-x-[-50%] items-center justify-between  bg-white px-[10%]  transition-transform duration-300 lg:flex ${
+        className={`fixed left-[50%] z-[50] w-full   m-auto hidden h-[78px]  translate-x-[-50%] items-center justify-between  bg-white px-[10%]  transition-transform duration-300 lg:flex ${
           showNavbar
             ? "translate-y-[0px] transform "
             : "-translate-y-[100px] transform"

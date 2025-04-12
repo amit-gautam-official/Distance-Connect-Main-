@@ -78,7 +78,7 @@ const Solutions = () => {
           className="relative z-[10] h-[369px] w-[336px] rounded-sm object-cover"
           alt="bg5"
         />
-        <div className="relative z-[100] mt-[-120px] h-[228px] w-[326px] rounded-[8px] border border-[#E1E4ED] bg-[#FFF] p-8 shadow-md">
+        <div className="relative z-[40] mt-[-120px] h-[228px] w-[326px] rounded-[8px] border border-[#E1E4ED] bg-[#FFF] p-8 shadow-md">
           <div className="font-inter text-[22px] font-bold leading-[32px] text-[#3D568F]">
             Student & Beginners
           </div>
@@ -349,7 +349,7 @@ const Solutions = () => {
           className="relative z-[10] h-[369px] w-[336px] rounded-sm object-cover"
           alt="bg5"
         />
-        <div className="relative z-[100] mt-[-120px] h-[228px] w-[326px] rounded-[8px] border border-[#E1E4ED] bg-[#FFF] p-8 shadow-md">
+        <div className="relative z-[40] mt-[-120px] h-[228px] w-[326px] rounded-[8px] border border-[#E1E4ED] bg-[#FFF] p-8 shadow-md">
           <div className="font-inter text-[22px] font-bold leading-[32px] text-[#3D568F]">
           Mentors
           </div>
