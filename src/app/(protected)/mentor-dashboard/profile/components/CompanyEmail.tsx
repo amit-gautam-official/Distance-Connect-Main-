@@ -148,7 +148,7 @@ export default function CompanyEmail({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between bg-slate-50 p-3 rounded-md">
+              <div className="flex items-center md:flex-row flex-col justify-between bg-slate-50 p-3 rounded-md">
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-slate-500" />
                   <span className="font-medium">{companyEmail}</span>
