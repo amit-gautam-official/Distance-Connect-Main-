@@ -217,8 +217,12 @@ export default function ContactForm() {
                 Visit Us
               </div>
               <div className="font-[DM Sans] text-center text-[18px] font-normal leading-[30px] text-white">
-                58 rohini Rd <br />
-                Delhi, 110042
+              <span>
+                  IIF, Room No: 808, 8th Floor, <br />
+                  Academic Block 4, Delhi <br />
+                  Technological University, <br />
+                  Bhavana Road, Delhi - 110042
+                </span>
               </div>
             </div>
             <div className="flex flex-col pt-[60px] text-center">
@@ -226,9 +230,9 @@ export default function ContactForm() {
                 Contact Us
               </div>
               <div className="font-[DM Sans] text-center text-[18px] font-normal leading-[30px] text-white">
-                (123) 456 - 789 <br />
-                (123) 456 - 789 <br />
-                contact@company.com
+              <span>+91 8750307740</span> <br/>
+                
+                <span>support@distanceconnect.in</span>
               </div>
             </div>
           </div>

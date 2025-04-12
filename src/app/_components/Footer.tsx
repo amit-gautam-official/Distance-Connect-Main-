@@ -22,8 +22,7 @@ export default function Footer() {
                   Subscribe to our newsletter
                 </div>
                 <div className="text-center font-[Inter] text-[14px] font-normal leading-[22px] text-white">
-                  Donec eget dignissim id sit egestas in consequat volutpat
-                  elementum donec et.
+                  Get the latest updates and news from us.
                 </div>
                 <div className="flex gap-2">
                   <Input
