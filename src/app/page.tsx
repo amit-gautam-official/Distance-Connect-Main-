@@ -63,7 +63,6 @@ export default async function Home() {
         {/* Increased top margin for FeatureMentor */}
         <FeatureMentor />
       </div>
-
       <OurStory />
       <Potential />
       <Testimonials />

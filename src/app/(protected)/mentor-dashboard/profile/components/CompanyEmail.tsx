@@ -203,7 +203,7 @@ export default function CompanyEmail({
                 ) : 'Send Verification Code'}
               </Button>
               
-              {companyEmail && (
+              {companyEmailVerified && (
                 <Button 
                   variant="ghost" 
                   onClick={() => setStep('verified')} 

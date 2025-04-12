@@ -1,6 +1,5 @@
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { BLOCKS, INLINES } from '@contentful/rich-text-types';
-import Image from 'next/image'; // Use Next.js Image for optimized images
 import React from 'react';
 
 // Define options for rendering rich text
@@ -12,8 +11,10 @@ const options = {
       const { target } = data;
       const { fields } = target;
 
+      console.log(target);
+
       // Example: Render an embedded image component
-      if (target.sys.contentType.sys.id === 'componentRichImage') {
+      if (target?.sys?.contentType?.sys?.id === 'componentRichImage') {
         return (
           <div className="my-4">
             <img
@@ -32,15 +33,12 @@ const options = {
         );
       }
 
-      // Fallback for unsupported embedded entries
+      // Fallback for unsupported or unknown embedded entries
       return (
-        <div className="my-4 p-4 bg-yellow-100 border border-yellow-300 rounded">
-          <p className="text-yellow-800">
-            Unsupported embedded entry: {target.sys.contentType.sys.id}
-          </p>
-        </div>
+        <></>
       );
     },
+
     // Handle embedded assets (e.g., images directly embedded in the rich text)
     [BLOCKS.EMBEDDED_ASSET]: (node: any) => {
       const { data } = node;

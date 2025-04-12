@@ -35,14 +35,13 @@ const SyncUser = async () => {
       },
     });
 
+    return redirect("/register");
 
-    //console.log("User Synced", user)
   } catch (error) {
     //console.log(error);
     return notFound();
   }
 
-  return redirect("/register");
 };
 
 export default SyncUser;

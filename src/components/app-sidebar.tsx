@@ -84,7 +84,7 @@ export function AppSidebar({ role }: { role: string }) {
     },
     {
       title: "AI career assistant",
-      url: "/student-dashboard/ai",
+      url: "/ai",
       icon: BotMessageSquare,
     },
   ];

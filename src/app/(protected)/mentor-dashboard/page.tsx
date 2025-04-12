@@ -1,18 +1,15 @@
 import { api } from "@/trpc/server";
 import Link from "next/link";
 import React from "react";
-import ChatRooms from "./_components/chatRooms";
 import ProgressChart from "./_components/ProgressChart";
 import ScheduledSessions from "./_components/ScheduledSessions";
-import { MessageSquareMore } from "lucide-react";
 
 const Page = async () => {
-  const chatRooms = await api.chatRoom.getChatRoomByMentorId();
   const scheduledSessions =
     await api.scheduledMeetings.getMentorScheduledMeetings();
 
   return (
-    <div className="mx-auto min-h-screen w-full p-4 md:p-8">
+    <div className="mx-auto min-h-[100dvh] w-full p-4 md:p-8">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">
