@@ -11,8 +11,8 @@ const SyncUser = async () => {
   if (!user) {
     throw new Error("User not found");
   }
-  if (!user.email) {
-    return notFound();
+  if (!user?.email) {
+    return redirect("/");
   }
 
   try {
