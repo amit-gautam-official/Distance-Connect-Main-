@@ -93,7 +93,7 @@ const ProfileCompletionBar: React.FC<ProfileCompletionBarProps> = ({
         name: "Skills & Expertise",
         isComplete: false,
         fields: [
-          { name: "Skills", isComplete: !!formData.skills && formData.skills.split(",").length >= 3 },
+          { name: "Skills", isComplete: !!formData.skills && formData.skills.split(",").length >= 2 },
           { name: "Hiring Fields", isComplete: !!formData.hiringFields },
         ],
       },

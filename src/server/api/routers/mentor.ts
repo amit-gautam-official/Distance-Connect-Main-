@@ -180,6 +180,9 @@ export const mentorRouter = createTRPCRouter({
   getAllMentors: publicProcedure
   .query(async ({ ctx }) => {
     return ctx.db.mentor.findMany({
+      where:{
+        companyEmailVerified: true,
+      },
       select: {
         companyEmailVerified: true,
         availability: true,
