@@ -25,6 +25,7 @@ interface Mentor {
   experience: string | null;
   industry: string | null;
   currentCompany: string | null;
+  companyEmailVerified: boolean;
   hiringFields: string[];
   bio: string | null;
   user: {
@@ -116,9 +117,13 @@ export function MentorCard({ mentor }: MentorCardProps) {
               </div>
               <div className="text-center sm:text-left">
                 <div className="font-medium">{mentor.jobTitle}</div>
-                <div className="text-sm text-gray-600">
+                {mentor.companyEmailVerified ?
+                  <div className="text-sm text-gray-600">
                   {mentor.currentCompany}
                 </div>
+                : <div className="text-sm text-gray-600">
+                  <span className="text-red-500">Not Verified</span> {mentor.currentCompany}
+                </div>}
               </div>
             </div>
 

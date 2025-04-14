@@ -117,7 +117,11 @@ export const BannerUpload = ({
             <div className="flex px-[10%]  h-32 w-full items-center justify-center rounded-lg bg-gray-200">
               <Ban className="h-8 w-8 text-gray-400 pr-2" />
               <p className="text-sm text-gray-500">
-                No banner image uploaded.
+                Upload 4:1 aspect ratio image for best results
+                <br />
+                Recommended size: 1600x400px
+                <br />
+
               </p>
             </div>
           )}

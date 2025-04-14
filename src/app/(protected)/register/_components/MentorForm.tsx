@@ -746,7 +746,7 @@ export default function MentorForm({
 
 
             <Button type="submit" className="w-full">
-              Submit
+              {form.formState.isSubmitting ? "Submitting..." : "Submit"}
             </Button>
           </form>
         </Form>

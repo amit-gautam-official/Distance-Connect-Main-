@@ -13,6 +13,7 @@ interface ProfileHeaderProps {
     mentorName: string;
     jobTitle: string;
     currentCompany: string;
+    companyEmailVerified: boolean;
     experience: string;
     industry: string;
     bio ?: string;
@@ -88,9 +89,12 @@ export function ProfileHeader({
                 {mentor.mentorName}
               </h1>
               <p className="text-gray-700">{mentor.jobTitle}</p>
-              <p className="font-medium text-blue-600">
+              { mentor.companyEmailVerified ?
+                <p className="font-medium text-blue-600">
                 @{mentor.currentCompany}
-              </p>
+              </p> : <p className="font-medium text-blue-600">
+                <span className="text-red-500">Not Verified</span> @{mentor.currentCompany}
+              </p>}
             </div>
             <div className="mt-2 flex items-center space-x-2 md:mt-0">
               <Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
@@ -106,12 +110,14 @@ export function ProfileHeader({
                 {mentor.experience} of experience
               </span>
             </div>
+            {mentor.companyEmailVerified && 
             <div className="flex items-center rounded-full bg-gray-50 px-3 py-1 text-sm text-gray-800">
               <div className="mr-2 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">
                 C
               </div>
               <span>{mentor.currentCompany}</span>
-            </div>
+            </div> 
+            }
             <div className="flex items-center rounded-full bg-gray-50 px-3 py-1 text-sm text-gray-800">
               <div className="mr-2 flex h-4 w-4 items-center justify-center rounded-full bg-gray-200 text-xs font-bold text-gray-600">
                 I

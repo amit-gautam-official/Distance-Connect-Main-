@@ -142,7 +142,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, mentor }) => {
   }, [user, mentor]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -197,7 +197,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, mentor }) => {
       hiringFields: formData.hiringFields.split(",").map(item => item.trim()),
       skills: formData.skills.split(",").map(item => item.trim()),
       state: formData.state,
-      linkedinUrl: formData.linkedinUrl,
+      linkedinUrl: formData.linkedinUrl === "" ? undefined : formData.linkedinUrl,
       jobTitle: formData.jobTitle,
       experience: formData.experience,
       industry: formData.industry,

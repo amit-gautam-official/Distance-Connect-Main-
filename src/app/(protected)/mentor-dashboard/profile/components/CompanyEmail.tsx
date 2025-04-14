@@ -158,6 +158,7 @@ export default function CompanyEmail({
             </CardContent>
             <CardFooter>
               <Button 
+                type='button'
                 variant="outline" 
                 onClick={startChangeEmail} 
                 className="w-full"
@@ -191,6 +192,7 @@ export default function CompanyEmail({
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
               <Button 
+              type='button'
                 onClick={handleVerify}
                 className="w-full"
                 disabled={isLoading}
@@ -205,6 +207,7 @@ export default function CompanyEmail({
               
               {companyEmailVerified && (
                 <Button 
+                type='button'
                   variant="ghost" 
                   onClick={() => setStep('verified')} 
                   className="w-full"
@@ -237,7 +240,8 @@ export default function CompanyEmail({
               />
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
-              <Button 
+              <Button
+              type='button' 
                 onClick={handleOtp}
                 className="w-full"
                 disabled={isLoading}
@@ -252,6 +256,7 @@ export default function CompanyEmail({
               
               <div className="flex justify-between w-full text-sm pt-2">
                 <Button
+                type='button'
                   variant="link"
                   onClick={() => setStep('form')}
                   disabled={isLoading || resendDisabled}
@@ -261,6 +266,7 @@ export default function CompanyEmail({
                 </Button>
                 
                 <Button
+                type='button'
                   variant="link"
                   onClick={handleResendOtp}
                   disabled={resendDisabled || isLoading}
@@ -297,6 +303,7 @@ export default function CompanyEmail({
             </CardContent>
             <CardFooter>
               <Button 
+              type='button'
                 variant="outline" 
                 onClick={() => setStep('verified')} 
                 className="w-full"

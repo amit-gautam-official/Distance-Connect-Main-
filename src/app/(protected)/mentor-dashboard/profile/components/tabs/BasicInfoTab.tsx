@@ -9,12 +9,15 @@ import { BannerUpload } from "@/app/(protected)/register/_components/BannerUploa
 import CompanyEmail from "../CompanyEmail";
 import { User as PrismaUser, Mentor } from "@prisma/client";
 import { CompanyType } from "../types";
+import { FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { each } from "node_modules/chart.js/dist/helpers/helpers.core";
 
 interface BasicInfoTabProps {
   formData: {
     name: string;
     location: string;
-    linkedinUrl: string;
+    linkedinUrl: string | undefined;
     currentCompany: string;
     pinCode: string;
     state: string;
@@ -24,7 +27,7 @@ interface BasicInfoTabProps {
     industry: string;
   };
   companyType: CompanyType;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   handleCompanyTypeChange: (value: string) => void;
   user: PrismaUser;
   mentor: Mentor;
@@ -190,14 +193,49 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="industry">Industry</Label>
-              <Input
-                id="industry"
-                name="industry"
-                value={formData.industry}
-                onChange={handleChange}
-                placeholder="Your industry"
-              />
+              
+<div className="flex flex-col gap-2">
+  <Label htmlFor="industry" className="text-sm text-black font-inter">
+    Industry
+  </Label>
+  <select
+    id="industry"
+    name="industry"
+    value={formData.industry}
+    onChange={handleChange}
+    className="w-[300px] rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-black focus:border-black focus:outline-none focus:ring-1 focus:ring-black transition-all"
+  >
+    <option value="" disabled>Select Industry</option>
+    <option value="Software Development">Software Development</option>
+    <option value="Artificial Intelligence / Machine Learning">
+      Artificial Intelligence / Machine Learning
+    </option>
+    <option value="Data Science & Analytics">Data Science & Analytics</option>
+    <option value="Cloud Computing & DevOps">Cloud Computing & DevOps</option>
+    <option value="Cybersecurity">Cybersecurity</option>
+    <option value="Blockchain & Web3">Blockchain & Web3</option>
+    <option value="IoT & Embedded Systems">IoT & Embedded Systems</option>
+    <option value="UI/UX Design">UI/UX Design</option>
+    <option value="Product Management">Product Management</option>
+    <option value="Digital Marketing">Digital Marketing</option>
+    <option value="Finance & Investment Banking">Finance & Investment Banking</option>
+    <option value="Consulting & Strategy">Consulting & Strategy</option>
+    <option value="Mechanical & Automotive Engineering">
+      Mechanical & Automotive Engineering
+    </option>
+    <option value="Civil & Construction Engineering">
+      Civil & Construction Engineering
+    </option>
+    <option value="Electrical & Electronics Engineering">
+      Electrical & Electronics Engineering
+    </option>
+    <option value="Biomedical & Healthcare Technology">
+      Biomedical & Healthcare Technology
+    </option>
+  </select>
+</div>
+
+                              
             </div>
           </div>
         </div>

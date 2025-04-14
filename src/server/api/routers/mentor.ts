@@ -89,7 +89,7 @@ export const mentorRouter = createTRPCRouter({
     z.object({
       linkedinUrl: z
         .string({ required_error: "LinkedIn URL is required" })
-        .url("Please enter a valid LinkedIn URL"),
+        .url("Please enter a valid LinkedIn URL").optional(),
       companyType: z.string({ required_error: "Company type is required" }),
       currentCompany: z.string({ required_error: "Current company is required" }),
       pinCode: z
@@ -169,18 +169,19 @@ export const mentorRouter = createTRPCRouter({
   // }
   // ),
 
-  // getMentor: protectedProcedure
-  // .query(async ({ ctx }) => {
-  //   return ctx.db.student.findUnique({
-  //     where: { userId: ctx?.dbUser?.id },
-  //   });
-  // }
-  // ),
+  getMentor: protectedProcedure
+  .query(async ({ ctx }) => {
+    return ctx.db.mentor.findUnique({
+      where: { userId: ctx?.dbUser?.id },
+    });
+  }
+  ),
 
   getAllMentors: publicProcedure
   .query(async ({ ctx }) => {
     return ctx.db.mentor.findMany({
       select: {
+        companyEmailVerified: true,
         availability: true,
         userId: true,
         bio: true,

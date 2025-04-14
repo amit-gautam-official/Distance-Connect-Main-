@@ -134,9 +134,9 @@ const ProgressChart = () => {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-gray-900">
-          {selectedYear} WORKING PROGRESS
+          2025 WORKING PROGRESS
         </h2>
-        <div className="relative">
+        {/* <div className="relative">
           <button
             className="flex items-center gap-1 rounded border border-gray-300 px-3 py-1 text-sm"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -167,7 +167,7 @@ const ProgressChart = () => {
               </div>
             </div>
           )}
-        </div>
+        </div> */}
       </div>
 
       <div className="h-48">

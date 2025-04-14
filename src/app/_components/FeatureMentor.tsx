@@ -12,33 +12,64 @@ import MentorCard from "./MentorCard"
 
 export default function FeatureMentor() {
 
-        const mentors = [
-            {
-                name: "Lisa Nilon",
-                company: "Microsoft",
-                experience: "10 years"
-            },
-            {
-                name: "Paarth Rathore",
-                company: "Apple",
-                experience: "5 years"
-            },
-            {
-                name: "Prachi Sinha",
-                company: "Boat",
-                experience: "2 years"
-            },
-            {
-                name: "Wilsom trump",
-                company: "Microsoft",
-                experience: "5 years"
-            },
-            {
-                name: "John Doe",
-                company: "Google",
-                experience: "10 years"
-            }
-        ]
+  const mentors = [
+    {
+      name: "Lisa Nilon",
+      company: "Microsoft",
+      experience: "10 years",
+      img: "/mentors/m1.jpeg",
+    },
+    {
+      name: "Paarth Rathore",
+      company: "Apple",
+      experience: "5 years",
+      img: "/mentors/m2.jpeg",
+    },
+    {
+      name: "Rahul Sinha",
+      company: "Boat",
+      experience: "2 years",
+      img: "/mentors/m3.jpeg",
+    },
+    {
+      name: "Tanay Gupta",
+      company: "Microsoft",
+      experience: "5 years",
+      img: "/mentors/m4.jpeg",
+    },
+    {
+      name: "Siddharth Sharma",
+      company: "Google",
+      experience: "10 years",
+      img: "/mentors/m5.jpeg",
+    },
+    {
+      name: "Nihal Kapoor",
+      company: "Meta",
+      experience: "8 years",
+      img: "/mentors/m6.jpeg",
+    },
+    {
+      name: "Rajiv Menon",
+      company: "Amazon",
+      experience: "7 years",
+      img: "/mentors/m7.jpeg",
+    },
+    {
+      name: "Bhavesh Kumar",
+      company: "Netflix",
+      experience: "6 years",
+      img: "/mentors/m8.jpeg",
+    },
+    {
+      name: "Sarthak Mehra",
+      company: "Tesla",
+      experience: "4 years",
+      img: "/mentors/m9.jpeg",
+    },
+   
+  ];
+  
 
   return (
     <div className="relative h-[670px] px-6 flex justify-center items-center" >

@@ -11,7 +11,7 @@ interface ProfileCompletionBarProps {
   formData: {
     name: string;
     location: string;
-    linkedinUrl: string;
+    linkedinUrl: string | undefined;
     currentCompany: string;
     pinCode: string;
     state: string;
@@ -72,21 +72,21 @@ const ProfileCompletionBar: React.FC<ProfileCompletionBarProps> = ({
           { name: "Company Name", isComplete: !!formData.currentCompany },
           { name: "Job Title", isComplete: !!formData.jobTitle },
           { name: "Experience", isComplete: !!formData.experience },
-          { name: "Industry", isComplete: !!formData.industry },
+          { name: "Industry", isComplete: !!formData.industry  },
         ],
       },
       {
         name: "Education",
         isComplete: false,
         fields: [
-          { name: "Education History", isComplete: educationList.length > 0 },
+          { name: "Education History", isComplete: educationList.length === 1 ? educationList[0]?.institution !== "" : educationList.length > 1 },
         ],
       },
       {
         name: "Experience",
         isComplete: false,
         fields: [
-          { name: "Work Experience", isComplete: experienceList.length > 0 },
+          { name: "Work Experience", isComplete: experienceList.length === 1 ? experienceList[0]?.company !== "" : experienceList.length > 1 },
         ],
       },
       {

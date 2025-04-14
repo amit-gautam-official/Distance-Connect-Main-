@@ -14,6 +14,7 @@ import Testimonials from "./_components/Testimonials";
 import Faq from "./_components/Faq";
 import Footer from "./_components/Footer";
 import client from "@/lib/contentful";
+import { syncUserToDb } from "@/lib/syncUser";
 
 export default async function Home() {
   // Fetch the user session
@@ -23,16 +24,19 @@ export default async function Home() {
 
   if (user) {
     const dbUser = await api.user.checkUser({ kindeId: user?.sub! });
-    //console.log("DB User", dbUser)
-
+  
     if (dbUser) {
       loggedId = true;
       if (!dbUser.isRegistered) {
-        //console.log("User is not registered")
         return redirect("/register");
       }
     } else {
-      return redirect("/sync-user-to-db");
+      const synced = await syncUserToDb(); // 👈 direct function call
+      if (synced) {
+        return redirect("/register");
+      } else {
+        return redirect("/error"); // or handle error as needed
+      }
     }
   }
 

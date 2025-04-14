@@ -358,6 +358,7 @@ const professionalBackground = {
               currentCompany: mentorData.currentCompany || "",
               experience: mentorData.experience || "",
               industry: mentorData.industry || "",
+              companyEmailVerified: mentorData.companyEmailVerified || false,
               bio: mentorData.bio || "",
               user: mentorData.user
                 ? { avatarUrl: mentorData.user.avatarUrl || "" }

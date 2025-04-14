@@ -1,27 +1,16 @@
-"use server";
+import "server-only"
 import { db } from "@/server/db";
-import { notFound, redirect } from "next/navigation";
 import { auth0 } from "@/lib/auth0";
 
-
-const SyncUser = async () => {
-
+export const syncUserToDb = async () => {
   const session = await auth0?.getSession();
   const user = session?.user;
 
-  if (!user) {
-    throw new Error("User not found");
-  }
-  if (!user?.email) {
-    return redirect("/");
-  }
+  if (!user || !user.email) return false;
 
   try {
-
     await db.user.upsert({
-      where: {
-        kindeId: user.sub,
-      },
+      where: { kindeId: user.sub },
       update: {
         name: user.given_name + " " + user.family_name,
         avatarUrl: user.picture,
@@ -32,17 +21,13 @@ const SyncUser = async () => {
         email: user.email,
         name: user.given_name + " " + user.family_name,
         avatarUrl: user.picture,
-        username : user.sub,
+        username: user.sub,
       },
     });
 
-    return redirect("/register");
-
-  } catch (error) {
-    //console.log(error);
-    return notFound();
+    return true;
+  } catch (err) {
+    console.error("DB sync failed:", err);
+    return false;
   }
-
 };
-
-export default SyncUser;
