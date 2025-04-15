@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Github, Linkedin } from "lucide-react";
+import { BriefcaseBusiness, Github, Linkedin, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -60,8 +60,9 @@ export default function RegisterForm({
                   setRole("MENTOR");
                   setStep(2);
                 }}
-                className="h-[45px] w-full flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] transition-colors hover:border-blue-400 hover:text-[#0A64BC] focus:border-blue-400 focus:text-[#0A64BC] xl:h-[65.66px]"
+                className="h-[45px] w-full flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] transition-colors hover:border-blue-400 hover:text-[#0A64BC] focus:border-blue-400 focus:text-[#0A64BC] xl:h-[65.66px] m-auto flex justify-center items-center gap-2 "
               >
+                <BriefcaseBusiness className="h-4 w-4" />
                 To be a Mentor
               </button>
               <button
@@ -69,11 +70,12 @@ export default function RegisterForm({
                   setRole("STUDENT");
                   setStep(2);
                 }}
-                className="h-[45px] w-full flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] transition-colors hover:border-blue-400 hover:text-[#0A64BC] focus:border-blue-400 focus:text-[#0A64BC] xl:h-[65.66px]"
+                className="h-[45px] w-full  justify-center items-center flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] transition-colors flex hover:border-blue-400 hover:text-[#0A64BC] focus:border-blue-400 focus:text-[#0A64BC] xl:h-[65.66px]"
               >
+                <User className="mr-2 h-6 w-6" />
                 Placement Preparation
               </button>
-              <button
+              {/* <button
                 onClick={() => {
                   setRole("STUDENT");
                   setStep(2);
@@ -81,7 +83,7 @@ export default function RegisterForm({
                 className="h-[45px] w-full flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] transition-colors hover:border-blue-400 hover:text-[#0A64BC] focus:border-blue-400 focus:text-[#0A64BC] xl:h-[65.66px]"
               >
                 Find Jobs
-              </button>
+              </button> */}
             </div>
           </div>
         ) : (

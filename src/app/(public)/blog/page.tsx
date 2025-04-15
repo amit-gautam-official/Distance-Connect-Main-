@@ -47,6 +47,16 @@ const page = async () => {
       new Date(b.sys.updatedAt).getTime() - new Date(a.sys.updatedAt).getTime(),
   );
 
+  if(!blogsInDescendingOrder || blogsInDescendingOrder.length === 0) {
+    return (
+      <div className="mx-auto min-h-screen w-full bg-white pt-[50px] md:pt-[150px]">
+        <div className="text-center font-inter text-[20px] font-normal leading-normal tracking-[0.6px] [webkit-text-stroke-color:#000] [webkit-text-stroke-width:1px]">
+          No blogs available at the moment.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto min-h-screen w-full bg-white pt-[50px] md:pt-[150px]">
       <div className="mb-20">

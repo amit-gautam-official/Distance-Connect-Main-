@@ -56,83 +56,110 @@ Message: ${message}`,
     const { name, email, username, message, phone } = data;
     
     return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <title>New Support Request</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              line-height: 1.6;
-              color: #333;
-              max-width: 600px;
-              margin: 0 auto;
-            }
-            .container {
-              border: 1px solid rgba(0, 0, 0, 0.1);
-              border-radius: 5px;
-              padding: 20px;
-              margin: 20px 0;
-            }
-            h1 {
-              font-size: 24px;
-              color: #333;
-              text-align: center;
-              margin-bottom: 20px;
-            }
-            .field {
-              margin-bottom: 10px;
-            }
-            .label {
-              font-weight: bold;
-            }
-            .message-box {
-              background-color: #f5f5f5;
-              padding: 15px;
-              border-radius: 5px;
-              margin: 10px 0;
-              white-space: pre-wrap;
-            }
-            .footer {
-              font-size: 12px;
-              color: rgba(0, 0, 0, 0.7);
-              text-align: center;
-              margin-top: 20px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <h1>New Support Request</h1>
-            
-            <div class="field">
-              <span class="label">Name:</span> ${name}
-            </div>
-            
-            <div class="field">
-              ${username? `<span class="label">Username:</span> ${username || 'Not provided'}` : ''}
-              ${phone ? `<br /><span class="label">Phone:</span> ${phone}` : ''}
-            </div>
-            
-            <div class="field">
-              <span class="label">Email:</span> ${email}
-            </div>
-            
-            <div class="field">
-              <span class="label">Message:</span>
-            </div>
-            
-            <div class="message-box">
-              ${message.replace(/\n/g, '<br />')}
-            </div>
-          </div>
-          
-          <div class="footer">
-            &copy; 2024 | Distance Connect
-          </div>
-        </body>
-      </html>
+     <!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>New Support Request</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f3f6fa;
+        margin: 0;
+        padding: 20px;
+        color: #333;
+      }
+
+      .container {
+        max-width: 650px;
+        background-color: #ffffff;
+        margin: 40px auto;
+        padding: 30px 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e0e0e0;
+      }
+
+      h1 {
+        text-align: center;
+        font-size: 26px;
+        margin-bottom: 30px;
+        color: #2e5aac;
+      }
+
+      .field {
+        margin-bottom: 16px;
+        font-size: 15px;
+        line-height: 1.5;
+      }
+
+      .label {
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 4px;
+        color: #555;
+      }
+
+      .message-box {
+        background: linear-gradient(to right, #f5f8ff, #e9f0ff);
+        padding: 18px;
+        border-left: 4px solid #2e5aac;
+        border-radius: 8px;
+        color: #333;
+        font-size: 15px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .optional {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #444;
+      }
+
+      .footer {
+        font-size: 12px;
+        color: #999;
+        text-align: center;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>New Support Request</h1>
+
+      <div class="field">
+        <div class="label">Name:</div>
+        ${name}
+      </div>
+
+      ${username || phone ? `
+        <div class="field optional">
+          ${username ? `<div><span class="label">Username:</span> ${username}</div>` : ''}
+          ${phone ? `<div><span class="label">Phone:</span> ${phone}</div>` : ''}
+        </div>
+      ` : ''}
+
+      <div class="field">
+        <div class="label">Email:</div>
+        ${email}
+      </div>
+
+      <div class="field">
+        <div class="label">Message:</div>
+        <div class="message-box">
+          ${message.replace(/\n/g, '<br />')}
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      &copy; 2024 Distance Connect. All rights reserved.
+    </div>
+  </body>
+</html>
+
     `;
   }
 } 

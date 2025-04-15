@@ -72,9 +72,16 @@ export default function FeatureMentor() {
   
 
   return (
-    <div className="relative h-[670px] px-6 flex justify-center items-center" >
-
+    <div className="relative h-[670px] px-6 flex flex-col justify-center items-center" >
+      {/* /Top Featured Mentors */}
         <img src="/bg11.png" alt="bg" className=" w-[100%] h-[100%] absolute"/>
+
+      <div className="relative z-[50] pt-[100px] pb-[-50px]">
+        <h1 className="text-2xl md:text-5xl font-bold text-center text-white mb-4">Top Featured Mentors</h1>
+        <p className="text-center text-white mb-8">Get mentored by the best in the industry</p>
+      </div>
+
+
     <Carousel className="w-[80%] m-auto ">
       <CarouselContent className="">
         {mentors.map((mentor) => (

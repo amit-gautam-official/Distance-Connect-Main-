@@ -1,6 +1,7 @@
 //layout 
 
 import { auth0 } from "@/lib/auth0";
+import { db } from "@/server/db";
 import { api } from "@/trpc/server";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -25,7 +26,12 @@ const user = session?.user;
     return redirect("/auth/login");
   }
 
-  const dbUser = await api?.user?.checkUser({ kindeId: user?.sub! });
+  const dbUser = await db.user.findFirst({
+    where: {
+      kindeId: user?.sub!,
+    },
+  });
+  
   if (user && dbUser?.isRegistered) {
     if (dbUser?.role === "STUDENT") {
       return redirect("/student-dashboard");

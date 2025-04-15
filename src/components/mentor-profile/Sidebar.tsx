@@ -38,7 +38,7 @@ export function Sidebar({
       {/* <Articles articles={articles} /> */}
       
       {/* Similar profiles section */}
-      <SimilarProfiles profiles={similarProfiles} />
+      {/* <SimilarProfiles profiles={similarProfiles} /> */}
     </div>
   );
 } 

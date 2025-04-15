@@ -46,74 +46,104 @@ export class OtpEmailService extends EmailService {
         const { toEmail, otp } = data;
 
         return `
-        <!DOCTYPE html>
-        <html>
-            <head>
-                <meta charset="utf-8">
-                <title>Your OTP Code</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        line-height: 1.6;
-                        color: #333;
-                        max-width: 600px;
-                        margin: 0 auto;
-                    }
-                    .container {
-                        border: 1px solid rgba(0, 0, 0, 0.1);
-                        border-radius: 5px;
-                        padding: 20px;
-                        margin: 20px 0;
-                    }
-                    h1 {
-                        font-size: 24px;
-                        color: #333;
-                        text-align: center;
-                        margin-bottom: 20px;
-                    }
-                    .field {
-                        margin-bottom: 10px;
-                    }
-                    .label {
-                        font-weight: bold;
-                    }
-                    .message-box {
-                        background-color: #f5f5f5;
-                        padding: 15px;
-                        border-radius: 5px;
-                        margin: 10px 0;
-                        white-space: pre-wrap;
-                    }
-                    .footer {
-                        font-size: 12px;
-                        color: rgba(0, 0, 0, 0.7);
-                        text-align: center;
-                        margin-top: 20px;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>Your OTP Code</h1>
-                    
-                    <div class="field">
-                        <span class="label">Email:</span> ${toEmail}
-                    </div>
-                    
-                    <div class="field">
-                        <span class="label">OTP Code:</span>
-                    </div>
-                    
-                    <div class="message-box">
-                        ${otp}
-                    </div>
-                </div>
-                
-                <div class="footer">
-                    &copy; 2024 | Distance Connect
-                </div>
-            </body>
-        </html>
+     <!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Your OTP Code</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f9f9f9;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 600px;
+        background-color: #ffffff;
+        margin: 40px auto;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e0e0e0;
+      }
+
+      h1 {
+        text-align: center;
+        color: #004aad;
+        margin-bottom: 24px;
+        font-size: 26px;
+      }
+
+      .info {
+        margin-bottom: 16px;
+        font-size: 16px;
+      }
+
+      .info .label {
+        font-weight: 600;
+        color: #555;
+      }
+
+      .otp-box {
+        background-color: #f0f7ff;
+        color: #004aad;
+        font-size: 24px;
+        text-align: center;
+        padding: 18px;
+        border-radius: 8px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        margin-top: 12px;
+        border: 1px dashed #004aad;
+      }
+
+      .note {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #777;
+        text-align: center;
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 30px;
+        font-size: 12px;
+        color: #aaa;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Verify Your Email</h1>
+
+      <div class="info">
+        <div><span class="label">Recipient:</span> ${toEmail}</div>
+      </div>
+
+      <div class="label">Your One-Time Password (OTP):</div>
+      <div class="otp-box">${otp}</div>
+
+      <div class="note">
+        This OTP is valid for the next 10 minutes. Please do not share it with anyone.
+      </div>
+    </div>
+
+    <div class="footer">
+      &copy; 2024 Distance Connect. All rights reserved.<br />
+      <strong>Email:</strong> support@distanceconnect.in<br />
+      <strong>Phone:</strong> +91 8750307740<br />
+      <strong>Address:</strong> IIF, Room No: 808, 8th Floor,<br />
+      Academic Block 4, Delhi Technological University,<br />
+      Bhavana Road, Delhi - 110042
+    </div>
+  </body>
+</html>
+
+
         `;
 
 

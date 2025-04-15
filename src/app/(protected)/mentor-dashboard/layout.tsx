@@ -4,6 +4,7 @@ import { api } from "@/trpc/server";
 import { redirect } from "next/navigation";
 import { auth0 } from "@/lib/auth0";
 import { Metadata } from "next";
+import { syncUserToDb } from "@/lib/syncUser";
 
 export const metadata: Metadata = {
   title: "Distance Connect",
@@ -25,7 +26,12 @@ export default async function Layout({
   const user = await api.user.getMe();
 
   if (!user) {
-    redirect("/sync-user-to-db");
+    const synced = await syncUserToDb();
+    if (synced) {
+      return redirect("/register");
+    } else {
+      return redirect("/");
+    }
   }
 
   if (user.role !== "MENTOR") {
@@ -36,7 +42,7 @@ export default async function Layout({
     <SidebarProvider>
       <AppSidebar role="mentor" />
       <main>
-        <div className="flex  h-[calc(100dvh-69px)]  w-screen justify-center md:w-[calc(100vw-280px)]">
+        <div className="flex h-[calc(100dvh-69px)] w-screen justify-center md:w-[calc(100vw-280px)]">
           <div className="w-[calc(100vw-10%)] pb-20 md:w-[calc(100vw-280px)] md:pb-0">
             {children}
           </div>

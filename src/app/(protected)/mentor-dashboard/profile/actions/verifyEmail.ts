@@ -40,8 +40,8 @@ export async function verifyCompanyEmail(company: string, email: string) {
         throw new Error('Invalid email format');
     }
 
-    console.log(domain);
-    console.log(company);
+    // console.log(domain);
+    // console.log(company);
     
     
     
@@ -60,7 +60,7 @@ Can this email plausibly belong to someone working at the company "${company}"?
 Reply strictly with only one word: "yes" or "no". Do not include any explanation or extra text.
 `;
 
-    console.log(`Prompt: ${prompt}`);
+    // console.log(`Prompt: ${prompt}`);
     const result = await model.generateContent(prompt);
     const response = result.response;
     const textResult = response?.text()?.split('\n')[0]?.trim().toLowerCase() || '';

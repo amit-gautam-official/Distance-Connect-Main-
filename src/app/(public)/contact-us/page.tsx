@@ -73,7 +73,7 @@ export default function ContactForm() {
             <form className="space-y-4" onSubmit={handleSubmit}>
               <Input
                 type="text"
-                placeholder="John"
+                placeholder="Talha Ansari"
                 onChange={(e) => setName(e.target.value)}
                 disabled={isSubmitting}
                 className="border-0 bg-white placeholder:text-muted-foreground"
@@ -89,7 +89,7 @@ export default function ContactForm() {
                 type="tel"
                 onChange={(e) => setPhone(e.target.value)}
                 disabled={isSubmitting}
-                placeholder="(123) 456 - 789"
+                placeholder="+91 XXXXX XXXXX"
                 className="border-0 bg-white placeholder:text-muted-foreground"
               />
               <Textarea
@@ -162,7 +162,7 @@ export default function ContactForm() {
                 className="shadow-xs flex items-center gap-2 self-stretch rounded-[48px] border border-[var(--Gray-300,#D0D5DD)] bg-[#3D568F] px-4 py-3 font-inter text-[16px] font-normal leading-6 text-white"
               />
               <p className="font-inter text-[14px] font-normal leading-5 text-[#0A0A0A]">
-                We care about your data in our
+                We care about your data in our {" "}
                 <a href="#" className="underline">
                   privacy policy
                 </a>
@@ -188,7 +188,7 @@ export default function ContactForm() {
               <form className="space-y-4">
                 <Input
                   type="text"
-                  placeholder="John"
+                  placeholder="Talha Ansari"
                   className="border-0 bg-[#EEF3FF] placeholder:text-muted-foreground"
                 />
                 <Input
@@ -198,7 +198,7 @@ export default function ContactForm() {
                 />
                 <Input
                   type="tel"
-                  placeholder="(123) 456 - 789"
+                  placeholder="+91 XXXXX XXXXX"
                   className="border-0 bg-[#EEF3FF] placeholder:text-muted-foreground"
                 />
                 <Textarea
@@ -218,8 +218,8 @@ export default function ContactForm() {
               </div>
               <div className="font-[DM Sans] text-center text-[18px] font-normal leading-[30px] text-white">
               <span>
-                  IIF, Room No: 808, 8th Floor, <br />
-                  Academic Block 4, Delhi <br />
+                  Room No: 808, 8th Floor, DTU IIF,<br />
+                  New Academic Block 4, Delhi <br />
                   Technological University, <br />
                   Bhavana Road, Delhi - 110042
                 </span>
@@ -230,7 +230,7 @@ export default function ContactForm() {
                 Contact Us
               </div>
               <div className="font-[DM Sans] text-center text-[18px] font-normal leading-[30px] text-white">
-              <span>+91 8750307740</span> <br/>
+              <span>+91 7678163826</span> <br/>
                 
                 <span>support@distanceconnect.in</span>
               </div>
