@@ -174,6 +174,14 @@ export default function Footer() {
                   Privacy policy
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/shipping-policy"
+                  className="hover:text-[#EAF3B2] hover:underline"
+                >
+                  Shipping & Delivery Policy
+                </Link>
+              </li>
             </ul>
           </div>
           {/* Newsletter */}
