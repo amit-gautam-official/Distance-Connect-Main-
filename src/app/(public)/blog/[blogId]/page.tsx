@@ -111,12 +111,7 @@ export default async function BlogPost({ params }: Props) {
           alt="blog"
           className="mx-auto object-cover h-[516px] w-[1106px] flex-shrink-0 rounded-[40px]"
         />
-        <div className="mx-auto w-[80%] font-inter text-xl font-normal leading-[30px] text-black">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec
-          ullamcorper mattis lorem non. Ultrices praesent amet ipsum justo
-          massa. Eu dolor aliquet risus gravida nunc at feugiat consequat purus.
-          Non massa enim vitae duis mattis. Vel in ultricies vel fringilla.
-        </div>
+        
       </div>
 
       <div className="mx-auto my-5 h-[1px] w-[60%] bg-black"></div>
