@@ -44,8 +44,8 @@ const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
     <div className="flex flex-col">
       {/* Profile picture and basic info */}
       <div className="flex flex-col items-center">
-        <Avatar className="h-28 w-28 border-4 border-white">
-          <AvatarImage src={user?.avatarUrl || ""} alt={user?.name || "User"} />
+        <Avatar className="h-28 w-28 border-4 border-white object-cover">
+          <AvatarImage className="object-cover" src={user?.avatarUrl || ""} alt={user?.name || "User"} />
           <AvatarFallback className="bg-blue-100 text-2xl text-blue-800">
             {user?.name?.charAt(0) || "U"}
           </AvatarFallback>

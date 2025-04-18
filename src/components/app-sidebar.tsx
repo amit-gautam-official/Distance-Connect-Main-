@@ -29,6 +29,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { api } from "@/trpc/react";
 import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 export function AppSidebar({ role }: { role: string }) {
   const { data: user } = api.user.getMe.useQuery(undefined, {
@@ -332,9 +333,13 @@ export function AppSidebar({ role }: { role: string }) {
                     onClick={toggleProfileDropdown}
                     className="flex h-10 cursor-pointer items-center justify-center overflow-hidden"
                   >
-                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-600 text-white">
-                      {user?.name?.[0] || "U"}
-                    </div>
+                    
+                    <Avatar className="h-12 w-12 border-4 border-white object-cover">
+          <AvatarImage className="object-cover" src={user?.avatarUrl || ""} alt={user?.name || "User"} />
+          <AvatarFallback className="bg-blue-100 text-2xl text-blue-800">
+            {user?.name?.charAt(0) || "U"}
+          </AvatarFallback>
+        </Avatar>
                     <div className="w-full truncate">{user?.name}</div>
                   </SidebarMenuButton>
                 </div>

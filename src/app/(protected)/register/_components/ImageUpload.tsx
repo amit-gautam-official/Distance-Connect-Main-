@@ -111,8 +111,8 @@ export const ImageUpload = ({
   return (
     <div className="flex flex-col  items-center gap-4">
       <div className="relative">
-        <Avatar className="h-32 w-32">
-          <AvatarImage src={previewUrl} />
+        <Avatar className="h-32 w-32 object-cover">
+          <AvatarImage className="object-cover" src={previewUrl} />
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
         <label
