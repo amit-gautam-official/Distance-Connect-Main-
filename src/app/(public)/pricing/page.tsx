@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle, Send } from "lucide-react";
 import Head from "next/head";
+import Link from "next/link";
 
 export default function PricingPage() {
   return (
@@ -31,9 +32,11 @@ export default function PricingPage() {
             <p className="text-sm md:text-base text-gray-500 mb-4 md:mb-6">Get paid by direct clients worldwide</p>
             
             <div className="flex justify-center mb-8 md:mb-16">
-              <Button className="bg-blue-300 hover:bg-blue-400 text-blue-800 px-6 sm:px-8 py-1.5 sm:py-2 rounded-full text-sm sm:text-base">
+             <Link href="/auth/login?screen_hint=signup">
+             <Button className="bg-blue-300 hover:bg-blue-400 text-blue-800 px-6 sm:px-8 py-1.5 sm:py-2 rounded-full text-sm sm:text-base">
                 Lets go
               </Button>
+              </Link>
             </div>
           </div>
 
@@ -49,10 +52,10 @@ export default function PricingPage() {
             <div className="relative z-10 bg-white rounded-lg shadow-md p-4 max-w-xs w-full mx-auto sm:mx-0">
               <div className="flex items-start gap-3 mb-4">
                 <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
-                  <img src="/mentors/m3.jpeg" alt="Matthew Wade" className="w-full h-full object-cover object-top" />
+                  <img src="/smallLogo.png" alt="DC" className="w-full h-full object-cover object-top" />
                 </div>
                 <div className="text-left">
-                  <p className="text-sm font-medium text-gray-900">Matthew Wade</p>
+                  <p className="text-sm font-medium text-gray-900">Distance Connect</p>
                   <p className="text-xs text-gray-500">India</p>
                 </div>
               </div>
@@ -60,9 +63,9 @@ export default function PricingPage() {
                 <p className="text-xs text-gray-500">Total amount</p>
                 <p className="text-2xl font-bold">$500</p>
               </div>
-              <button className="w-full bg-orange-50 text-orange-500 border border-orange-100 py-2 px-4 rounded-md flex items-center justify-center gap-2 text-sm">
+              <div className="w-full bg-orange-50 text-orange-500 border border-orange-100 py-2 px-4 rounded-md flex items-center justify-center gap-2 text-sm">
                 <Send size={14} /> Send request
-              </button>
+              </div>
             </div>
             
             {/* Second transaction card */}
