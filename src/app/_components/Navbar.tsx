@@ -163,15 +163,18 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                   >
                     Blogs
                   </Link>
-                
-                  <div className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]">
-                    Pricing
-                  </div>
                   <Link
+                  href={"/pricing"}
+                  className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]">
+                    Pricing
+                  </Link>
+                
+                 
+                  {/* <Link
                   href={"/ai-tutor"}
                   className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]">
                     AI Tutors
-                  </Link>
+                  </Link> */}
                   <Link
                     href="/contact-us"
                     className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
@@ -319,14 +322,14 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="/ai-tutor" legacyBehavior passHref>
+                {/* <Link href="/ai-tutor" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     AI Tutors
                   </NavigationMenuLink>
-                </Link>
+                </Link> */}
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="/" legacyBehavior passHref>
+                <Link href="/pricing" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     Pricing
                   </NavigationMenuLink>
