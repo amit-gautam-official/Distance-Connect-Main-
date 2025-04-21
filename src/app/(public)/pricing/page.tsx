@@ -61,7 +61,7 @@ export default function PricingPage() {
               </div>
               <div className="mb-4">
                 <p className="text-xs text-gray-500">Total amount</p>
-                <p className="text-2xl font-bold">$500</p>
+                <p className="text-2xl font-bold">₹500</p>
               </div>
               <div className="w-full bg-orange-50 text-orange-500 border border-orange-100 py-2 px-4 rounded-md flex items-center justify-center gap-2 text-sm">
                 <Send size={14} /> Send request
@@ -80,7 +80,7 @@ export default function PricingPage() {
                 </div>
               </div>
               <div className="mb-4">
-                <p className="text-2xl font-bold">$495</p>
+                <p className="text-2xl font-bold">₹495</p>
               </div>
               <div className="w-full bg-green-50 text-green-600 py-2 px-4 rounded-md flex items-center justify-center gap-2 text-sm">
                 <CheckCircle size={14} /> Received
