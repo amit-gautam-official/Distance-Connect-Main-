@@ -118,6 +118,7 @@ export const studentRouter = createTRPCRouter({
 
   getStudent: protectedProcedure
   .query(async ({ ctx }) => {
+
     return ctx.db.student.findUnique({
       where: { userId: ctx?.dbUser?.id },
       include: {

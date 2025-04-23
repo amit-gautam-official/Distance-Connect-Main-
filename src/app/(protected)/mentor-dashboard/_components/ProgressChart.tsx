@@ -28,12 +28,31 @@ interface MonthData {
   value: number;
 }
 
-const ProgressChart = () => {
+
+
+interface ScheduledMeeting {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  meetUrl: string;
+  completed: boolean;
+  formatedTimeStamp: string;
+  selectedDate: Date;
+}
+
+interface ScheduledSessionsProps {
+  scheduledSessions: ScheduledMeeting[];
+}
+
+
+
+const ProgressChart : React.FC<ScheduledSessionsProps> = ({scheduledSessions}) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
-  const { data: scheduledSessions } =
-    api.scheduledMeetings.getMentorScheduledMeetings.useQuery();
+
 
   const [monthsData, setMonthsData] = useState<MonthData[]>([]);
 

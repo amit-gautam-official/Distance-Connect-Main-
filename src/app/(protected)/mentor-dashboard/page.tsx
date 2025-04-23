@@ -1,19 +1,29 @@
-import { api } from "@/trpc/server";
+"use client"
+import { api } from "@/trpc/react";
 import Link from "next/link";
 import React from "react";
 import ProgressChart from "./_components/ProgressChart";
 import ScheduledSessions from "./_components/ScheduledSessions";
 import { Cross, X } from "lucide-react";
+import MentorDashboardSkeleton from "./_components/MentorDashboardSkeleton";
 
-const Page = async () => {
+const Page =  () => {
   const scheduledSessions =
-    await api.scheduledMeetings.getMentorScheduledMeetings();
+     api.scheduledMeetings.getMentorScheduledMeetings.useQuery();
 
-  const mentor = await api.mentor.getMentor();
+  const mentor =  api.mentor.getMentor.useQuery();
+
+
+  if(mentor.isLoading || scheduledSessions.isLoading ) {
+    return (
+      <MentorDashboardSkeleton/>
+    );
+  }
+
   return (
     <div className="mx-auto min-h-[100dvh] w-full p-4 md:p-8">
       {/* Header */}
-      {mentor?.companyEmailVerified ? (
+      {mentor?.data?.companyEmailVerified ? (
         <div className="mb-6 flex items-center justify-between rounded-lg bg-green-50 p-4 text-sm text-green-800">
           <div className="flex items-center gap-2">
             <svg
@@ -63,7 +73,7 @@ const Page = async () => {
 
       {/* Progress Chart */}
       <div className="mb-6 overflow-hidden rounded-lg bg-white p-4 shadow-sm">
-        <ProgressChart />
+        <ProgressChart scheduledSessions={scheduledSessions?.data!} />
       </div>
 
       {/* Scheduled Sessions */}
@@ -80,7 +90,7 @@ const Page = async () => {
           </Link>
         </div>
         <div className="space-y-4">
-          <ScheduledSessions sessions={scheduledSessions} />
+          <ScheduledSessions sessions={scheduledSessions?.data!} />
         </div>
       </div>
     </div>

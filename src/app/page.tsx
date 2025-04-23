@@ -40,7 +40,7 @@ export default async function Home() {
     }
   }
 
-  const response = await client.getEntries({ content_type: "pageBlogPost" });
+  const response = await client?.getEntries({ content_type: "pageBlogPost" });
   const initialBlogs = response?.items?.sort(
     (a, b) =>
       new Date(b?.sys?.updatedAt).getTime() -

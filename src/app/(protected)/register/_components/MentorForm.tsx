@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/popover";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
-import {ImageUpload} from "./ImageUpload";
+import { ImageUpload } from "./ImageUpload";
 import { toast } from "sonner";
 
 import { hiringFields } from "@/constants/hiringFirlds";
@@ -94,10 +94,10 @@ export default function MentorForm({
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const [checked, setChecked] = useState(false);
   const router = useRouter();
-
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const handleChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
     setChecked(e.target.checked);
-  }
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -117,59 +117,59 @@ export default function MentorForm({
     },
   });
 
-  const createMentorUpdateUser = api.mentor.createMentorUpdateUser.useMutation({
-    onSuccess: () => {
-      router.push("/mentor-dashboard");
-
-    },
-    onError: (error) => {
-      console.error(error);
-    },
-  });
+  const createMentorUpdateUser =
+    api.mentor.createMentorUpdateUser.useMutation();
 
   const checkUsernameAvailability =
     api.user.checkUsernameAvailabilityMutation.useMutation();
 
   // Watch for username changes and validate
-  useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name === "username" && value.username && value.username.length >= 3) {
-        setIsCheckingUsername(true);
+  // useEffect(() => {
+  //   const subscription = form.watch((value, { name }) => {
+  //     if (name === "username" && value.username && value.username.length >= 3) {
+  //       setIsCheckingUsername(true);
 
-        const timer = setTimeout(async () => {
-          try {
-            // Make sure username exists and is a string before passing to the mutation
-            if (value.username) {
-              const result = await checkUsernameAvailability.mutateAsync({
-                username: value.username,
-              });
+  //       const timer = setTimeout(async () => {
+  //         try {
+  //           // Make sure username exists and is a string before passing to the mutation
+  //           if (value.username) {
+  //             const result = await checkUsernameAvailability.mutateAsync({
+  //               username: value.username,
+  //             });
 
-              if (!result.available) {
-                setUsernameError("This username is already taken");
-              } else {
-                setUsernameError(null);
-              }
-            }
-          } catch (error) {
-            console.error("Error checking username:", error);
-          } finally {
-            setIsCheckingUsername(false);
-          }
-        }, 1000);
+  //             if (!result.available) {
+  //               setUsernameError("This username is already taken");
+  //             } else {
+  //               setUsernameError(null);
+  //             }
+  //           }
+  //         } catch (error) {
+  //           console.error("Error checking username:", error);
+  //         } finally {
+  //           setIsCheckingUsername(false);
+  //         }
+  //       }, 1000);
 
-        return () => clearTimeout(timer);
-      }
-    });
+  //       return () => clearTimeout(timer);
+  //     }
+  //   });
 
-    return () => subscription.unsubscribe();
-  }, []);
+  //   return () => subscription.unsubscribe();
+  // }, []);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    if (usernameError) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!checked) {
+      toast.error(
+        "Please agree to the Terms and Conditions and Privacy Policy",
+      );
       return;
     }
-    if (!checked) {
-      toast.error("Please agree to the Terms and Conditions and Privacy Policy");
+    const result = await checkUsernameAvailability.mutateAsync({
+      username: values.username,
+    });
+
+    if (!result.available) {
+      toast.error("This username is already taken");
       return;
     }
 
@@ -191,8 +191,9 @@ export default function MentorForm({
     };
 
     try {
-      createMentorUpdateUser.mutate(mentorUserData);
-      
+      await createMentorUpdateUser.mutateAsync(mentorUserData);
+      setIsRedirecting(true);
+      router.push("/mentor-dashboard");
     } catch (error) {
       console.error(error);
       toast.error("Failed to create mentor profile");
@@ -230,7 +231,7 @@ export default function MentorForm({
   return (
     <div className="mx-auto w-full max-w-2xl">
       <CardHeader>
-        <CardTitle className="text-center mb-12 w-full font-inter text-2xl font-medium leading-tight text-black sm:text-left sm:text-[28px] sm:leading-[36px] md:text-[32px]">
+        <CardTitle className="mb-12 w-full text-center font-inter text-2xl font-medium leading-tight text-black sm:text-left sm:text-[28px] sm:leading-[36px] md:text-[32px]">
           Give your Brief Introduction
         </CardTitle>
       </CardHeader>
@@ -240,7 +241,7 @@ export default function MentorForm({
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-5 sm:space-y-6"
           >
-            <div className="mb-4 flex  items-center md:justify-center sm:mb-6 justify-start">
+            <div className="mb-4 flex items-center justify-start sm:mb-6 md:justify-center">
               <ImageUpload
                 userId={user?.id}
                 isSubmitting={form.formState.isSubmitting}
@@ -723,30 +724,47 @@ export default function MentorForm({
               )}
             />
 
-            
-  <div className="flex items-center space-x-2">
-    <input
-      type="checkbox"
-      id="agree"
-      className="h-4 w-4 accent-blue-600"
-      checked={checked}
-        onChange={handleChecked}
-    />
-    <label htmlFor="agree" className="text-sm text-[#8A8A8A]">
-      I agree to the&nbsp;
-      <a href="/terms-conditions" className="text-blue-600 hover:underline">
-        Terms and Conditions
-      </a>
-      &nbsp;and&nbsp;
-      <a href="/privacy-policy" className="text-blue-600 hover:underline">
-        Privacy Policy
-      </a>
-    </label>
-  </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="agree"
+                className="h-4 w-4 accent-blue-600"
+                checked={checked}
+                onChange={handleChecked}
+              />
+              <label htmlFor="agree" className="text-sm text-[#8A8A8A]">
+                I agree to the&nbsp;
+                <a
+                  href="/terms-conditions"
+                  className="text-blue-600 hover:underline"
+                >
+                  Terms and Conditions
+                </a>
+                &nbsp;and&nbsp;
+                <a
+                  href="/privacy-policy"
+                  className="text-blue-600 hover:underline"
+                >
+                  Privacy Policy
+                </a>
+              </label>
+            </div>
 
-
-            <Button type="submit" className="w-full">
-              {form.formState.isSubmitting ? "Submitting..." : "Submit"}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={
+                createMentorUpdateUser.isPending ||
+                checkUsernameAvailability.isPending ||
+                isRedirecting
+              }
+            >
+              {!createMentorUpdateUser.isPending &&
+                !checkUsernameAvailability.isPending &&
+                !isRedirecting && <span>Submit</span>}
+              {checkUsernameAvailability.isPending && "Checking Username..."}
+              {createMentorUpdateUser.isPending && "Submitting..."}
+              {isRedirecting && "Redirecting to Dashboard..."}
             </Button>
           </form>
         </Form>

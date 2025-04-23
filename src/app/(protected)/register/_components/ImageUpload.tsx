@@ -60,8 +60,14 @@ export const ImageUpload = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const ALLOWED_IMAGE_TYPES = [
+      "image/jpeg", 
+      "image/png", 
+      "image/webp"
+    ];
+
     // Validate file type
-    if (!file.type.startsWith("image/")) {
+    if (!file.type || !ALLOWED_IMAGE_TYPES.includes(file.type)) {
       toast.error("Please select an image file");
       return;
     }
@@ -124,7 +130,7 @@ export const ImageUpload = ({
         <input
           id="image-upload"
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp,image/jpg"
           className="hidden"
           onChange={handleFileSelect}
           disabled={isUploading || isSubmitting}

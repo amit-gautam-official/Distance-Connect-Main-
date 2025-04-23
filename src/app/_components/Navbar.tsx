@@ -170,11 +170,7 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                   </Link>
                 
                  
-                  {/* <Link
-                  href={"/ai-tutor"}
-                  className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]">
-                    AI Tutors
-                  </Link> */}
+                  
                   <Link
                     href="/contact-us"
                     className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
@@ -240,10 +236,6 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
           </Link>
         </div>
         <div className="flex items-center justify-center font-inter leading-normal text-white lg:gap-4 lg:text-[16px] xl:gap-8 xl:text-[16px] font-[500]">
-          {/* <div className="cursor-pointer">Solutions</div>
-        <Link href="/blog" className='cursor-pointer'>Resources</Link>
-        <div>Pricing</div>
-        <Link href="/contact-us" className='cursor-pointer'>Contact Us</Link> */}
           <NavigationMenu>
             <NavigationMenuList className="text-black text-[16px] font-[500]">
             <NavigationMenuItem>
@@ -300,14 +292,13 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                     {components.map((component: any) => (
                       <ListItem
                         key={component.title}
-                        // title={component.title}
                         href={component.href}
                       >
                         <div className="flex items-start gap-2">
                           <img
                             src={component.imageUrl}
                             alt={component.imageAlt}
-                            className="mt-2 h-[60px] w-[60px] rounded-md"
+                            className="mt-2 h-[60px] w-[60px] rounded-md object-cover"
                           />
                           <div>
                             <div className="text-[14px] font-medium leading-[24px] text-black">
@@ -322,11 +313,6 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                {/* <Link href="/ai-tutor" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    AI Tutors
-                  </NavigationMenuLink>
-                </Link> */}
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <Link href="/pricing" legacyBehavior passHref>

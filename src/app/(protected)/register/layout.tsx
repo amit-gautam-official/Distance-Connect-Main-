@@ -26,11 +26,7 @@ const user = session?.user;
     return redirect("/auth/login");
   }
 
-  const dbUser = await db.user.findFirst({
-    where: {
-      kindeId: user?.sub!,
-    },
-  });
+  const dbUser = await api.user.getMe()
   
   if (user && dbUser?.isRegistered) {
     if (dbUser?.role === "STUDENT") {

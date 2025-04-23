@@ -1,40 +1,36 @@
-import React from "react";
-import { api } from "@/trpc/server";
-import { Metadata } from "next";
+"use client"
+import React, { Suspense } from "react";
+import { api } from "@/trpc/react";
 
 // Component imports
 import ExploreMentorsBanner from "./components/ExploreMentorsBanner";
 import DashboardStats from "./components/DashboardStats";
 import TrackSessions from "./components/TrackSessions";
 import YourMentors from "./components/YourMentors";
-import { auth0 } from "@/lib/auth0";
-import { redirect } from "next/navigation";
+import StudentDashboardSkeleton from "./components/StudentDashboardSkeleton";
 
-export const metadata: Metadata = {
-  title: "Student Dashboard | Distance Connect",
-  description:
-    "Manage your mentorship journey, meetings, and learning progress",
-};
 
-const StudentDashboardPage = async () => {
-  const session = await auth0.getSession();
-  if (!session) {
-    redirect("/");
-  }
-  const student = await api.student.getStudent();
+
+
+const StudentDashboardPage = () => {
+  
+
+  const student = api.student.getStudent.useQuery();
+
+  
 
   const filterMeetingList = (type: string) => {
     const currentTimestamp = new Date().getTime();
     if (type == "upcoming") {
-      return student?.scheduledMeetings?.filter(
+      return student?.data?.scheduledMeetings?.filter(
         (item) =>
           Number(item?.formatedTimeStamp) >= Number(currentTimestamp) &&
           !item?.completed,
       );
     } else if (type == "completed") {
-      return student?.scheduledMeetings?.filter((item) => item?.completed);
+      return student?.data?.scheduledMeetings?.filter((item) => item?.completed);
     } else if (type == "missed") {
-      return student?.scheduledMeetings?.filter(
+      return student?.data?.scheduledMeetings?.filter(
         (item) =>
           Number(item?.formatedTimeStamp) < Number(currentTimestamp) &&
           !item?.completed,
@@ -65,7 +61,7 @@ const StudentDashboardPage = async () => {
 
   // console.log("mentorsData", mentorsData);
 
-  const completedSessions = student?.scheduledMeetings?.filter(
+  const completedSessions = student?.data?.scheduledMeetings?.filter(
     (m) => m.completed === true,
   );
   // Mock data for stats
@@ -76,7 +72,7 @@ const StudentDashboardPage = async () => {
       completedSessions?.reduce((acc, curr) => acc + curr.duration, 0) ?? 0,
     totalTimeSpentTrend: "4.3%",
     totalPending:
-      (student?.scheduledMeetings?.length ?? 0) -
+      (student?.data?.scheduledMeetings?.length ?? 0) -
       (completedSessions?.length ?? 0),
   };
 
@@ -104,8 +100,12 @@ const StudentDashboardPage = async () => {
 
   // console.log("sessionData", sessionData);
 
+  if(student.isLoading){
+    return <StudentDashboardSkeleton/>
+  }
+
   return (
-    <div className="container mx-auto w-full px-4 py-6 ">
+     <div className="container mx-auto w-full px-4 py-6 ">
       {/* Explore Mentors Banner */}
       <ExploreMentorsBanner />
 
