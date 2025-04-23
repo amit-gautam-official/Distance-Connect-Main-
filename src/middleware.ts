@@ -19,9 +19,8 @@ export const config = {
      */
     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
     "/student-dashboard",
-    "/mentor-dashboard", 
-    "/startup-dashboard", 
-    "/register",
+ 
+    "/register",  
      "/[mentorUserId]",
      "/[mentorUserId]/[eventId]",
     

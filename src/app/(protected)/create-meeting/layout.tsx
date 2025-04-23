@@ -4,6 +4,7 @@ import { api } from "@/trpc/server";
 import { redirect } from "next/navigation";
 import { auth0 } from "@/lib/auth0";
 import { Metadata } from "next";
+import { syncUserToDb } from "@/lib/syncUser";
 
 export const metadata: Metadata = {
   title: "Distance Connect",
@@ -17,27 +18,21 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
 
-  
-   try{
-     const user = await api.user.getMe();
-     if (!user || user.role !== "STUDENT") {
-       redirect("/register");
-     }
- 
-   }catch(err){
-    redirect("/auth/login");
-   }
+
+  try{
+    const user = await api.user.getMe();
+    if (!user || user.role !== "MENTOR") {
+      redirect("/register");
+    }
+
+  }catch(err){
+   redirect("/auth/login");
+  }
+
 
   return (
-    <SidebarProvider>
-      <AppSidebar role="student" />
-      <main>
-        <div className="flex w-screen h-[calc(100dvh-69px)] justify-center md:w-[calc(100vw-280px)]">
-          <div className="w-[calc(100vw-10%)] pb-20 md:w-[calc(100vw-280px)] md:pb-0">
-            {children}
-          </div>
-        </div>
-      </main>
-    </SidebarProvider>
+    <>
+    {children}
+    </>
   );
 }

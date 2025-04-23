@@ -64,7 +64,6 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
     return () => window.removeEventListener("scroll", handleScroll); // Cleanup on component unmount
   }, [lastScrollY]);
 
-  const me = api.user.getMe.useQuery()
 
   return (
     <div className="m-auto w-full">
@@ -204,7 +203,7 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
                     ) : (
                       <>
                         <Link
-                          href={"/register"}
+                          href={role === "STUDENT" ? "/student-dashboard" : "/mentor-dashboard"}
                           className="flex w-[199px] items-center justify-center gap-1 rounded-lg border border-[#E1E4ED] bg-[#F8FAFF] p-[18px_22px]"
                         >
                           Dashboard
@@ -356,7 +355,7 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
         ) : (
           <div className="flex items-center justify-center gap-4">
             <Link
-               href={"/register"}
+               href={role === "STUDENT" ? "/student-dashboard" : "/mentor-dashboard"}
 
               className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[31px] border-[0.5px] border-[rgba(94,127,203,0.6)] bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-md lg:w-[100px] xl:w-[134px]"
             >

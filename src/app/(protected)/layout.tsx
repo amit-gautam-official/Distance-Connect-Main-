@@ -10,11 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
-  const session = await auth0.getSession();
- 
-  if (!session?.user) {
-    redirect("/auth/login");
-  }
+
 
 
   return <>{children}</>;

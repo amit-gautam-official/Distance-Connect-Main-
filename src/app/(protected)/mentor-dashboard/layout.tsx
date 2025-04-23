@@ -17,17 +17,18 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth0.getSession();
- 
-  if (!session?.user) {
-    redirect("/auth/login");
+
+
+  try{
+    const user = await api.user.getMe();
+    if (!user || user.role !== "MENTOR") {
+      redirect("/register");
+    }
+
+  }catch(err){
+   redirect("/auth/login");
   }
 
- const user = await api.user.getMe();
-
- if (!user || user.role !== "MENTOR") {
-   redirect("/register");
- }
 
   return (
     <SidebarProvider>
