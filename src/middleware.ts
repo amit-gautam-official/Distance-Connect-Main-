@@ -18,11 +18,15 @@ export const config = {
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
      */
     "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-    "/student-dashboard/*",
-    "/mentor-dashboard/*", 
-    "/startup-dashboard/*", 
+    "/student-dashboard",
+    "/mentor-dashboard", 
+    "/startup-dashboard", 
     "/register",
     "/[mentorUserId]",
+    "/create-meeting",
+    "/chat",
+    "/ai",
+    "/confirmation",
     "/[mentorUserId]/[eventId]",
     
   ],

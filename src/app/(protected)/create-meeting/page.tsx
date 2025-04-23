@@ -15,7 +15,8 @@ function CreateMeeting() {
     if (userRole && userRole !== "MENTOR") {
       router.push("/");
     }
-  }, [userRole, router]);
+  }, [userRole]);
+
 
   if (userRole !== "MENTOR") {
     return null;

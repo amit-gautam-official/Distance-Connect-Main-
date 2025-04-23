@@ -32,11 +32,11 @@ export default async function Home() {
         return redirect("/register");
       }
     } else {
-      const synced = await syncUserToDb(); // 👈 direct function call
+      const synced = await syncUserToDb(); 
       if (synced) {
         return redirect("/register");
       } else {
-        return redirect("/"); // or handle error as needed
+        return redirect("/"); 
       }
     }
   }
