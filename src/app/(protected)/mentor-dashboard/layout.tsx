@@ -19,24 +19,15 @@ export default async function Layout({
 }) {
   const session = await auth0.getSession();
  
-   if (!session?.user) {
-     redirect("/auth/login");
-   }
+  if (!session?.user) {
+    redirect("/auth/login");
+  }
 
-  const user = await api.user.getMe();
-  
-  if (!user) {
-    const synced = await syncUserToDb();
-    if (synced) {
-      return redirect("/register");
-    } else {
-      return redirect("/");
-    }
-  }
-  
-  if (user?.role !== "MENTOR") {
-    redirect("/register");
-  }
+ const user = await api.user.getMe();
+
+ if (!user || user.role !== "MENTOR") {
+   redirect("/register");
+ }
 
   return (
     <SidebarProvider>
