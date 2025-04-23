@@ -24,7 +24,11 @@ export default async function RootLayout({
   const user = session?.user;
 
   let loggedIn = false;
+  let role = "USER";
+
   if (user) {
+    const dbUser = await api.user.getMe();
+    role = dbUser?.role ?? "USER"; 
     loggedIn = true;
   }
 
@@ -39,7 +43,7 @@ export default async function RootLayout({
 
   return (
     <>
-      <Navbar blogs={initialBlogs} loggedId={loggedIn} />
+      <Navbar role={role!} blogs={initialBlogs} loggedId={loggedIn} />
       {children}
       <Footer />
     </>
