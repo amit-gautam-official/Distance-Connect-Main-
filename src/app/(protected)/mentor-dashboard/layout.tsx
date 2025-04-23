@@ -1,40 +1,35 @@
+"use client";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { api } from "@/trpc/server";
-import { redirect } from "next/navigation";
-import { auth0 } from "@/lib/auth0";
-import { Metadata } from "next";
-import { syncUserToDb } from "@/lib/syncUser";
+import { api } from "@/trpc/react";
+import {  useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export const metadata: Metadata = {
-  title: "Distance Connect",
-  description: "A platform for connecting students and mentors.",
-  icons: [{ rel: "icon", url: "/logo.png" }],
-};
 
-export default async function Layout({
+export default  function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
 
+  const router = useRouter();
+  
+  const user =  api.user.getMe.useQuery();
 
-  try{
-    const user = await api.user.getMe();
-    if (!user || user.role !== "MENTOR") {
-      redirect("/register");
+  useEffect(() => {
+    if (user.isError) {
+      router.push("/auth/login");
+    } else if (user.data && user.data.role !== "MENTOR") {
+      router.push("/register");
     }
-
-  }catch(err){
-   redirect("/auth/login");
   }
-
+  , [user.isError, user.data, router]);
 
   return (
     <SidebarProvider>
       <AppSidebar role="mentor" />
       <main>
-        <div className="flex h-[calc(100dvh-69px)] w-screen justify-center md:w-[calc(100vw-280px)]">
+        <div className="flex w-screen h-[calc(100dvh-69px)] justify-center md:w-[calc(100vw-280px)]">
           <div className="w-[calc(100vw-10%)] pb-20 md:w-[calc(100vw-280px)] md:pb-0">
             {children}
           </div>

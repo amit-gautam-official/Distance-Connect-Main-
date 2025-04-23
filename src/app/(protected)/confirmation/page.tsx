@@ -1,20 +1,26 @@
+"use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from '@/components/ui/button'
-import { api } from '@/trpc/server';
+import { api } from '@/trpc/react';
 import { CheckCircle } from 'lucide-react'
 import Link from 'next/link'
-import { redirect } from 'next/navigation';
 import React from 'react'
 
-async function Confirmation() {
-     try{
-       const user = await api.user.getMe();
-       if (!user || user.role !== "STUDENT") {
-         redirect("/register");
-       }
-   
-     }catch(err){
-      redirect("/auth/login");
-     }
+function Confirmation() {
+
+    const router = useRouter();
+    
+    const user =  api.user.getMe.useQuery();
+  
+    useEffect(() => {
+      if (user.isError) {
+        router.push("/auth/login");
+      } else if (user.data && user.data.role !== "STUDENT") {
+        router.push("/register");
+      }
+    }
+    , [user.isError, user.data, router]);
 
   return (
     <div className='flex flex-col items-center justify-center gap-6
