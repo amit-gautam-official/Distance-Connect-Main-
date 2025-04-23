@@ -2,16 +2,9 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { api } from "@/trpc/react";
-import { redirect, useRouter } from "next/navigation";
-import { auth0 } from "@/lib/auth0";
-import { Metadata } from "next";
+import {  useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export const metadata: Metadata = {
-  title: "Distance Connect",
-  description: "A platform for connecting students and mentors.",
-  icons: [{ rel: "icon", url: "/logo.png" }],
-};
 
 export default  function Layout({
   children,
