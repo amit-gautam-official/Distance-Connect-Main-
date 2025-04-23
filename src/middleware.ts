@@ -22,12 +22,8 @@ export const config = {
     "/mentor-dashboard", 
     "/startup-dashboard", 
     "/register",
-    "/[mentorUserId]",
-    "/create-meeting",
-    "/chat",
-    "/ai",
-    "/confirmation",
-    "/[mentorUserId]/[eventId]",
+     "/[mentorUserId]",
+     "/[mentorUserId]/[eventId]",
     
   ],
 };

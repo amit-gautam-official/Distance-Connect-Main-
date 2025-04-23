@@ -8,7 +8,6 @@ import { auth0 } from "@/lib/auth0";
 import { redirect } from "next/navigation";
 import Footer from "../_components/Footer";
 import client from "@/lib/contentful";
-import { BlogProvider } from "@/contexts/BlogContext";
 
 export const metadata: Metadata = {
   title: "Distance Connect",

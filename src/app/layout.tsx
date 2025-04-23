@@ -62,10 +62,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
-        <TRPCReactProvider>{children}
-        <GoogleAnalytics gaId="G-D2RLQDYV1B" />
+        <TRPCReactProvider>
+          {children}
         </TRPCReactProvider>
-
+        <GoogleAnalytics gaId="G-D2RLQDYV1B" />
         <Toaster />
       </body>
     </html>
