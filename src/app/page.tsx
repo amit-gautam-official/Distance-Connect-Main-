@@ -21,12 +21,13 @@ export default async function Home() {
   const session = await auth0.getSession();
   const user = session?.user;
   let loggedId = false;
-
+  let role = "USER";
+  
   if (user) {
     const dbUser = await api.user.checkUser({ kindeId: user?.sub! });
-  
     if (dbUser) {
       loggedId = true;
+      role = dbUser.role;
       if (!dbUser.isRegistered) {
         return redirect("/register");
       }
@@ -35,7 +36,7 @@ export default async function Home() {
       if (synced) {
         return redirect("/register");
       } else {
-        return redirect("/error"); // or handle error as needed
+        return redirect("/"); // or handle error as needed
       }
     }
   }
@@ -52,7 +53,7 @@ export default async function Home() {
       {/* <img src="/bg.png" alt="bg" className="absolute right-[0] top-0" /> */}
 
       <div className="relative flex w-full items-center justify-center">
-        <Navbar blogs={initialBlogs} loggedId={loggedId} />
+        <Navbar role={role} blogs={initialBlogs} loggedId={loggedId} />
       </div>
 
       <HeroSection />
