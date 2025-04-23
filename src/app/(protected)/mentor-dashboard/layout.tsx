@@ -17,24 +17,11 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth0.getSession();
-
-  if (!session?.user) {
-    redirect("/auth/login");
-  }
+ 
 
   const user = await api.user.getMe();
-
-  if (!user) {
-    const synced = await syncUserToDb();
-    if (synced) {
-      return redirect("/register");
-    } else {
-      return redirect("/");
-    }
-  }
-
-  if (user.role !== "MENTOR") {
+  
+  if (user?.role !== "MENTOR") {
     redirect("/register");
   }
 
