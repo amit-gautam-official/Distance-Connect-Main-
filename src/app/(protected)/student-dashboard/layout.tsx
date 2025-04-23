@@ -1,9 +1,11 @@
+"use client";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { api } from "@/trpc/server";
-import { redirect } from "next/navigation";
+import { api } from "@/trpc/react";
+import { redirect, useRouter } from "next/navigation";
 import { auth0 } from "@/lib/auth0";
 import { Metadata } from "next";
+import { useEffect } from "react";
 
 export const metadata: Metadata = {
   title: "Distance Connect",
@@ -11,22 +13,24 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/logo.png" }],
 };
 
-export default async function Layout({
+export default  function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
 
+  const router = useRouter();
   
-   try{
-     const user = await api.user.getMe();
-     if (!user || user.role !== "STUDENT") {
-       redirect("/register");
-     }
- 
-   }catch(err){
-    redirect("/auth/login");
-   }
+  const user =  api.user.getMe.useQuery();
+
+  useEffect(() => {
+    if (user.isError) {
+      router.push("/auth/login");
+    } else if (user.data && user.data.role !== "STUDENT") {
+      router.push("/register");
+    }
+  }
+  , [user.isError, user.data, router]);
 
   return (
     <SidebarProvider>

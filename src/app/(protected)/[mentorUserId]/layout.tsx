@@ -30,7 +30,7 @@ export default async function Layout({
 
   return (
 
-          <div >
+          <div className="w-[calc(100vw-10%)] pb-20 md:w-[calc(100vw-280px)] md:pb-0">
             {children}
           </div>
 
