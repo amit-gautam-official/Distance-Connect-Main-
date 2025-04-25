@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 import Footer from "../_components/Footer";
 import client from "@/lib/contentful";
 import { auth } from "@/server/auth";
-import { getUserById, getUserFromSession } from "@/data/user";
+import { getUserById } from "@/data/user";
 
 export const metadata: Metadata = {
   title: "Distance Connect",

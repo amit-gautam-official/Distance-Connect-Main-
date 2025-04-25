@@ -1,4 +1,5 @@
-import { getUserFromSession } from "@/data/user";
+import { getUserById } from "@/data/user";
+import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
 
 
@@ -11,7 +12,9 @@ export default async function Layout({
 
   
        try {
-       const user = await getUserFromSession();
+        const session = await auth();
+
+        const user = await getUserById(session?.user?.id);
        if (!user || user?.role !== "STUDENT") {
            redirect("/register");
        } 

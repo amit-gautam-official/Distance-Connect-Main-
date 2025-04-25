@@ -16,7 +16,7 @@ export const getUserByEmail = cache(async (email: string) => {
     }
 })
 
-export const getUserById = cache(async (id: string | undefined) => {
+export const getUserById = cache(async (id: string | undefined ) => {
     if (!id) return null;
     try {
         const user = await db.user.findUnique({
@@ -49,6 +49,8 @@ export const getAccountById = async (id:string) => {
 export const getUserFromSession = cache(async() => {
     const session = await auth();
     if (!session?.user?.id) return null;
+
+    
     const user = await db.user.findUnique({ where: { id: session.user.id } });
     return user;
   });
