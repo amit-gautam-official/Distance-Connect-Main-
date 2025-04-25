@@ -1,7 +1,6 @@
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
-import { cache } from "react";
-export const getUserByEmail = cache(async (email: string) => {
+export const getUserByEmail = async (email: string) => {
     try {
         const lowerCaseEmail = email.toLowerCase();
         const user = await db.user.findUnique({
@@ -14,9 +13,9 @@ export const getUserByEmail = cache(async (email: string) => {
     } catch (error) {
         return null
     }
-})
+}
 
-export const getUserById = cache(async (id: string | undefined ) => {
+export const getUserById = async (id: string | undefined ) => {
     if (!id) return null;
     try {
         const user = await db.user.findUnique({
@@ -29,7 +28,7 @@ export const getUserById = cache(async (id: string | undefined ) => {
     } catch (error) {
         return null
     }
-})
+}
 
 export const getAccountById = async (id:string) => {
     try {
@@ -46,11 +45,11 @@ export const getAccountById = async (id:string) => {
     }
 }
 
-export const getUserFromSession = cache(async() => {
+export const getUserFromSession = async() => {
     const session = await auth();
     if (!session?.user?.id) return null;
 
     
     const user = await db.user.findUnique({ where: { id: session.user.id } });
     return user;
-  });
+  };
