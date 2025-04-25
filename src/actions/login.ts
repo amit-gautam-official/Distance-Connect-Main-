@@ -33,12 +33,12 @@ export const login = async (data: z.infer<typeof LoginSchema>) => {
     });
   }  catch (error) {
     if (error instanceof AuthError) {
-     
-      switch (error.cause?.toString()) {
+      // console.log("AuthError:", error , error.name);
+      switch (error?.name) {
         case "CredentialsSignin":
           return { error: "Invalid credentials" };
         default:
-          return { error: "Please confirm your email address" };
+          return { error: "Please confirm your email address (check mail)" };
       }
     }
 

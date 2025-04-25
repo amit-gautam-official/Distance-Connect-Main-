@@ -48,7 +48,7 @@ const LoginForm = () => {
   return (
     <CardWrapper
       headerLabel="Log in to your account"
-      title="Login"
+      title="Distance Connect"
       backButtonHref="/auth/register"
       backButtonLabel="Don't have an account? Register here."
       showSocial

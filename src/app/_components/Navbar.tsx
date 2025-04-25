@@ -351,7 +351,7 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
               Login
             </Link>
             <Link
-              href="/auth/login?screen_hint=signup"
+              href="/auth/register"
               className="flex w-[102px] h-[41px] p-3 flex-col justify-center items-center shrink-0 rounded-[31px] bg-[#3D568F] shadow-md text-white font-roboto text-[16px] not-italic font-medium leading-[24px]
 "
             >
