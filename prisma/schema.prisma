@@ -13,12 +13,15 @@ datasource db {
 // 🧑‍💻 User Model
 model User {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-
   username     String? @unique
-  kindeId      String  @unique
+
   email        String  @unique
   name         String?
-  avatarUrl    String?
+  password     String?
+  image       String?
+  emailVerified DateTime?
+
+  accounts      Account[]
   role         Role    @default(USER)
   isRegistered Boolean @default(false)
 
@@ -30,6 +33,26 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
 }
 
 // Enum for User Role

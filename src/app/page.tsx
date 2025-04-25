@@ -1,4 +1,3 @@
-import { auth0 } from "@/lib/auth0";
 import { api } from "@/trpc/server";
 import { redirect } from "next/navigation";
 import Navbar from "./_components/Navbar";
@@ -15,31 +14,19 @@ import Faq from "./_components/Faq";
 import Footer from "./_components/Footer";
 import client from "@/lib/contentful";
 import { syncUserToDb } from "@/lib/syncUser";
+import { auth } from "@/server/auth";
+import { truncate } from "node:fs";
 
 export default async function Home() {
   // Fetch the user session
-  const session = await auth0.getSession();
-  const user = session?.user;
+  const session = await auth()
+  console.log(session)
+
   let loggedId = false;
+ 
   let role = "USER";
   
-  if (user) {
-    const dbUser = await api.user.checkUser({ kindeId: user?.sub! });
-    if (dbUser) {
-      loggedId = true;
-      role = dbUser.role;
-      if (!dbUser.isRegistered) {
-        return redirect("/register");
-      }
-    } else {
-      const synced = await syncUserToDb(); 
-      if (synced) {
-        return redirect("/register");
-      } else {
-        return redirect("/"); 
-      }
-    }
-  }
+  
 
   const response = await client?.getEntries({ content_type: "pageBlogPost" });
   const initialBlogs = response?.items?.sort(

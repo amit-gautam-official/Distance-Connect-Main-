@@ -12,7 +12,7 @@ const Page =  () => {
      api.scheduledMeetings.getMentorScheduledMeetings.useQuery();
 
   const mentor =  api.mentor.getMentor.useQuery();
-
+  
 
   if(mentor.isLoading || scheduledSessions.isLoading ) {
     return (

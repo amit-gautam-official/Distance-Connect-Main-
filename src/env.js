@@ -45,7 +45,6 @@ export const env = createEnv({
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_BASE_URL: z.string().url(),
     NEXT_PUBLIC_GEMINI_API_KEY: z.string(),
-    NEXT_PUBLIC_RESEND_API_KEY: z.string(),
   },
 
   /**
@@ -79,7 +78,6 @@ export const env = createEnv({
     EMAIL_FROM: process.env.EMAIL_FROM,
     SUPPORT_EMAIL: process.env.SUPPORT_EMAIL,
     NEXT_PUBLIC_GEMINI_API_KEY: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
-    NEXT_PUBLIC_RESEND_API_KEY: process.env.NEXT_PUBLIC_RESEND_API_KEY,
     CF_SPACE_ID: process.env.CF_SPACE_ID,
   },
   /**

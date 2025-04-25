@@ -95,12 +95,12 @@ export const userRouter = createTRPCRouter({
 
   checkUser: protectedProcedure
   .input(z.object({
-    kindeId: z.string(),
+    id: z.string(),
   }))
   .query(async ({ ctx, input }) => {
     //console.log("input")
     return ctx?.db?.user.findUnique({
-      where: { kindeId: input.kindeId },
+      where: { id: input.id },
     });
   }
   ),

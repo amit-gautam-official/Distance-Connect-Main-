@@ -10,8 +10,7 @@ import UserFormInfo from "./UserFormInfo";
 import { useRouter } from "next/navigation";
 import { JSONValue } from "node_modules/superjson/dist/types";
 import { api } from "@/trpc/react";
-import { Resend } from "resend";
-import { render } from "@react-email/render";
+
 import Email from "@/../emails/index";
 import { toast } from "sonner";
 import { useUser } from "@auth0/nextjs-auth0";
@@ -110,14 +109,6 @@ function MeetingTimeDateSelection({
       },
     );
 
-  const sendEmaill = api.email.sendEmail.useMutation({
-    onSuccess: () => {
-      //console.log('Email Sent!');
-    },
-    onError: (error) => {
-      //console.log(error);
-    },
-  });
 
   useEffect(() => {
     if (prevBookingData) {

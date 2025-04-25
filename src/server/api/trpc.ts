@@ -11,8 +11,8 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "@/server/db";
-import { auth0 } from "@/lib/auth0";
 import { limiters } from "@/lib/rateLimit";
+import { auth } from "@/server/auth";
 
 /**
  * 1. CONTEXT
@@ -28,9 +28,9 @@ import { limiters } from "@/lib/rateLimit";
  * 
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  
   return {
     db,
+    
     ...opts,
   };
 };
@@ -86,7 +86,7 @@ export const createTRPCRouter = t.router;
 
 const rateLimiter = t.middleware(async ({ ctx, next }) => {
   // Authenticated user
-  const session = await auth0.getSession();
+  const session = await auth();
   const user = session?.user;
 
   if (!user) {
@@ -96,11 +96,9 @@ const rateLimiter = t.middleware(async ({ ctx, next }) => {
     });
   }
  
-  const dbUser = await ctx.db.user.findUnique({
-    where: { kindeId: user?.sub },
-  });
+  const dbUser = user
  
-  if (!user.sub) {
+  if (!user.id) {
     throw new TRPCError({
       code: 'BAD_REQUEST',
       message: 'Invalid user ID',
@@ -111,7 +109,7 @@ const rateLimiter = t.middleware(async ({ ctx, next }) => {
   const userTier = 'premium';
   
   // Apply short-term rate limit (quick burst protection)
-  const shortTermLimit = await limiters.local.limitTier(`user:${user.sub}`, userTier, 'shortWindow');
+  const shortTermLimit = await limiters.local.limitTier(`user:${user.id}`, userTier, 'shortWindow');
   if (!shortTermLimit.success) {
     throw new TRPCError({ 
       code: "TOO_MANY_REQUESTS",
@@ -120,7 +118,7 @@ const rateLimiter = t.middleware(async ({ ctx, next }) => {
   }
 
   // Apply medium-term rate limit (sustained usage)
-  const mediumTermLimit = await limiters.global.limitTier(`user:${user.sub}`, userTier, 'mediumWindow');
+  const mediumTermLimit = await limiters.global.limitTier(`user:${user.id}`, userTier, 'mediumWindow');
   if (!mediumTermLimit.success) {
     throw new TRPCError({ 
       code: "TOO_MANY_REQUESTS",

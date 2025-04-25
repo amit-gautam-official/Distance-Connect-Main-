@@ -19,7 +19,7 @@ export default  function Layout({
   useEffect(() => {
     if (user.isError) {
       router.push("/auth/login");
-    } else if (user.data && user.data.role !== "MENTOR") {
+    } else if (user?.data && user.data.role !== "MENTOR") {
       router.push("/register");
     }
   }
