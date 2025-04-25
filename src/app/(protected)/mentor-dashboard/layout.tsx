@@ -13,11 +13,12 @@ export default async function Layout({
 
   try {
   const user = await getUserFromSession();
+
   if (!user || user?.role !== "MENTOR" || !user.isRegistered) {
       redirect("/register");
   } 
   } catch (err) {
-    redirect("/auth/login");
+    redirect("/");
   }
  
 

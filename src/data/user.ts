@@ -49,8 +49,6 @@ export const getAccountById = async (id:string) => {
 export const getUserFromSession = cache(async() => {
     const session = await auth();
     if (!session?.user?.id) return null;
-
-    
     const user = await db.user.findUnique({ where: { id: session.user.id } });
     return user;
   });
