@@ -32,7 +32,9 @@ import { CalendarIcon, CheckCircle2, MessageSquare, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import Link from "next/link";
-import StudentList from "../profile/components/StudentList";
+
+
+
 import { toast } from "sonner";
 import {
   Dialog,
@@ -43,6 +45,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import MeetingsSkeleton from "./components/MeetingsSkeleton";
+import dynamic from "next/dynamic";
+import StudentListSkeleton from "./components/StudentListSkeleton";
+import StudentList from "../profile/components/StudentList";
 
 type MeetingStatus = "not-started" | "ongoing" | "completed" | "missed";
 type HistoryStatus = "Completed" | "Pending" | "Rejected";
@@ -317,7 +322,7 @@ const MeetingsPage = () => {
       role: meeting?.student.user.role ?? "",
       instituteName: meeting?.student.institutionName ?? "",
       expertise: meeting?.student.interestFields ?? [],
-      avatarUrl: meeting?.student.user.avatarUrl ?? "",
+      image: meeting?.student.user.image ?? "",
       isFollowing: false,
       rating: 4,
     };

@@ -1,12 +1,5 @@
 import React, { cache } from "react";
-import Image from "next/image";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Star } from "lucide-react";
+
 import {
   Mentor,
   User,
@@ -22,7 +15,7 @@ import { ProfileHeader } from "@/components/mentor-profile/ProfileHeader";
 import { AvailabilityCard } from "@/components/mentor-profile/AvailabilityCard";
 import { ProfileTabs } from "@/components/mentor-profile/ProfileTabs";
 import { Sidebar } from "@/components/mentor-profile/Sidebar";
-import { auth0 } from "@/lib/auth0";
+import { auth } from "@/server/auth";
 
 // Types for mentor data with relations
 type MentorWithRelations = Mentor & {
@@ -43,7 +36,7 @@ type SimilarMentorProfile = {
   name: string;
   title: string;
   company: string;
-  avatarUrl: string;
+  image: string;
 };
 
 // Function to fetch mentor data
@@ -110,7 +103,7 @@ async function getSimilarMentors(
       name: mentor.mentorName || "",
       title: mentor.jobTitle || "Mentor",
       company: `@${mentor.currentCompany || "Company"}`,
-      avatarUrl: mentor.user?.avatarUrl || "",
+      image: mentor.user?.image || "",
     }));
   } catch (error) {
     console.error("Error fetching similar mentors:", error);
@@ -154,7 +147,7 @@ export default async function MentorProfilePage({ params }: PageProps) {
   const { mentorName } = await params;
   const mentorData = await getCachedMentorData(mentorName);
   // console.log("mentorData", mentorData);
-  const session = await auth0.getSession();
+  const session = await auth();
   const userEmail = session?.user.email;
 
   if (!mentorData) {
@@ -256,7 +249,7 @@ export default async function MentorProfilePage({ params }: PageProps) {
     .map((meeting, index) => ({
       id: meeting.id,
       name: meeting.student.user.name || "Anonymous Student",
-      avatar: meeting.student.user.avatarUrl || "",
+      avatar: meeting.student.user.image || "",
       role: "Student", // Simplify to avoid type errors
       rating: meeting.star || 5,
       date: new Date(meeting.updatedAt).toLocaleDateString("en-US", {
@@ -361,7 +354,7 @@ const professionalBackground = {
               companyEmailVerified: mentorData.companyEmailVerified || false,
               bio: mentorData.bio || "",
               user: mentorData.user
-                ? { avatarUrl: mentorData.user.avatarUrl || "" }
+                ? { image: mentorData.user.image || "" }
                 : undefined,
             }}
             userEmail={userEmail || ""}

@@ -13,7 +13,7 @@ interface Mentor {
   role: string;
   company: string;
   expertise: string[];
-  avatarUrl: string;
+  image: string;
   isFollowing: boolean;
   rating: number;
   selectedTime: string;

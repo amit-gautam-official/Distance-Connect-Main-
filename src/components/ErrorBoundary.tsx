@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { TRPCClientError } from "@trpc/client";
 
 interface ErrorBoundaryProps {
   error: Error;
@@ -28,7 +27,7 @@ export default function ErrorBoundary({ error, reset }: ErrorBoundaryProps) {
           You must be logged in to access this page.
         </p>
         <button
-          onClick={() => router.push("/api/auth/login")}
+          onClick={() => router.push("/auth/login")}
           className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
           Go to Login

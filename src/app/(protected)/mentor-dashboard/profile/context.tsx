@@ -4,7 +4,7 @@ import React, { createContext, useContext } from "react";
 
 // Create a context for sharing profile state
 export interface ProfileContextType {
-  avatarUrl: string;
+  image: string;
   updateAvatar: (newUrl: string) => void;
   profileData: {
     name: string;
@@ -20,7 +20,7 @@ export interface ProfileContextType {
 }
 
 export const ProfileContext = createContext<ProfileContextType>({
-  avatarUrl: "",
+  image: "",
   updateAvatar: (newUrl: string) => {
     // console.log("Avatar update not implemented in context consumer", newUrl);
   },

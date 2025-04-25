@@ -3,18 +3,14 @@ import { Button } from "@/components/ui/button";
 import { format, isValid } from "date-fns";
 import { CalendarCheck, Clock, LoaderIcon, MapPin, Timer } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import TimeDateSelection from "./TimeDateSelection";
 import UserFormInfo from "./UserFormInfo";
 import { useRouter } from "next/navigation";
 import { JSONValue } from "node_modules/superjson/dist/types";
 import { api } from "@/trpc/react";
-import { Resend } from "resend";
-import { render } from "@react-email/render";
-import Email from "@/../emails/index";
+
 import { toast } from "sonner";
-import { useUser } from "@auth0/nextjs-auth0";
 
 // Types for the new availability structure
 type TimeSlot = {
@@ -85,7 +81,6 @@ function MeetingTimeDateSelection({
   const [meetUrl, setMeetUrl] = useState<string>("");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const { user, error, isLoading } = useUser();
   const [userName, setUserName] = useState<string>("");
   const [userEmail, setUserEmail] = useState<string>("");
   const [step, setStep] = useState<number>(1);
@@ -110,14 +105,6 @@ function MeetingTimeDateSelection({
       },
     );
 
-  const sendEmaill = api.email.sendEmail.useMutation({
-    onSuccess: () => {
-      //console.log('Email Sent!');
-    },
-    onError: (error) => {
-      //console.log(error);
-    },
-  });
 
   useEffect(() => {
     if (prevBookingData) {

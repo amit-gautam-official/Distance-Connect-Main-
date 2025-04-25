@@ -23,7 +23,7 @@ const ScheduledSessions: React.FC<ScheduledSessionsProps> = ({ sessions }) => {
   const upcomingSessions = React.useMemo(() => {
     const now = new Date();
     
-    return sessions.filter(session => {
+    return sessions?.filter(session => {
       // Parse the session date string into a Date object
       // Assuming date format is "DD Month YYYY"
       const dateParts = session.date.split(" ");

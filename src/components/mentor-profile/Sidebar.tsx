@@ -13,7 +13,7 @@ interface SimilarMentorProfile {
   name: string;
   title: string;
   company: string;
-  avatarUrl: string;
+  image: string;
 }
 
 interface SidebarProps {

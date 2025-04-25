@@ -11,7 +11,7 @@ interface User {
   id: string;
   kindeId: string;
   email: string;
-  avatarUrl: string | null;
+  image: string | null;
   role: any; // Using 'any' for Role enum since we don't have the exact type
   isRegistered: boolean;
   createdAt: Date;
@@ -39,7 +39,7 @@ const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ user }) => {
       <div className="flex items-center gap-4">
         <Avatar className="h-16 w-16 border-2 border-primary/10">
           <AvatarImage
-            src={user?.avatarUrl || ""}
+            src={user?.image || ""}
             alt={user?.name || "Student"}
           />
           <AvatarFallback className="bg-primary/10 text-lg font-semibold text-primary">

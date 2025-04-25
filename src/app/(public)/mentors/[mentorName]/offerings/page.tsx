@@ -6,11 +6,11 @@ import {
   ScheduledMeetings,
 } from "@prisma/client";
 import { db } from "@/server/db";
-import { auth0 } from "@/lib/auth0";
 import { Offerings } from "@/components/mentor-profile/Offerings";
 import { AvailabilityCard } from "@/components/mentor-profile/AvailabilityCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BadgeCheck, MapPin, Briefcase, Star } from "lucide-react";
+import { auth } from "@/server/auth";
 
 
 
@@ -71,7 +71,7 @@ export default async function OfferingsPage({ params }: PageProps) {
   const { mentorName } = await params;
 
   const mentorData = await getMentorData(mentorName);
-  const session = await auth0.getSession();
+  const session = await auth();
   const userEmail = session?.user.email;
 
   const offerings = mentorData?.meetingEvents.map((event) => ({
@@ -94,7 +94,7 @@ export default async function OfferingsPage({ params }: PageProps) {
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
           <Avatar className="h-16 w-16 border-2 border-blue-100 shadow-sm">
             <AvatarImage
-              src={mentorData?.user?.avatarUrl || ""}
+              src={mentorData?.user?.image || ""}
               alt={mentorData?.mentorName || "Mentor Avatar"}
             />
             <AvatarFallback className="bg-blue-500 text-lg font-medium text-white">

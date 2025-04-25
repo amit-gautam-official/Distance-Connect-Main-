@@ -41,10 +41,12 @@ import HighSchoolForm from "./HighSchoolForm";
 import CollegeForm from "./CollegeForm";
 import WorkingForm from "./WorkingForm";
 
+import {SessionUserSchema} from "@/schemas";
+
 export default function StudentForm({
   user,
 }: {
-  user: { firstName: string; lastName: string; id: string };
+  user: z.infer<typeof SessionUserSchema>;
 }) {
   const [studentRole, setStudentRole] = useState<string>("");
   const [step, setStep] = useState<number>(2);

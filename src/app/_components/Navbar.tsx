@@ -27,11 +27,14 @@ import {
 
 import Link from "next/link";
 import { api } from "@/trpc/react";
+import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 
 const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blogs: any }) => {
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const router = useRouter();
 
   //get only top 4 blogs
   const top4Blogs = blogs?.slice(0, 4);
@@ -194,7 +197,7 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
                           Login
                         </Link>
                         <Link
-                          href="/auth/login?screen_hint=signup"
+                          href="/auth/register"
                           className="flex w-[199px] items-center justify-center gap-1 rounded-lg bg-[#6D758F] p-[18px_22px] text-white shadow-md"
                         >
                           Sign up
@@ -208,12 +211,15 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
                         >
                           Dashboard
                         </Link>
-                        <Link
-                          href="/auth/logout"
+                        <div
                           className="flex w-[199px] items-center justify-center gap-1 rounded-lg bg-[#6D758F] p-[18px_22px] text-white shadow-md"
                         >
-                          Logout
-                        </Link>
+                          
+      <button onClick={() => {
+        signOut()
+        router.push("/")
+        }}>Log Out</button>
+                        </div>
                       </>
                     )}
                   </div>
@@ -361,12 +367,15 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
             >
               Dashboard
             </Link>
-            <Link
-              href="/auth/logout"
+            <div
               className="flex w-[102px] h-[41px] p-3 flex-col justify-center items-center shrink-0 rounded-[31px] bg-[#3D568F] shadow-md  text-white font-roboto text-[16px] not-italic font-medium leading-[24px]"
             >
-              Logout
-            </Link>
+             
+      <button onClick={() =>{
+         signOut()
+        router.push("/")
+      }}>Log Out</button>
+            </div>
           </div>
         )}
       </div>

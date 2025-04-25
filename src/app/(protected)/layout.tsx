@@ -1,5 +1,4 @@
 
-import { auth0 } from "@/lib/auth0";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 

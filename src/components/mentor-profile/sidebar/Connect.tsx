@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { auth0 } from "@/lib/auth0";
+import { auth } from "@/server/auth";
 interface ConnectProps {
   mentorName: string;
   mentorUserId: string;
@@ -9,7 +9,7 @@ interface ConnectProps {
 
 
 export async function Connect({ mentorName , mentorUserId}: ConnectProps) {
-  const session =  await auth0.getSession();
+  const session =  await auth();
   return (
     <div className="rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 shadow-sm">
       <h3 className="mb-3 text-lg font-semibold text-gray-900">

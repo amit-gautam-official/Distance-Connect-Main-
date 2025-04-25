@@ -1,13 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import {MainContentSkeleton, ProfileHeaderSkeleton, ProfileSkeleton} from "./components/ProfileSkeleton";
+
 import ProfileHeader from "./components/ProfileHeader";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UserSettings from "./components/UserSettings";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/trpc/react";
-import ProfileSkeleton from "./components/ProfileSkeleton";
 import Link from "next/link";
 import { ProfileContext } from "./context";
+import dynamic from "next/dynamic";
 
 // Define proper type for mentor data
 interface MentorData {
@@ -28,7 +31,7 @@ interface MentorData {
     id: string;
     name: string;
     email: string;
-    avatarUrl: string;
+    image: string;
     role: string;
     createdAt: Date;
   };
@@ -61,8 +64,8 @@ const ProfilePage = () => {
   // Initialize data from mentor data when it loads
   React.useEffect(() => {
     if (mentor) {
-      if (mentor.user?.avatarUrl) {
-        setCurrentAvatarUrl(mentor.user.avatarUrl);
+      if (mentor.user?.image) {
+        setCurrentAvatarUrl(mentor.user.image);
       }
 
       setProfileData({
@@ -95,7 +98,7 @@ const ProfilePage = () => {
   const profileHeaderData = {
     name: profileData.name || mentor?.user?.name || "",
     email: mentor?.user?.email || "",
-    avatarUrl: currentAvatarUrl || mentor?.user?.avatarUrl || "",
+    image: currentAvatarUrl || mentor?.user?.image || "",
     role: mentor?.user?.role || "",
     state: profileData.state || mentor?.state || "",
     createdAt: mentor?.user?.createdAt!,
@@ -110,30 +113,38 @@ const ProfilePage = () => {
     bio: mentor?.bio || "",
     education: mentor?.education || [] as JSON[],
     wholeExperience: mentor?.wholeExperience || [] as JSON[],
-    
   };
 
   return (
     <ProfileContext.Provider
       value={{
-        avatarUrl: currentAvatarUrl || mentor?.user?.avatarUrl || "",
+        image: currentAvatarUrl || mentor?.user?.image || "",
         updateAvatar: setCurrentAvatarUrl,
         profileData,
         updateProfileField,
       }}
     >
-      <div className="container mx-auto px-1 py-4 sm:py-6 md:pb-6 pb-24">
-        <div className="grid grid-cols-1 justify-center   gap-4 md:grid-cols-3 md:gap-6 lg:gap-8">
-          {/* Profile Header - Takes full width on mobile, 1/3 on desktop */}
-          <div className="col-span-1 md:mt-[150px] flex justify-center   ">
-            <div className="rounded-lg  bg-card p-4 shadow-sm sm:p-6">
+      <div className="container  mx-auto px-2 py-4 sm:py-6">
+        <div className="grid grid-cols-1 justify-center gap-4 lg:grid-cols-3 md:gap-6 lg:gap-8">
+          {/* Mobile-only profile header visibility control */}
+          <div className="block lg:hidden mb-4">
+            <div className="rounded-lg bg-card p-4 shadow-sm">
               <ProfileHeader user={profileHeaderData!} />
             </div>
           </div>
+          
+          {/* Layout for larger screens */}
+          <div className="hidden  lg:block lg:col-span-1">
+            <div className="sticky no-scrollbar top-4 overflow-auto max-h-[calc(100vh-2rem)]">
+              <div className="rounded-lg bg-card p-4 shadow-sm sm:p-6">
+                <ProfileHeader user={profileHeaderData!} />
+              </div>
+            </div>
+          </div>
 
-          {/* Main Content - Takes full width on mobile, 2/3 on desktop */}
-          <div className="col-span-1 space-y-4 md:col-span-2 md:space-y-6">
-            <div className="rounded-lg  bg-card p-1 min-h-[500px] sm:min-h-[600px] sm:p-6">
+          {/* Main Content - Scrollable */}
+          <div className="col-span-1 lg:col-span-2 space-y-4">
+            <div className="rounded-lg bg-card p-3 sm:p-6 min-h-[500px] overflow-y-auto">
               <UserSettings />
             </div>
           </div>

@@ -37,7 +37,7 @@ interface Mentor {
   role: string;
   company: string;
   expertise: string[];
-  avatarUrl: string;
+  image: string;
   isFollowing: boolean;
   rating: number;
   selectedTime: string;
@@ -70,7 +70,7 @@ const DashUpcoming = ({ mentorsData }: { mentorsData: Mentor[] }) => {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-4">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={mentor.avatarUrl} alt={mentor.name} />
+                      <AvatarImage src={mentor.image} alt={mentor.name} />
                       <AvatarFallback>
                         {mentor.name.substring(0, 2)}
                       </AvatarFallback>

@@ -19,10 +19,16 @@ import MentorForm from "./MentorForm";
 import StudentForm from "./StudentForm";
 import StartupForm from "./StartupForm";
 
+import {SessionUserSchema} from "@/schemas";
+
+import { z } from "zod";
+
+
+
 export default function RegisterForm({
   user,
 }: {
-  user: { firstName: string; lastName: string; id: string };
+  user: z.infer<typeof SessionUserSchema>;
 }) {
   const [role, setRole] = useState<string>("");
   const [step, setStep] = useState<number>(1);

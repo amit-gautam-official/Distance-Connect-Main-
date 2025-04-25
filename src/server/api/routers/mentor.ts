@@ -17,7 +17,7 @@ export const mentorRouter = createTRPCRouter({
       name : z.string(),
       role : z.enum(["STUDENT", "MENTOR", "STARTUP"]),
       isRegistered : z.boolean(),
-      avatarUrl : z.string().optional(),
+      image : z.string().optional(),
       companyType : z.string(),
       hiringFields : z.array(z.string()),
      }))
@@ -47,7 +47,7 @@ export const mentorRouter = createTRPCRouter({
             name: input.name,
             role: input.role,
             isRegistered: input.isRegistered,
-            avatarUrl: input.avatarUrl,
+            image: input.image,
           },
         })
       ])
@@ -198,7 +198,7 @@ export const mentorRouter = createTRPCRouter({
         state : true,
         user : {
           select : {
-            avatarUrl : true,
+            image : true,
           }
         },
         meetingEvents: {

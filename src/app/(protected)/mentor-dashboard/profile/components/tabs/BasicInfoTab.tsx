@@ -53,7 +53,7 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
             userId={user.id}
             isSubmitting={isSubmitting}
             onAvatarUpdate={updateAvatar}
-            initialAvatarUrl={user.avatarUrl || undefined}
+            initialAvatarUrl={user.image || undefined}
           />
         </div>
 

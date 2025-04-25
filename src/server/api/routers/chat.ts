@@ -177,7 +177,7 @@ export const chatRouter = createTRPCRouter({
           chatRoomId: true,
           user : {
             select : {
-              avatarUrl: true,
+              image: true,
               name: true,
             }
           }

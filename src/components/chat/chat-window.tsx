@@ -26,7 +26,7 @@ type ChatRoom = {
     id: string
     mentorName: string | null
     user: {
-      avatarUrl: string | null
+      image: string | null
       name: string | null
     }
   }
@@ -34,7 +34,7 @@ type ChatRoom = {
     id: string
     studentName: string | null
     user: {
-      avatarUrl: string | null
+      image: string | null
       name: string | null
     }
   }
@@ -59,7 +59,7 @@ type Message = {
   updatedAt: Date
   imageUrl?: string | null
   user?: {
-    avatarUrl: string | null
+    image: string | null
     name: string | null
   }
 }
@@ -326,7 +326,7 @@ export default function ChatWindow({
         fileName: chatMessage.fileName,
         imageUrl: imageUrl || undefined,
         user: {
-          avatarUrl: contact.user.avatarUrl,
+          image: contact.user.image,
           name: contact.user.name,
         }
       }
@@ -402,7 +402,7 @@ export default function ChatWindow({
         fileName: chatMessage.fileName,
         imageUrl: imageUrl || undefined,
         user: {
-          avatarUrl: contact.user.avatarUrl,
+          image: contact.user.image,
           name: contact.user.name,
         }
       }
@@ -496,7 +496,7 @@ export default function ChatWindow({
             </Button>
           )}  
           <Avatar>
-            <AvatarImage src={contact.user.avatarUrl || ""} alt={contact.user.name || "User"} />
+            <AvatarImage src={contact.user.image || ""} alt={contact.user.name || "User"} />
             <AvatarFallback>{contact.user.name?.charAt(0) || "U"}</AvatarFallback>
           </Avatar>
           <div>

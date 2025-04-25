@@ -5,31 +5,13 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/
 export const userRouter = createTRPCRouter({
  
 
-  createUser: publicProcedure
-    .input(z.object({ 
-      kindeId : z.string(),
-      name: z.string(),
-      email : z.string().email(),
-      avatarUrl : z.string().url().optional(),
-      username: z.string().min(3),
-     }))
-    .mutation(async ({ ctx, input }) => {
-      return ctx?.db?.user.create({
-        data: {
-          kindeId : input.kindeId,
-          name: input.name,
-          email: input.email,
-          avatarUrl: input.avatarUrl,
-          username: input.username,
-        },
-      });
-    }),
+
 
   updateUser: protectedProcedure
   .input(z.object({
     name: z.string().optional(),
   
-    avatarUrl: z.string()
+    image: z.string()
       .url("Please provide a valid avatar URL")
       .optional(),
   
@@ -95,12 +77,12 @@ export const userRouter = createTRPCRouter({
 
   checkUser: protectedProcedure
   .input(z.object({
-    kindeId: z.string(),
+    id: z.string(),
   }))
   .query(async ({ ctx, input }) => {
     //console.log("input")
     return ctx?.db?.user.findUnique({
-      where: { kindeId: input.kindeId },
+      where: { id: input.id },
     });
   }
   ),
@@ -110,7 +92,7 @@ export const userRouter = createTRPCRouter({
     username: z.string().min(3),
   }))
   .query(async ({ ctx, input }) => {
-    const existingUser = await ctx?.db?.user.findUnique({
+    const existingUser = await ctx?.db?.user.findFirst({
       where: { username: input.username },
     });
     return { available: !existingUser };
@@ -121,7 +103,7 @@ export const userRouter = createTRPCRouter({
     username: z.string().min(3),
   }))
   .mutation(async ({ ctx, input }) => {
-    const existingUser = await ctx?.db?.user.findUnique({
+    const existingUser = await ctx?.db?.user.findFirst({
       where: { username: input.username },
     });
     return { available: !existingUser };

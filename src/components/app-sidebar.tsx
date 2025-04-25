@@ -30,6 +30,8 @@ import { useEffect, useState, useRef } from "react";
 import { api } from "@/trpc/react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export function AppSidebar({ role }: { role: string }) {
   const { data: user } = api.user.getMe.useQuery(undefined, {
@@ -43,6 +45,7 @@ export function AppSidebar({ role }: { role: string }) {
   const profileButtonRef = useRef<HTMLDivElement>(null);
   // Initialize with null to avoid hydration mismatch
   const [windowWidth, setWindowWidth] = useState<number | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     // Set initial window width after component mounts (client-side only)
@@ -236,16 +239,20 @@ export function AppSidebar({ role }: { role: string }) {
             </Link>
           )}
           {logoutItem && (
-            <Link
+            <button
               key={logoutItem.title}
-              href={logoutItem.url}
+              onClick={() => {
+                signOut();
+                router.push("/");
+
+              }}
               className="flex w-1/7 flex-col items-center justify-center py-1 text-sidebar-foreground"
             >
               <logoutItem.icon className="h-4 w-4" />
               <span className="mt-1 w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-[8px]">
                 {logoutItem.title}
               </span>
-            </Link>
+            </button>
           )}
          
         </div>
@@ -266,11 +273,11 @@ export function AppSidebar({ role }: { role: string }) {
         <SidebarGroup className="overflow-visible">
           <SidebarGroupLabel>
             <Link href="/" className="cursor-pointer">
-              <img src="/logo.png" alt="logo" className="w- h-[60px]" />
+              <img src="/logo.png" alt="logo" className="w- mb-[-10px] mt-[30px] h-[80px]" />
             </Link>
           </SidebarGroupLabel>
 
-          <SidebarGroupContent className="flex h-[calc(100dvh-4rem)] flex-col justify-between overflow-visible pl-2 pt-4">
+          <SidebarGroupContent className="flex mt-[20px] h-[calc(100dvh-4rem)] flex-col justify-between overflow-visible pl-2 pt-4">
             {/* Main navigation */}
             <SidebarMenu>
               {role === "student" &&
@@ -307,19 +314,37 @@ export function AppSidebar({ role }: { role: string }) {
 
             {/* Support and settings */}
             <SidebarMenu>
-              {downItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem >
                   <SidebarMenuButton 
-                    isActive={isActive(item.url)}
+                    isActive={isActive(role === "student"
+                      ? "/student-dashboard/help-support"
+                      : "/mentor-dashboard/help-support")}
                     asChild
                   >
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
+                    <a href={role === "student"
+          ? "/student-dashboard/help-support"
+          : "/mentor-dashboard/help-support"}>
+                      <MessageCircleQuestion />
+                      <span>Help & Support</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+                <SidebarMenuItem >
+                  <SidebarMenuButton 
+                  
+                    asChild
+                  >
+                    <button
+                      onClick={() => {
+                        signOut();
+                        router.push("/");
+                      }}>
+
+                      <LogOut />
+                      <span>Log Out</span>
+                    </button>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
             </SidebarMenu>
 
             {/* User profile with dropdown */}
@@ -335,7 +360,7 @@ export function AppSidebar({ role }: { role: string }) {
                   >
                     
                     <Avatar className="h-12 w-12 border-4 border-white object-cover">
-          <AvatarImage className="object-cover" src={user?.avatarUrl || ""} alt={user?.name || "User"} />
+          <AvatarImage className="object-cover" src={user?.image || ""} alt={user?.name || "User"} />
           <AvatarFallback className="bg-blue-100 text-2xl text-blue-800">
             {user?.name?.charAt(0) || "U"}
           </AvatarFallback>

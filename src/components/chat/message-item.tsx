@@ -22,7 +22,7 @@ interface Message {
   createdAt: Date
   updatedAt: Date
   user:{
-    avatarUrl: string | null
+    image: string | null
     name: string | null
   }
 }
@@ -39,7 +39,7 @@ export default function MessageItem({ message, isOwn }: MessageItemProps) {
     <>
       <div className={cn("flex gap-3 max-w-[80%]", isOwn ? "ml-auto flex-row-reverse" : "mr-auto")}>
         <Avatar className="h-8 w-8">
-          <AvatarImage src={message.user.avatarUrl!} alt={"avatar url"} />
+          <AvatarImage src={message.user.image!} alt={"avatar url"} />
           <AvatarFallback>{message?.user?.name?.charAt(0)!}</AvatarFallback>
         </Avatar>        <div>
           <div className={cn("rounded-lg p-3", isOwn ? "bg-blue-500 text-white" : "bg-white border")}>

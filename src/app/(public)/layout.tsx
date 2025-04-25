@@ -4,10 +4,11 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 import Navbar from "../_components/Navbar";
 import { api } from "@/trpc/server";
-import { auth0 } from "@/lib/auth0";
 import { redirect } from "next/navigation";
 import Footer from "../_components/Footer";
 import client from "@/lib/contentful";
+import { auth } from "@/server/auth";
+import { getUserById, getUserFromSession } from "@/data/user";
 
 export const metadata: Metadata = {
   title: "Distance Connect",
@@ -19,14 +20,14 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   // Fetch the user session
-  const session = await auth0.getSession();
+  const session = await auth()
   const user = session?.user;
 
   let loggedIn = false;
   let role = "USER";
 
   if (user) {
-    const dbUser = await api.user.getMe();
+    const dbUser = await getUserById(user.id)
     role = dbUser?.role ?? "USER"; 
     loggedIn = true;
   }
