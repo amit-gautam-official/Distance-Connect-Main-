@@ -1,8 +1,9 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { getUserById } from "@/data/user";
+
 import { redirect } from "next/navigation";
 import { auth } from "@/server/auth";
+import { db } from "@/server/db";
 
 
 
@@ -16,7 +17,11 @@ export default async function Layout({
    try {
        const session = await auth();
    
-      const user = await getUserById(session?.user?.id);
+      const user = await db.user.findUnique({
+              where: {
+                  id : session?.user?.id,
+              }
+          }); 
    if (!user || user?.role !== "STUDENT" || !user.isRegistered) {
        redirect("/register");
    } 

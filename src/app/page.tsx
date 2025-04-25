@@ -1,10 +1,10 @@
 import client from "@/lib/contentful";
 import { auth } from "@/server/auth";
-import { getUserById } from "@/data/user";
 
 import React from 'react'
 import { redirect } from "next/navigation";
 import LandingPage from "./_components/LandingPage";
+import { db } from "@/server/db";
 
 const Home = async () => {
 
@@ -14,7 +14,11 @@ const Home = async () => {
   const user = await session?.user;
 
   if (user) {
-    const dbUser = await getUserById(user?.id as string);
+    const dbUser  = await db.user.findUnique({
+            where: {
+                id : user.id,
+            }
+        }); 
     if (dbUser?.isRegistered) {
       loggedIn = true;
       role = dbUser?.role;

@@ -1,5 +1,6 @@
-import { getUserById } from "@/data/user";
+
 import { auth } from "@/server/auth";
+import { db } from "@/server/db";
 import { redirect } from "next/navigation";
 
 export default async function Layout({
@@ -13,7 +14,11 @@ export default async function Layout({
 
     const session = await auth();
 
-   const user = await getUserById(session?.user?.id);
+   const user = await db.user.findUnique({
+           where: {
+               id : session?.user?.id,
+           }
+       }); 
 
    if (!user || user?.role !== "STUDENT") {
        redirect("/register");

@@ -8,7 +8,8 @@ import { redirect } from "next/navigation";
 import Footer from "../_components/Footer";
 import client from "@/lib/contentful";
 import { auth } from "@/server/auth";
-import { getUserById } from "@/data/user";
+
+import { db } from "@/server/db";
 
 export const metadata: Metadata = {
   title: "Distance Connect",
@@ -27,7 +28,11 @@ export default async function RootLayout({
   let role = "USER";
 
   if (user) {
-    const dbUser = await getUserById(user.id)
+    const dbUser =  await db.user.findUnique({
+            where: {
+                id : user.id,
+            }
+        }); 
     role = dbUser?.role ?? "USER"; 
     loggedIn = true;
   }

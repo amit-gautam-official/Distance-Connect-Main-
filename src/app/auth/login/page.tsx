@@ -1,13 +1,18 @@
 import LoginForm from "@/components/auth/forms/login-form"
-import { getUserById } from "@/data/user"
+
 import { auth } from "@/server/auth"
+import { db } from "@/server/db"
 import { redirect } from "next/navigation"
 
 const SignInPage = async () => {
   const session = await auth()
 
   if (session?.user) {
-    const dbUser = await getUserById(session.user.id)
+    const dbUser =  await db.user.findUnique({
+            where: {
+                id  : session?.user?.id,
+            }
+        }); 
 
     if (dbUser?.isRegistered) {
       // Redirect based on user role

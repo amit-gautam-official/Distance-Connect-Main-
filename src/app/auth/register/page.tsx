@@ -1,6 +1,7 @@
 import RegisterForm from '@/components/auth/forms/register-form'
-import { getUserById } from '@/data/user';
+
 import { auth } from '@/server/auth';
+import { db } from '@/server/db';
 import { redirect } from 'next/navigation';
 import React from 'react'
 
@@ -9,7 +10,11 @@ const RegisterPage = async () => {
   const session = await auth();
   // console.log("Session", session)
   if(session?.user) {
-    const dbUser = await getUserById(session.user.id)
+    const dbUser = await db.user.findUnique({
+            where: {
+                id  : session?.user?.id,
+            }
+        }); 
 
     if (dbUser?.isRegistered) {
       // Redirect based on user role

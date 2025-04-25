@@ -1,8 +1,8 @@
 
-import { getUserById } from "@/data/user";
+
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
-import { api } from "@/trpc/server";
+
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -23,7 +23,11 @@ const user = session?.user;
     return redirect("/auth/login");
   }
 
-  const dbUser = await getUserById(user?.id as string);
+  const dbUser = await db.user.findUnique({
+    where: {
+        id : user.id,
+    }
+}); 
   
   if (user && dbUser?.isRegistered) {
     if (dbUser?.role === "STUDENT") {

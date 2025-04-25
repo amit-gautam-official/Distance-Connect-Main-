@@ -7,7 +7,7 @@ import { db } from "@/server/db";
 import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
 import { LoginSchema } from "@/schemas";
-import { getAccountById, getUserByEmail, getUserById } from "@/data/user";
+import { getUserByEmail } from "@/data/user";
 import bcrypt from "bcryptjs";
 
 /**

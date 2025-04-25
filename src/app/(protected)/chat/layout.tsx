@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
-import { getUserById } from "@/data/user";
 import { auth } from "@/server/auth";
+import { db } from "@/server/db";
 
 export const metadata: Metadata = {
   title: "Distance Connect",
@@ -18,7 +18,11 @@ export default async function Layout({
   try {
     const session = await auth();
 
-    const user = await getUserById(session?.user?.id);
+    const user = await db.user.findUnique({
+            where: {
+                id : session?.user?.id,
+            }
+        }); 
   if (!user) {
       redirect("/register");
   } 
