@@ -14,7 +14,7 @@ type Contact = {
     id: string
     mentorName: string | null
     user : {
-      avatarUrl: string   | null
+      image: string   | null
       name : string | null
     }
   }
@@ -22,7 +22,7 @@ type Contact = {
     id: string
     studentName: string | null
     user : {
-      avatarUrl: string | null
+      image: string | null
       name : string | null
 
     }
@@ -88,7 +88,7 @@ export default function ContactList({
                 >
                   <div className="flex items-start gap-3">
                     <Avatar>
-                      <AvatarImage src={contact.user.avatarUrl!} alt={"avatar url"} />
+                      <AvatarImage src={contact.user.image!} alt={"avatar url"} />
                       <AvatarFallback>{contact?.user?.name}</AvatarFallback>
                     </Avatar>
 

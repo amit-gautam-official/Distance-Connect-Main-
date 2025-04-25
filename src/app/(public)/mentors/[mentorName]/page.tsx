@@ -43,7 +43,7 @@ type SimilarMentorProfile = {
   name: string;
   title: string;
   company: string;
-  avatarUrl: string;
+  image: string;
 };
 
 // Function to fetch mentor data
@@ -110,7 +110,7 @@ async function getSimilarMentors(
       name: mentor.mentorName || "",
       title: mentor.jobTitle || "Mentor",
       company: `@${mentor.currentCompany || "Company"}`,
-      avatarUrl: mentor.user?.avatarUrl || "",
+      image: mentor.user?.image || "",
     }));
   } catch (error) {
     console.error("Error fetching similar mentors:", error);
@@ -256,7 +256,7 @@ export default async function MentorProfilePage({ params }: PageProps) {
     .map((meeting, index) => ({
       id: meeting.id,
       name: meeting.student.user.name || "Anonymous Student",
-      avatar: meeting.student.user.avatarUrl || "",
+      avatar: meeting.student.user.image || "",
       role: "Student", // Simplify to avoid type errors
       rating: meeting.star || 5,
       date: new Date(meeting.updatedAt).toLocaleDateString("en-US", {
@@ -361,7 +361,7 @@ const professionalBackground = {
               companyEmailVerified: mentorData.companyEmailVerified || false,
               bio: mentorData.bio || "",
               user: mentorData.user
-                ? { avatarUrl: mentorData.user.avatarUrl || "" }
+                ? { image: mentorData.user.image || "" }
                 : undefined,
             }}
             userEmail={userEmail || ""}

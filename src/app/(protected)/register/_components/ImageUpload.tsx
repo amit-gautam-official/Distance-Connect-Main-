@@ -42,7 +42,7 @@ export const ImageUpload = ({
   const uploadImage = api.file.upload.useMutation({
     onSuccess: (data) => {
       updateUser.mutate({
-        avatarUrl: data?.url,
+        image: data?.url,
       });
       if (data?.url && onAvatarUpdate) {
         onAvatarUpdate(data.url);

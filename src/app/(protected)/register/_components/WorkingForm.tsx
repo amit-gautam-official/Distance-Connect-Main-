@@ -43,6 +43,7 @@ import { ImageUpload } from "./ImageUpload";
 
 import { hiringFields } from "@/constants/hiringFirlds";
 import { toast } from "sonner";
+import { SessionUserSchema } from "@/schemas"
 
 const formSchema = z.object({
   username: z.string().min(3, {
@@ -65,7 +66,7 @@ const formSchema = z.object({
 export default function WorkingForm({
   user,
 }: {
-  user: { firstName: string; lastName: string; id: string };
+  user: z.infer<typeof SessionUserSchema>;
 }) {
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [commandOpen, setCommandOpen] = useState(false);
@@ -91,8 +92,8 @@ export default function WorkingForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
-      firstName: user.firstName,
-      lastName: user.lastName,
+      firstName: user.name.split(" ")[0],
+      lastName: user.name.split(" ")[1],
       companyName: "",
       jobTitle: "",
       experience: "",
@@ -104,39 +105,6 @@ export default function WorkingForm({
     },
   });
 
-  // Watch for username changes and validate
-  // useEffect(() => {
-  //   const subscription = form.watch((value, { name }) => {
-  //     if (name === "username" && value.username && value.username.length >= 3) {
-  //       setIsCheckingUsername(true);
-
-  //       const timer = setTimeout(async () => {
-  //         try {
-  //           // Make sure username exists and is a string before passing to the mutation
-  //           if (value.username) {
-  //             const result = await checkUsernameAvailability.mutateAsync({
-  //               username: value.username,
-  //             });
-
-  //             if (!result.available) {
-  //               setUsernameError("This username is already taken");
-  //             } else {
-  //               setUsernameError(null);
-  //             }
-  //           }
-  //         } catch (error) {
-  //           console.error("Error checking username:", error);
-  //         } finally {
-  //           setIsCheckingUsername(false);
-  //         }
-  //       }, 1000);
-
-  //       return () => clearTimeout(timer);
-  //     }
-  //   });
-
-  //   return () => subscription.unsubscribe();
-  // }, []);
 
   async function onSubmit(input: z.infer<typeof formSchema>) {
     if (usernameError) {
@@ -234,6 +202,7 @@ export default function WorkingForm({
           >
             <div className="mb-4 flex justify-start sm:mb-6 md:justify-center">
               <ImageUpload
+                initialAvatarUrl={user?.image}
                 userId={user?.id}
                 isSubmitting={form.formState.isSubmitting}
               />

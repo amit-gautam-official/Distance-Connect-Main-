@@ -51,7 +51,7 @@ const ProfileCompletionBar: React.FC<ProfileCompletionBarProps> = ({
         name: "Basic Info",
         isComplete: false,
         fields: [
-          { name: "Profile Picture", isComplete: !!user.avatarUrl },
+          { name: "Profile Picture", isComplete: !!user.image },
           { name: "Name", isComplete: !!formData.name },
           { name: "Bio", isComplete: !!formData.bio && formData.bio.length >= 10 },
           { name: "LinkedIn Profile", isComplete: !!formData.linkedinUrl },

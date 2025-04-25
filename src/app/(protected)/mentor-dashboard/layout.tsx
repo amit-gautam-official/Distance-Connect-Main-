@@ -1,29 +1,27 @@
-"use client";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { api } from "@/trpc/react";
-import {  useRouter } from "next/navigation";
-import { useEffect } from "react";
+import {  getUserFromSession } from "@/data/user";
+import { redirect } from "next/navigation";
 
 
-export default  function Layout({
+
+export default async function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
 
-  const router = useRouter();
-  
-  const user =  api.user.getMe.useQuery();
-
-  useEffect(() => {
-    if (user.isError) {
-      router.push("/auth/login");
-    } else if (user?.data && user.data.role !== "MENTOR") {
-      router.push("/register");
-    }
+  try {
+  const user = await getUserFromSession();
+  if (!user || user?.role !== "MENTOR" || !user.isRegistered) {
+      redirect("/register");
+  } 
+  } catch (err) {
+    redirect("/auth/login");
   }
-  , [user.isError, user.data, router]);
+ 
+
+  
 
   return (
     <SidebarProvider>
@@ -37,4 +35,4 @@ export default  function Layout({
       </main>
     </SidebarProvider>
   );
-}
+} 

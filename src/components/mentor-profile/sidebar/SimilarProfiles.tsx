@@ -6,7 +6,7 @@ interface SimilarMentorProfile {
   name: string;
   title: string;
   company: string;
-  avatarUrl: string;
+  image: string;
 }
 
 interface SimilarProfilesProps {
@@ -27,9 +27,9 @@ export function SimilarProfiles({ profiles }: SimilarProfilesProps) {
               className="group flex cursor-pointer items-center"
             >
               <div className="mr-3 h-12 w-12 shrink-0 overflow-hidden rounded-full border border-gray-200">
-                {profile.avatarUrl ? (
+                {profile.image ? (
                   <Image
-                    src={profile.avatarUrl}
+                    src={profile.image}
                     alt={profile.name}
                     width={48}
                     height={48}

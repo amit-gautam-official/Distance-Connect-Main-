@@ -18,7 +18,7 @@ interface ProfileHeaderProps {
     industry: string;
     bio ?: string;
     user?: {
-      avatarUrl: string;
+      image: string;
     };
   };
   menteeCount: number;
@@ -63,7 +63,7 @@ export function ProfileHeader({
         >
           <Avatar className="h-36 w-36">
             <AvatarImage
-              src={mentor.user?.avatarUrl || ""}
+              src={mentor.user?.image || ""}
               alt={mentor.mentorName || ""}
               className="h-36 w-36 object-cover"
             />
@@ -77,7 +77,7 @@ export function ProfileHeader({
         <AvatarModal 
           isOpen={isModalOpen}
           onClose={closeModal}
-          imageUrl={mentor.user?.avatarUrl!}
+          imageUrl={mentor.user?.image!}
           name={mentor.mentorName}
         />
 

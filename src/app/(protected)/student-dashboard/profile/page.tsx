@@ -34,8 +34,8 @@ const ProfilePage = () => {
   // Initialize avatar URL from student data when it loads
   React.useEffect(() => {
     if (student) {
-      if (student.user.avatarUrl) {
-        setCurrentAvatarUrl(student.user.avatarUrl);
+      if (student.user.image) {
+        setCurrentAvatarUrl(student.user.image);
       }
 
       setProfileData({
@@ -73,7 +73,7 @@ const ProfilePage = () => {
       role: meeting?.mentor.user.role ?? "",
       company: meeting?.mentor.currentCompany ?? "",
       expertise: meeting?.mentor.hiringFields ?? [],
-      avatarUrl: meeting?.mentor.user.avatarUrl ?? "",
+      image: meeting?.mentor.user.image ?? "",
       isFollowing: false,
       rating: 4,
     };
@@ -82,7 +82,7 @@ const ProfilePage = () => {
   const profileHeaderData = {
     name: profileData.name || student?.studentName || "",
     email: student?.user.email || "",
-    avatarUrl: currentAvatarUrl || student?.user.avatarUrl || "",
+    image: currentAvatarUrl || student?.user.image || "",
     role: student?.user.role || "",
     state: profileData.state || student?.state || "",
     createdAt: student?.user.createdAt!,
@@ -102,7 +102,7 @@ const ProfilePage = () => {
   const userSettingsData = {
     name: profileData.name || student?.studentName || "",
     email: student?.user.email || "",
-    avatarUrl: currentAvatarUrl || student?.user.avatarUrl || "",
+    image: currentAvatarUrl || student?.user.image || "",
     role: student?.user.role || "",
     state: profileData.state || student?.state || "",
   };
@@ -110,7 +110,7 @@ const ProfilePage = () => {
   return (
     <ProfileContext.Provider
       value={{
-        avatarUrl: currentAvatarUrl || student?.user.avatarUrl || "",
+        image: currentAvatarUrl || student?.user.image || "",
         updateAvatar: setCurrentAvatarUrl,
         profileData,
         updateProfileField,

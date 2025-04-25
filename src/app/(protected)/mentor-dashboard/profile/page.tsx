@@ -28,7 +28,7 @@ interface MentorData {
     id: string;
     name: string;
     email: string;
-    avatarUrl: string;
+    image: string;
     role: string;
     createdAt: Date;
   };
@@ -61,8 +61,8 @@ const ProfilePage = () => {
   // Initialize data from mentor data when it loads
   React.useEffect(() => {
     if (mentor) {
-      if (mentor.user?.avatarUrl) {
-        setCurrentAvatarUrl(mentor.user.avatarUrl);
+      if (mentor.user?.image) {
+        setCurrentAvatarUrl(mentor.user.image);
       }
 
       setProfileData({
@@ -95,7 +95,7 @@ const ProfilePage = () => {
   const profileHeaderData = {
     name: profileData.name || mentor?.user?.name || "",
     email: mentor?.user?.email || "",
-    avatarUrl: currentAvatarUrl || mentor?.user?.avatarUrl || "",
+    image: currentAvatarUrl || mentor?.user?.image || "",
     role: mentor?.user?.role || "",
     state: profileData.state || mentor?.state || "",
     createdAt: mentor?.user?.createdAt!,
@@ -116,7 +116,7 @@ const ProfilePage = () => {
   return (
     <ProfileContext.Provider
       value={{
-        avatarUrl: currentAvatarUrl || mentor?.user?.avatarUrl || "",
+        image: currentAvatarUrl || mentor?.user?.image || "",
         updateAvatar: setCurrentAvatarUrl,
         profileData,
         updateProfileField,

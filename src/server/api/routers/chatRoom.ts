@@ -35,7 +35,7 @@ getChatRoomByBothId: protectedProcedure
                         mentorName : true,
                         user : {
                             select : {
-                                avatarUrl : true,
+                                image : true,
                                 name : true,
                                 
                             }
@@ -48,7 +48,7 @@ getChatRoomByBothId: protectedProcedure
                         studentName : true,
                         user : {
                             select : {
-                                avatarUrl : true,
+                                image : true,
                                 name    : true,
                             }
                         }
@@ -86,7 +86,7 @@ getChatRoomByBothId2: protectedProcedure
                         mentorName : true,
                         user : {
                             select : {
-                                avatarUrl : true,
+                                image : true,
                                 name : true,
                                 
                             }
@@ -99,7 +99,7 @@ getChatRoomByBothId2: protectedProcedure
                         studentName : true,
                         user : {
                             select : {
-                                avatarUrl : true,
+                                image : true,
                                 name    : true,
                             }
                         }
@@ -137,7 +137,7 @@ createChatRoomByMentorId: protectedProcedure
                         mentorName : true,
                         user : {
                             select : {
-                                avatarUrl : true,
+                                image : true,
                                 name : true,
                                 
                             }
@@ -150,7 +150,7 @@ createChatRoomByMentorId: protectedProcedure
                         studentName : true,
                         user : {
                             select : {
-                                avatarUrl : true,
+                                image : true,
                                 name    : true,
                             }
                         }
@@ -296,7 +296,7 @@ getChatRoomById: protectedProcedure
                         studentName : true,
                         user : {
                             select : {
-                                avatarUrl : true
+                                image : true
                             }
                         }
                     }
@@ -414,7 +414,7 @@ getChatRoomById: protectedProcedure
                         mentorName : true,
                         user : {
                             select : {
-                                avatarUrl : true,
+                                image : true,
                                 name : true,
                                 
                             }
@@ -427,7 +427,7 @@ getChatRoomById: protectedProcedure
                         studentName : true,
                         user : {
                             select : {
-                                avatarUrl : true,
+                                image : true,
                                 name    : true,
                             }
                         }
@@ -452,7 +452,7 @@ getChatRoomById: protectedProcedure
                         mentorName : true,
                         user : {
                             select : {
-                                avatarUrl : true,
+                                image : true,
                                 name : true,
                                 
                             }
@@ -465,7 +465,7 @@ getChatRoomById: protectedProcedure
                         studentName : true,
                         user : {
                             select : {
-                                avatarUrl : true,
+                                image : true,
                                 name    : true,
                             }
                         }

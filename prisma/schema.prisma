@@ -13,9 +13,9 @@ datasource db {
 // 🧑‍💻 User Model
 model User {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  username     String? @unique
+  username     String?   
 
-  email        String  @unique
+  email        String  @unique 
   name         String?
   password     String?
   image       String?
@@ -35,7 +35,6 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
-
 model Account {
   id                String  @id @default(auto()) @map("_id") @db.ObjectId
   userId            String  @db.ObjectId
@@ -54,6 +53,16 @@ model Account {
 
   @@unique([provider, providerAccountId])
 }
+
+model VerificationToken {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  email String
+  token String
+  expires DateTime
+
+  @@unique([email, token])
+}
+
 
 // Enum for User Role
 enum Role {

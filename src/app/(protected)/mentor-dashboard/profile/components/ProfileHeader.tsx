@@ -43,7 +43,7 @@ interface Experience {
 interface ProfileHeaderProps {
   name: string;
   email: string;
-  avatarUrl: string;
+  image: string;
   role: string;
   state: string;
   createdAt: Date;
@@ -112,7 +112,7 @@ const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
       {/* Profile picture and basic info */}
       <div className="flex flex-col items-center">
         <Avatar className="h-28 w-28 border-4 border-white">
-          <AvatarImage src={user?.avatarUrl || ""} alt={user?.name || "User"} />
+          <AvatarImage src={user?.image || ""} alt={user?.name || "User"} />
           <AvatarFallback className="bg-blue-100 text-2xl text-blue-800">
             {user?.name?.charAt(0) || "U"}
           </AvatarFallback>

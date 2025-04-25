@@ -1,4 +1,3 @@
-import { api } from "@/trpc/server";
 import { redirect } from "next/navigation";
 import Navbar from "./_components/Navbar";
 import HeroSection from "./_components/HeroSection";
@@ -13,18 +12,28 @@ import Testimonials from "./_components/Testimonials";
 import Faq from "./_components/Faq";
 import Footer from "./_components/Footer";
 import client from "@/lib/contentful";
-import { syncUserToDb } from "@/lib/syncUser";
 import { auth } from "@/server/auth";
-import { truncate } from "node:fs";
+import { getUserById } from "@/data/user";
 
 export default async function Home() {
-  // Fetch the user session
-  const session = await auth()
-  console.log(session)
 
-  let loggedId = false;
- 
+  let loggedIn = false;
   let role = "USER";
+  const session = await auth()
+  // console.log(session)
+  const user = session?.user;
+
+  if(user){
+    const dbUser = await getUserById(user?.id as string);
+    if(dbUser?.isRegistered){
+      loggedIn = true;
+      role = dbUser?.role;
+    }else{
+      redirect("/register")
+    }
+
+  }
+
   
   
 
@@ -40,7 +49,7 @@ export default async function Home() {
       {/* <img src="/bg.png" alt="bg" className="absolute right-[0] top-0" /> */}
 
       <div className="relative flex w-full items-center justify-center">
-        <Navbar role={role} blogs={initialBlogs} loggedId={loggedId} />
+        <Navbar role={role} blogs={initialBlogs} loggedId={loggedIn} />
       </div>
 
       <HeroSection />

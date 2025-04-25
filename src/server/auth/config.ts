@@ -2,9 +2,13 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
 import GoogleProvider from "next-auth/providers/google";
+
 import { db } from "@/server/db";
 import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
+import { LoginSchema } from "@/schemas";
+import { getAccountById, getUserByEmail, getUserById } from "@/data/user";
+import bcrypt from "bcryptjs";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -16,8 +20,10 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
+      name: string;
+      email: string;
+      image: string | null;
+      
     } & DefaultSession["user"];
   }
 
@@ -37,20 +43,32 @@ export const authConfig = {
     GoogleProvider({
       clientId: process.env.AUTH_GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.AUTH_GOOGLE_CLIENT_SECRET ?? "",
-    })
-   
-  ],
-  adapter: PrismaAdapter(db),
-  session : {strategy: "jwt"},
-
-
-  callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
     }),
-  },
-} satisfies NextAuthConfig;
+
+    Credentials({
+      async authorize(credentials) {
+        const parsed = LoginSchema.safeParse(credentials);
+        if (!parsed.success) return null;
+    
+        const { email, password } = parsed.data;
+        const user = await getUserByEmail(email);
+    
+        if (!user || !user?.password || !user.email) return null;
+    
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return null;
+    
+        console.log("User found", user);
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        };
+      }
+    })
+    
+
+  ],
+ 
+  
+};

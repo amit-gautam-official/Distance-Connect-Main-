@@ -44,6 +44,7 @@ import { ImageUpload } from "./ImageUpload";
 import { hiringFields } from "@/constants/hiringFirlds";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { SessionUserSchema } from "@/schemas"
 
 const formSchema = z.object({
   username: z.string().min(3, {
@@ -63,7 +64,7 @@ const formSchema = z.object({
 export default function HighSchoolForm({
   user,
 }: {
-  user: { firstName: string; lastName: string; id: string };
+  user: z.infer<typeof SessionUserSchema>;
 }) {
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [commandOpen, setCommandOpen] = useState(false);
@@ -89,8 +90,8 @@ export default function HighSchoolForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
-      firstName: user.firstName || "",
-      lastName: user.lastName || "",
+      firstName: user.name.split(" ")[0] || "",
+      lastName: user.name.split(" ")[1] || "",
       institutionName: "",
       pinCode: "",
       state: "",
@@ -192,6 +193,7 @@ export default function HighSchoolForm({
           >
             <div className="mb-4 flex justify-start sm:mb-6 md:justify-center">
               <ImageUpload
+                initialAvatarUrl={user?.image}
                 userId={user?.id}
                 isSubmitting={form.formState.isSubmitting}
               />

@@ -94,7 +94,7 @@ export default async function OfferingsPage({ params }: PageProps) {
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
           <Avatar className="h-16 w-16 border-2 border-blue-100 shadow-sm">
             <AvatarImage
-              src={mentorData?.user?.avatarUrl || ""}
+              src={mentorData?.user?.image || ""}
               alt={mentorData?.mentorName || "Mentor Avatar"}
             />
             <AvatarFallback className="bg-blue-500 text-lg font-medium text-white">

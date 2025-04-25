@@ -21,7 +21,7 @@ type Contact = {
     id: string;
     mentorName: string | null;
     user: {
-      avatarUrl: string | null;
+      image: string | null;
       name: string | null;
     };
   };
@@ -29,7 +29,7 @@ type Contact = {
     id: string;
     studentName: string | null;
     user: {
-      avatarUrl: string | null;
+      image: string | null;
       name: string | null;
     };
   };

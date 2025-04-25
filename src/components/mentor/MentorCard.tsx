@@ -13,7 +13,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import Availability from "@/app/(protected)/mentor-dashboard/meeting/availability/page";
 import { AvailabilityCard } from "../mentor-profile/AvailabilityCard";
 import { useRouter } from "next/navigation";
 
@@ -29,7 +28,7 @@ interface Mentor {
   hiringFields: string[];
   bio: string | null;
   user: {
-    avatarUrl: string | null;
+    image: string | null;
   };
   meetingEvents: any[]; // Update this with proper type when available
   state?: string | null; // Add state property
@@ -64,7 +63,7 @@ export function MentorCard({ mentor }: MentorCardProps) {
           <div className="relative flex justify-center sm:justify-start">
             <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
               <AvatarImage
-                src={mentor.user.avatarUrl || ""}
+                src={mentor.user.image || ""}
                 alt={mentor.mentorName || "Mentor Avatar"}
                 className="object-cover"
               />
@@ -212,7 +211,7 @@ export function MentorCard({ mentor }: MentorCardProps) {
             <div className="flex items-center space-x-3 mb-4">
               <Avatar className="h-12 w-12">
                 <AvatarImage
-                  src={mentor.user.avatarUrl || ""}
+                  src={mentor.user.image || ""}
                   alt={mentor.mentorName || "Mentor Avatar"}
                 />
                 <AvatarFallback>{mentor.mentorName?.[0]}</AvatarFallback>

@@ -20,7 +20,7 @@ export const studentRouter = createTRPCRouter({
       courseSpecialization : z.string(),
       role : z.enum(["STUDENT", "MENTOR", "STARTUP"]),
       isRegistered : z.boolean(),
-      avatarUrl : z.string().optional(),
+      image : z.string().optional(),
       name : z.string(),
      }))
     .mutation(async ({ ctx, input }) => {
@@ -40,8 +40,6 @@ export const studentRouter = createTRPCRouter({
               industry : input.industry,
               courseSpecialization : input.courseSpecialization,
               studentName : input.name,
-              
-            
           },
         }),
         ctx.db.user.update({
@@ -51,7 +49,7 @@ export const studentRouter = createTRPCRouter({
             name: input.name,
             role: input.role,
             isRegistered: input.isRegistered,
-            avatarUrl: input.avatarUrl,
+            image: input.image,
           },
         }),
       ])

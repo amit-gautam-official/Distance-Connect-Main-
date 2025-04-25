@@ -28,9 +28,10 @@ import { auth } from "@/server/auth";
  * 
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
+  const session = await auth();
   return {
     db,
-    
+    user: session?.user,
     ...opts,
   };
 };
@@ -86,9 +87,8 @@ export const createTRPCRouter = t.router;
 
 const rateLimiter = t.middleware(async ({ ctx, next }) => {
   // Authenticated user
-  const session = await auth();
-  const user = session?.user;
-
+  const user = ctx.user;
+  console.log("User session:", user); 
   if (!user) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
@@ -96,7 +96,9 @@ const rateLimiter = t.middleware(async ({ ctx, next }) => {
     });
   }
  
-  const dbUser = user
+  const dbUser = await ctx.db.user.findUnique({
+    where: { id: user.id },
+  });
  
   if (!user.id) {
     throw new TRPCError({
@@ -184,4 +186,4 @@ const anonymousRatelimitMiddleware = t.middleware(async ({ ctx, next }) => {
  * are logged in.
  */
 export const protectedProcedure = t.procedure.use(rateLimiter);
-export const publicProcedure = t.procedure.use(anonymousRatelimitMiddleware);
+export const publicProcedure = t.procedure;

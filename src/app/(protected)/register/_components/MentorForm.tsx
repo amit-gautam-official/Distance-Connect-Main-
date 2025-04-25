@@ -44,6 +44,7 @@ import { toast } from "sonner";
 
 import { hiringFields } from "@/constants/hiringFirlds";
 
+import {SessionUserSchema} from "@/schemas";
 const formSchema = z.object({
   username: z.string().min(3, {
     message: "Username must be at least 3 characters",
@@ -86,7 +87,7 @@ const formSchema = z.object({
 export default function MentorForm({
   user,
 }: {
-  user: { firstName: string; lastName: string; id: string };
+  user: z.infer<typeof SessionUserSchema>;
 }) {
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [commandOpen, setCommandOpen] = useState(false);
@@ -103,8 +104,8 @@ export default function MentorForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
-      firstName: user.firstName ?? "",
-      lastName: user.lastName ?? "",
+      firstName: user?.name?.split(" ")[0] ?? "",
+      lastName: user?.name?.split(" ")[1] ?? "",
       currentCompany: "",
       jobTitle: "",
       experience: "",
@@ -123,39 +124,7 @@ export default function MentorForm({
   const checkUsernameAvailability =
     api.user.checkUsernameAvailabilityMutation.useMutation();
 
-  // Watch for username changes and validate
-  // useEffect(() => {
-  //   const subscription = form.watch((value, { name }) => {
-  //     if (name === "username" && value.username && value.username.length >= 3) {
-  //       setIsCheckingUsername(true);
-
-  //       const timer = setTimeout(async () => {
-  //         try {
-  //           // Make sure username exists and is a string before passing to the mutation
-  //           if (value.username) {
-  //             const result = await checkUsernameAvailability.mutateAsync({
-  //               username: value.username,
-  //             });
-
-  //             if (!result.available) {
-  //               setUsernameError("This username is already taken");
-  //             } else {
-  //               setUsernameError(null);
-  //             }
-  //           }
-  //         } catch (error) {
-  //           console.error("Error checking username:", error);
-  //         } finally {
-  //           setIsCheckingUsername(false);
-  //         }
-  //       }, 1000);
-
-  //       return () => clearTimeout(timer);
-  //     }
-  //   });
-
-  //   return () => subscription.unsubscribe();
-  // }, []);
+  
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!checked) {
@@ -244,6 +213,7 @@ export default function MentorForm({
             <div className="mb-4 flex items-center justify-start sm:mb-6 md:justify-center">
               <ImageUpload
                 userId={user?.id}
+                initialAvatarUrl={user?.image}
                 isSubmitting={form.formState.isSubmitting}
               />
             </div>

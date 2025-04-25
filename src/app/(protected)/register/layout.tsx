@@ -1,6 +1,6 @@
-//layout 
 
-import { auth0 } from "@/lib/auth0";
+import { getUserById } from "@/data/user";
+import { auth } from "@/server/auth";
 import { db } from "@/server/db";
 import { api } from "@/trpc/server";
 import { Metadata } from "next";
@@ -14,19 +14,16 @@ export const metadata: Metadata = {
 
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
-  const session = await auth0.getSession();
 
+const session = await auth()
 
 const user = session?.user;
-  if (!session?.user) {
-    redirect("/auth/login");
-  }
   
   if (!user) {
     return redirect("/auth/login");
   }
 
-  const dbUser = await api.user.getMe()
+  const dbUser = await getUserById(user?.id as string);
   
   if (user && dbUser?.isRegistered) {
     if (dbUser?.role === "STUDENT") {
