@@ -32,10 +32,7 @@ import { CalendarIcon, CheckCircle2, MessageSquare, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import Link from "next/link";
-const StudentList = dynamic(() => import("../profile/components/StudentList"), {
-  loading: () => <StudentListSkeleton />,
-  ssr: false,
-});
+
 
 
 import { toast } from "sonner";
@@ -50,6 +47,7 @@ import {
 import MeetingsSkeleton from "./components/MeetingsSkeleton";
 import dynamic from "next/dynamic";
 import StudentListSkeleton from "./components/StudentListSkeleton";
+import StudentList from "../profile/components/StudentList";
 
 type MeetingStatus = "not-started" | "ongoing" | "completed" | "missed";
 type HistoryStatus = "Completed" | "Pending" | "Rejected";

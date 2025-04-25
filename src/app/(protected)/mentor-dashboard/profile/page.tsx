@@ -3,15 +3,8 @@
 import React, { useState, useEffect } from "react";
 import {MainContentSkeleton, ProfileHeaderSkeleton, ProfileSkeleton} from "./components/ProfileSkeleton";
 
-const ProfileHeader = dynamic(() => import("./components/ProfileHeader"), {
-  loading: () => <ProfileHeaderSkeleton/>,
-  ssr: false,
-});
-
-const UserSettings = dynamic(() => import("./components/UserSettings"), {
-  loading: () => <MainContentSkeleton/>,
-  ssr: false,
-});
+import ProfileHeader from "./components/ProfileHeader";
+import UserSettings from "./components/UserSettings";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/trpc/react";

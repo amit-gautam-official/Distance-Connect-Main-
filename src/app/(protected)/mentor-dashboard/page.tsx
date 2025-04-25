@@ -1,18 +1,12 @@
 import { api } from "@/trpc/server";
 import Link from "next/link";
 import React from "react";
-import dynamic from "next/dynamic";
-import { ProgressChartSkeleton } from "./_components/MentorDashboardSkeleton";
 
-const ProgressChart = dynamic(() => import('./_components/ProgressChart'), {
-  loading: () => <ProgressChartSkeleton/>,
-});
 
-const ScheduledSessions = dynamic(() => import('./_components/ScheduledSessions'), {
-  loading: () => <p>Loading sessions...</p>,
-});
 
 import { X } from "lucide-react";
+import ProgressChart from "./_components/ProgressChart";
+import ScheduledSessions from "./_components/ScheduledSessions";
 
 export default async function Page() {
   try {
