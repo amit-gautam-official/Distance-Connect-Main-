@@ -10,7 +10,6 @@ import { emailRouter } from "./routers/email";
 import { meetRouter } from "./routers/meet";
 import { chatRouter } from "./routers/chat";
 import { chatRoomRouter } from "./routers/chatRoom";
-import { blogRouter } from "./routers/blog";
 import { fileRouter } from "./routers/file";
 
 /**
@@ -30,7 +29,6 @@ export const appRouter = createTRPCRouter({
   meet : meetRouter,
   chat : chatRouter,
   chatRoom : chatRoomRouter,
-  blog : blogRouter,
   file: fileRouter,
   
 });
