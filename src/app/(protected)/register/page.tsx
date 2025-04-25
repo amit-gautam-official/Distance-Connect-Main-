@@ -1,6 +1,5 @@
 import React from "react";
 import RegisterForm from "./_components/RegisterForm";
-import { auth0 } from "@/lib/auth0";
 import { auth } from "@/server/auth";
 
 export default async function RegisterPage() {

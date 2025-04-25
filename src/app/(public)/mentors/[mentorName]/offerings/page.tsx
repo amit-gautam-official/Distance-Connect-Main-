@@ -6,11 +6,11 @@ import {
   ScheduledMeetings,
 } from "@prisma/client";
 import { db } from "@/server/db";
-import { auth0 } from "@/lib/auth0";
 import { Offerings } from "@/components/mentor-profile/Offerings";
 import { AvailabilityCard } from "@/components/mentor-profile/AvailabilityCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BadgeCheck, MapPin, Briefcase, Star } from "lucide-react";
+import { auth } from "@/server/auth";
 
 
 
@@ -71,7 +71,7 @@ export default async function OfferingsPage({ params }: PageProps) {
   const { mentorName } = await params;
 
   const mentorData = await getMentorData(mentorName);
-  const session = await auth0.getSession();
+  const session = await auth();
   const userEmail = session?.user.email;
 
   const offerings = mentorData?.meetingEvents.map((event) => ({

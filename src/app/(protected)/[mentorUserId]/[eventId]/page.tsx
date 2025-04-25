@@ -2,7 +2,6 @@ import React from "react";
 import MeetingTimeDateSelection from "../_components/MeetingTimeDateSelection";
 import { api } from "@/trpc/server";
 import { db } from "@/server/db";
-import { auth0 } from "@/lib/auth0";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 
@@ -14,18 +13,8 @@ type Params = {
 export default async function Page({ params }: { params: Promise<Params> }) {
   const { mentorUserId, eventId } = await params;
 
-  const session = await auth0.getSession();
-  if (!session?.user?.email) {
-    // Redirect to login if not authenticated
-    return redirect("/auth/login");
-  }
-  const user = await api.user.getMe();
+  
 
-  // Check if the current user is the mentor for this event
-  if (user?.role === "MENTOR" && user?.id === mentorUserId) {
-    // Redirect mentors away from their own event page
-    return redirect("/mentor-dashboard");
-  }
 
   // Continue with the page for non-mentors
   const eventDetails = await api.meetingEvent.getMeetingEventById({

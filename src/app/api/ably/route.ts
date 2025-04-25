@@ -1,15 +1,15 @@
+import { auth } from "@/server/auth";
 import Ably from "ably";
-import { auth0 } from "@/lib/auth0";
 export const revalidate = 0;
 
 export async function GET(request: Request) {
   
-    const session = await auth0.getSession();
+    const session = await auth();
     
     if (session?.user) {
         const client = new Ably.Rest(process.env.ABLY_API_KEY!);
         const tokenRequestData = await client.auth.createTokenRequest({
-            clientId: session.user.sub,
+            clientId: session.user.id,
         });
         return Response.json(tokenRequestData);
     }

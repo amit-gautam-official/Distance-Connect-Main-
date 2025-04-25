@@ -1,8 +1,14 @@
 "use client";
-
+import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
-import ContactList from "@/components/chat/contact-list";
-import ChatWindow from "@/components/chat/chat-window";
+const ContactList = dynamic(() => import("@/components/chat/contact-list"), {
+  loading: () => <p>Loading...</p>,
+  ssr: false,
+});
+const ChatWindow = dynamic(() => import("@/components/chat/chat-window"), {
+  loading: () => <p>Loading...</p>,
+  ssr: false,
+});
 import { useMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";

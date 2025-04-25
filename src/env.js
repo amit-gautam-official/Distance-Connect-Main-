@@ -11,11 +11,7 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-    AUTH0_SECRET: z.string(),
     APP_BASE_URL: z.string().url(),
-    AUTH0_DOMAIN: z.string(),
-    AUTH0_CLIENT_ID: z.string(),
-    AUTH0_CLIENT_SECRET: z.string(),
     GOOGLE_SERVICE_ACCOUNT_EMAIL: z.string(),
     GOOGLE_PRIVATE_KEY: z.string(),
     ABLY_API_KEY: z.string(),
@@ -55,11 +51,7 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
-    AUTH0_SECRET: process.env.AUTH0_SECRET,
     APP_BASE_URL: process.env.APP_BASE_URL,
-    AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
-    AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
-    AUTH0_CLIENT_SECRET: process.env.AUTH0_CLIENT_SECRET,
     GOOGLE_SERVICE_ACCOUNT_EMAIL: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
     GOOGLE_PRIVATE_KEY: process.env.GOOGLE_PRIVATE_KEY,
     ABLY_API_KEY: process.env.ABLY_API_KEY,

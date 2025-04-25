@@ -46,15 +46,7 @@ import { toast } from "sonner";
 
 type MeetingStatus = "not-started" | "ongoing" | "completed" | "missed";
 type HistoryStatus = "Completed" | "Pending" | "Rejected";
-type DateFilterType =
-  | "all"
-  | "Feb"
-  | "May"
-  | "Jul"
-  | "Aug"
-  | "Sep"
-  | "Nov"
-  | "Dec";
+
 
 interface Meeting {
   id: string;
@@ -81,12 +73,9 @@ const MeetingsPage = () => {
   const [starRating, setStarRating] = useState(0);
 
   const utils = api.useUtils();
-  const { data: student } = api.student.getStudent.useQuery(undefined, {
-    retry: 1,
-    staleTime: 5 * 60 * 1000,
-  });
 
-  const { data, isLoading, isError } =
+
+  const { data } =
     api.scheduledMeetings.getScheduledMeetingsListByStudent.useQuery(
       undefined,
       {
@@ -274,12 +263,7 @@ const MeetingsPage = () => {
     ...(missedMeetings || []),
   ];
 
-  // console.log("scheduledMeetings", scheduledMeetings);
-  // console.log("completedMeetings", completedMeetings);
-  // console.log("missedMeetings", missedMeetings);
-  // console.log("notStartedMeetings", notStartedMeetings);
 
-  // Mock data for meeting history
 
   const meetingHistory = scheduledMeetings.map((item) => {
     return {

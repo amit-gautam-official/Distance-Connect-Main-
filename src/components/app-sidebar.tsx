@@ -273,11 +273,11 @@ export function AppSidebar({ role }: { role: string }) {
         <SidebarGroup className="overflow-visible">
           <SidebarGroupLabel>
             <Link href="/" className="cursor-pointer">
-              <img src="/logo.png" alt="logo" className="w- h-[60px]" />
+              <img src="/logo.png" alt="logo" className="w- mb-[-10px] mt-[30px] h-[80px]" />
             </Link>
           </SidebarGroupLabel>
 
-          <SidebarGroupContent className="flex h-[calc(100dvh-4rem)] flex-col justify-between overflow-visible pl-2 pt-4">
+          <SidebarGroupContent className="flex mt-[20px] h-[calc(100dvh-4rem)] flex-col justify-between overflow-visible pl-2 pt-4">
             {/* Main navigation */}
             <SidebarMenu>
               {role === "student" &&

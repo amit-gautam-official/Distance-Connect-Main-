@@ -1,5 +1,10 @@
 import React from "react";
-import MeetingEventList from "./_components/MeetingEventList";
+import dynamic from "next/dynamic";
+import MeetingEventSkeleton from "./_components/MeetingEventSkeleton";
+
+const MeetingEventList = dynamic(() => import("./_components/MeetingEventList"), {
+  loading: () => <MeetingEventSkeleton />,
+});
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";

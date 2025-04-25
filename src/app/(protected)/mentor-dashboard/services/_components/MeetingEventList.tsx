@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Clock, Copy, MapPin, Pen, Plus, Settings, Trash } from "lucide-react";
+import { Clock, Copy, Pen, Settings, Trash } from "lucide-react";
 import React, {  useState } from "react";
 import { toast } from "sonner";
 import {
@@ -21,7 +21,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Skeleton } from "@/components/ui/skeleton";
 
 type MeetingEvent = {
   description: string | null;
