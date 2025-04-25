@@ -30,6 +30,10 @@ export const env = createEnv({
     EMAIL_FROM: z.string(),
     SUPPORT_EMAIL: z.string(),
     CF_SPACE_ID: z.string(),
+    AUTH_GOOGLE_CLIENT_ID : z.string(),
+    AUTH_GOOGLE_CLIENT_SECRET : z.string(),
+    AUTH_SECRET : z.string(),
+
   },
 
   /**
@@ -71,6 +75,9 @@ export const env = createEnv({
     SUPPORT_EMAIL: process.env.SUPPORT_EMAIL,
     NEXT_PUBLIC_GEMINI_API_KEY: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
     CF_SPACE_ID: process.env.CF_SPACE_ID,
+    AUTH_GOOGLE_CLIENT_ID : process.env.AUTH_GOOGLE_CLIENT_ID,
+    AUTH_GOOGLE_CLIENT_SECRET : process.env.AUTH_GOOGLE_CLIENT_SECRET,
+    AUTH_SECRET : process.env.AUTH_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
