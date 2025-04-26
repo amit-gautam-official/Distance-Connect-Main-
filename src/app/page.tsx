@@ -1,28 +1,24 @@
 import client from "@/lib/contentful";
 import { auth } from "@/server/auth";
 
-import React from 'react'
+import React from "react";
 import { redirect } from "next/navigation";
 import LandingPage from "./_components/LandingPage";
 import { db } from "@/server/db";
+import { SessionUser } from "@/types/sessionUser";
 
 const Home = async () => {
-
   let loggedIn = false;
   let role = "USER";
-  const session = await  auth();
-  const user = await session?.user;
+  const session = await auth();
+  const user = session?.user as SessionUser | undefined;
 
   if (user) {
-    const dbUser  = await db.user.findUnique({
-            where: {
-                id : user.id,
-            }
-        }); 
-    if (dbUser?.isRegistered) {
+    if (user?.isRegistered) {
       loggedIn = true;
-      role = dbUser?.role;
-    } else {
+      role = user?.role || "USER";
+    }
+    if (!user?.isRegistered) {
       redirect("/register");
     }
   }
@@ -32,10 +28,10 @@ const Home = async () => {
   const initialBlogs = response?.items?.sort(
     (a: any, b: any) =>
       new Date(b?.sys?.updatedAt).getTime() -
-      new Date(a?.sys?.updatedAt).getTime()
+      new Date(a?.sys?.updatedAt).getTime(),
   );
 
-  return <LandingPage role={role} blogs={initialBlogs} loggedId={loggedIn}/>
-}
+  return <LandingPage role={role} blogs={initialBlogs} loggedId={loggedIn} />;
+};
 
-export default Home
+export default Home;

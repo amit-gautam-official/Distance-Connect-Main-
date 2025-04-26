@@ -10,6 +10,7 @@ import client from "@/lib/contentful";
 import { auth } from "@/server/auth";
 
 import { db } from "@/server/db";
+import { SessionUser } from "@/types/sessionUser";
 
 export const metadata: Metadata = {
   title: "Distance Connect",
@@ -22,18 +23,13 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   // Fetch the user session
   const session = await auth()
-  const user = session?.user;
+  const user = session?.user as SessionUser | null;
 
   let loggedIn = false;
   let role = "USER";
 
   if (user) {
-    const dbUser =  await db.user.findUnique({
-            where: {
-                id : user.id,
-            }
-        }); 
-    role = dbUser?.role ?? "USER"; 
+    role = user?.role ?? "USER"; 
     loggedIn = true;
   }
 

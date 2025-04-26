@@ -5,6 +5,9 @@ import { authConfig } from "./config";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { getAccountById, getUserById } from "@/data/user";
 import { db } from "../db";
+import { User } from "next-auth";
+
+import { type SessionUser } from "@/types/sessionUser";
 
 const { auth: uncachedAuth, handlers, signIn, signOut } = NextAuth({
     ...authConfig,
@@ -36,7 +39,9 @@ const { auth: uncachedAuth, handlers, signIn, signOut } = NextAuth({
             ...session.user,
             id: token.sub,
             isOAuth: token.isOauth,
-          },
+            role: token.role,
+            isRegistered: token.isRegistered,
+          } as SessionUser,
         };
       },
       async jwt({ token }) {
@@ -49,9 +54,11 @@ const { auth: uncachedAuth, handlers, signIn, signOut } = NextAuth({
   
         token.isOauth = !!existingAccount;
   
+        token.role = existingUser.role;
         token.name = existingUser.name;
         token.image = existingUser.image;
         token.email = existingUser.email;
+        token.isRegistered = existingUser.isRegistered;
   
         return token;
       },

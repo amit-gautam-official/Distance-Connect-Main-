@@ -2,24 +2,31 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { redirect } from "next/navigation";
 import { auth } from "@/server/auth";
-import { db } from "@/server/db";
+import { SessionUser } from "@/types/sessionUser";
 
 export default async function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-    const session = await auth();
+  const session = await auth();
+  const user = session?.user as SessionUser | undefined;
 
-    const user = await db.user.findUnique({
-      where: {
-        id: session?.user?.id,
-      },
-    });
-
-    if (!user || user?.role !== "MENTOR" || !user.isRegistered) {
-      redirect("/register");
-    }
+    if (user) {
+        if (user?.isRegistered) {
+          if (user?.role === "MENTOR") {
+            return redirect("/mentor-dashboard");
+          }
+          if (user?.role === "STUDENT") {
+            return redirect("/student-dashboard");
+          }
+        }
+        if (!user?.isRegistered) {
+          redirect("/register");
+        }
+      }else{
+        redirect("/");
+      }
 
 
   return (

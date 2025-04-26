@@ -1,6 +1,7 @@
 
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
+import { SessionUser } from "@/types/sessionUser";
 import { redirect } from "next/navigation";
 
 
@@ -12,20 +13,13 @@ export default async function Layout({
 }) {
 
   
-       try {
         const session = await auth();
 
-        const user = await db.user.findUnique({
-                where: {
-                    id : session?.user?.id,
-                }
-            }); 
-       if (!user || user?.role !== "STUDENT") {
+        const user = session?.user as SessionUser | null 
+       if (!user || user?.role !== "STUDENT" || !user.isRegistered) {
            redirect("/register");
        } 
-       } catch (err) {
-         redirect("/auth/login");
-       }
+       
 
 
   return (
