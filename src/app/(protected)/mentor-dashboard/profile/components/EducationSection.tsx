@@ -1,10 +1,12 @@
-// EducationSection.tsx
+"use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash } from "lucide-react";
+import { Loader2, Plus, Trash } from "lucide-react";
 import { Education } from "./types";
+import { api } from "@/trpc/react";
+import { toast } from "sonner";
 
 interface EducationSectionProps {
   educationList: Education[];
@@ -15,15 +17,21 @@ const EducationSection: React.FC<EducationSectionProps> = ({
   educationList,
   setEducationList,
 }) => {
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const updateMentorMutation = api.mentor.updateMentor.useMutation();
   // Handle education changes
-  const handleEducationChange = (index: number, field: keyof Education, value: string) => {
+  const handleEducationChange = (
+    index: number,
+    field: keyof Education,
+    value: string,
+  ) => {
     const newEducationList = [...educationList];
-    
+
     const updatedEducation = {
       ...newEducationList[index],
-      [field]: value
+      [field]: value,
     } as Education;
-    
+
     newEducationList[index] = updatedEducation;
     setEducationList(newEducationList);
   };
@@ -49,19 +57,34 @@ const EducationSection: React.FC<EducationSectionProps> = ({
     setEducationList(newEducationList);
   };
 
+  const handleUpdateEducation = async () => {
+    setIsSubmitting(true);
+    try {
+      await updateMentorMutation.mutateAsync({
+        education: educationList,
+      });
+      toast.success("Education updated successfully!");
+    } catch (error) {
+      console.error("Error updating education:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <div className="space-y-4 rounded-md">
       <div className="flex items-center justify-between">
         <div>
-        <h3 className="text-lg font-medium">Education History</h3>
-        <p className="text-sm text-gray-500">
-          Add your educational background to help mentees understand your academic journey
-        </p>
+          <h3 className="text-lg font-medium">Education History</h3>
+          <p className="text-sm text-gray-500">
+            Add your educational background to help mentees understand your
+            academic journey
+          </p>
         </div>
-        <Button 
-          type="button" 
-          variant="outline" 
-          size="sm" 
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
           onClick={addEducation}
           className="flex items-center"
         >
@@ -71,7 +94,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
       </div>
 
       {educationList.map((edu, index) => (
-        <div key={index} className="space-y-4 rounded-md border p-2">
+        <div key={index} className="space-y-4 rounded-md border md:p-4 p-2 ">
           <div className="flex items-center justify-between">
             <h4 className="text-sm font-medium">Education #{index + 1}</h4>
             <Button
@@ -84,24 +107,28 @@ const EducationSection: React.FC<EducationSectionProps> = ({
               <Trash className="h-4 w-4" />
             </Button>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor={`edu-institution-${index}`}>Institution</Label>
             <Input
               id={`edu-institution-${index}`}
               value={edu.institution}
-              onChange={(e) => handleEducationChange(index, 'institution', e.target.value)}
+              onChange={(e) =>
+                handleEducationChange(index, "institution", e.target.value)
+              }
               placeholder="University or Institution name"
             />
           </div>
-          
+
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor={`edu-degree-${index}`}>Degree</Label>
               <Input
                 id={`edu-degree-${index}`}
                 value={edu.degree}
-                onChange={(e) => handleEducationChange(index, 'degree', e.target.value)}
+                onChange={(e) =>
+                  handleEducationChange(index, "degree", e.target.value)
+                }
                 placeholder="Bachelor's, Master's, etc."
               />
             </div>
@@ -110,19 +137,23 @@ const EducationSection: React.FC<EducationSectionProps> = ({
               <Input
                 id={`edu-field-${index}`}
                 value={edu.field}
-                onChange={(e) => handleEducationChange(index, 'field', e.target.value)}
+                onChange={(e) =>
+                  handleEducationChange(index, "field", e.target.value)
+                }
                 placeholder="Computer Science, Business, etc."
               />
             </div>
           </div>
-          
+
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor={`edu-start-${index}`}>Start Year</Label>
               <Input
                 id={`edu-start-${index}`}
                 value={edu.startYear}
-                onChange={(e) => handleEducationChange(index, 'startYear', e.target.value)}
+                onChange={(e) =>
+                  handleEducationChange(index, "startYear", e.target.value)
+                }
                 placeholder="2010"
               />
             </div>
@@ -131,17 +162,38 @@ const EducationSection: React.FC<EducationSectionProps> = ({
               <Input
                 id={`edu-end-${index}`}
                 value={edu.endYear}
-                onChange={(e) => handleEducationChange(index, 'endYear', e.target.value)}
+                onChange={(e) =>
+                  handleEducationChange(index, "endYear", e.target.value)
+                }
                 placeholder="2014 (or Present)"
               />
             </div>
           </div>
         </div>
       ))}
-      
+      <div className="mt-6 flex justify-end">
+    {educationList.length > 0 &&
+      <Button
+    type="button"
+    onClick={handleUpdateEducation}
+      className="w-full md:w-auto"
+      disabled={isSubmitting}
+    >
+      {isSubmitting ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Saving...
+        </>
+      ) : (
+        "Save Education"
+      )}
+    </Button>}
+      </div>
+
       {educationList.length === 0 && (
         <p className="text-center text-sm text-gray-500">
-          No education records added. Click &quot;Add Education&quot; to add your educational background.
+          No education records added. Click &quot;Add Education&quot; to add
+          your educational background.
         </p>
       )}
     </div>

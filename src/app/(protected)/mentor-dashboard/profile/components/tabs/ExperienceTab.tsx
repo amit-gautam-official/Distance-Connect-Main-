@@ -1,7 +1,9 @@
-// tabs/ExperienceTab.tsx
+"use client";
 import React from "react";
 import { Experience } from "../types";
 import ExperienceSection from "../ExperienceSection";
+import { api } from "@/trpc/react";
+import { Button } from "@/components/ui/button";
 
 interface ExperienceTabProps {
   experienceList: Experience[];
@@ -12,6 +14,9 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
   experienceList, 
   setExperienceList 
 }) => {
+
+  
+
   return (
     <div className="space-y-6">
     
@@ -20,6 +25,8 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
         experienceList={experienceList} 
         setExperienceList={setExperienceList}
       />
+    
+      
     </div>
   );
 };

@@ -20,4 +20,6 @@ export enum CompanyType {
     startDate: string;
     endDate: string;
     current: boolean;
+    proofUrl : string; // proof of experience image url
+    verified: boolean;
   }

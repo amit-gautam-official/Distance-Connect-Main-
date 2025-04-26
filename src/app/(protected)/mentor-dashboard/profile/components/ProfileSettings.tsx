@@ -194,8 +194,6 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, mentor }) => {
       companyType,
       currentCompany: formData.currentCompany,
       pinCode: parseInt(formData.pinCode || "0"),
-      hiringFields: formData.hiringFields.split(",").map(item => item.trim()),
-      skills: formData.skills.split(",").map(item => item.trim()),
       state: formData.state,
       linkedinUrl: formData.linkedinUrl === "" ? undefined : formData.linkedinUrl,
       jobTitle: formData.jobTitle,
@@ -203,8 +201,6 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, mentor }) => {
       industry: formData.industry,
       mentorName: formData.name,
       bio: formData.bio,
-      education: educationList,
-      wholeExperience: experienceList,
     });
   };
 
@@ -282,7 +278,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, mentor }) => {
             </Tabs>
 
             {
-              activeTab !== "verifyEmail" && (
+              activeTab === "basic-info"  && (
                 <div className="mt-6 flex justify-end">
                   <Button
                     type="submit"

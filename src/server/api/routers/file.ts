@@ -16,6 +16,7 @@ const storage = new Storage({
 // Valid mime types to accept
 const ALLOWED_IMAGE_TYPES = [
   "image/jpeg", 
+  "image/jpg",
   "image/png", 
   "image/webp"
 ];
@@ -36,14 +37,25 @@ export const fileRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       const { bucketName, fileName, fileType, fileContent, folderName, initialAvatarUrl } = input;
+
+      if(fileContent === initialAvatarUrl) {
+        return {
+          success: true,
+          url: initialAvatarUrl,
+          filePath: "",
+        };
+      }
+
+
       
       // Validate file type
       if (![...ALLOWED_IMAGE_TYPES, ALLOWED_PDF_TYPE].includes(fileType)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Invalid file type. Only images (JPEG, PNG, WebP, GIF, SVG) and PDFs are allowed.",
+          message: "Invalid file type. Only images (JPEG, PNG, WebP, JPG) and PDFs are allowed.",
         });
       }
+      
       
       // Validate file size (Base64 is ~33% larger than binary)
       const estimatedFileSize = Math.ceil((fileContent.length * 3) / 4);
@@ -65,13 +77,11 @@ export const fileRouter = createTRPCRouter({
       // Delete initial image if exists
       if (initialAvatarUrl) {
         const url = new URL(initialAvatarUrl);
-        console.log("URL:", url);
-        const pathname = url.pathname;
+        const pathname = decodeURIComponent(url.pathname);
 
         // Remove leading slash and bucket name to get the full object path
         const objectPath = pathname.replace(`/${bucketName}/`, '');
 
-        console.log("Object path to delete:", objectPath);
 
         const initialFile = bucket.file(objectPath);
 
