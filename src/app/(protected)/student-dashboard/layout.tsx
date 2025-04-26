@@ -19,9 +19,6 @@ export default async function Layout({
       if (user?.role === "MENTOR") {
         return redirect("/mentor-dashboard");
       }
-      if (user?.role === "STUDENT") {
-        return redirect("/student-dashboard");
-      }
     }
     if (!user?.isRegistered) {
       redirect("/register");

@@ -9,24 +9,21 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  // const session = await auth();
-  // const user = session?.user as SessionUser | undefined;
+  const session = await auth();
+  const user = session?.user as SessionUser | undefined;
 
-  //   if (user) {
-  //       if (user?.isRegistered) {
-  //         if (user?.role === "MENTOR") {
-  //           return redirect("/mentor-dashboard");
-  //         }
-  //         if (user?.role === "STUDENT") {
-  //           return redirect("/student-dashboard");
-  //         }
-  //       }
-  //       if (!user?.isRegistered) {
-  //         redirect("/register");
-  //       }
-  //     }else{
-  //       redirect("/");
-  //     }
+    if (user) {
+        if (user?.isRegistered) {
+          if (user?.role === "STUDENT") {
+            return redirect("/student-dashboard");
+          }
+        }
+        if (!user?.isRegistered) {
+          redirect("/register");
+        }
+      }else{
+        redirect("/");
+      }
 
 
   return (
