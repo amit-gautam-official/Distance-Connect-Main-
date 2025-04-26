@@ -1,9 +1,6 @@
 import { api } from "@/trpc/server";
 import Link from "next/link";
 import React from "react";
-
-
-
 import { X } from "lucide-react";
 import ProgressChart from "./_components/ProgressChart";
 import ScheduledSessions from "./_components/ScheduledSessions";
