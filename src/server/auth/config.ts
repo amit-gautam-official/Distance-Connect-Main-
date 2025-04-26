@@ -41,6 +41,7 @@ declare module "next-auth" {
 export const authConfig = {
   providers: [
     GoogleProvider({
+      allowDangerousEmailAccountLinking: true,
       clientId: process.env.AUTH_GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.AUTH_GOOGLE_CLIENT_SECRET ?? "",
     }),
