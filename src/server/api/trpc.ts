@@ -85,6 +85,46 @@ export const createTRPCRouter = t.router;
  * network latency that would occur in production but not in local development.
  */
 
+const isAdmin = t.middleware(async ({ ctx, next }) => {
+  // Authenticated user
+  const user = ctx.user;
+  console.log("User session:", user); 
+  if (!user) {
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: 'You must be logged in to access this resource',
+    });
+  }
+ 
+  const dbUser = await ctx.db.user.findUnique({
+    where: { id: user.id },
+  });
+ 
+  if (!user.id) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'Invalid user ID',
+    });
+  }
+
+  // Check if the user is an admin
+  if (dbUser?.role !== "ADMIN") {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'You do not have permission to access this resource',
+    });
+  }
+  
+  return next({
+    ctx: {
+      ...ctx,
+      user,
+      dbUser,
+    },
+  });
+}
+
+);
 const rateLimiter = t.middleware(async ({ ctx, next }) => {
   // Authenticated user
   const user = ctx.user;
@@ -187,3 +227,4 @@ const anonymousRatelimitMiddleware = t.middleware(async ({ ctx, next }) => {
  */
 export const protectedProcedure = t.procedure.use(rateLimiter);
 export const publicProcedure = t.procedure;
+export const adminProcedure = t.procedure.use(isAdmin);

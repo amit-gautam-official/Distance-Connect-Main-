@@ -25,6 +25,7 @@ interface BasicInfoTabProps {
     jobTitle: string;
     experience: string;
     industry: string;
+    companyEmail: string;
   };
   companyType: CompanyType;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
@@ -167,6 +168,16 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
               value={formData.currentCompany}
               onChange={handleChange}
               placeholder="Name of your company"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="companyEmail">Company Email</Label>
+            <Input
+              id="companyEmail"
+              name="companyEmail"
+              value={formData?.companyEmail}
+              onChange={handleChange}
+              placeholder="name@company.com"
             />
           </div>
 

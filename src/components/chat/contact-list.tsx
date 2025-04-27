@@ -39,7 +39,7 @@ interface ContactListProps {
   selectedChatRoom: string | null
   onSelectChat: (chatRoomId: string) => void
   showDashboardButton?: boolean
-  userRole : "MENTOR" | "STUDENT" | "USER" | "STARTUP"
+  userRole : "MENTOR" | "STUDENT" | "USER" | "STARTUP" | "ADMIN"
 }
 
 export default function ContactList({

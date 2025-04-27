@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { get } from "http";
 
 export const studentRouter = createTRPCRouter({
  
@@ -55,28 +56,7 @@ export const studentRouter = createTRPCRouter({
       ])
     }),
 
-  // updateStudent: protectedProcedure
-  // .input(z.object({
-  //     university : z.string(),
-  //     course : z.string(),
-  //     yearOfStudy : z.enum(["FIRST", "SECOND", "THIRD", "FOURTH"]),
-  //     linkedInUrl : z.string(),
-  // }))
-  // .mutation(async ({ ctx, input }) => {
-  //   return ctx.db.student.update({
-  //     where: { userId: ctx?.dbUser?.id },
-  //     data: input,
-  //   });
-  // }
-  // ),
 
-  // deleteStudent: protectedProcedure
-  // .mutation(async ({ ctx }) => {
-  //   return ctx.db.student.delete({
-  //     where: { userId: ctx?.dbUser?.id },
-  //   });
-  // }
-  // ),
 
   getStudentOnly: protectedProcedure
   .query(async ({ ctx }) => {

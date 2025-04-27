@@ -51,9 +51,7 @@ export default function ChatPage() {
   const [chatRooms, setChatRooms] = useState<Contact[]>();
   const isMobile = useMobile();
   const [showChat, setShowChat] = useState(!isMobile);
-  const [userRole, setUserRole] = useState<
-    "MENTOR" | "STUDENT" | "USER" | "STARTUP"
-  >("USER");
+  const [userRole, setUserRole] = useState<"MENTOR" | "STUDENT" | "USER" | "STARTUP" | "ADMIN">("USER");
 
   const [client, setClient] = useState<Ably.Realtime | null>(null);
   const searchParams = useSearchParams()

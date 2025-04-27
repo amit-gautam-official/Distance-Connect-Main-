@@ -18,8 +18,13 @@ export default async function Layout({ children }: { children: React.ReactNode }
 
   const session = await auth();
   const user = session?.user as SessionUser | undefined;
-
-    if (user) {
+  const dbUser = await db.user.findUnique({
+    where: { id: user?.id },
+    select: {
+      role: true,
+    }
+  });
+    if(user) {
         if (user?.isRegistered) {
           if (user?.role === "MENTOR") {
             return redirect("/mentor-dashboard");
@@ -28,7 +33,13 @@ export default async function Layout({ children }: { children: React.ReactNode }
             return redirect("/student-dashboard");
           }
         }
-      }
+        if (dbUser?.role === "ADMIN") {
+          redirect("/admin-dashboard");
+        }
+      
+    }else{
+      return redirect("auth/login");
+    }
 
   return <>{children}</>;
 }

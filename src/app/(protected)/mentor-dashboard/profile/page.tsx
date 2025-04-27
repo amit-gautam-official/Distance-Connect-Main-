@@ -35,6 +35,7 @@ interface MentorData {
     role: string;
     createdAt: Date;
   };
+  companyEmail: string | null;
 }
 
 const ProfilePage = () => {
@@ -59,6 +60,7 @@ const ProfilePage = () => {
     bio: "",
     education: [] as JSON[],
     wholeExperience: [] as JSON[],
+    companyEmail: "",
   });
 
   // Initialize data from mentor data when it loads
@@ -80,6 +82,7 @@ const ProfilePage = () => {
         bio: mentor.bio || "",
         education: mentor.education || [] as JSON[],
         wholeExperience: mentor.wholeExperience || [] as JSON[],
+        companyEmail: mentor.companyEmail || "",
       });
     }
   }, [mentor]);
@@ -113,6 +116,8 @@ const ProfilePage = () => {
     bio: mentor?.bio || "",
     education: mentor?.education || [] as JSON[],
     wholeExperience: mentor?.wholeExperience || [] as JSON[],
+    commanyEmail: mentor?.companyEmail || "",
+    
   };
 
   return (

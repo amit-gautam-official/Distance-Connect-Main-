@@ -70,6 +70,7 @@ enum Role {
   STUDENT
   MENTOR
   STARTUP
+  ADMIN
 }
 
 enum SrudentRole {
@@ -133,6 +134,9 @@ model Mentor {
   profileBanner String?
   companyEmail String?
   companyEmailVerified Boolean @default(false)
+  verified Boolean @default(false)
+  messageFromAdmin String?
+  
 
   meetingEvents     MeetingEvent[]
   availability      Availability?

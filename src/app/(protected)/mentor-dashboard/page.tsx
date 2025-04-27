@@ -16,31 +16,34 @@ export default async function Page() {
     return (
       <div className="mx-auto min-h-[100dvh] w-full p-4 md:p-8">
         {/* Header */}
-        {mentor?.companyEmailVerified ? (
-          <div className="mb-6 flex items-center justify-between rounded-lg bg-green-50 p-4 text-sm text-green-800">
-            <div className="flex items-center gap-2">
-              <svg
-                className="h-5 w-5 text-green-500"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+        {
+          mentor?.messageFromAdmin && (
+            <div className="mb-6 flex items-center justify-between rounded-lg bg-yellow-50 p-4 text-sm text-yellow-800">
+              <div className="flex items-center gap-2">
+                <svg
+                  className="h-5 w-5 text-yellow-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 1v22M1 12h22" />
+                </svg>
+                <span className="font-medium">{mentor?.messageFromAdmin}</span>
+              </div>
+              <Link
+                href="/mentor-dashboard/profile"
+                className="text-sm text-blue-600 hover:underline"
               >
-                <path d="M12 1v22M1 12h22" />
-              </svg>
-              <span className="font-medium">Company Email Verified</span>
+                Update Profile
+              </Link>
             </div>
-            <Link
-              href="/mentor-dashboard/profile"
-              className="text-sm text-blue-600 hover:underline"
-            >
-              Update Profile
-            </Link>
-          </div>
-        ) : (
+          )
+        }
+        {!mentor?.companyEmailVerified && (
           <div className="mb-6 flex items-center justify-between rounded-lg bg-red-50 p-4 text-sm text-red-800">
             <div className="flex items-center gap-2">
               <X className="h-5 w-5 text-red-500" />

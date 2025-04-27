@@ -69,7 +69,7 @@ interface ChatWindowProps {
   onMessageSent: (message: Message) => void
   showChat: boolean
   setShowChat: React.Dispatch<React.SetStateAction<boolean>>
-  userRole: "MENTOR" | "STUDENT" | "USER" | "STARTUP"
+  userRole: "MENTOR" | "STUDENT" | "USER" | "STARTUP" | "ADMIN"
   userId: string
 }
 

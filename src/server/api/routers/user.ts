@@ -28,8 +28,17 @@ export const userRouter = createTRPCRouter({
   
   
   .mutation(async ({ ctx, input }) => {
+    // Use id if available, otherwise fall back to email
+    const userId = ctx?.user?.id;
+    const userEmail = ctx?.user?.email;
+    console.log("userId", userId);
+    console.log("userEmail", userEmail);
+    if (!userId && !userEmail) {
+      throw new Error("User not authenticated");
+    }
+    
     return ctx.db.user.update({
-      where: { id: ctx?.dbUser?.id },
+      where: userId ? { id: userId } : { email: userEmail as string },
       data: input,
     });
   }

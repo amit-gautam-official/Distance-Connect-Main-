@@ -110,6 +110,10 @@ export const mentorRouter = createTRPCRouter({
       mentorName: z.string({ required_error: "Mentor name is required" }).optional(),
       industry: z.string({ required_error: "Industry is required" }).optional(),
       bio: z.string().optional(),
+      companyEmail: z
+        .string({ required_error: "Company email is required" })
+        .email("Please enter a valid email address")
+        .optional(),
   
       education: z
         .array(
@@ -169,6 +173,48 @@ export const mentorRouter = createTRPCRouter({
   }
   ),
 
+  updateFromAdmin: protectedProcedure
+  .input(z.object({
+    userId: z.string(),
+    messageFromAdmin: z.string().optional(),
+    verified: z.boolean().optional(),
+    companyEmailVerified: z.boolean().optional(),
+  }))
+  .mutation(async ({ ctx, input }) => {
+    //remove userId from input
+    const { userId, ...data } = input;
+
+    return ctx.db.mentor.update({
+      where: { userId: input.userId },
+      data: { ...data },
+    });
+  }),
+
+  getMentorsForAdmin: protectedProcedure
+  .query(async ({ ctx }) => {
+    return ctx.db.mentor.findMany({
+      select: {
+        userId: true,
+        mentorName: true,
+        currentCompany: true,
+        companyEmail: true,
+        companyEmailVerified: true,
+        verified: true,
+        linkedinUrl: true,
+        wholeExperience: true,
+        industry: true,
+        user:{
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            image: true,
+          },
+        }
+      }
+    })
+  }),
+
 
 
   // deleteMentor: protectedProcedure
@@ -191,7 +237,10 @@ export const mentorRouter = createTRPCRouter({
   .query(async ({ ctx }) => {
     return ctx.db.mentor.findMany({
       where:{
-        companyEmailVerified: true,
+        AND: [
+          { companyEmailVerified: true },
+          { verified: true },
+        ]
       },
       select: {
         companyEmailVerified: true,
