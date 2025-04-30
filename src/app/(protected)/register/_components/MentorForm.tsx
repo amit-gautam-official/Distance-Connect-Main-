@@ -499,6 +499,12 @@ export default function MentorForm({
                         <SelectItem value="Business Analyst">
                           Business Analyst
                         </SelectItem>
+                        <SelectItem value="C-Suite">
+                         C-Suite / 
+                        </SelectItem>
+                        <SelectItem value="Director / VP / Head of Department">
+                         Director / VP / Head of Department
+                        </SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
@@ -618,7 +624,7 @@ export default function MentorForm({
               render={() => (
                 <FormItem className="relative flex flex-col">
                   <FormLabel className="absolute left-[10px] top-[0px] bg-white px-1 font-inter text-[14px] font-normal leading-[16px] text-[#8A8A8A] peer-focus:text-black">
-                    Select your hiring fields
+                    Select your Skill set
                   </FormLabel>
                   <FormControl className="floating-input peer w-[110%] text-[#8A8A8A]">
                     <Popover open={commandOpen} onOpenChange={setCommandOpen}>

@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
 import { Loader } from "lucide-react";
 import { toast } from "sonner";
+import MentorTierPrice from "../MentorTierPrice";
 
 interface Mentor {
   user: {
@@ -267,6 +268,7 @@ export default function VerifyMentorModal({
                       )}
                     </div>
                   ))}
+                  <MentorTierPrice wholeExperience={mentor.wholeExperience} />
                 </div>
               ) : (
                 <p className="text-sm italic text-gray-500">
