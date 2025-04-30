@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { razorpay } from "@/lib/razorpay";
+import { getRazorpayInstance } from "@/lib/razorpay";
 import { scheduledMeetingsRouter } from "./scheduledMeeting";
+
+const razorpay = getRazorpayInstance();
 
 export const razorpayOrderRouter = createTRPCRouter({
 
