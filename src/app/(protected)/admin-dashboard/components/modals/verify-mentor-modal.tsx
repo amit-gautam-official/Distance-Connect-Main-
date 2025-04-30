@@ -32,6 +32,9 @@ interface Mentor {
   wholeExperience: any[];
   companyEmailVerified: boolean;
   companyEmail: string | null;
+  mentorSessionPriceRange: string | null;
+  mentorTier: string | null;
+  tierReasoning: string | null;
 }
 
 interface VerifyMentorModalProps {
@@ -128,7 +131,7 @@ export default function VerifyMentorModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="h-[90dvh] max-w-2xl rounded-lg p-4 md:p-6">
+      <DialogContent className="h-[90dvh] max-w-4xl rounded-lg p-4 md:p-6">
         <DialogHeader>
           <DialogTitle className="text-lg md:text-xl">
             {mentor.verified ? "Mentor Profile" : "Verify Mentor Profile"}
@@ -268,7 +271,11 @@ export default function VerifyMentorModal({
                       )}
                     </div>
                   ))}
-                  <MentorTierPrice wholeExperience={mentor.wholeExperience} />
+                  <MentorTierPrice
+                  tierReasoning={mentor.tierReasoning}
+                   mentorTier={mentor.mentorTier}
+                   mentorSessionPriceRange={mentor.mentorSessionPriceRange}
+                   mentorUserId={mentor.userId} wholeExperience={mentor.wholeExperience} />
                 </div>
               ) : (
                 <p className="text-sm italic text-gray-500">

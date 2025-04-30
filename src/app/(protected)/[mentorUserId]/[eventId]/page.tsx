@@ -27,7 +27,8 @@ export default async function Page({ params }: { params: Promise<Params> }) {
     eventName: eventDetails?.eventName ?? "",
     duration: eventDetails?.duration ?? 0,
     meetEmail: eventDetails?.meetEmail ?? "",
-  };
+    price : eventDetails?.eventPrice ?? 0,
+  };  
 
   const mentorUserDetails = await db.user.findUnique({
     where: {

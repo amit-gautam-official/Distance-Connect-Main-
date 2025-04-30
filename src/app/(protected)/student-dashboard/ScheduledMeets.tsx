@@ -80,7 +80,7 @@ const ScheduledMeets = () => {
             <TableCell>{meeting.mentorUserId}</TableCell>
             <TableCell>
               <a
-                href={meeting.meetUrl}
+                href={meeting.meetUrl!}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline"

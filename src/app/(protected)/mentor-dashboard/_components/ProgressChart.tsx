@@ -36,7 +36,7 @@ interface ScheduledMeeting {
   description: string;
   date: string;
   time: string;
-  meetUrl: string;
+  meetUrl: string | null;
   completed: boolean;
   formatedTimeStamp: string;
   selectedDate: Date;

@@ -80,9 +80,9 @@ export default async function OfferingsPage({ params }: PageProps) {
     description: event.description || "",
     rating: 4.8,
     duration: `${event.duration} Mins`,
-    price: "₹799",
+    price: `₹${event.eventPrice}`,
     type: event.eventName || "",
-    repliesIn: "2 days",
+    repliesIn: "",
     priority: 134,
     mentorUserId: mentorName ?? "",
     userEmail: userEmail ?? "",
@@ -119,7 +119,7 @@ export default async function OfferingsPage({ params }: PageProps) {
           
           <div className="mt-3 flex flex-col items-start gap-2 sm:mt-0 sm:items-end">
             <div className="rounded-full bg-green-100 px-4 py-1.5 text-sm font-medium text-green-800">
-              ₹2000/session
+              First Session Free
             </div>
             <div className="flex items-center text-sm text-blue-600">
               <BadgeCheck className="mr-1 h-4 w-4" />

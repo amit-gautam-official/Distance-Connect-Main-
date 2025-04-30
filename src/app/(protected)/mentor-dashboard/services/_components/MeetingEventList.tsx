@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Clock, Copy, Pen, Settings, Trash } from "lucide-react";
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -88,7 +88,7 @@ function MeetingEventList() {
   };
 
   const handleFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setEventForm({
@@ -124,7 +124,7 @@ function MeetingEventList() {
 
   // Loading skeleton component
   const EventSkeleton = () => (
-    <div className="flex flex-col gap-3 rounded-lg border border-t-8 p-5 shadow-md animate-pulse">
+    <div className="flex animate-pulse flex-col gap-3 rounded-lg border border-t-8 p-5 shadow-md">
       <div className="flex justify-end">
         <div className="h-5 w-5 rounded-full bg-gray-200"></div>
       </div>
@@ -194,6 +194,19 @@ function MeetingEventList() {
               {event.description && (
                 <p className="text-sm text-gray-600">{event.description}</p>
               )}
+          
+              
+              {/* // event price   */}
+              <div className="flex items-center justify-between rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                <h2 className="flex items-center gap-2 text-gray-600">
+                  <span className="text-sm font-semibold text-gray-500">
+                    Session Price:
+                  </span>
+                  <span className="text-base font-bold text-gray-800">
+                    ₹{event.eventPrice}
+                  </span>
+                </h2>
+              </div>
               <hr></hr>
               <div className="flex justify-between">
                 <h2
@@ -208,12 +221,15 @@ function MeetingEventList() {
             </div>
           ))
         )}
-        
+
         {isError && (
           <div className="col-span-full flex flex-col items-center justify-center p-8 text-center">
-            <h2 className="text-lg font-semibold text-red-500">Error Loading Meeting Events</h2>
+            <h2 className="text-lg font-semibold text-red-500">
+              Error Loading Meeting Events
+            </h2>
             <p className="text-sm text-gray-500">
-              There was a problem loading your meeting events. Please try again later.
+              There was a problem loading your meeting events. Please try again
+              later.
             </p>
             <Button onClick={() => refetch()} className="mt-4">
               Retry
@@ -270,10 +286,7 @@ function MeetingEventList() {
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={updateMeetingEvent.isPending}
-              >
+              <Button type="submit" disabled={updateMeetingEvent.isPending}>
                 {updateMeetingEvent.isPending ? "Saving..." : "Save Changes"}
               </Button>
             </DialogFooter>

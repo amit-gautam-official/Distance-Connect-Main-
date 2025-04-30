@@ -54,14 +54,7 @@ export function Offerings({ offerings }: OfferingsProps) {
                     {offering.rating}
                   </span>
                 </div>
-                {offering.repliesIn && (
-                  <Badge
-                    variant="outline"
-                    className="border-gray-200 bg-white text-gray-600"
-                  >
-                    Replies in {offering.repliesIn}
-                  </Badge>
-                )}
+                
               </div>
               <h3 className="mb-2 text-xl font-semibold text-gray-800">
                 {offering.title}

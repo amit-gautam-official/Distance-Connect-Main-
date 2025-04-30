@@ -5,6 +5,7 @@ import { type Metadata } from "next";
 import { TRPCReactProvider } from "@/trpc/react";
 import { Toaster } from "sonner";
 import { GoogleAnalytics } from '@next/third-parties/google'
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Distance Connect",
@@ -61,6 +62,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
+    <Script
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          strategy="lazyOnload"
+        />
       <body>
         <TRPCReactProvider>
           {children}

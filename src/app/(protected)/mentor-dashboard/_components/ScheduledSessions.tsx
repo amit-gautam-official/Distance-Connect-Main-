@@ -9,7 +9,7 @@ type ScheduledSession = {
   description: string;
   date: string;
   time: string;
-  meetUrl?: string;
+  meetUrl?: string | null;
 };
 
 interface ScheduledSessionsProps {

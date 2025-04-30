@@ -1,6 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import React from "react";
+import { type  ScheduledMeetings } from "@prisma/client";
+
+
 
 interface TimeDateSelectionProps {
   date: Date;
@@ -9,7 +12,7 @@ interface TimeDateSelectionProps {
   setSelectedTime: (time: string) => void;
   enableTimeSlot: boolean;
   selectedTime: string;
-  prevBooking: { selectedTime: string }[];
+  prevBooking: ScheduledMeetings[];
 }
 
 function TimeDateSelection({
@@ -21,14 +24,38 @@ function TimeDateSelection({
   selectedTime,
   prevBooking,
 }: TimeDateSelectionProps) {
-  /**
-   * Used to check timeslot whether its already booked or not
-   * @param {*} time
-   * @returns Boolean
-   */
-  const checkTimeSlot = (time: string) => {
-    return prevBooking.filter((item) => item.selectedTime === time).length > 0;
-  };
+ 
+  // Converts "09:00 AM" + date to a Date object
+const getDateTimeFromDateAndTime = (date: Date, time: string): Date => {
+  const [hours, minutesPart] = time.split(":");
+
+  const minutesArray = minutesPart ? minutesPart.split(" ") : ["0", "AM"];
+  const [minutes, period] = minutesArray;
+  let hour = parseInt(hours!);
+  const minute = parseInt(minutes!);
+
+  if (period === "PM" && hour !== 12) hour += 12;
+  if (period === "AM" && hour === 12) hour = 0;
+
+  const result = new Date(date);
+  result.setHours(hour, minute, 0, 0);
+  return result;
+};
+
+const checkTimeSlot = (time: string) => {
+  const selectedStart = getDateTimeFromDateAndTime(date, time);
+  const selectedEnd = new Date(selectedStart.getTime() + 30 * 60 * 1000); // Event2 = 30 mins
+
+  return prevBooking.some((booking) => {
+    const bookingStart = getDateTimeFromDateAndTime(new Date(booking.selectedDate), booking.selectedTime);
+    const bookingEnd = new Date(bookingStart.getTime() + booking.duration * 60 * 1000);
+
+    // Check for overlap
+    const isOverlapping = selectedStart < bookingEnd && selectedEnd > bookingStart;
+    return isOverlapping;
+  });
+};
+
 
   return (
     <div className="flex w-full flex-col gap-5 px-2 md:flex-row md:px-4">

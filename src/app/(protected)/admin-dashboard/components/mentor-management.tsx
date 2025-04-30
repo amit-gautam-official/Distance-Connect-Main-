@@ -39,6 +39,9 @@ interface Mentor {
   wholeExperience: JsonValue[];
   companyEmailVerified: boolean;
   companyEmail: string | null;
+  mentorTier: string | null;
+  mentorSessionPriceRange: string | null;
+  tierReasoning: string | null;
 }
 
 interface MentorManagementProps {

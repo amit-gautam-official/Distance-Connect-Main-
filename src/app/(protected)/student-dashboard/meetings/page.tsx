@@ -195,7 +195,7 @@ const MeetingsPage = () => {
           date: item?.formatedDate,
           status: "ongoing" as MeetingStatus,
           duration: item?.duration,
-          meetUrl: item?.meetUrl,
+          meetUrl: item?.meetUrl!,
           completed: item?.completed,
           statusText: "In progress",
         };
@@ -216,7 +216,7 @@ const MeetingsPage = () => {
         date: item?.formatedDate,
         status: "not-started" as MeetingStatus,
         duration: item?.duration,
-        meetUrl: item?.meetUrl,
+        meetUrl: item?.meetUrl!,
         completed: item?.completed,
         statusText: `Starting in: ${days > 0 ? `${days} days, ` : ""}${hours > 0 ? `${hours} hours, ` : ""}${minutes} minutes`,
       };
@@ -233,7 +233,7 @@ const MeetingsPage = () => {
         date: item?.formatedDate,
         status: "completed" as MeetingStatus,
         duration: item?.duration,
-        meetUrl: item?.meetUrl,
+        meetUrl: item?.meetUrl!,
         completed: item?.completed,
         feedback: item?.feedback || undefined,
         starRating: item?.star || 0,
@@ -251,7 +251,7 @@ const MeetingsPage = () => {
       date: item?.formatedDate,
       status: "missed" as MeetingStatus,
       duration: item?.duration,
-      meetUrl: item?.meetUrl,
+      meetUrl: item?.meetUrl!,
       completed: item?.completed,
       statusText: "Meeting was missed",
     };

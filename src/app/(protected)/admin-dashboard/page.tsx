@@ -28,6 +28,9 @@ interface Mentor  {
     wholeExperience: JsonValue[];
     companyEmailVerified: boolean;
     companyEmail: string | null;
+    mentorTier: string | null;
+    mentorSessionPriceRange: string | null;
+    tierReasoning: string | null;
 }
 
 
@@ -50,7 +53,7 @@ export default function AdminDashboard() {
         return <div>Loading...</div>;
     }
     
-    console.log(students);
+    console.log(mentors);
 
 
 
@@ -99,6 +102,7 @@ export default function AdminDashboard() {
  
 
       <VerifyMentorModal
+
         mentor={selectedMentor}
         isOpen={isVerifyModalOpen}
         setIsOpen={setIsVerifyModalOpen}

@@ -11,6 +11,7 @@ import { chatRouter } from "./routers/chat";
 import { chatRoomRouter } from "./routers/chatRoom";
 import { fileRouter } from "./routers/file";
 import { adminRouter } from "./routers/admin";
+import { razorpayOrderRouter } from "./routers/razorpayOrder";
 
 /**
  * This is the primary router for your server.
@@ -29,7 +30,8 @@ export const appRouter = createTRPCRouter({
   chat : chatRouter,
   chatRoom : chatRoomRouter,
   file: fileRouter,
-  admin : adminRouter
+  admin : adminRouter,
+  razorpayOrder: razorpayOrderRouter
   
 });
 

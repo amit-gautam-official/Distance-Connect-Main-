@@ -32,6 +32,20 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
   const [loading, setLoading] = useState(false);
   const [customEventName, setCustomEventName] = useState<boolean>(false);
   const router = useRouter();
+  const [price, setPrice] = useState<number>();
+
+ 
+
+
+
+  const getMeQuery = api.mentor.getMentor.useQuery();
+
+  const mentorSessionPriceRange = getMeQuery.data?.mentorSessionPriceRange; //Ex: "500-700" //string
+
+  const [minPrice, maxPrice] = mentorSessionPriceRange
+  ? mentorSessionPriceRange.split("-").map(Number)
+  : [500, 700]; // Default range
+
 
 
   const createMeetingEvent = api.meetingEvent.createMeetingEvent.useMutation({
@@ -51,8 +65,9 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
       duration: duration,
       email: email,
       description: description,
+      price: price ?? minPrice,
     });
-  }, [eventName, duration, email, description]);
+  }, [eventName, duration, email, description, price]);
 
   const onCreateClick = async () => {
     setLoading(true);
@@ -69,6 +84,8 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
       duration: duration as number,
       description: description as string,
       meetEmail: email as string,
+      price: price as number,
+
     });
   };
 
@@ -196,6 +213,31 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
               </div>
             </div>
           </div>
+
+          {/* Price Selection Section */}
+<div className="rounded-lg bg-white p-6 shadow-sm">
+  <div className="mb-4 flex items-center gap-2">
+    <Clock className="h-5 w-5 text-blue-600" />
+    <h3 className="text-lg font-semibold text-gray-900">Session Price</h3>
+  </div>
+  <div className="space-y-2">
+    <label className="text-sm font-medium text-gray-700">
+      Choose your session price (₹{minPrice}–₹{maxPrice})
+    </label>
+    <input
+      type="range"
+      min={minPrice}
+      max={maxPrice}
+      step={50}
+      value={price ?? minPrice}
+      onChange={(e) => setPrice(Number(e.target.value))}
+      className="w-full"
+    />
+    <div className="text-sm text-gray-600">Selected: ₹{price ?? minPrice}</div>
+  </div>
+</div>
+
+
 
           {/* Meeting Details Section */}
           <div className="rounded-lg bg-white p-6 shadow-sm">

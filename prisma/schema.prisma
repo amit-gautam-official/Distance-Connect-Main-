@@ -12,18 +12,18 @@ datasource db {
 
 // 🧑‍💻 User Model
 model User {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  username     String?   
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  username String?
 
-  email        String  @unique 
-  name         String?
-  password     String?
-  image       String?
+  email         String    @unique
+  name          String?
+  password      String?
+  image         String?
   emailVerified DateTime?
 
-  accounts      Account[]
-  role         Role    @default(USER)
-  isRegistered Boolean @default(false)
+  accounts     Account[]
+  role         Role      @default(USER)
+  isRegistered Boolean   @default(false)
 
   // Relations (One-to-One)
   student Student?
@@ -34,7 +34,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
 
 model Account {
   id                String  @id @default(auto()) @map("_id") @db.ObjectId
@@ -56,14 +55,13 @@ model Account {
 }
 
 model VerificationToken {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  email String
-  token String
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  email   String
+  token   String
   expires DateTime
 
   @@unique([email, token])
 }
-
 
 // Enum for User Role
 enum Role {
@@ -107,6 +105,7 @@ model Student {
 
   scheduledMeetings ScheduledMeetings[]
   chatRooms         ChatRoom[]
+  orders            RazorpayOrder[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -114,39 +113,72 @@ model Student {
 
 // 🧑‍🏫 Mentor Model
 model Mentor {
-  id          String  @id @default(auto()) @map("_id") @db.ObjectId 
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
   user        User    @relation(fields: [userId], references: [id])
   userId      String  @unique @db.ObjectId
   linkedinUrl String?
 
-  mentorName     String?
-  currentCompany String?
-  jobTitle       String?
-  experience     String?
-  industry       String?
-  pinCode        Int?
-  state          String?
-  hiringFields   String[]
-  companyType    String
-  bio     String?
-  education    Json[]
-  wholeExperience Json[]  // Array of objects
-  skills       String[]
-  profileBanner String?
-  companyEmail String?
-  companyEmailVerified Boolean @default(false)
-  verified Boolean @default(false)
-  messageFromAdmin String?
+  mentorTier              String?
+  mentorSessionPriceRange String?
+  tierReasoning         String?
   
+  mentorName           String?
+  currentCompany       String?
+  jobTitle             String?
+  experience           String?
+  industry             String?
+  pinCode              Int?
+  state                String?
+  hiringFields         String[]
+  companyType          String
+  bio                  String?
+  education            Json[]
+  wholeExperience      Json[] // Array of objects
+  skills               String[]
+  profileBanner        String?
+  companyEmail         String?
+  companyEmailVerified Boolean  @default(false)
+  verified             Boolean  @default(false)
+  messageFromAdmin     String?
 
   meetingEvents     MeetingEvent[]
   availability      Availability?
   scheduledMeetings ScheduledMeetings[]
   chatRooms         ChatRoom[]
 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+
+
+enum OrderStatus {
+  pending
+  completed
+  failed
+  refunded
+}
+
+model RazorpayOrder {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  scheduledMeetingId String?            @db.ObjectId
+  scheduledMeeting   ScheduledMeetings? @relation(fields: [scheduledMeetingId], references: [id])
+
+  status            OrderStatus @default(pending)
+  razorpayOrderId   String @unique
+  razorpayPaymentId String?
+  amount            Int // Amount in paise (e.g., 700 for ₹7.00)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Student   Student? @relation(fields: [studentUserId], references: [userId])
+  studentUserId String?  @db.ObjectId
+}
+  
+
 
 // 🚀 Startup Model
 model Startup {
@@ -176,6 +208,8 @@ model MeetingEvent {
   duration    Int
   description String?
   meetEmail   String
+
+  eventPrice Int? // Price in paise (e.g., 700 for ₹7.00)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -210,14 +244,19 @@ model ScheduledMeetings {
   formatedDate      String
   formatedTimeStamp String
   duration          Int
-  meetUrl           String
+  meetUrl           String?
   eventId           String
   eventName         String
   userNote          String
+  userEmailForMeet  String
+  mentorEmailForMeet String
   completed         Boolean  @default(false)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  paymentStatus    Boolean  @default(false)
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  RazorpayOrder RazorpayOrder[]
 }
 
 model ChatRoom {
@@ -250,7 +289,7 @@ model chatMessage {
   chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
   chatRoomId String   @db.ObjectId
 
-  user       User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
   userId String @db.ObjectId
 
   imageName String?

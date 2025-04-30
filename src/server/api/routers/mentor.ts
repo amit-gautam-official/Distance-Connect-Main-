@@ -173,6 +173,74 @@ export const mentorRouter = createTRPCRouter({
   }
   ),
 
+
+  updateMentorTier: protectedProcedure
+    .input(
+      z.object({
+
+        mentorUserId : z.string(),
+        mentorTier: z.enum([
+          "Junior",
+          "Mid-Level A",
+          "Mid-Level B",
+          "Senior A",
+          "Senior B",
+          "Expert",
+        ]).optional(),
+        
+
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!input) return null;
+      
+      return ctx.db.mentor.update({
+        where: { userId: input.mentorUserId },
+        data: {
+          mentorTier : input.mentorTier,
+        },
+      });
+    }
+  ),
+
+  updateMentorPrice : protectedProcedure
+  .input(
+    z.object({
+      mentorUserId : z.string(),
+      price: z.string()
+    })
+  )
+  .mutation(async ({ ctx, input }) => {
+    if (!input) return null;
+    
+    return ctx.db.mentor.update({
+      where: { userId: input.mentorUserId },
+      data: {
+        mentorSessionPriceRange : input.price,
+      },
+    });
+  }
+  ),
+
+  updateMentorTierReasoning : protectedProcedure
+  .input(
+    z.object({
+      mentorUserId : z.string(),
+      tierReasoning: z.string()
+    })
+  )
+  .mutation(async ({ ctx, input }) => {
+    if (!input) return null;
+    
+    return ctx.db.mentor.update({
+      where: { userId: input.mentorUserId },
+      data: {
+        tierReasoning : input.tierReasoning,
+      },
+    });
+  }
+  ),
+
   updateFromAdmin: protectedProcedure
   .input(z.object({
     userId: z.string(),
@@ -203,6 +271,9 @@ export const mentorRouter = createTRPCRouter({
         linkedinUrl: true,
         wholeExperience: true,
         industry: true,
+        mentorTier: true,
+        mentorSessionPriceRange: true,
+        tierReasoning: true,
         user:{
           select: {
             id: true,

@@ -56,7 +56,7 @@ export function MentorCard({ mentor }: MentorCardProps) {
     <>
       <Card className="relative overflow-hidden bg-white p-4">
         <div className="absolute right-4 top-4 rounded-full bg-[#E5F7E5] px-3 py-1 text-sm">
-          ₹2000
+          First session free
         </div>
         <div className="flex flex-col gap-4 sm:flex-row">
           {/* Avatar Section */}
@@ -221,7 +221,7 @@ export function MentorCard({ mentor }: MentorCardProps) {
                 <p className="text-sm text-gray-500">{mentor.jobTitle} at {mentor.currentCompany}</p>
               </div>
               <div className="ml-auto">
-                <Badge className="bg-green-100 text-green-800 hover:bg-green-200">₹2000/session</Badge>
+                <Badge className="bg-green-100 text-green-800 hover:bg-green-200">First Session Free</Badge>
               </div>
             </div>
 
