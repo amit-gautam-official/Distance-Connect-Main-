@@ -34,6 +34,10 @@ export const env = createEnv({
     AUTH_GOOGLE_CLIENT_SECRET : z.string(),
     AUTH_SECRET : z.string(),
     AUTH_URL : z.string(),
+    RAZORPAY_KEY_ID : z.string(),
+    RAZORPAY_KEY_SECRET : z.string(),
+    RAZORPAY_WEBHOOK_SECRET : z.string(),
+
 
   },
 
@@ -46,6 +50,7 @@ export const env = createEnv({
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_BASE_URL: z.string().url(),
     NEXT_PUBLIC_GEMINI_API_KEY: z.string(),
+    NEXT_PUBLIC_RAZORPAY_KEY_ID: z.string(),
   },
 
   /**
@@ -80,6 +85,10 @@ export const env = createEnv({
     AUTH_GOOGLE_CLIENT_SECRET : process.env.AUTH_GOOGLE_CLIENT_SECRET,
     AUTH_SECRET : process.env.AUTH_SECRET,
     AUTH_URL : process.env.AUTH_URL,
+    RAZORPAY_KEY_ID : process.env.RAZORPAY_KEY_ID,
+    RAZORPAY_WEBHOOK_SECRET : process.env.RAZORPAY_WEBHOOK_SECRET,
+    RAZORPAY_KEY_SECRET : process.env.RAZORPAY_KEY_SECRET,
+    NEXT_PUBLIC_RAZORPAY_KEY_ID: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
