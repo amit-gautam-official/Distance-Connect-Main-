@@ -3,7 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { getRazorpayInstance } from "@/lib/razorpay";
 import { scheduledMeetingsRouter } from "./scheduledMeeting";
 
-const razorpay = getRazorpayInstance();
+
 
 export const razorpayOrderRouter = createTRPCRouter({
 
@@ -36,7 +36,7 @@ export const razorpayOrderRouter = createTRPCRouter({
       if (isNaN(amount)) {
         throw new Error("Invalid event price format.");
       }
-
+      const razorpay = getRazorpayInstance();
       const order = await razorpay.orders.create({
         amount: amount * 100, // Razorpay expects amount in paise
         currency: "INR",
