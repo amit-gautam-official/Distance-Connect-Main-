@@ -25,7 +25,7 @@ export default async function Layout({
 
   return (
 
-          <div className="w-[calc(100vw-10%)] pb-20 md:w-[calc(100vw-280px)] md:pb-0">
+          <div className=" pb-20  md:pb-0">
             {children}
           </div>
 
