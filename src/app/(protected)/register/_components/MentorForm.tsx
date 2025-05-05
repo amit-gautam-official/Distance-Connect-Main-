@@ -500,7 +500,7 @@ export default function MentorForm({
                           Business Analyst
                         </SelectItem>
                         <SelectItem value="C-Suite">
-                         C-Suite / 
+                         C-Suite
                         </SelectItem>
                         <SelectItem value="Director / VP / Head of Department">
                          Director / VP / Head of Department
