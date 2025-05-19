@@ -454,7 +454,7 @@ getChatRoomById: protectedProcedure
                 if (!mentorMeetings[meeting.mentorUserId]) {
                     mentorMeetings[meeting.mentorUserId] = meetingDate;
                 } else {
-                    const existingDate = new Date(mentorMeetings[meeting.mentorUserId]);
+                    const existingDate = new Date(mentorMeetings[meeting.mentorUserId]!);
                     if (meetingDate > existingDate) {
                         mentorMeetings[meeting.mentorUserId] = meetingDate;
                     }
@@ -510,7 +510,7 @@ getChatRoomById: protectedProcedure
                 if (!chatRoom.mentorUserId || !mentorMeetings[chatRoom.mentorUserId]) return false;
                 
                 // Since we've already checked that mentorMeetings[chatRoom.mentorUserId] exists and is a Date
-                const meetingDate = new Date(mentorMeetings[chatRoom.mentorUserId].valueOf());
+                const meetingDate = new Date(mentorMeetings[chatRoom.mentorUserId]!.valueOf());
                 meetingDate.setHours(23, 59, 59); // End of meeting day
                 return now <= meetingDate;
             });
