@@ -48,6 +48,7 @@ export const scheduledMeetingsRouter = createTRPCRouter({
         where :{
           selectedDate: input.selectedDate, 
           mentorUserId: input.mentorUserId,
+          paymentStatus : true,
         }
       })
 
@@ -73,7 +74,15 @@ export const scheduledMeetingsRouter = createTRPCRouter({
 
       
 
-       const meeting = await ctx.db.scheduledMeetings.create({
+      // Find the event details to include for admin logging
+      const eventDetails = await ctx.db.meetingEvent.findFirst({
+        where: {
+          id: input.eventId
+        }
+      });
+
+      // Create the scheduled meeting with complete information
+      const meeting = await ctx.db.scheduledMeetings.create({
         data : {
             mentorUserId : input.mentorUserId,
             selectedTime : input.selectedTime,
@@ -87,14 +96,14 @@ export const scheduledMeetingsRouter = createTRPCRouter({
             eventName : input.eventName,
             userEmailForMeet : input.userEmailForMeet,
             mentorEmailForMeet : input.mentorEmailForMeet,
-            meetUrl : input.meetUrl || "",
-            paymentStatus : input.paymentStatus || false,
+            meetUrl : input.meetUrl? input.meetUrl : "",
+            paymentStatus : input.paymentStatus ? input.paymentStatus : false,
         }
       })
 
-      const student = await ctx.db.student.update({
+      await ctx.db.student.update({
         where : {
-          id : ctx.dbUser!.id
+          userId : ctx.dbUser!.id  // Using userId instead of id to properly match with the User
         },
         data : {
           hasUsedFreeSession : true

@@ -4,8 +4,6 @@ import { createTRPCRouter, adminProcedure } from "@/server/api/trpc";
 
 export const adminRouter = createTRPCRouter({
 
-
-
   updateFromAdmin: adminProcedure
   .input(z.object({
     userId: z.string(),
@@ -72,6 +70,45 @@ export const adminRouter = createTRPCRouter({
 
 
 
+  getMeetingLogs: adminProcedure
+  .input(z.object({
+    date: z.date().optional(),
+    status: z.enum(['paid', 'pending']).optional(),
+  }))
+  .query(async ({ ctx, input }) => {
+    // Build the where clause based on input filters
+    const where: any = {};
     
-  })
-
+    if (input.date) {
+      where.selectedDate = input.date;
+    }
+    
+    if (input.status === 'paid') {
+      where.paymentStatus = true;
+    } else if (input.status === 'pending') {
+      where.paymentStatus = false;
+    }
+    
+    return ctx.db.scheduledMeetings.findMany({
+      where,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        student: {
+          select: {
+            studentName: true,
+            userId: true,
+          },
+        },
+        mentor: {
+          select: {
+            mentorName: true,
+            userId: true,
+          },
+        },
+        
+      },
+    });
+  }),
+})

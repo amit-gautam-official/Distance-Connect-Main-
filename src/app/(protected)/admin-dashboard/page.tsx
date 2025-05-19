@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockMentors, mockStudents } from "./data/mock-data";
 import StudentManagement from "./components/student-management";
 import MentorManagement from "./components/mentor-management";
+import MeetingLogsContent from "./components/MeetingLogsContent";
 import StudentViewModal from "./components/modals/student-view-modal";
 import MentorViewModal from "./components/modals/mentor-view-modal";
 import VerifyMentorModal from "./components/modals/verify-mentor-modal";
@@ -77,9 +78,10 @@ export default function AdminDashboard() {
       
 
       <Tabs defaultValue="students" className="w-full">
-        <TabsList className="mx-auto mb-6 grid w-full max-w-md grid-cols-2 rounded-lg md:mb-8">
+        <TabsList className="mx-auto mb-6 grid w-full max-w-md grid-cols-3 rounded-lg md:mb-8">
           <TabsTrigger value="students">Students</TabsTrigger>
           <TabsTrigger value="mentors">Mentors</TabsTrigger>
+          <TabsTrigger value="meeting-logs">Meeting Logs</TabsTrigger>
         </TabsList>
 
         <TabsContent value="students" className="space-y-4 md:space-y-6">
@@ -90,10 +92,13 @@ export default function AdminDashboard() {
 
         <TabsContent value="mentors" className="space-y-4 md:space-y-6">
           <MentorManagement
-            
             mentors={mentors ?? []}
             handleVerify={handleVerify}
           />
+        </TabsContent>
+
+        <TabsContent value="meeting-logs" className="space-y-4 md:space-y-6">
+          <MeetingLogsContent />
         </TabsContent>
       </Tabs>
 
