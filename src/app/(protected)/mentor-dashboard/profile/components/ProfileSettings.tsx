@@ -56,6 +56,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, mentor }) => {
     industry: "",
     bio: "",
     companyEmail: "",
+    mentorPhoneNumber: "",
   });
 
   // Initialize education and experience data
@@ -113,6 +114,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, mentor }) => {
         industry: mentor?.industry || "",
         bio: mentor?.bio || "",
         companyEmail: mentor?.companyEmail || "",
+        mentorPhoneNumber: mentor?.mentorPhoneNumber || "",
       });
 
       // Parse education JSON data if available
@@ -164,7 +166,11 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, mentor }) => {
       updateProfileField("state", value);
     } else if (name === "bio") {
       updateProfileField("bio", value);
-    } else if (name === "hiringFields") {
+    } 
+    else if (name === "mentorPhoneNumber") {
+      updateProfileField("mentorPhoneNumber", value);
+    }
+    else if (name === "hiringFields") {
       // Split by comma and trim spaces for array fields
       const fields = value.split(",").map((field) => field.trim());
       updateProfileField("hiringFields", fields);
@@ -207,6 +213,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, mentor }) => {
       mentorName: formData.name,
       bio: formData.bio,
       companyEmail: formData.companyEmail,
+      mentorPhoneNumber: formData.mentorPhoneNumber,
     });
   };
 

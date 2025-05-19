@@ -140,6 +140,7 @@ model Mentor {
   companyEmailVerified Boolean  @default(false)
   verified             Boolean  @default(false)
   messageFromAdmin     String?
+  mentorPhoneNumber    String?
 
   meetingEvents     MeetingEvent[]
   availability      Availability?

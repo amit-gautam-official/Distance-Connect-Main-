@@ -114,6 +114,7 @@ export const mentorRouter = createTRPCRouter({
         .string({ required_error: "Company email is required" })
         .email("Please enter a valid email address")
         .optional(),
+      mentorPhoneNumber : z.string().optional(),
   
       education: z
         .array(

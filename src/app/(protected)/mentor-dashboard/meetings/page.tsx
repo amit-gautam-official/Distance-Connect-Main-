@@ -46,7 +46,6 @@ import {
 } from "@/components/ui/dialog";
 import MeetingsSkeleton from "./components/MeetingsSkeleton";
 import dynamic from "next/dynamic";
-import StudentListSkeleton from "./components/StudentListSkeleton";
 import StudentList from "../profile/components/StudentList";
 
 type MeetingStatus = "not-started" | "ongoing" | "completed" | "missed";
