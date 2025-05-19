@@ -55,6 +55,33 @@ export const chatRouter = createTRPCRouter({
     if (![chatRoom.studentUserId, chatRoom.mentorUserId].includes(ctx.dbUser.id)) {
       throw new Error("Not part of this chat");
     }
+    
+    // If the user is a student, check if they have a valid meeting with this mentor
+    if (ctx.dbUser.role === "STUDENT") {
+      const scheduledMeeting = await ctx.db.scheduledMeetings.findFirst({
+        where: {
+          mentorUserId: chatRoom.mentorUserId,
+          studentUserId: ctx.dbUser.id,
+          paymentStatus: true,
+        },
+        orderBy: {
+          selectedDate: 'desc', // Get the latest meeting
+        },
+      });
+
+      if (!scheduledMeeting) {
+        throw new Error("You must have a scheduled meeting with this mentor to chat");
+      }
+
+      // Check if today is after the meeting day
+      const meetingDate = new Date(scheduledMeeting.selectedDate);
+      meetingDate.setHours(23, 59, 59); // End of the meeting day
+      const now = new Date();
+
+      if (now > meetingDate) {
+        throw new Error("Chat is only available until the end of your meeting day");
+      }
+    }
  
    
     let imagePath = null;

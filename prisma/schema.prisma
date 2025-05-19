@@ -103,6 +103,9 @@ model Student {
   experience  String?
   industry    String?
 
+
+  
+
   scheduledMeetings ScheduledMeetings[]
   chatRooms         ChatRoom[]
   orders            RazorpayOrder[]

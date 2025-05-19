@@ -19,6 +19,19 @@ const config = {
   images: {
     domains: ["storage.googleapis.com"],
   },
+  
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Don't resolve 'fs' module on the client to prevent this error
+      config.resolve.fallback = {
+        fs: false,
+        net: false,
+        tls: false,
+        "pg-native": false,
+      };
+    }
+    return config;
+  },
 
   serverExternalPackages: ["ably"],
 };

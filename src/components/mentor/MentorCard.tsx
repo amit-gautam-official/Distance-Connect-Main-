@@ -1,10 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, MapPin, Calendar } from "lucide-react";
+import { Building2, MapPin, Calendar, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import {
   Dialog,
@@ -16,6 +16,8 @@ import {
 import { AvailabilityCard } from "../mentor-profile/AvailabilityCard";
 import { useRouter } from "next/navigation";
 import { JSONValue } from "node_modules/superjson/dist/types";
+import { useToast } from "@/components/ui/use-toast";
+import { api } from "@/trpc/react";
 
 interface Mentor {
   availability: Avail | null;
@@ -51,7 +53,48 @@ interface MentorCardProps {
 export function MentorCard({ mentor }: MentorCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExpandedBio, setIsExpandedBio] = useState(false);
+  const [canChat, setCanChat] = useState<boolean>(false);
+  const [isCheckingMeeting, setIsCheckingMeeting] = useState<boolean>(false);
   const router = useRouter();
+  const { toast } = useToast();
+  
+  // Check if the student has a meeting with this mentor
+  const getMeetingStatus = api.scheduledMeetings.hasMeetingWithMentor.useQuery(
+    { mentorUserId: mentor.userId },
+    { enabled: false }
+  );
+  
+  // Update local state when query results change
+  useEffect(() => {
+    if (getMeetingStatus.status === 'success') {
+      setCanChat(getMeetingStatus.data === true);
+      setIsCheckingMeeting(false);
+    } else if (getMeetingStatus.status === 'error') {
+      setCanChat(false);
+      setIsCheckingMeeting(false);
+    }
+  }, [getMeetingStatus.status, getMeetingStatus.data]);
+  
+  const createChatRoom = api.chatRoom.createChatRoomByMentorId.useMutation();
+  
+  // Handle chat room creation results
+  useEffect(() => {
+    if (createChatRoom.status === 'success' && createChatRoom.data) {
+      router.push(`/chat/${createChatRoom.data.id}`);
+    } else if (createChatRoom.status === 'error' && createChatRoom.error) {
+      toast({
+        title: "Cannot start chat",
+        description: createChatRoom.error.message || "You must book a meeting with this mentor first",
+        variant: "destructive",
+      });
+    }
+  }, [createChatRoom.status, createChatRoom.data, createChatRoom.error, router, toast]);
+
+  // Check meeting status when the component mounts
+  useEffect(() => {
+    setIsCheckingMeeting(true);
+    getMeetingStatus.refetch();
+  }, []);
   
   // Function to truncate bio text
   const truncateBio = (text: string, maxLength = 100) => {
@@ -150,13 +193,25 @@ export function MentorCard({ mentor }: MentorCardProps) {
                 View Profile
               </Button>
             </Link>
-            <Button 
-              size="sm"
-              className="flex-1 bg-primary/90 hover:bg-primary"
-              onClick={() => setIsModalOpen(true)}
-            >
-              Book Now
-            </Button>
+            <div className="flex flex-1 gap-2">
+              <Button 
+                size="sm"
+                variant="outline"
+                className="flex-1 gap-1"
+                disabled={isCheckingMeeting || !canChat}
+                onClick={() => createChatRoom.mutate({ mentorUserId: mentor.userId })}
+              >
+                <MessageSquare className="h-4 w-4" />
+                Chat
+              </Button>
+              <Button 
+                size="sm"
+                className="flex-1 bg-primary/90 hover:bg-primary"
+                onClick={() => setIsModalOpen(true)}
+              >
+                Book Now
+              </Button>
+            </div>
           </div>
         </div>
       </Card>

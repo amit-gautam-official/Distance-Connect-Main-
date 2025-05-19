@@ -223,4 +223,36 @@ export const scheduledMeetingsRouter = createTRPCRouter({
         },
       });
     }),
+
+    hasMeetingWithMentor: protectedProcedure
+    .input(z.object({ mentorUserId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      if (ctx.dbUser?.role !== "STUDENT") {
+        return false;
+      }
+
+      const now = new Date();
+      
+      // Get the latest scheduled meeting between this student and mentor
+      const meeting = await ctx.db.scheduledMeetings.findFirst({
+        where: {
+          mentorUserId: input.mentorUserId,
+          studentUserId: ctx.dbUser.id,
+          paymentStatus: true, // Ensure payment is completed
+        },
+        orderBy: {
+          selectedDate: 'desc',
+        },
+      });
+
+      if (!meeting) {
+        return false;
+      }
+
+      // Check if today is before or on the meeting day
+      const meetingDate = new Date(meeting.selectedDate);
+      meetingDate.setHours(23, 59, 59); // End of the meeting day
+      
+      return now <= meetingDate;
+    }),
   })
