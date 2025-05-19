@@ -1,56 +1,85 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star } from "lucide-react";
-import { auth0 } from "@/lib/auth0";
+import { Star, X } from "lucide-react";
 import Link from "next/link";
+import { AvatarModal } from "./Modal";
 
 interface ProfileHeaderProps {
   mentor: {
+    profileBanner: string;
     mentorName: string;
     jobTitle: string;
     currentCompany: string;
+    companyEmailVerified: boolean;
     experience: string;
     industry: string;
+    bio ?: string;
     user?: {
-      avatarUrl: string;
+      image: string;
     };
   };
   menteeCount: number;
   skills: string[];
   userId: string;
+  userEmail: string;
   averageRating?: number;
 }
 
-export async function ProfileHeader({
+export function ProfileHeader({
   mentor,
   menteeCount,
   skills,
   userId,
+  userEmail,
+
   averageRating = 5.0,
 }: ProfileHeaderProps) {
-  const session = await auth0.getSession();
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-      {/* Cover image - Blue gradient background */}
-      <div className="h-48 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+    
+      {mentor?.profileBanner ? (
+        <img
+          src={mentor?.profileBanner}
+          alt="Profile Banner"
+          className="h-48 w-full object-cover"
+        />
+      ):(
+        <div className="h-48 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+      )}
 
       <div className="relative p-8 pt-0">
         {/* Profile image overlapping the cover */}
-        <div className="absolute -top-[150px] left-8 overflow-hidden rounded-xl border-4 border-white bg-white shadow-md">
-          <Avatar className="h-32 w-32">
+        <div 
+          className="absolute -top-[150px] left-8 h-36 w-36 cursor-pointer overflow-hidden rounded-full border-4 border-white bg-white shadow-md"
+          onClick={openModal}
+        >
+          <Avatar className="h-36 w-36">
             <AvatarImage
-              src={mentor.user?.avatarUrl || ""}
+              src={mentor.user?.image || ""}
               alt={mentor.mentorName || ""}
-              className="h-32 w-32 object-cover"
+              className="h-36 w-36 object-cover"
             />
             <AvatarFallback className="h-32 w-32 bg-gradient-to-br from-blue-100 to-blue-200 text-2xl text-blue-700">
               {mentor.mentorName?.charAt(0) || "M"}
             </AvatarFallback>
           </Avatar>
         </div>
+
+        {/* Avatar Modal */}
+        <AvatarModal 
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          imageUrl={mentor.user?.image!}
+          name={mentor.mentorName}
+        />
 
         {/* Profile info */}
         <div className="mt-16 pb-2">
@@ -60,9 +89,12 @@ export async function ProfileHeader({
                 {mentor.mentorName}
               </h1>
               <p className="text-gray-700">{mentor.jobTitle}</p>
-              <p className="font-medium text-blue-600">
+              { mentor.companyEmailVerified ?
+                <p className="font-medium text-blue-600">
                 @{mentor.currentCompany}
-              </p>
+              </p> : <p className="font-medium text-blue-600">
+                <span className="text-red-500">Not Verified</span> @{mentor.currentCompany}
+              </p>}
             </div>
             <div className="mt-2 flex items-center space-x-2 md:mt-0">
               <Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
@@ -78,12 +110,14 @@ export async function ProfileHeader({
                 {mentor.experience} of experience
               </span>
             </div>
+            {mentor.companyEmailVerified && 
             <div className="flex items-center rounded-full bg-gray-50 px-3 py-1 text-sm text-gray-800">
               <div className="mr-2 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">
                 C
               </div>
               <span>{mentor.currentCompany}</span>
-            </div>
+            </div> 
+            }
             <div className="flex items-center rounded-full bg-gray-50 px-3 py-1 text-sm text-gray-800">
               <div className="mr-2 flex h-4 w-4 items-center justify-center rounded-full bg-gray-200 text-xs font-bold text-gray-600">
                 I
@@ -94,18 +128,13 @@ export async function ProfileHeader({
 
           <p className="mt-6 rounded-lg border border-gray-100 bg-gray-50 p-4 text-gray-600">
             <span className="font-medium text-gray-800">About Me: </span>
-            Looking for a mentor who can help you navigate your career in{" "}
-            {mentor.industry}? I have {mentor.experience} of experience and can
-            provide guidance in various fields.
-            <button className="ml-1 text-blue-600 hover:underline">
-              read more
-            </button>
+            {mentor?.bio || "No bio available."}
           </p>
 
           <div className="mt-6 flex flex-col justify-between gap-3 sm:flex-row">
             <div className="flex-1">
               <h3 className="mb-2 text-sm font-medium uppercase text-gray-500">
-                Skills
+                Hiring Fields
               </h3>
               <div className="flex flex-wrap gap-2">
                 {skills.slice(0, 4).map((skill, index) => (
@@ -129,21 +158,20 @@ export async function ProfileHeader({
             <div className="flex justify-start space-x-3 pt-4 sm:mt-0 sm:justify-end">
               <Link
                 href={
-                  session?.user?.email
-                    ? `/student-dashboard/inbox?mId=${userId}`
+                  userEmail
+                    ? `/chat?mentorId=${userId}`
                     : "/auth/login"
                 }
-                className="m-auto rounded-md bg-blue-600 px-4 py-2 text-white shadow-sm hover:bg-blue-700"
+                className="m-auto text-sm h-10 md:text-md rounded-md bg-blue-600 px-4 py-2 text-white shadow-sm hover:bg-blue-700"
               >
                 Ask a Question
               </Link>
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-blue-600 text-blue-600 hover:bg-blue-50"
+              <Link
+                href={"/"} 
+                className="m-auto text-sm h-10 md:text-md rounded-md border border-blue-600 bg-white px-4 py-2 text-blue-600 shadow-sm hover:bg-gray-100"
               >
                 View Pricing
-              </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -151,3 +179,5 @@ export async function ProfileHeader({
     </div>
   );
 }
+
+

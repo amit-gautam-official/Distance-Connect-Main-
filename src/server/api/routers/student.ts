@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { get } from "http";
 
 export const studentRouter = createTRPCRouter({
  
@@ -20,7 +21,7 @@ export const studentRouter = createTRPCRouter({
       courseSpecialization : z.string(),
       role : z.enum(["STUDENT", "MENTOR", "STARTUP"]),
       isRegistered : z.boolean(),
-      avatarUrl : z.string(),
+      image : z.string().optional(),
       name : z.string(),
      }))
     .mutation(async ({ ctx, input }) => {
@@ -40,8 +41,6 @@ export const studentRouter = createTRPCRouter({
               industry : input.industry,
               courseSpecialization : input.courseSpecialization,
               studentName : input.name,
-              
-            
           },
         }),
         ctx.db.user.update({
@@ -51,34 +50,13 @@ export const studentRouter = createTRPCRouter({
             name: input.name,
             role: input.role,
             isRegistered: input.isRegistered,
-            avatarUrl: input.avatarUrl,
+            image: input.image,
           },
         }),
       ])
     }),
 
-  // updateStudent: protectedProcedure
-  // .input(z.object({
-  //     university : z.string(),
-  //     course : z.string(),
-  //     yearOfStudy : z.enum(["FIRST", "SECOND", "THIRD", "FOURTH"]),
-  //     linkedInUrl : z.string(),
-  // }))
-  // .mutation(async ({ ctx, input }) => {
-  //   return ctx.db.student.update({
-  //     where: { userId: ctx?.dbUser?.id },
-  //     data: input,
-  //   });
-  // }
-  // ),
 
-  // deleteStudent: protectedProcedure
-  // .mutation(async ({ ctx }) => {
-  //   return ctx.db.student.delete({
-  //     where: { userId: ctx?.dbUser?.id },
-  //   });
-  // }
-  // ),
 
   getStudentOnly: protectedProcedure
   .query(async ({ ctx }) => {
@@ -118,6 +96,7 @@ export const studentRouter = createTRPCRouter({
 
   getStudent: protectedProcedure
   .query(async ({ ctx }) => {
+
     return ctx.db.student.findUnique({
       where: { userId: ctx?.dbUser?.id },
       include: {

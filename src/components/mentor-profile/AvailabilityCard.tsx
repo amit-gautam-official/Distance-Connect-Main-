@@ -26,20 +26,15 @@ type DaysAvailableType = {
 };
 
 interface AvailabilityCardProps {
-  availability: {
-    timezone: string;
-    availableDays: string[];
-    availableHours: string;
-    nextAvailable: string;
-  };
+
   avail: {
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    mentorUserId: string;
-    daysAvailable: JSONValue;
-    bufferTime: number;
-  };
+    id: string | null;
+    createdAt: Date | null;
+    updatedAt: Date | null;
+    mentorUserId: string | null;
+    daysAvailable: JSONValue | null; // Use JSONValue for dynamic keys
+    bufferTime: number | null;
+  } | null;
 }
 
 // Helper function to format time for display
@@ -60,10 +55,10 @@ const formatTime = (timeString: string) => {
 };
 
 export function AvailabilityCard({
-  availability,
+
   avail,
 }: AvailabilityCardProps) {
-  console.log("avail", avail);
+  // console.log("avail", avail);
 
   // Parse daysAvailable
   const daysAvailable = avail?.daysAvailable as DaysAvailableType;
@@ -86,7 +81,7 @@ export function AvailabilityCard({
       <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-3">
         <div className="rounded-lg bg-gray-50 p-4">
           <h3 className="mb-2 text-sm font-medium text-gray-500">Timezone</h3>
-          <p className="text-gray-800">{availability.timezone}</p>
+          <p className="text-gray-800">{"Asia/Kolkata (GMT+5:30)"}</p>
         </div>
         <div className="rounded-lg bg-gray-50 p-4">
           <h3 className="mb-2 text-sm font-medium text-gray-500">

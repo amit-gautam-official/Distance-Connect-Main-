@@ -29,88 +29,13 @@ import { UserPlus } from "lucide-react";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 
-// Mock data for mentors - in a real app, this would come from an API
-// const mentorsData = [
-//   {
-//     id: "1",
-//     name: "Prashant Kumar Singh",
-//     role: "Software Developer",
-//     company: "Google",
-//     expertise: ["Web Development", "React", "Node.js"],
-//     avatarUrl: "",
-//     isFollowing: true,
-//     lastInteraction: "2023-11-15T14:30:00",
-//     rating: 5,
-//     upcomingMeeting: {
-//       date: "2023-12-05T10:00:00",
-//       topic: "Career Guidance",
-//     },
-//   },
-//   {
-//     id: "2",
-//     name: "Ananya Sharma",
-//     role: "UX Designer",
-//     company: "Microsoft",
-//     expertise: ["UI/UX Design", "Figma", "User Research"],
-//     avatarUrl: "",
-//     isFollowing: true,
-//     lastInteraction: "2023-11-10T11:15:00",
-//     rating: 4,
-//     upcomingMeeting: null,
-//   },
-//   {
-//     id: "3",
-//     name: "Rahul Verma",
-//     role: "Data Scientist",
-//     company: "Amazon",
-//     expertise: ["Machine Learning", "Python", "Data Analysis"],
-//     avatarUrl: "",
-//     isFollowing: true,
-//     lastInteraction: "2023-10-28T15:45:00",
-//     rating: 5,
-//     upcomingMeeting: {
-//       date: "2023-12-10T14:30:00",
-//       topic: "ML Project Review",
-//     },
-//   },
-//   {
-//     id: "4",
-//     name: "Neha Patel",
-//     role: "Product Manager",
-//     company: "Facebook",
-//     expertise: ["Product Strategy", "Agile", "Market Research"],
-//     avatarUrl: "",
-//     isFollowing: false,
-//     lastInteraction: "2023-11-05T12:00:00",
-//     rating: 4,
-//     upcomingMeeting: {
-//       date: "2023-12-15T16:00:00",
-//       topic: "Product Launch Strategy",
-//     },
-//   },
-//   {
-//     id: "5",
-//     name: "Vikram Malhotra",
-//     role: "Mobile Developer",
-//     company: "Apple",
-//     expertise: ["iOS", "Swift", "React Native"],
-//     avatarUrl: "",
-//     isFollowing: false,
-//     lastInteraction: "2023-11-20T10:30:00",
-//     rating: 3,
-//     upcomingMeeting: null,
-//   },
-// ];
-
-// All expertise areas from mentors
-
 interface Mentor {
   id: string;
   name: string;
   role: string;
   company: string;
   expertise: string[];
-  avatarUrl: string;
+  image: string;
   isFollowing: boolean;
   rating: number;
   mentorUserId: string;
@@ -127,8 +52,8 @@ const MentorList = ({ mentorsData }: { mentorsData: Mentor[] }) => {
     setMentors(mentorsData);
   }, [mentorsData]);
 
-  console.log("mentorsData", mentorsData);
-  console.log("mentors", mentors);
+  // console.log("mentorsData", mentorsData);
+  // console.log("mentors", mentors);
 
   const allExpertiseAreas = Array.from(
     new Set(mentorsData?.flatMap((mentor) => mentor.expertise) || []),
@@ -294,7 +219,7 @@ const MentorList = ({ mentorsData }: { mentorsData: Mentor[] }) => {
                 <div className="flex items-start justify-between">
                   <div className="flex gap-3">
                     <Avatar className="h-12 w-12">
-                      <AvatarImage src={mentor.avatarUrl} alt={mentor.name} />
+                      <AvatarImage src={mentor.image} alt={mentor.name} />
                       <AvatarFallback className="bg-blue-100 text-blue-800">
                         {mentor.name.charAt(0)}
                       </AvatarFallback>

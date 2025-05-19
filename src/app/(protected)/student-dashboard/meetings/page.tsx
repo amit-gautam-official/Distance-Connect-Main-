@@ -46,15 +46,7 @@ import { toast } from "sonner";
 
 type MeetingStatus = "not-started" | "ongoing" | "completed" | "missed";
 type HistoryStatus = "Completed" | "Pending" | "Rejected";
-type DateFilterType =
-  | "all"
-  | "Feb"
-  | "May"
-  | "Jul"
-  | "Aug"
-  | "Sep"
-  | "Nov"
-  | "Dec";
+
 
 interface Meeting {
   id: string;
@@ -81,12 +73,9 @@ const MeetingsPage = () => {
   const [starRating, setStarRating] = useState(0);
 
   const utils = api.useUtils();
-  const { data: student } = api.student.getStudent.useQuery(undefined, {
-    retry: 1,
-    staleTime: 5 * 60 * 1000,
-  });
 
-  const { data, isLoading, isError } =
+
+  const { data } =
     api.scheduledMeetings.getScheduledMeetingsListByStudent.useQuery(
       undefined,
       {
@@ -152,8 +141,8 @@ const MeetingsPage = () => {
       );
     }
   };
-  console.log("upcoming", filterMeetingList("upcoming"));
-  console.log("expired", filterMeetingList("expired"));
+  // console.log("upcoming", filterMeetingList("upcoming"));
+  // console.log("expired", filterMeetingList("expired"));
 
   // Mock data for scheduled meetings
   const notStartedMeetings = filterMeetingList("upcoming")?.map(
@@ -206,7 +195,7 @@ const MeetingsPage = () => {
           date: item?.formatedDate,
           status: "ongoing" as MeetingStatus,
           duration: item?.duration,
-          meetUrl: item?.meetUrl,
+          meetUrl: item?.meetUrl!,
           completed: item?.completed,
           statusText: "In progress",
         };
@@ -227,7 +216,7 @@ const MeetingsPage = () => {
         date: item?.formatedDate,
         status: "not-started" as MeetingStatus,
         duration: item?.duration,
-        meetUrl: item?.meetUrl,
+        meetUrl: item?.meetUrl!,
         completed: item?.completed,
         statusText: `Starting in: ${days > 0 ? `${days} days, ` : ""}${hours > 0 ? `${hours} hours, ` : ""}${minutes} minutes`,
       };
@@ -244,7 +233,7 @@ const MeetingsPage = () => {
         date: item?.formatedDate,
         status: "completed" as MeetingStatus,
         duration: item?.duration,
-        meetUrl: item?.meetUrl,
+        meetUrl: item?.meetUrl!,
         completed: item?.completed,
         feedback: item?.feedback || undefined,
         starRating: item?.star || 0,
@@ -262,7 +251,7 @@ const MeetingsPage = () => {
       date: item?.formatedDate,
       status: "missed" as MeetingStatus,
       duration: item?.duration,
-      meetUrl: item?.meetUrl,
+      meetUrl: item?.meetUrl!,
       completed: item?.completed,
       statusText: "Meeting was missed",
     };
@@ -274,12 +263,7 @@ const MeetingsPage = () => {
     ...(missedMeetings || []),
   ];
 
-  // console.log("scheduledMeetings", scheduledMeetings);
-  // console.log("completedMeetings", completedMeetings);
-  // console.log("missedMeetings", missedMeetings);
-  // console.log("notStartedMeetings", notStartedMeetings);
 
-  // Mock data for meeting history
 
   const meetingHistory = scheduledMeetings.map((item) => {
     return {
@@ -408,7 +392,7 @@ const MeetingsPage = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="scheduled" className="space-y-4 md:space-y-6">
+        <TabsContent value="scheduled" className="space-y-4 md:space-y-6 md:mb-0 mb-20">
           {scheduledMeetings && scheduledMeetings.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
               {scheduledMeetings.map((meeting) => (

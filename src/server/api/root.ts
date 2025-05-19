@@ -6,11 +6,12 @@ import { startupRouter } from "./routers/startup";
 import { meetingEventRouter } from "./routers/meetingEvent";
 import { availabilityRouter } from "./routers/availability";
 import { scheduledMeetingsRouter } from "./routers/scheduledMeeting";
-import { emailRouter } from "./routers/email";
 import { meetRouter } from "./routers/meet";
 import { chatRouter } from "./routers/chat";
 import { chatRoomRouter } from "./routers/chatRoom";
-import { blogRouter } from "./routers/blog";
+import { fileRouter } from "./routers/file";
+import { adminRouter } from "./routers/admin";
+import { razorpayOrderRouter } from "./routers/razorpayOrder";
 
 /**
  * This is the primary router for your server.
@@ -25,11 +26,13 @@ export const appRouter = createTRPCRouter({
   meetingEvent : meetingEventRouter,
   availability : availabilityRouter,
   scheduledMeetings : scheduledMeetingsRouter,
-  email : emailRouter,
   meet : meetRouter,
   chat : chatRouter,
   chatRoom : chatRoomRouter,
-  blog : blogRouter,
+  file: fileRouter,
+  admin : adminRouter,
+  razorpayOrder: razorpayOrderRouter
+  
 });
 
 // export type definition of API

@@ -56,8 +56,8 @@ const MentorSolutionsPage = () => {
   ];
 
   return (
-    <div className="min-h-screen">
-      <div className="pt-[170px]">
+    <div className="min-h-[100dvh]">
+      <div className="lg:pt-[130px] pt-[50px]">
         <div className="mx-auto w-[80%]">
           <h1 className="mb-6 font-inter text-5xl font-semibold leading-[46px] text-black">
             {sections[0]?.title}

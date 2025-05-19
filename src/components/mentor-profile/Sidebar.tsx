@@ -13,7 +13,7 @@ interface SimilarMentorProfile {
   name: string;
   title: string;
   company: string;
-  avatarUrl: string;
+  image: string;
 }
 
 interface SidebarProps {
@@ -35,10 +35,10 @@ export function Sidebar({
       <Connect mentorName={mentorName} mentorUserId={mentorUserId} />
       
       {/* Articles section */}
-      <Articles articles={articles} />
+      {/* <Articles articles={articles} /> */}
       
       {/* Similar profiles section */}
-      <SimilarProfiles profiles={similarProfiles} />
+      {/* <SimilarProfiles profiles={similarProfiles} /> */}
     </div>
   );
 } 

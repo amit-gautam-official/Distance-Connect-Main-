@@ -9,6 +9,7 @@ import {
   FileText,
   Users,
   Video,
+  ChevronDown,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import {
@@ -29,7 +30,24 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
   const [email, setEmail] = useState<string>("example@gmail.com");
   const [description, setDescription] = useState<string>();
   const [loading, setLoading] = useState(false);
+  const [customEventName, setCustomEventName] = useState<boolean>(false);
   const router = useRouter();
+  const [price, setPrice] = useState<number>();
+
+ 
+
+
+
+  const getMeQuery = api.mentor.getMentor.useQuery();
+
+  const mentorSessionPriceRange = getMeQuery.data?.mentorSessionPriceRange; //Ex: "500-700" //string
+
+  const [minPrice, maxPrice] = mentorSessionPriceRange
+  ? mentorSessionPriceRange.split("-").map(Number)
+  : [500, 700]; // Default range
+
+
+
   const createMeetingEvent = api.meetingEvent.createMeetingEvent.useMutation({
     onSuccess: () => {
       toast("New Meeting Event Created!");
@@ -47,17 +65,27 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
       duration: duration,
       email: email,
       description: description,
+      price: price ?? minPrice,
     });
-  }, [eventName, duration, email, description]);
+  }, [eventName, duration, email, description, price]);
 
   const onCreateClick = async () => {
     setLoading(true);
+
+    // Verify that the email is a Gmail address
+    if (!email.endsWith("@gmail.com")) {
+      toast.error("Please use a Gmail address for Google Meet integration.");
+      setLoading(false);
+      return;
+    }
 
     await createMeetingEvent.mutateAsync({
       eventName: eventName as string,
       duration: duration as number,
       description: description as string,
       meetEmail: email as string,
+      price: price as number,
+
     });
   };
 
@@ -65,11 +93,14 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
     <div className="flex h-full flex-col">
       {/* Header Section */}
       <div className="border-b bg-white p-6">
-          <h2 className="flex items-center gap-2 text-gray-600 transition-colors hover:text-gray-900">
-            <Link className="flex items-center gap-2" href={"/mentor-dashboard/services"}>
+        <h2 className="flex items-center gap-2 text-gray-600 transition-colors hover:text-gray-900">
+          <Link
+            className="flex items-center gap-2"
+            href={"/mentor-dashboard/services"}
+          >
             <ChevronLeft className="h-5 w-5" /> Back to Services
-            </Link>
-          </h2>
+          </Link>
+        </h2>
         <div className="mt-4">
           <h2 className="text-2xl font-bold text-gray-900">Create New Event</h2>
           <p className="mt-1 text-sm text-gray-600">
@@ -95,54 +126,72 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
                   <Calendar className="h-4 w-4 text-gray-500" />
                   Event Name *
                 </label>
+               { !customEventName && 
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="h-11 w-full justify-start text-left font-normal"
-                    >
-                      {eventName || "Select meeting type"}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-full">
-                    <DropdownMenuItem
-                      onClick={() => setEventName("One-on-One Mentorship")}
-                    >
-                      One-on-One Mentorship
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setEventName("Group Mentorship")}
-                    >
-                      Group Mentorship
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setEventName("Career Guidance")}
-                    >
-                      Career Guidance
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setEventName("Interview Preparation")}
-                    >
-                      Interview Preparation
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setEventName("Mock Interview Prep")}
-                    >
-                      Mock Interview Prep
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="h-11 w-full justify-start text-left font-normal"
+                  >
+                    {eventName || "Select meeting type"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full">
+                  <DropdownMenuItem
+                    onClick={() => setEventName("One-on-One Mentorship")}
+                  >
+                    One-on-One Mentorship
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setEventName("Group Mentorship")}
+                  >
+                    Group Mentorship
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setEventName("Career Guidance")}
+                  >
+                    Career Guidance
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setEventName("Interview Preparation")}
+                  >
+                    Interview Preparation
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setEventName("Mock Interview Prep")}
+                  >
+                    Mock Interview Prep
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setCustomEventName(true)}
+
+                  >
+                    Custom
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              }
+                {
+                  customEventName && (
+                    <Input
+                      placeholder="Enter custom meeting type"
+                      onChange={(event) => setEventName(event.target.value)}
+                      className="h-11"
+                    />
+                  ) 
+                }
               </div>
 
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                   <Clock className="h-4 w-4 text-gray-500" />
                   Duration *
+
                 </label>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="h-11 w-40">
-                      {duration.toString()} Min
+                      {duration.toString()} Min  <ChevronDown className="h-4 w-4 text-gray-500" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
@@ -160,9 +209,35 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+              
               </div>
             </div>
           </div>
+
+          {/* Price Selection Section */}
+<div className="rounded-lg bg-white p-6 shadow-sm">
+  <div className="mb-4 flex items-center gap-2">
+    <Clock className="h-5 w-5 text-blue-600" />
+    <h3 className="text-lg font-semibold text-gray-900">Session Price</h3>
+  </div>
+  <div className="space-y-2">
+    <label className="text-sm font-medium text-gray-700">
+      Choose your session price (₹{minPrice}–₹{maxPrice})
+    </label>
+    <input
+      type="range"
+      min={minPrice}
+      max={maxPrice}
+      step={50}
+      value={price ?? minPrice}
+      onChange={(e) => setPrice(Number(e.target.value))}
+      className="w-full"
+    />
+    <div className="text-sm text-gray-600">Selected: ₹{price ?? minPrice}</div>
+  </div>
+</div>
+
+
 
           {/* Meeting Details Section */}
           <div className="rounded-lg bg-white p-6 shadow-sm">

@@ -94,7 +94,7 @@ const Testimonials = () => {
           <Carousel className="m-auto w-full">
             <CarouselContent>
               {testimonials.map((testimonial, index) => (
-                <CarouselItem key={index} className="px-2">
+                <CarouselItem key={index} className="px-2 ">
                   <TestiminialCard testimonial={testimonial} />
                 </CarouselItem>
               ))}
@@ -121,7 +121,7 @@ const Testimonials = () => {
                 {testimonials.map((testimonial, index) => (
                   <CarouselItem
                     key={index}
-                    className="pl-4 md:basis-1/2 md:pl-6 lg:basis-1/3"
+                    className="pl-4 md:basis-1/2 md:pl-6 xl:basis-1/3"
                   >
                     <div className="h-full p-1">
                       <TestimonialCardDesk testimonial={testimonial} />

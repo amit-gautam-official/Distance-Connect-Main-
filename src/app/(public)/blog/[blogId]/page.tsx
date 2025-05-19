@@ -1,4 +1,4 @@
-import React from "react";
+import React, { cache } from "react";
 import client from "@/lib/contentful";
 import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
@@ -16,7 +16,7 @@ export async function generateMetadata(
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const { blogId } = await params;
-  const blog: any = await getBlogPost(blogId);
+  const blog: any = await cachedGetBlogPost(blogId);
   const seoFields = blog?.fields?.seoFields?.fields;
  
 
@@ -28,7 +28,7 @@ export async function generateMetadata(
 
   return {
     metadataBase: new URL(
-      process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
+      "https://www.distanceconnect.in",
     ),
     title: `${seoFields?.internalName} | Distance Connect`,
     description: seoFields?.pageDescription || "Blog Distance Connect",
@@ -65,25 +65,31 @@ interface BlogPost {
   // Add other fields as needed
 }
 
+
+
 // Helper function to fetch blog post
 async function getBlogPost(slug: string) {
   const response = await client.getEntries({
     content_type: "pageBlogPost",
     "fields.slug": slug,
   });
-
+  
   return response.items[0];
 }
 
+const cachedGetBlogPost = cache(getBlogPost);
+
+
+
 export default async function BlogPost({ params }: Props) {
   const { blogId } = await params;
-  const blog: any = await getBlogPost(blogId);
+  const blog: any = await cachedGetBlogPost(blogId);
   // console.log(blog?.fields?.seoFields?.fields.shareImage);
   if (!blog) {
     notFound();
   }
 
-  console.log(blog?.fields);
+  // console.log(blog?.fields);
 
   return (
     <div className="mx-auto min-h-screen w-[80%] pt-[150px]">
@@ -105,12 +111,7 @@ export default async function BlogPost({ params }: Props) {
           alt="blog"
           className="mx-auto object-cover h-[516px] w-[1106px] flex-shrink-0 rounded-[40px]"
         />
-        <div className="mx-auto w-[80%] font-inter text-xl font-normal leading-[30px] text-black">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec
-          ullamcorper mattis lorem non. Ultrices praesent amet ipsum justo
-          massa. Eu dolor aliquet risus gravida nunc at feugiat consequat purus.
-          Non massa enim vitae duis mattis. Vel in ultricies vel fringilla.
-        </div>
+        
       </div>
 
       <div className="mx-auto my-5 h-[1px] w-[60%] bg-black"></div>

@@ -1,39 +1,18 @@
-import { api } from "@/trpc/server";
-import { redirect } from "next/navigation";
 import React from "react";
 import RegisterForm from "./_components/RegisterForm";
-import { auth0 } from "@/lib/auth0";
+import { auth } from "@/server/auth";
 
 export default async function RegisterPage() {
-  const session = await auth0.getSession();
+  const session = await auth();
   const user = session?.user;
-  //console.log("User",user)
-
-  if (!user) {
-    return redirect("/auth/login");
-  }
-
-  const dbUser = await api?.user?.checkUser({ kindeId: user?.sub! });
-  //console.log("--------------------- ",dbUser)
-  if (user && dbUser?.isRegistered) {
-    if (dbUser?.role === "STUDENT") {
-      // return redirect("/student-dashboard");
-      return redirect("/student-dashboard");
-    }
-    if (dbUser.role === "MENTOR") {
-      // return redirect("/mentor-dashboard");
-      return redirect("/mentor-dashboard");
-    }
-    if (dbUser.role === "STARTUP") {
-      // return redirect("/startup-dashboard");
-      return redirect("/startup-dashboard");
-    }
-    return redirect("/");
-  }
+  // console.log("User",user)
 
   const userInfo = {
-    firstName: user?.given_name ?? "",
-    lastName: user?.family_name ?? "",
+    id: user?.id ?? "",
+    name: user?.name ?? "",
+    email: user?.email ?? "",
+    image: user?.image ?? "",
+
   };
 
   return (

@@ -22,7 +22,7 @@ export const startupRouter = createTRPCRouter({
       state         : z.string(),
       interestFields: z.array(z.string()),
       role : z.enum(["STUDENT", "MENTOR", "STARTUP"]),
-      avatarUrl : z.string(),
+      image : z.string().optional(),
      }))
     .mutation(async ({ ctx, input }) => {
       return await ctx.db.$transaction([
@@ -41,8 +41,8 @@ export const startupRouter = createTRPCRouter({
           where: { id: ctx?.dbUser?.id! },
           data: {
             username: input.username,
-            name: ctx.user.given_name + " " + ctx.user.family_name,
-            avatarUrl: input.avatarUrl,
+            name: ctx.user.name,
+            image: input.image,
             role: "STARTUP",
             isRegistered: true,
           },

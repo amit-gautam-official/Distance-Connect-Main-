@@ -39,9 +39,12 @@ import {
 } from "@/components/ui/popover";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
+import { ImageUpload } from "./ImageUpload";
+import { toast } from "sonner";
 
 import { hiringFields } from "@/constants/hiringFirlds";
 
+import {SessionUserSchema} from "@/schemas";
 const formSchema = z.object({
   username: z.string().min(3, {
     message: "Username must be at least 3 characters",
@@ -84,21 +87,25 @@ const formSchema = z.object({
 export default function MentorForm({
   user,
 }: {
-  user: { firstName: string; lastName: string };
+  user: z.infer<typeof SessionUserSchema>;
 }) {
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [commandOpen, setCommandOpen] = useState(false);
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
-
+  const [checked, setChecked] = useState(false);
   const router = useRouter();
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const handleChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setChecked(e.target.checked);
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
-      firstName: user.firstName ?? "",
-      lastName: user.lastName ?? "",
+      firstName: user?.name?.split(" ")[0] ?? "",
+      lastName: user?.name?.split(" ")[1] ?? "",
       currentCompany: "",
       jobTitle: "",
       experience: "",
@@ -111,54 +118,27 @@ export default function MentorForm({
     },
   });
 
-  const createMentorUpdateUser = api.mentor.createMentorUpdateUser.useMutation({
-    onSuccess: () => {
-      //console.log("Mentor created successfully");
-    },
-    onError: (error) => {
-      console.error(error);
-    },
-  });
+  const createMentorUpdateUser =
+    api.mentor.createMentorUpdateUser.useMutation();
 
   const checkUsernameAvailability =
     api.user.checkUsernameAvailabilityMutation.useMutation();
 
-  // Watch for username changes and validate
-  useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name === "username" && value.username && value.username.length >= 3) {
-        setIsCheckingUsername(true);
+  
 
-        const timer = setTimeout(async () => {
-          try {
-            // Make sure username exists and is a string before passing to the mutation
-            if (value.username) {
-              const result = await checkUsernameAvailability.mutateAsync({
-                username: value.username,
-              });
-
-              if (!result.available) {
-                setUsernameError("This username is already taken");
-              } else {
-                setUsernameError(null);
-              }
-            }
-          } catch (error) {
-            console.error("Error checking username:", error);
-          } finally {
-            setIsCheckingUsername(false);
-          }
-        }, 1000);
-
-        return () => clearTimeout(timer);
-      }
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!checked) {
+      toast.error(
+        "Please agree to the Terms and Conditions and Privacy Policy",
+      );
+      return;
+    }
+    const result = await checkUsernameAvailability.mutateAsync({
+      username: values.username,
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    if (usernameError) {
+    if (!result.available) {
+      toast.error("This username is already taken");
       return;
     }
 
@@ -177,15 +157,15 @@ export default function MentorForm({
       hiringFields: selectedFields,
       isRegistered: true,
       companyType: values?.companyType,
-      avatarUrl: "https://i.sstatic.net/l60Hf.png",
     };
 
     try {
-      createMentorUpdateUser.mutate(mentorUserData);
+      await createMentorUpdateUser.mutateAsync(mentorUserData);
+      setIsRedirecting(true);
       router.push("/mentor-dashboard");
-      // router.push("/post-register");
     } catch (error) {
       console.error(error);
+      toast.error("Failed to create mentor profile");
     }
   }
 
@@ -220,13 +200,23 @@ export default function MentorForm({
   return (
     <div className="mx-auto w-full max-w-2xl">
       <CardHeader>
-        <CardTitle className="font-inter text-[32px] font-medium leading-[36px] text-black">
+        <CardTitle className="mb-12 w-full text-center font-inter text-2xl font-medium leading-tight text-black sm:text-left sm:text-[28px] sm:leading-[36px] md:text-[32px]">
           Give your Brief Introduction
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 sm:px-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-5 sm:space-y-6"
+          >
+            <div className="mb-4 flex items-center justify-start sm:mb-6 md:justify-center">
+              <ImageUpload
+                userId={user?.id}
+                initialAvatarUrl={user?.image}
+                isSubmitting={form.formState.isSubmitting}
+              />
+            </div>
             <FormField
               control={form.control}
               name="username"
@@ -509,6 +499,12 @@ export default function MentorForm({
                         <SelectItem value="Business Analyst">
                           Business Analyst
                         </SelectItem>
+                        <SelectItem value="C-Suite">
+                         C-Suite
+                        </SelectItem>
+                        <SelectItem value="Director / VP / Head of Department">
+                         Director / VP / Head of Department
+                        </SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
@@ -628,7 +624,7 @@ export default function MentorForm({
               render={() => (
                 <FormItem className="relative flex flex-col">
                   <FormLabel className="absolute left-[10px] top-[0px] bg-white px-1 font-inter text-[14px] font-normal leading-[16px] text-[#8A8A8A] peer-focus:text-black">
-                    Select your hiring fields
+                    Select your Skill set
                   </FormLabel>
                   <FormControl className="floating-input peer w-[110%] text-[#8A8A8A]">
                     <Popover open={commandOpen} onOpenChange={setCommandOpen}>
@@ -704,8 +700,47 @@ export default function MentorForm({
               )}
             />
 
-            <Button type="submit" className="w-full">
-              Submit
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="agree"
+                className="h-4 w-4 accent-blue-600"
+                checked={checked}
+                onChange={handleChecked}
+              />
+              <label htmlFor="agree" className="text-sm text-[#8A8A8A]">
+                I agree to the&nbsp;
+                <a
+                  href="/terms-conditions"
+                  className="text-blue-600 hover:underline"
+                >
+                  Terms and Conditions
+                </a>
+                &nbsp;and&nbsp;
+                <a
+                  href="/privacy-policy"
+                  className="text-blue-600 hover:underline"
+                >
+                  Privacy Policy
+                </a>
+              </label>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={
+                createMentorUpdateUser.isPending ||
+                checkUsernameAvailability.isPending ||
+                isRedirecting
+              }
+            >
+              {!createMentorUpdateUser.isPending &&
+                !checkUsernameAvailability.isPending &&
+                !isRedirecting && <span>Submit</span>}
+              {checkUsernameAvailability.isPending && "Checking Username..."}
+              {createMentorUpdateUser.isPending && "Submitting..."}
+              {isRedirecting && "Redirecting to Dashboard..."}
             </Button>
           </form>
         </Form>

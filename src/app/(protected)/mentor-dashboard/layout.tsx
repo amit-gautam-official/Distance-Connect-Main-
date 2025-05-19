@@ -1,26 +1,37 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { api } from "@/trpc/server";
 import { redirect } from "next/navigation";
+import { auth } from "@/server/auth";
+import { SessionUser } from "@/types/sessionUser";
 
 export default async function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = await api.user.getMe();
+  const session = await auth();
+  const user = session?.user as SessionUser | undefined;
 
-  if (!user || user.role !== "MENTOR") {
-    redirect("/");
-  }
+    if (user) {
+        if (user?.isRegistered) {
+          if (user?.role === "STUDENT") {
+            return redirect("/student-dashboard");
+          }
+        }
+        if (!user?.isRegistered) {
+          redirect("/register");
+        }
+      }else{
+        redirect("/");
+      }
+
 
   return (
     <SidebarProvider>
       <AppSidebar role="mentor" />
       <main>
-        <SidebarTrigger className="p-4 md:hidden" />
-        <div className="flex w-screen justify-center md:w-[calc(100vw-280px)]">
-          <div className="w-[calc(100vw-10%)] md:w-[calc(100vw-280px)]">
+        <div className="flex h-[calc(100dvh-69px)] w-screen justify-center md:w-[calc(100vw-280px)]">
+          <div className="w-[calc(100vw-10%)] pb-20 md:w-[calc(100vw-280px)] md:pb-0">
             {children}
           </div>
         </div>

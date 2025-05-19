@@ -2,7 +2,7 @@ import React from 'react'
 
 const BlogCard = ({blog} : any) => {
 
-  const blogDescription = blog.shortDescription;
+  const blogDescription = blog.shortDescription.slice(0, 300).concat("...");
   const blogTitle = blog.title;
   const blogCreatedAt = blog.publishedDate;
   const blogThumbnailImageUrl = blog.featuredImage.fields.file.url;
@@ -11,7 +11,7 @@ const BlogCard = ({blog} : any) => {
 
 
   return (
-    <div className='flex md:w-[280px] md:h-[460px] lg:w-[355px] lg:h-[500px] p-6 flex-col justify-start gap-4 flex-shrink-0 rounded-[20px] bg-white shadow-[0px_0px_41.3px_16px_rgba(61,86,143,0.20)]'>
+    <div className='flex md:w-[280px] md:h-[500px] lg:w-[355px] lg:h-[550px] p-6 flex-col justify-start gap-4 flex-shrink-0 rounded-[20px] bg-white shadow-[0px_0px_41.3px_16px_rgba(61,86,143,0.20)]'>
       
         <img alt={blogThumbnailImageFileName} src={blogThumbnailImageUrl} className='w-[307px] h-[229px] flex-shrink-0 rounded-md object-cover' />
         <div>

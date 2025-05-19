@@ -134,55 +134,47 @@ export default function HelpSupportPage() {
       <div className="mb-12">
         <h2 className="mb-6 text-center text-2xl font-bold">FAQ</h2>
         <Accordion type="single" collapsible className="mx-auto max-w-3xl">
-          <AccordionItem value="item-1">
-            <AccordionTrigger className="text-left font-medium">
-              Why is this the best nocode tool?
-            </AccordionTrigger>
-            <AccordionContent>
-              UI artists and startup strategists widely trust our
-              internationally recommended convenient and time-clear solution.
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="item-2">
-            <AccordionTrigger className="text-left font-medium">
-              How to launch a Webflow website?
-            </AccordionTrigger>
-            <AccordionContent>
-              To launch a Webflow website, you need to finalize your design,
-              connect a custom domain, review for mobile responsiveness, and
-              publish it through the Webflow dashboard.
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="item-3">
-            <AccordionTrigger className="text-left font-medium">
-              Who founded BRix Templates?
-            </AccordionTrigger>
-            <AccordionContent>
-              BRix Templates was founded by a team of experienced designers and
-              developers who wanted to make professional web design accessible
-              to everyone.
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="item-4">
-            <AccordionTrigger className="text-left font-medium">
-              When did Webflow was founded?
-            </AccordionTrigger>
-            <AccordionContent>
-              Webflow was founded in 2013 by Vlad Magdalin, Sergie Magdalin, and
-              Bryant Chou.
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="item-5">
-            <AccordionTrigger className="text-left font-medium">
-              Is NoCode the future of the web?
-            </AccordionTrigger>
-            <AccordionContent>
-              NoCode is emerging as an important part of the web&apos;s future,
-              democratizing web development and enabling more people to create
-              digital products without traditional coding skills.
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+    <AccordionItem value="item-1">
+      <AccordionTrigger className="text-left font-medium">
+        How do I pay for a mentorship session on Distance Connect?
+      </AccordionTrigger>
+      <AccordionContent>
+        You can easily pay using UPI, Debit/Credit Cards, Net Banking, or Wallets while booking a session. Just select your preferred payment method at checkout.
+      </AccordionContent>
+    </AccordionItem>
+    <AccordionItem value="item-2">
+      <AccordionTrigger className="text-left font-medium">
+        Will I get an invoice or payment receipt after booking a session?
+      </AccordionTrigger>
+      <AccordionContent>
+        Yes, once your payment is successful, you’ll automatically receive an invoice & payment receipt on your registered email.
+      </AccordionContent>
+    </AccordionItem>
+    <AccordionItem value="item-3">
+      <AccordionTrigger className="text-left font-medium">
+        What happens if my payment fails but the amount is deducted?
+      </AccordionTrigger>
+      <AccordionContent>
+        Don&apos;t worry! In case of any failed payment, the deducted amount (if any) will be automatically refunded by your bank within 5-7 working days.
+      </AccordionContent>
+    </AccordionItem>
+    <AccordionItem value="item-4">
+      <AccordionTrigger className="text-left font-medium">
+        Are there any hidden charges apart from the mentor&apos;s session price?
+      </AccordionTrigger>
+      <AccordionContent>
+        Absolutely not! The final amount shown during checkout is all you need to pay. No hidden or extra charges.
+      </AccordionContent>
+    </AccordionItem>
+    <AccordionItem value="item-5">
+      <AccordionTrigger className="text-left font-medium">
+        How does Distance Connect handle refunds or cancellations?
+      </AccordionTrigger>
+      <AccordionContent>
+        Refunds are only applicable if the mentor cancels the session or doesn’t show up. In such cases, your full amount will be refunded within 5-7 working days.
+      </AccordionContent>
+    </AccordionItem>
+  </Accordion>
       </div>
     </div>
   );

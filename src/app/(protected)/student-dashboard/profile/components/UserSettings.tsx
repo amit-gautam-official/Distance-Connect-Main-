@@ -18,11 +18,15 @@ import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { User, Student } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import {ImageUpload} from "@/app/(protected)/register/_components/ImageUpload";
+import { useProfile } from "../context";
+
 enum StudentRole {
   HIGHSCHOOL = "HIGHSCHOOL",
   COLLEGE = "COLLEGE",
   WORKING = "WORKING",
 }
+
 const UserSettings = () => {
   const { data: user, isLoading } = api.user.getMe.useQuery(undefined, {
     // Reduce retries to avoid rate limit issues
@@ -37,7 +41,7 @@ const UserSettings = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  console.log("student", student);
+  // console.log("student", student);
   return (
     <div className="space-y-6">
       <ProfileSettings user={user!} student={student!} />
@@ -54,16 +58,17 @@ const ProfileSettings = ({
   student: Student;
 }) => {
   const router = useRouter();
+  const { updateAvatar, updateProfileField } = useProfile();
+
   const updateUserMutation = api.user.updateUser.useMutation({
     onSuccess: () => {
       toast.success("User updated successfully");
-      // Force a hard refresh of the page to ensure data is reloaded
-      window.location.reload();
-
+      // Don't force reload as it interrupts image upload
       setIsSubmitting(false);
     },
     onError: () => {
       toast.error("Failed to update user");
+      setIsSubmitting(false);
     },
   });
   const updateStudentMutation = api.student.updateStudent.useMutation({
@@ -74,6 +79,7 @@ const ProfileSettings = ({
     },
     onError: () => {
       toast.error("Failed to update student");
+      setIsSubmitting(false);
     },
   });
   // Use empty default values for initial server render to avoid hydration mismatch
@@ -125,10 +131,34 @@ const ProfileSettings = ({
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Update context state for immediate UI updates
+    if (name === "name") {
+      updateProfileField("name", value);
+    } else if (name === "institutionName") {
+      updateProfileField("institutionName", value);
+    } else if (name === "state") {
+      updateProfileField("state", value);
+    } else if (name === "interestFields") {
+      // Split by comma and trim spaces for array fields
+      const fields = value.split(",").map((field) => field.trim());
+      updateProfileField("interestFields", fields);
+    } else if (name === "courseSpecialization") {
+      updateProfileField("courseSpecialization", value);
+    } else if (name === "companyName") {
+      updateProfileField("companyName", value);
+    } else if (name === "jobTitle") {
+      updateProfileField("jobTitle", value);
+    } else if (name === "experience") {
+      updateProfileField("experience", value);
+    } else if (name === "industry") {
+      updateProfileField("industry", value);
+    }
   };
 
   const handleRoleChange = (value: string) => {
     setStudentRole(value as StudentRole);
+    updateProfileField("studentRole", value);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -156,7 +186,7 @@ const ProfileSettings = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 md:mb-0 mb-20">
       {/* Profile Information */}
       <Card>
         <CardHeader>
@@ -167,6 +197,16 @@ const ProfileSettings = ({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Profile Picture */}
+            <div className="mb-6 flex justify-center">
+              <ImageUpload
+                userId={user.id}
+                isSubmitting={isSubmitting}
+                onAvatarUpdate={updateAvatar}
+                initialAvatarUrl={user.image || undefined}
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input
@@ -208,22 +248,23 @@ const ProfileSettings = ({
               <RadioGroup
                 value={studentRole}
                 onValueChange={handleRoleChange}
-                className="flex space-x-4"
+                className="flex space-x-2"
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
                     value={StudentRole.HIGHSCHOOL}
                     id="highschool"
+                    
                   />
-                  <Label htmlFor="highschool">High School Student</Label>
+                  <Label className="text-sm" htmlFor="highschool">High School Student</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value={StudentRole.COLLEGE} id="college" />
-                  <Label htmlFor="college">College Student</Label>
+                  <Label className="text-sm" htmlFor="college">College Student</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value={StudentRole.WORKING} id="working" />
-                  <Label htmlFor="working">Working Professional</Label>
+                  <Label className="text-sm" htmlFor="working">Working Professional</Label>
                 </div>
               </RadioGroup>
             </div>

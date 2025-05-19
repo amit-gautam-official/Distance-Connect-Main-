@@ -2,6 +2,24 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 
+const getDateTimeFromDateAndTime = (date: Date, time: string): Date => {
+  const [hours, minutesPart] = time.split(":");
+
+  const minutesArray = minutesPart ? minutesPart.split(" ") : ["0", "AM"];
+  const [minutes, period] = minutesArray;
+  let hour = parseInt(hours!);
+  const minute = parseInt(minutes!);
+
+  if (period === "PM" && hour !== 12) hour += 12;
+  if (period === "AM" && hour === 12) hour = 0;
+
+  const result = new Date(date);
+  result.setHours(hour, minute, 0, 0);
+  return result;
+};
+
+
+
 export const scheduledMeetingsRouter = createTRPCRouter({
 
   createScheduledMeeting: protectedProcedure
@@ -12,13 +30,45 @@ export const scheduledMeetingsRouter = createTRPCRouter({
         formatedDate : z.string(),
         formatedTimeStamp : z.string(),
         duration : z.number(),
-        meetUrl : z.string().url(),
         eventId : z.string(),
         userNote : z.string(),
-        eventName : z.string()
+        eventName : z.string(),
+        userEmailForMeet : z.string().email(),
+        mentorEmailForMeet : z.string().email()
       
      }))
     .mutation(async ({ ctx, input }) => {
+
+
+      const prevBooking = await ctx.db.scheduledMeetings.findMany({
+        where :{
+          selectedDate: input.selectedDate, 
+          mentorUserId: input.mentorUserId,
+        }
+      })
+
+      const checkTimeSlot = (time: string) => {
+        const selectedStart = getDateTimeFromDateAndTime(input.selectedDate, time);
+        const selectedEnd = new Date(selectedStart.getTime() + 30 * 60 * 1000);
+      
+        return prevBooking.some((booking) => {
+          const bookingStart = getDateTimeFromDateAndTime(new Date(booking.selectedDate), booking.selectedTime);
+          const bookingEnd = new Date(bookingStart.getTime() + booking.duration * 60 * 1000);
+      
+          // Check for overlap
+          const isOverlapping = selectedStart < bookingEnd && selectedEnd > bookingStart;
+          return isOverlapping;
+        });
+      };
+
+      const isOverlapping = checkTimeSlot(input.selectedTime);
+
+      if (isOverlapping) {
+        throw new Error("Selected time slot is already booked. Please choose another time.");
+      }
+
+      
+
       return await ctx.db.scheduledMeetings.create({
         data : {
             mentorUserId : input.mentorUserId,
@@ -27,11 +77,12 @@ export const scheduledMeetingsRouter = createTRPCRouter({
             formatedDate : input.formatedDate,
             formatedTimeStamp : input.formatedTimeStamp,
             duration : input.duration,
-            meetUrl : input.meetUrl,
             eventId : input.eventId,
             userNote : input.userNote,
             studentUserId : ctx.dbUser!.id,
-            eventName : input.eventName
+            eventName : input.eventName,
+            userEmailForMeet : input.userEmailForMeet,
+            mentorEmailForMeet : input.mentorEmailForMeet,
         }
       })
     }),
@@ -39,13 +90,16 @@ export const scheduledMeetingsRouter = createTRPCRouter({
     getScheduledMeetingsList: protectedProcedure
     .input(z.object({ 
         selectedDate : z.date(),
-        eventId : z.string()
+        eventId : z.string(),
+        mentorUserId : z.string()
      }))
     .query(async ({ ctx, input }) => {
       return ctx.db.scheduledMeetings.findMany({
         where: {
           selectedDate: input.selectedDate, 
-            eventId: input.eventId,
+          paymentStatus : true,
+          // eventId: input.eventId,
+          mentorUserId: input.mentorUserId,
         },
       });
     }),
@@ -67,7 +121,8 @@ export const scheduledMeetingsRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       return ctx.db.scheduledMeetings.findMany({
         where: {
-          studentUserId: ctx.dbUser!.id
+          studentUserId: ctx.user.id,
+          paymentStatus : true,
         },
         include: {
           mentor: true,
@@ -81,15 +136,26 @@ export const scheduledMeetingsRouter = createTRPCRouter({
       const meetings = await ctx.db.scheduledMeetings.findMany({
         where: {
           mentorUserId: ctx.dbUser!.id,
-          completed: false,
         },
         orderBy: {
           selectedDate: 'asc',
         },
-        include: {
-          student: true,
-        },
-        take: 3, // Limit to 3 most recent upcoming meetings
+        
+        select: {
+          id: true,
+          selectedDate: true,
+          selectedTime: true,
+          eventName: true,
+          userNote: true,
+          meetUrl: true,
+          completed: true,
+          formatedTimeStamp: true,
+          student : {
+            select : {
+              studentName : true,
+            }
+          }
+        }
       });
 
       // Transform the data to match our ScheduledSessions component format
@@ -104,7 +170,10 @@ export const scheduledMeetingsRouter = createTRPCRouter({
           description: meeting.userNote || `Meeting with ${meeting.student.studentName || 'Student'}`,
           date: `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`,
           time: meeting.selectedTime,
-          meetUrl: meeting.meetUrl
+          meetUrl: meeting.meetUrl,
+          completed: meeting.completed,
+          formatedTimeStamp: meeting.formatedTimeStamp,
+          selectedDate: meeting.selectedDate,
         };
       });
     }),

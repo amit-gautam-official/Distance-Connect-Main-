@@ -6,10 +6,7 @@ import {
   Search,
   Filter,
   X,
-  MessageSquare,
-  Star,
   GraduationCap,
-  Building,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,12 +14,10 @@ import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 
 interface Student {
@@ -31,7 +26,7 @@ interface Student {
   role: string;
   instituteName: string;
   expertise: string[];
-  avatarUrl: string;
+  image: string;
   isFollowing: boolean;
   rating: number;
   studentUserId: string;
@@ -194,7 +189,7 @@ const StudentList = ({ studentsData }: { studentsData: Student[] }) => {
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4">
                     <Avatar className="h-12 w-12">
-                      <AvatarImage src={student.avatarUrl} alt={student.name} />
+                      <AvatarImage src={student.image} alt={student.name} />
                       <AvatarFallback>
                         {student.name.charAt(0).toUpperCase()}
                       </AvatarFallback>
@@ -208,17 +203,17 @@ const StudentList = ({ studentsData }: { studentsData: Student[] }) => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  {/* <div className="flex items-center gap-2">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() =>
-                        router.push(`/mentor-dashboard/inbox`)
+                        router.push(`/chat?studentId=${student.studentUserId}`)
                       }
                     >
                       <MessageSquare className="h-4 w-4" />
                     </Button>
-                  </div>
+                  </div> */}
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {student.expertise.map((exp) => (

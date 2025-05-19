@@ -48,6 +48,9 @@ interface FilterState {
   hiringFields: string[];
 }
 
+
+
+
 const MentorsPagePublic = () => {
   const {
     data: mentors,
@@ -203,7 +206,7 @@ const MentorsPagePublic = () => {
   }
 
   return (
-    <div className="container mx-auto w-[80%] pb-[100px] pt-[150px]">
+    <div className="container mx-auto w-[80%] pb-[100px] md:pt-[150px]">
       <div className="mb-8">
         <h1 className="mb-4 text-3xl font-bold">Find Your Mentor</h1>
         <div className="flex flex-col gap-4 md:flex-row">
@@ -425,7 +428,7 @@ const MentorsPagePublic = () => {
                 </Card>
               ))
           : filteredMentors?.map((mentor) => (
-              <MentorCard key={mentor.userId} mentor={mentor} />
+              <MentorCard key={mentor.userId} mentor={mentor!} />
             ))}
       </div>
     </div>

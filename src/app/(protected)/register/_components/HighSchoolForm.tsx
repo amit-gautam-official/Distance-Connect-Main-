@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Form,
   FormControl,
@@ -39,8 +39,12 @@ import {
 } from "@/components/ui/popover";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
+import { ImageUpload } from "./ImageUpload";
 
 import { hiringFields } from "@/constants/hiringFirlds";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { SessionUserSchema } from "@/schemas"
 
 const formSchema = z.object({
   username: z.string().min(3, {
@@ -60,33 +64,34 @@ const formSchema = z.object({
 export default function HighSchoolForm({
   user,
 }: {
-  user: { firstName: string; lastName: string };
+  user: z.infer<typeof SessionUserSchema>;
 }) {
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [commandOpen, setCommandOpen] = useState(false);
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
-
+  const [profileImageUrl, setProfileImageUrl] = useState<string>("");
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const router = useRouter();
+  const [checked, setChecked] = useState(false);
+
+  const handleChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setChecked(e.target.checked);
+  };
+
   const createStudentUpdateUser =
-    api.student.createStudentUpdateUser.useMutation({
-      onSuccess: () => {
-        //console.log("Student created successfully")
-      },
-      onError: (error) => {
-        console.error(error);
-      },
-    });
+    api.student.createStudentUpdateUser.useMutation();
 
   const checkUsernameAvailability =
     api.user.checkUsernameAvailabilityMutation.useMutation();
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
-      firstName: user.firstName || "",
-      lastName: user.lastName || "",
+      firstName: user.name.split(" ")[0] || "",
+      lastName: user.name.split(" ")[1] || "",
       institutionName: "",
       pinCode: "",
       state: "",
@@ -95,43 +100,26 @@ export default function HighSchoolForm({
     },
   });
 
-  // Watch for username changes and validate
-  useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name === "username" && value.username && value.username.length >= 3) {
-        setIsCheckingUsername(true);
-
-        const timer = setTimeout(async () => {
-          try {
-            // Make sure username exists and is a string before passing to the mutation
-            if (value.username) {
-              const result = await checkUsernameAvailability.mutateAsync({
-                username: value.username,
-              });
-
-              if (!result.available) {
-                setUsernameError("This username is already taken");
-              } else {
-                setUsernameError(null);
-              }
-            }
-          } catch (error) {
-            console.error("Error checking username:", error);
-          } finally {
-            setIsCheckingUsername(false);
-          }
-        }, 1000);
-
-        return () => clearTimeout(timer);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  function onSubmit(input: z.infer<typeof formSchema>) {
+  async function onSubmit(input: z.infer<typeof formSchema>) {
     if (usernameError) {
       return;
+    }
+    if (!checked) {
+      toast.error(
+        "Please agree to the Terms and Conditions and Privacy Policy",
+      );
+      return;
+    }
+
+    if (input.username) {
+      const result = await checkUsernameAvailability.mutateAsync({
+        username: input.username,
+      });
+
+      if (!result.available) {
+        toast.error("This username is already taken");
+        return;
+      }
     }
 
     const role: "STUDENT" = "STUDENT";
@@ -150,15 +138,13 @@ export default function HighSchoolForm({
       courseSpecialization: "",
       role: role,
       isRegistered: true,
-      avatarUrl: "",
       name: input.firstName + " " + input.lastName,
     };
 
-    //console.log(studentUserData)
     try {
-      createStudentUpdateUser.mutate(studentUserData);
+      await createStudentUpdateUser.mutateAsync(studentUserData);
+      setIsRedirecting(true);
       router.push("/student-dashboard");
-      // router.push("/post-register");
     } catch (error) {
       console.error(error);
     }
@@ -195,13 +181,23 @@ export default function HighSchoolForm({
   return (
     <div className="mx-auto w-full max-w-2xl">
       <CardHeader>
-        <CardTitle className="font-inter text-[32px] font-medium leading-[36px] text-black">
+        <CardTitle className="text-center font-inter text-2xl font-medium leading-tight text-black sm:text-left sm:text-[28px] sm:leading-[36px] md:text-[32px]">
           Give your Brief Introduction
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 sm:px-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-5 sm:space-y-6"
+          >
+            <div className="mb-4 flex justify-start sm:mb-6 md:justify-center">
+              <ImageUpload
+                initialAvatarUrl={user?.image}
+                userId={user?.id}
+                isSubmitting={form.formState.isSubmitting}
+              />
+            </div>
             <FormField
               control={form.control}
               name="username"
@@ -453,8 +449,47 @@ export default function HighSchoolForm({
               />
             </div>
 
-            <Button type="submit" className="w-full">
-              Submit
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="agree"
+                className="h-4 w-4 accent-blue-600"
+                checked={checked}
+                onChange={handleChecked}
+              />
+              <label htmlFor="agree" className="text-sm text-[#8A8A8A]">
+                I agree to the&nbsp;
+                <a
+                  href="/terms-conditions"
+                  className="text-blue-600 hover:underline"
+                >
+                  Terms and Conditions
+                </a>
+                &nbsp;and&nbsp;
+                <a
+                  href="/privacy-policy"
+                  className="text-blue-600 hover:underline"
+                >
+                  Privacy Policy
+                </a>
+              </label>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={
+                createStudentUpdateUser.isPending ||
+                checkUsernameAvailability.isPending ||
+                isRedirecting
+              }
+            >
+              {!createStudentUpdateUser.isPending &&
+                !checkUsernameAvailability.isPending &&
+                !isRedirecting && <span>Submit</span>}
+              {checkUsernameAvailability.isPending && "Checking Username..."}
+              {createStudentUpdateUser.isPending && "Submitting..."}
+              {isRedirecting && "Redirecting to Dashboard..."}
             </Button>
           </form>
         </Form>

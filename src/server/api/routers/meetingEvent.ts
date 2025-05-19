@@ -9,8 +9,8 @@ export const meetingEventRouter = createTRPCRouter({
       eventName : z.string(),
       duration : z.number(),
       description : z.string().optional(),
-      meetEmail : z.string().email()
-      
+      meetEmail : z.string().email(),
+      price : z.number()      
      }))
     .mutation(async ({ ctx, input }) => {
       return ctx.db.meetingEvent.create({
@@ -19,10 +19,16 @@ export const meetingEventRouter = createTRPCRouter({
           duration: input.duration,
           description: input.description || '',
           meetEmail : input.meetEmail,
-          mentorUserId : ctx.dbUser!.id
+          eventPrice : input.price,
+          mentorUserId: ctx.dbUser!.id,
         },
       });
+      
+     
+      
     }),
+
+ 
 
   getMeetingEventById: protectedProcedure
     .input(z.object({ id: z.string() }))
@@ -34,6 +40,9 @@ export const meetingEventRouter = createTRPCRouter({
       });
     }),
 
+
+
+
   
   getMeetingEventList: protectedProcedure
     .query(async ({ ctx }) => {
@@ -41,6 +50,7 @@ export const meetingEventRouter = createTRPCRouter({
         where: {
           mentorUserId: ctx.dbUser!.id,
         },
+
       });
     }),
 

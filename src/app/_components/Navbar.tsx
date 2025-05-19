@@ -26,9 +26,15 @@ import {
 } from "@/components/ui/navigation-menu";
 
 import Link from "next/link";
-const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
+import { api } from "@/trpc/react";
+import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
+
+const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blogs: any }) => {
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const router = useRouter();
 
   //get only top 4 blogs
   const top4Blogs = blogs?.slice(0, 4);
@@ -43,9 +49,9 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
     imageAlt: blog?.fields?.featuredImage?.fields?.title,
   }));
 
-  console.log(blogs);
+  // console.log(blogs);
 
-  console.log(components);
+  // console.log(components);
 
   const handleScroll = () => {
     if (window.scrollY > lastScrollY) {
@@ -60,6 +66,7 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll); // Cleanup on component unmount
   }, [lastScrollY]);
+
 
   return (
     <div className="m-auto w-full">
@@ -112,22 +119,16 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
 
               <div className="flex h-full flex-col justify-between gap-4">
                 <div className="mt-4 flex flex-col items-center justify-start gap-4 text-left">
-                  <div className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]">
-                    Home
-                  </div>
-                  <div className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]">
-                    About
-                  </div>
-                  <Link
-                    href="/blog"
+                <Link
+                    href="/mentors"
                     className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
                   >
-                    Blogs
+                    Mentors
                   </Link>
                   <div className="relative mt-2 w-full">
                     <details className="group [&_summary::-webkit-details-marker]:hidden">
                       <summary className="flex cursor-pointer items-center justify-between text-[18px] font-normal leading-[18px] text-[#5D5A88]">
-                        <span>Solutions</span>
+                        <Link href="/solutions/student">Solutions</Link>
                         <span className="transition group-open:rotate-180">
                           <svg
                             width="10"
@@ -159,18 +160,24 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                         >
                           Mentors
                         </Link>
-                        <Link
-                          href="/solutions/startup"
-                          className="block text-[16px] font-normal text-[#5D5A88]"
-                        >
-                          Startups
-                        </Link>
+                       
                       </div>
                     </details>
                   </div>
-                  <div className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]">
+                  <Link
+                    href="/blog"
+                    className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
+                  >
+                    Blogs
+                  </Link>
+                  <Link
+                  href={"/pricing"}
+                  className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]">
                     Pricing
-                  </div>
+                  </Link>
+                
+                 
+                  
                   <Link
                     href="/contact-us"
                     className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
@@ -179,17 +186,7 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                   </Link>
                 </div>
                 <div className="flex flex-col gap-16">
-                  <div className="flex flex-col gap-6">
-                    <div className="flex items-center gap-2 text-[16px] font-medium leading-[16px] text-[#5D5A88]">
-                      <CircleHelp /> <span>FAQs</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[16px] font-medium leading-[16px] text-[#5D5A88]">
-                      <Headphones /> <span>Support</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[16px] font-medium leading-[16px] text-[#5D5A88]">
-                      <Settings /> <span>Settings</span>
-                    </div>
-                  </div>
+                 
                   <div className="flex flex-col items-center justify-center gap-4">
                     {!loggedId ? (
                       <>
@@ -200,7 +197,7 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                           Login
                         </Link>
                         <Link
-                          href="/auth/login?screen_hint=signup"
+                          href="/auth/register"
                           className="flex w-[199px] items-center justify-center gap-1 rounded-lg bg-[#6D758F] p-[18px_22px] text-white shadow-md"
                         >
                           Sign up
@@ -209,17 +206,20 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                     ) : (
                       <>
                         <Link
-                          href="/register"
+                          href={role === "STUDENT" ? "/student-dashboard" : "/mentor-dashboard"}
                           className="flex w-[199px] items-center justify-center gap-1 rounded-lg border border-[#E1E4ED] bg-[#F8FAFF] p-[18px_22px]"
                         >
                           Dashboard
                         </Link>
-                        <Link
-                          href="/auth/logout"
+                        <div
                           className="flex w-[199px] items-center justify-center gap-1 rounded-lg bg-[#6D758F] p-[18px_22px] text-white shadow-md"
                         >
-                          Logout
-                        </Link>
+                          
+      <button onClick={() => {
+        signOut()
+        router.push("/")
+        }}>Log Out</button>
+                        </div>
                       </>
                     )}
                   </div>
@@ -234,25 +234,30 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
     xl--> desktop */}
 
       <div
-        className={`fixed left-[50%] z-[200] m-auto hidden h-[68px] w-[80%] translate-x-[-50%] items-center justify-between rounded-[50px] bg-[#7090dc] pl-4 pr-6 shadow-md transition-transform duration-300 lg:flex ${
+        className={`fixed left-[50%] z-[50] w-full   m-auto hidden h-[78px]  translate-x-[-50%] items-center justify-between  bg-white px-[10%]  transition-transform duration-300 lg:flex ${
           showNavbar
-            ? "translate-y-[30px] transform"
+            ? "translate-y-[0px] transform "
             : "-translate-y-[100px] transform"
         }`}
       >
         <div className="flex items-center justify-center gap-2">
-          <img src="/logo.png" alt="logo" className="m-auto w-full h-[70px]" />
+          <Link href="/" className="cursor-pointer">
+            <img src="/logo.png" alt="logo" className="m-auto h-[80px]" />
+          </Link>
         </div>
-        <div className="flex items-center justify-center font-inter font-medium leading-normal text-white lg:gap-4 lg:text-[12px] xl:gap-8 xl:text-[16px]">
-          {/* <div className="cursor-pointer">Solutions</div>
-        <Link href="/blog" className='cursor-pointer'>Resources</Link>
-        <div>Pricing</div>
-        <Link href="/contact-us" className='cursor-pointer'>Contact Us</Link> */}
+        <div className="flex items-center justify-center font-inter leading-normal text-white lg:gap-4 lg:text-[16px] xl:gap-8 xl:text-[16px] font-[500]">
           <NavigationMenu>
-            <NavigationMenuList>
+            <NavigationMenuList className="text-black text-[16px] font-[500]">
+            <NavigationMenuItem>
+                <Link href="/mentors" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Mentors
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
               <NavigationMenuItem className="">
                 <NavigationMenuTrigger>
-                  <Link href="/solutions" className="cursor-pointer">
+                  <Link href="/solutions/student" className="cursor-pointer ">
                     Solutions
                   </Link>
                 </NavigationMenuTrigger>
@@ -261,24 +266,20 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                     <li className="row-span-3">
                       <NavigationMenuLink asChild>
                         <div
-                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-4 no-underline outline-none focus:shadow-md"
                           
                         >
-                          <img src="/logo.png" alt="logo" className="h- w-" />
-                          <div className="mb-2 mt-4 text-lg font-medium">
+                          <img src="/logo.png" alt="logo" className="h-20 w- object-cover"  />
+                          <div className="mb-2 mt-4 text-sm font-medium">
                             Solutions offered
                           </div>
-                          <p className="text-sm leading-tight text-muted-foreground">
-                            Tailored solutions for students, mentors, and
-                            startups to connect and grow together.
+                          <p className="text-xs leading-tight text-muted-foreground">
+                            Tailored solutions for students and mentors to connect and grow together.
                           </p>
                         </div>
                       </NavigationMenuLink>
                     </li>
-                    <ListItem href="/solutions/startup" title="Startups">
-                      Find the right talent, get expert guidance, and build a
-                      strong professional network to scale your startup.
-                    </ListItem>
+                 
                     <ListItem href="/solutions/mentor" title="Mentors">
                       Monetize your expertise, build your personal brand, and
                       mentor on your own terms with full flexibility.
@@ -301,14 +302,13 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                     {components.map((component: any) => (
                       <ListItem
                         key={component.title}
-                        // title={component.title}
                         href={component.href}
                       >
                         <div className="flex items-start gap-2">
                           <img
                             src={component.imageUrl}
                             alt={component.imageAlt}
-                            className="mt-2 h-[60px] w-[60px] rounded-md"
+                            className="mt-2 h-[60px] w-[60px] rounded-md object-cover"
                           />
                           <div>
                             <div className="text-[14px] font-medium leading-[24px] text-black">
@@ -323,6 +323,16 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
               <NavigationMenuItem>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link href="/pricing" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Pricing
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              
+              <NavigationMenuItem>
                 <Link href="/contact-us" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     Contact Us
@@ -336,13 +346,14 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
           <div className="flex items-center justify-center gap-4">
             <Link
               href="/auth/login"
-              className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[25px] border-[0.5px] border-[rgba(94,127,203,0.6)] bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08)] lg:w-[100px] xl:w-[134px]"
+              className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[25px] border-[0.5px] border-[rgba(94,127,203,0.6)] bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-md lg:w-[100px] xl:w-[134px]"
             >
               Login
             </Link>
             <Link
-              href="/auth/login?screen_hint=signup"
-              className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[25px] border-[0.5px] border-[rgba(94,127,203,0.6)] text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08)] lg:w-[100px] xl:w-[134px]"
+              href="/auth/register"
+              className="flex w-[102px] h-[41px] p-3 flex-col justify-center items-center shrink-0 rounded-[31px] bg-[#3D568F] shadow-md text-white font-roboto text-[16px] not-italic font-medium leading-[24px]
+"
             >
               Sign Up
             </Link>
@@ -350,17 +361,21 @@ const Navbar = ({ loggedId, blogs }: { loggedId: boolean; blogs: any }) => {
         ) : (
           <div className="flex items-center justify-center gap-4">
             <Link
-              href="/register"
-              className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[25px] border-[0.5px] border-[rgba(94,127,203,0.6)] bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08)] lg:w-[100px] xl:w-[134px]"
+               href={role === "STUDENT" ? "/student-dashboard" : "/mentor-dashboard"}
+
+              className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[31px] border-[0.5px] border-[rgba(94,127,203,0.6)] bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-md lg:w-[100px] xl:w-[134px]"
             >
               Dashboard
             </Link>
-            <Link
-              href="/auth/logout"
-              className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[25px] border-[0.5px] border-[rgba(94,127,203,0.6)] bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08)] lg:w-[100px] xl:w-[134px]"
+            <div
+              className="flex w-[102px] h-[41px] p-3 flex-col justify-center items-center shrink-0 rounded-[31px] bg-[#3D568F] shadow-md  text-white font-roboto text-[16px] not-italic font-medium leading-[24px]"
             >
-              Logout
-            </Link>
+             
+      <button onClick={() =>{
+         signOut()
+        router.push("/")
+      }}>Log Out</button>
+            </div>
           </div>
         )}
       </div>

@@ -1,7 +1,11 @@
 import { createClient } from 'contentful';
+
+import { env } from "@/env";
+
+
 const client = createClient({
-    space: process.env.CF_SPACE_ID!, // ID of a Compose-compatible space to be used \
-    accessToken: process.env.CF_DELIVERY_ACCESS_TOKEN!, // delivery API key for the space \
-  });
+  space: env.CF_SPACE_ID || 'yfsekmbfnbal',
+  accessToken: env.CF_DELIVERY_ACCESS_TOKEN || '1znAoSs4AwnsV8FZOlcPB2PO75NLSraGnwu1-eN21jU',
+});
 
 export default client;

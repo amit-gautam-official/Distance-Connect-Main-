@@ -4,11 +4,8 @@ import React, { useState } from "react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -22,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Search,
-  Building2,
   Briefcase,
   MapPin,
   SlidersHorizontal,
@@ -404,7 +400,7 @@ const MentorsPage = () => {
       </div>
 
       {/* Mentors Grid */}
-      <div className="grid w-full grid-cols-1 gap-4 md:gap-6">
+      <div className="grid w-full grid-cols-1 gap-4 md:gap-6 md:mb-0 mb-20">
         {isLoading
           ? // Loading skeletons
             Array(6)

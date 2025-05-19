@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/popover";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
+import {ImageUpload} from "./ImageUpload";
 
 const hiringFields = [
   { label: "Python", value: "python" },
@@ -62,16 +63,22 @@ const formSchema = z.object({
     .min(1, "Please select at least one hiring field"),
 });
 
-export default function StartupForm() {
+export default function StartupForm({
+  user,
+}: {
+  user: { firstName: string; lastName: string; id: string };
+}) {
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [commandOpen, setCommandOpen] = useState(false);
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState<string>("");
 
   const router = useRouter();
   const createStudentUpdateUser =
     api.startup.createStartupUpdateUser.useMutation({
       onSuccess: () => {
+        router.push("/startup-dashboard");
         //console.log("Student created successfully")
       },
       onError: (error) => {
@@ -96,6 +103,7 @@ export default function StartupForm() {
     },
   });
 
+  //nice
   // Watch for username changes and validate
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
@@ -145,14 +153,12 @@ export default function StartupForm() {
       state: input.state,
       interestFields: input.interestFields,
       role: role,
-      avatarUrl: "", // Add appropriate value
-      isRegistered: true, // Add appropriate value
+      isRegistered: true,
     };
 
     try {
       createStudentUpdateUser.mutate(startupUserData);
       router.push("/startup-dashboard");
-      // router.push("/post-register");
     } catch (error) {
       console.error(error);
     }
@@ -189,13 +195,22 @@ export default function StartupForm() {
   return (
     <div className="mx-auto w-full max-w-2xl">
       <CardHeader>
-        <CardTitle className="font-inter text-[32px] font-medium leading-[36px] text-black">
+        <CardTitle className="text-center font-inter text-2xl font-medium leading-tight text-black sm:text-left sm:text-[28px] sm:leading-[36px] md:text-[32px]">
           Give your Brief Introduction
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 sm:px-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-5 sm:space-y-6"
+          >
+            <div className="mb-4 flex nd:justify-center sm:mb-6 justify-start">
+              <ImageUpload
+                userId={user?.id}
+                isSubmitting={form.formState.isSubmitting}
+              />
+            </div>
             <FormField
               control={form.control}
               name="username"

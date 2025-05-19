@@ -1,5 +1,4 @@
 "use client";
-
 import React from "react";
 import { CalendarIcon, Clock } from "lucide-react";
 import Link from "next/link";
@@ -10,7 +9,7 @@ type ScheduledSession = {
   description: string;
   date: string;
   time: string;
-  meetUrl?: string;
+  meetUrl?: string | null;
 };
 
 interface ScheduledSessionsProps {
@@ -18,21 +17,63 @@ interface ScheduledSessionsProps {
 }
 
 const ScheduledSessions: React.FC<ScheduledSessionsProps> = ({ sessions }) => {
-  // If no sessions are provided or the array is empty, show mock data
-  const displaySessions = sessions;
 
+  console.log("Scheduled Sessions", sessions);
+  // Filter sessions to only show upcoming ones
+  const upcomingSessions = React.useMemo(() => {
+    const now = new Date();
+    
+    return sessions?.filter(session => {
+      // Parse the session date string into a Date object
+      // Assuming date format is "DD Month YYYY"
+      const dateParts = session.date.split(" ");
+      const day = dateParts[0] || "";
+      const month = dateParts[1] || "";
+      const year = dateParts[2] || "";
+      
+      // Parse the session time string
+      // Assuming time format is "HH:MM AM/PM"
+      const [timePart, ampm] = session.time.split(" ");
+      const [hours, minutes] = timePart ? timePart.split(":") : ["0", "0"];
+      
+      let parsedHours = parseInt(hours ?? "0");
+      if (ampm === "PM" && parsedHours !== 12) {
+        parsedHours += 12;
+      } else if (ampm === "AM" && parsedHours === 12) {
+        parsedHours = 0;
+      }
+      
+      // Create a Date object for the session
+      const sessionDate = new Date(
+        parseInt(year),
+        new Date(`${month} 1, 2000`).getMonth(),
+        parseInt(day),
+        parsedHours,
+        parseInt(minutes || "0"),
+      );
+      
+      // Return true if session date is greater than or equal to current time
+      return sessionDate >= now;
+    }).sort((a, b) => {
+      // Sort by date and time for display
+      const dateA = new Date(`${a.date} ${a.time}`);
+      const dateB = new Date(`${b.date} ${b.time}`);
+      return dateA.getTime() - dateB.getTime();
+    });
+  }, [sessions]);
 
-  if (displaySessions.length === 0) {
+  // If no upcoming sessions, show message
+  if (upcomingSessions.length === 0) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-gray-500">No scheduled sessions</p>
+        <p className="text-gray-500">No upcoming sessions scheduled</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-3">
-      {displaySessions.map((session) => (
+      {upcomingSessions.map((session) => (
         <div
           key={session.id}
           className="flex flex-col overflow-hidden rounded-md bg-white shadow-sm md:flex-row"
@@ -46,7 +87,7 @@ const ScheduledSessions: React.FC<ScheduledSessionsProps> = ({ sessions }) => {
               {session.date.split(" ")[1]}
             </div>
           </div>
-
+          
           <div className="flex-1 border-t border-gray-200 p-3 md:border-l md:border-t-0 md:p-4">
             <div className="mb-1 text-sm font-medium md:mb-2 md:text-base">
               {session.title}

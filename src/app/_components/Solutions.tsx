@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 
 const Solutions = () => {
@@ -77,7 +78,7 @@ const Solutions = () => {
           className="relative z-[10] h-[369px] w-[336px] rounded-sm object-cover"
           alt="bg5"
         />
-        <div className="relative z-[100] mt-[-120px] h-[228px] w-[326px] rounded-[8px] border border-[#E1E4ED] bg-[#FFF] p-8 shadow-md">
+        <div className="relative z-[40] mt-[-120px] h-[228px] w-[326px] rounded-[8px] border border-[#E1E4ED] bg-[#FFF] p-8 shadow-md">
           <div className="font-inter text-[22px] font-bold leading-[32px] text-[#3D568F]">
             Student & Beginners
           </div>
@@ -169,7 +170,7 @@ const Solutions = () => {
          
 
           <div className="mt-2 flex items-center gap-2 text-center font-inter text-[16px] font-semibold leading-[22px] text-[#3D568F]">
-            <span>Learn more</span>
+            <Link href="/solutions/student">Learn more</Link>
             <div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -197,7 +198,7 @@ const Solutions = () => {
           </div>
         </div>
       </div>
-      <div className="relative mt-10 flex flex-col items-center gap-4 lg:hidden">
+      {/* <div className="relative mt-10 flex flex-col items-center gap-4 lg:hidden">
         <img
           src="/bg6.jpg"
           className="relative z-[10] h-[369px] w-[336px] rounded-sm object-cover"
@@ -314,7 +315,7 @@ const Solutions = () => {
           </div>
 
           <div className="mt-2 flex items-center gap-2 text-center font-inter text-[16px] font-semibold leading-[22px] text-[#3D568F]">
-            <span>Learn more</span>
+            <Link href="/solutions/startup">Learn more</Link>
             <div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -341,14 +342,14 @@ const Solutions = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       <div className="relative mt-10 flex flex-col items-center gap-4 lg:hidden">
         <img
           src="/bg7.jpg"
           className="relative z-[10] h-[369px] w-[336px] rounded-sm object-cover"
           alt="bg5"
         />
-        <div className="relative z-[100] mt-[-120px] h-[228px] w-[326px] rounded-[8px] border border-[#E1E4ED] bg-[#FFF] p-8 shadow-md">
+        <div className="relative z-[40] mt-[-120px] h-[228px] w-[326px] rounded-[8px] border border-[#E1E4ED] bg-[#FFF] p-8 shadow-md">
           <div className="font-inter text-[22px] font-bold leading-[32px] text-[#3D568F]">
           Mentors
           </div>
@@ -439,7 +440,7 @@ const Solutions = () => {
          
 
           <div className="mt-2 flex items-center gap-2 text-center font-inter text-[16px] font-semibold leading-[22px] text-[#3D568F]">
-            <span>Learn more</span>
+            <Link href="/solutions/mentor">Learn more</Link>
             <div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -469,7 +470,7 @@ const Solutions = () => {
       </div>
 
       {/* desktop section */}
-      <div className="lg:flex h-[610px] hidden  w-full flex-shrink-0 rounded-[30px] bg-[linear-gradient(0deg,#FFFDEB_0%,#FFFDEB_100%),conic-gradient(from_196deg_at_78.23%_63.56%,rgba(245,246,255,0)_0deg,rgba(197,192,216,0)_360deg)]">
+      <div className="lg:flex mb-6 h-[610px] hidden  w-full flex-shrink-0 rounded-[30px] bg-[linear-gradient(0deg,#FFFDEB_0%,#FFFDEB_100%),conic-gradient(from_196deg_at_78.23%_63.56%,rgba(245,246,255,0)_0deg,rgba(197,192,216,0)_360deg)]">
         <div className="flex w-[50%] flex-col gap-4 px-[68px] pt-[60px]">
           <button className="h-[30px] w-[98px] flex-shrink-0 rounded-[20px] border border-white bg-[rgba(246,212,207,0.30)] font-inter text-[12px] font-medium leading-[110%] text-black backdrop-blur-[25px]">
             Student
@@ -610,7 +611,7 @@ const Solutions = () => {
             </div>
           </div>
           <button className="relative z-[40] mt-6 h-[45px] w-[183px] flex-shrink-0 rounded-[30px] bg-[#3D568F] font-inter text-[18px] font-medium leading-[110%] text-white">
-            Learn more
+            <Link href="/solutions/student">Learn more</Link>
           </button>
         </div>
         <div className="flex w-[50%] flex-col items-center justify-center">
@@ -621,7 +622,7 @@ const Solutions = () => {
           />
         </div>
       </div>
-      <div className="lg:flex hidden h-[564px] w-full flex-shrink-0">
+      {/* <div className="lg:flex hidden h-[564px] w-full flex-shrink-0">
         <div className="relative flex w-[50%] flex-col items-center justify-center">
           <div className="absolute right-[-50px]">
             <svg
@@ -786,15 +787,15 @@ const Solutions = () => {
             </div>
           </div>
           <button className="relative z-[40] mt-6 h-[45px] w-[183px] flex-shrink-0 rounded-[30px] bg-[#3D568F] font-inter text-[18px] font-medium leading-[110%] text-white">
-            Learn more
+            <Link href="/solutions/startup">Learn more</Link>
           </button>
         </div>
-      </div>
+      </div> */}
 
 
 
 
-      <div className="hidden lg:flex h-[564px] w-full flex-shrink-0 rounded-[30px] bg-[linear-gradient(0deg,#FFFDEB_0%,#FFFDEB_100%),conic-gradient(from_196deg_at_78.23%_63.56%,rgba(245,246,255,0)_0deg,rgba(197,192,216,0)_360deg)]">
+      <div className="hidden mt-6 lg:flex h-[564px] w-full flex-shrink-0 rounded-[30px] bg-[linear-gradient(0deg,#FFFDEB_0%,#FFFDEB_100%),conic-gradient(from_196deg_at_78.23%_63.56%,rgba(245,246,255,0)_0deg,rgba(197,192,216,0)_360deg)]">
         <div className="flex w-[50%] flex-col gap-4 px-[68px] pt-[60px]">
           <button className="w-[98px] h-[30px] flex-shrink-0 rounded-[20px] border border-white bg-[rgba(202,189,255,0.30)] backdrop-blur-[25px] text-black font-inter text-[12px] font-medium leading-[110%]">
           Mentors
@@ -917,7 +918,7 @@ const Solutions = () => {
            
           </div>
           <button className="relative z-[40] mt-6 h-[45px] w-[183px] flex-shrink-0 rounded-[30px] bg-[#3D568F] font-inter text-[18px] font-medium leading-[110%] text-white">
-            Learn more
+            <Link href="/solutions/mentor">Learn more</Link>
           </button>
         </div>
         <div className="flex relative w-[50%] flex-col items-center justify-center">

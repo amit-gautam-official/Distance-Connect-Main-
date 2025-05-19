@@ -5,10 +5,10 @@ export async function POST(request: NextRequest) {
   try {
     // Parse the request body
     const body = (await request.json()) as SupportRequest;
-    const { name, email, username, message } = body;
+    const { name, email, username, message, phone } = body;
 
     // Validate required fields
-    if (!name || !email || !message) {
+    if (!name || !email || !message ) {
       return NextResponse.json(
         { error: "Name, email, and message are required" },
         { status: 400 }
@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
       email,
       username: username || "",
       message,
+      phone: phone || "", 
     });
 
     return NextResponse.json({ success: true, data: result });

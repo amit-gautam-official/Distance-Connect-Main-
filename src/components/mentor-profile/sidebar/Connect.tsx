@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { auth0 } from "@/lib/auth0";
+import { auth } from "@/server/auth";
 interface ConnectProps {
   mentorName: string;
   mentorUserId: string;
@@ -9,7 +9,7 @@ interface ConnectProps {
 
 
 export async function Connect({ mentorName , mentorUserId}: ConnectProps) {
-  const session =  await auth0.getSession();
+  const session =  await auth();
   return (
     <div className="rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 shadow-sm">
       <h3 className="mb-3 text-lg font-semibold text-gray-900">
@@ -20,13 +20,13 @@ export async function Connect({ mentorName , mentorUserId}: ConnectProps) {
         growth.
       </p>
       <div className="space-y-3">
-        <Link href="#offerings" className="block mb-2 w-full">
+        <Link href={`/mentors/${mentorUserId}/offerings`} className="block mb-2 w-full">
           <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">
             Schedule a Call
           </Button>
         </Link>
         <Link
-          href={session?.user?.email ? `/student-dashboard/inbox?mId=${mentorUserId}` : "/auth/login"}
+          href={session?.user?.email ? `/chat?mentorId=${mentorUserId}` : "/auth/login"}
               >
         <Button
           variant="outline"

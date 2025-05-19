@@ -30,7 +30,7 @@ const EditProfileModal = ({ isOpen, onClose, user }: EditProfileModalProps) => {
     bio: "",
     location: "",
     institution: "",
-    avatarUrl: user?.avatarUrl || "",
+    image: user?.image || "",
   });
   const [isUploading, setIsUploading] = useState(false);
 
@@ -63,7 +63,7 @@ const EditProfileModal = ({ isOpen, onClose, user }: EditProfileModalProps) => {
     setTimeout(() => {
       // Create a fake URL for demo purposes
       const fakeUrl = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, avatarUrl: fakeUrl }));
+      setFormData((prev) => ({ ...prev, image: fakeUrl }));
       setIsUploading(false);
     }, 1500);
   };
@@ -75,8 +75,8 @@ const EditProfileModal = ({ isOpen, onClose, user }: EditProfileModalProps) => {
     updateUser.mutate({
       name: formData.name,
       // Only include avatarUrl if it's different from the current one
-      ...(formData.avatarUrl !== user?.avatarUrl && {
-        avatarUrl: formData.avatarUrl,
+      ...(formData.image !== user?.image && {
+        image: formData.image,
       }),
     });
   };
@@ -93,7 +93,7 @@ const EditProfileModal = ({ isOpen, onClose, user }: EditProfileModalProps) => {
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={formData.avatarUrl} />
+                <AvatarImage src={formData.image} />
                 <AvatarFallback className="bg-blue-100 text-xl text-blue-800">
                   {formData.name.charAt(0) || "U"}
                 </AvatarFallback>

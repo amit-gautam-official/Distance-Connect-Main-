@@ -11,33 +11,35 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-      AUTH0_SECRET: z.string(),
-      APP_BASE_URL: z.string().url(),
-      AUTH0_DOMAIN: z.string(),
-      AUTH0_CLIENT_ID: z.string(),
-      AUTH0_CLIENT_SECRET: z.string(),
-      GOOGLE_SERVICE_ACCOUNT_EMAIL: z.string(),
-      GOOGLE_PRIVATE_KEY: z.string(),
-      ABLY_API_KEY: z.string(),
-      GCP_PROJECT_ID: z.string(),
-      GCP_CHAT_IMAGE_BUCKET_NAME: z.string(),
-      GCP_CLIENT_EMAIL: z.string(),
-      GCP_PRIVATE_KEY: z.string(),
-      UPSTASH_REDIS_REST_URL: z.string().url(),
-      UPSTASH_REDIS_REST_TOKEN: z.string(),
-      SKIP_ENV_VALIDATION: z.number(),
-      CF_DELIVERY_ACCESS_TOKEN: z.string(),
-      EMAIL_HOST: z.string(),
-      EMAIL_PORT: z.number(),
-      EMAIL_USER: z.string(),
-      EMAIL_PASSWORD: z.string(),
-      EMAIL_FROM: z.string(),
-      SUPPORT_EMAIL: z.string(),
-      
+    APP_BASE_URL: z.string().url(),
+    GOOGLE_SERVICE_ACCOUNT_EMAIL: z.string(),
+    GOOGLE_PRIVATE_KEY: z.string(),
+    ABLY_API_KEY: z.string(),
+    GCP_PROJECT_ID: z.string(),
+    GCP_CHAT_IMAGE_BUCKET_NAME: z.string(),
+    GCP_CLIENT_EMAIL: z.string(),
+    GCP_PRIVATE_KEY: z.string(),
+    UPSTASH_REDIS_REST_URL: z.string().optional(),
+    UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+    SKIP_ENV_VALIDATION: z.number().optional(),
+    CF_DELIVERY_ACCESS_TOKEN: z.string().optional(),
+    EMAIL_HOST: z.string(),
+    EMAIL_PORT: z.number(),
+    EMAIL_USER: z.string(),
+    EMAIL_PASSWORD: z.string(),
+    EMAIL_FROM: z.string(),
+    SUPPORT_EMAIL: z.string(),
+    CF_SPACE_ID: z.string(),
+    AUTH_GOOGLE_CLIENT_ID : z.string(),
+    AUTH_GOOGLE_CLIENT_SECRET : z.string(),
+    AUTH_SECRET : z.string(),
+    AUTH_URL : z.string(),
+    RAZORPAY_KEY_ID : z.string(),
+    RAZORPAY_KEY_SECRET : z.string(),
+    RAZORPAY_WEBHOOK_SECRET : z.string(),
+
+
   },
-  
-
-
 
   /**
    * Specify your client-side environment variables schema here. This way you can ensure the app
@@ -46,9 +48,9 @@ export const env = createEnv({
    */
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
-    NEXT_PUBLIC_BASE_URL : z.string().url(),
+    NEXT_PUBLIC_BASE_URL: z.string().url(),
     NEXT_PUBLIC_GEMINI_API_KEY: z.string(),
-    NEXT_PUBLIC_RESEND_API_KEY: z.string(),
+    NEXT_PUBLIC_RAZORPAY_KEY_ID: z.string(),
   },
 
   /**
@@ -59,11 +61,7 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
-    AUTH0_SECRET: process.env.AUTH0_SECRET,
     APP_BASE_URL: process.env.APP_BASE_URL,
-    AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
-    AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
-    AUTH0_CLIENT_SECRET: process.env.AUTH0_CLIENT_SECRET,
     GOOGLE_SERVICE_ACCOUNT_EMAIL: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
     GOOGLE_PRIVATE_KEY: process.env.GOOGLE_PRIVATE_KEY,
     ABLY_API_KEY: process.env.ABLY_API_KEY,
@@ -82,7 +80,15 @@ export const env = createEnv({
     EMAIL_FROM: process.env.EMAIL_FROM,
     SUPPORT_EMAIL: process.env.SUPPORT_EMAIL,
     NEXT_PUBLIC_GEMINI_API_KEY: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
-    NEXT_PUBLIC_RESEND_API_KEY: process.env.NEXT_PUBLIC_RESEND_API_KEY,
+    CF_SPACE_ID: process.env.CF_SPACE_ID,
+    AUTH_GOOGLE_CLIENT_ID : process.env.AUTH_GOOGLE_CLIENT_ID,
+    AUTH_GOOGLE_CLIENT_SECRET : process.env.AUTH_GOOGLE_CLIENT_SECRET,
+    AUTH_SECRET : process.env.AUTH_SECRET,
+    AUTH_URL : process.env.AUTH_URL,
+    RAZORPAY_KEY_ID : process.env.RAZORPAY_KEY_ID,
+    RAZORPAY_WEBHOOK_SECRET : process.env.RAZORPAY_WEBHOOK_SECRET,
+    RAZORPAY_KEY_SECRET : process.env.RAZORPAY_KEY_SECRET,
+    NEXT_PUBLIC_RAZORPAY_KEY_ID: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
