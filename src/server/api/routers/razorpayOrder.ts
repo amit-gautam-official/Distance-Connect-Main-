@@ -14,6 +14,8 @@ export const razorpayOrderRouter = createTRPCRouter({
 
     }))
     .mutation(async ({ ctx, input }) => {
+      
+      
       const event = await ctx.db.meetingEvent.findUnique({
         where: {
           id: input.eventId,
@@ -33,9 +35,7 @@ export const razorpayOrderRouter = createTRPCRouter({
       }
 
       const amount = Number(event.eventPrice);
-      if (isNaN(amount)) {
-        throw new Error("Invalid event price format.");
-      }
+      
 
       const razorpay = new Razorpay({
             key_id: process.env.RAZORPAY_KEY_ID,

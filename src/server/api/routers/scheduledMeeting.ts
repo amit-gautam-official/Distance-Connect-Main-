@@ -34,10 +34,14 @@ export const scheduledMeetingsRouter = createTRPCRouter({
         userNote : z.string(),
         eventName : z.string(),
         userEmailForMeet : z.string().email(),
-        mentorEmailForMeet : z.string().email()
+        mentorEmailForMeet : z.string().email(),
+        meetUrl : z.string().optional(),
+        paymentStatus : z.boolean().optional(),
       
      }))
     .mutation(async ({ ctx, input }) => {
+
+       
 
 
       const prevBooking = await ctx.db.scheduledMeetings.findMany({
@@ -69,7 +73,7 @@ export const scheduledMeetingsRouter = createTRPCRouter({
 
       
 
-      return await ctx.db.scheduledMeetings.create({
+       const meeting = await ctx.db.scheduledMeetings.create({
         data : {
             mentorUserId : input.mentorUserId,
             selectedTime : input.selectedTime,
@@ -83,8 +87,23 @@ export const scheduledMeetingsRouter = createTRPCRouter({
             eventName : input.eventName,
             userEmailForMeet : input.userEmailForMeet,
             mentorEmailForMeet : input.mentorEmailForMeet,
+            meetUrl : input.meetUrl || "",
+            paymentStatus : input.paymentStatus || false,
         }
       })
+
+      const student = await ctx.db.student.update({
+        where : {
+          id : ctx.dbUser!.id
+        },
+        data : {
+          hasUsedFreeSession : true
+        }
+      })
+
+      return meeting
+
+     
     }),
 
     getScheduledMeetingsList: protectedProcedure

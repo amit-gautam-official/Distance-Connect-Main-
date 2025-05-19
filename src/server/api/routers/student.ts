@@ -131,7 +131,42 @@ export const studentRouter = createTRPCRouter({
       }
     });
   }),
-
+  
+  // Check if the student has used their free session
+  hasFreeSessionAvailable: protectedProcedure
+  .query(async ({ ctx }) => {
+    // Ensure the user is a student
+    if (ctx.dbUser?.role !== "STUDENT") {
+      throw new Error("Only students can check free session status");
+    }
+    
+    const student = await ctx.db.student.findUnique({
+      where: { userId: ctx.dbUser.id },
+      select: { hasUsedFreeSession: true }
+    });
+    
+    if (!student) {
+      throw new Error("Student profile not found");
+    }
+    
+    // Return true if the student still has free session available
+    return !student.hasUsedFreeSession;
+  }),
+  
+  // Update after schema migration is applied
+  updateHasUsedFreeSession: protectedProcedure
+  .input(z.object({ hasUsed: z.boolean() }))
+  .mutation(async ({ ctx, input }) => {
+    // Ensure the user is a student
+    if (ctx.dbUser?.role !== "STUDENT") {
+      throw new Error("Only students can update free session status");
+    }
+    
+    return await ctx.db.student.update({
+      where: { userId: ctx.dbUser.id },
+      data: { hasUsedFreeSession: input.hasUsed }
+    });
+  }),
     
   })
 

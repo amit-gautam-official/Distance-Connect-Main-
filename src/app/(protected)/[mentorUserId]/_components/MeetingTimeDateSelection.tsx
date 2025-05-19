@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { format, isValid } from "date-fns";
-import { CalendarCheck, Clock, LoaderIcon, MapPin, Timer } from "lucide-react";
+import { CalendarCheck, Clock, Gift, LoaderIcon, MapPin, Timer } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import TimeDateSelection from "./TimeDateSelection";
@@ -106,6 +106,10 @@ function MeetingTimeDateSelection({
       },
     });
 
+    const me = api.student.getStudentOnly.useQuery()
+
+    console.log(me.data);
+
   useEffect(() => {
     if (prevBookingData) {
       setPrevBooking(prevBookingData!);
@@ -148,6 +152,9 @@ function MeetingTimeDateSelection({
   // });
 
   // Generate time slots based on mentor's availability for the selected day
+
+  const generateMeetLinkMutation = api.meet.generateMeetLink.useMutation();
+  const updateHasUsedFreeSessionMutation = api.student.updateHasUsedFreeSession.useMutation();
   const generateAvailableTimeSlots = (
     selectedDate: Date,
     meetingDuration: number,
@@ -339,10 +346,10 @@ function MeetingTimeDateSelection({
       } else {
         toast.error("Error creating order. Please try again.");
       }
+      setLoading(false);
     }
   }
-
-
+  
   const handleScheduleEvent = async () => {
     // Validate email is a Gmail address
     if (!userEmail.toLowerCase().endsWith("@gmail.com")) {
@@ -358,24 +365,55 @@ function MeetingTimeDateSelection({
 
     setLoading(true);
     try {
+      
+      if( !me.isLoading && !me?.data?.hasUsedFreeSession ){
+        toast.success("Free session used successfully!");
+  
+          if (!date || !selectedTime) {
+              throw new Error("Missing meeting date/time");
+              }
+  
+            const startDateTime = convertToDateTime(
+              date,
+              selectedTime!
+            );
+  
+            // Use the TRPC procedure instead of direct function call
+            const meet = await generateMeetLinkMutation.mutateAsync({
+              dateTime: startDateTime.toISOString(),
+              duration: eventInfo.duration,
+              attendees: [{ email: userEmail }, {email : eventInfo.meetEmail! }],
+            });
+            
+            await createScheduledMeeting.mutateAsync({
+              mentorUserId: mentorUserDetails.mentorUserId,
+              selectedTime: selectedTime!,
+              selectedDate: date,
+              formatedDate: format(date, "PPP"),
+              formatedTimeStamp: getCombinedTimestamp(date, selectedTime!).toString(),
+              duration: eventInfo.duration,
+              eventId: eventInfo.id,
+              userNote: userNote,
+              eventName: eventInfo.eventName,
+              userEmailForMeet: userEmail,
+              mentorEmailForMeet: eventInfo.meetEmail!,
+              meetUrl: meet.meetLink,
+              paymentStatus: true,
+            });
+            
+            await updateHasUsedFreeSessionMutation.mutateAsync({
+              hasUsed: true,
+            });
 
-      //meet url will be created by webhook
-      // const { meetLink } = await meetlinkGenerator.mutateAsync({
-      //   dateTime: convertToDateTime(date, selectedTime!).toString(),
-      //   duration: eventInfo.duration,
-      //   attendees: [{ email: eventInfo.meetEmail! }, { email: userEmail }],
-      // });
+            router.replace("/student-dashboard/meetings");
 
-      // if (!meetLink) {
-      //   toast.error("Error in generating meeting link");
-      //   setLoading(false);
-      //   return;
-      // }
+        return
+      }
 
-      // setMeetUrl(meetLink);
+      // Create the scheduled meeting first
       const scheduledMeeting = await createScheduledMeeting.mutateAsync({
         mentorUserId: mentorUserDetails.mentorUserId,
-        selectedTime: selectedTime ?? "",
+        selectedTime: selectedTime!,
         selectedDate: date,
         formatedDate: format(date, "PPP"),
         formatedTimeStamp: getCombinedTimestamp(date, selectedTime!).toString(),
@@ -386,11 +424,13 @@ function MeetingTimeDateSelection({
         userEmailForMeet: userEmail,
         mentorEmailForMeet: eventInfo.meetEmail!,
       });
-
-      await handleCreateOrder(scheduledMeeting.id);
-
-
-    } catch (error) {
+      
+      
+        await handleCreateOrder(scheduledMeeting.id);
+      
+      
+    } 
+    catch (error: any) {
       toast.error("Error scheduling meeting. Please try again later.");
       if (error instanceof Error) {
         toast.error(error.message);
@@ -398,11 +438,10 @@ function MeetingTimeDateSelection({
       setLoading(false);
     }
   };
-
+  
   const createScheduledMeeting =
     api.scheduledMeetings.createScheduledMeeting.useMutation({
       onSuccess: async () => {
-        //console.log('Meeting Scheduled successfully!')
         setLoading(false);
       },
       onError: (error) => {
@@ -423,6 +462,22 @@ function MeetingTimeDateSelection({
   return (
     <div className="rounded-lg border bg-white shadow-md">
       <div className="border-b p-6">
+        {/* Free Session Banner */}
+        {
+          !me.isLoading && !me?.data?.hasUsedFreeSession &&
+          <div className="mb-4 rounded-md bg-green-50 p-3 border border-green-200">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <Gift className="h-5 w-5 text-green-600" />
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-green-800">First Session Free</h3>
+              <div className="mt-1 text-sm text-green-700">
+                <p>Your first mentorship session is completely free! Regular sessions are ₹{eventInfo.price}.</p>
+              </div>
+            </div>
+          </div>
+        </div>}
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">

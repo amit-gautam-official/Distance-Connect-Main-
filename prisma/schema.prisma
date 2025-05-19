@@ -109,6 +109,7 @@ model Student {
   scheduledMeetings ScheduledMeetings[]
   chatRooms         ChatRoom[]
   orders            RazorpayOrder[]
+  hasUsedFreeSession Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
