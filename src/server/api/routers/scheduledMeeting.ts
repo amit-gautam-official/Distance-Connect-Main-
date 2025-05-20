@@ -136,7 +136,8 @@ export const scheduledMeetingsRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       return ctx.db.scheduledMeetings.findMany({
         where: {
-          mentorUserId: ctx.dbUser!.id
+          mentorUserId: ctx.dbUser!.id,
+          paymentStatus : true,
         },
         include: {
           student: true,
@@ -164,7 +165,8 @@ export const scheduledMeetingsRouter = createTRPCRouter({
       const meetings = await ctx.db.scheduledMeetings.findMany({
         where: {
           mentorUserId: ctx.dbUser!.id,
-        },
+          paymentStatus : true,
+          },
         orderBy: {
           selectedDate: 'asc',
         },
