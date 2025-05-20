@@ -39,9 +39,13 @@ type MeetingLog = {
   selectedDate: Date;
   paymentStatus: boolean;
   createdAt: Date;
+  isFirstSession: boolean; // Added field to track if this is the student's first session
+  studentId: string; // Added field for direct access to student ID
+  mentorId: string; // Added field for direct access to mentor ID
   student: {
     studentName: string | null;
     userId: string;
+    hasUsedFreeSession?: boolean;
   };
   mentor: {
     mentorName: string | null;
@@ -57,7 +61,8 @@ const isMeetingLog = (data: unknown): data is MeetingLog[] => {
     'id' in item && 
     'eventName' in item && 
     'student' in item && 
-    'mentor' in item
+    'mentor' in item && 
+    'isFirstSession' in item
   );
 };
 
@@ -83,17 +88,19 @@ export default function MeetingLogsContent() {
 
     try {
       // Create CSV content
-      const headers = ["Meeting ID", "Student", "Mentor", "Event Name", "Date", "Time", "Status"];
+      const headers = ["Meeting ID", "Student", "Student ID", "Mentor", "Mentor ID", "Event Name", "Date", "Time", "Status"];
       const csvContent = [
         headers.join(","),
         ...meetingLogs.map(log => [
           log.id,
           log.student?.studentName || "Unknown Student",
+          log.studentId || "-",
           log.mentor?.mentorName || "Unknown Mentor",
+          log.mentorId || "-",
           log.eventName,
           log.formatedDate,
           log.selectedTime,
-          log.paymentStatus ? "Paid" : "Pending"
+          log.isFirstSession ? "First Session" : (log.paymentStatus ? "Paid" : "Pending")
         ].join(","))
       ].join("\n");
 
@@ -196,7 +203,9 @@ export default function MeetingLogsContent() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Student</TableHead>
+                  <TableHead>Student ID</TableHead>
                   <TableHead>Mentor</TableHead>
+                  <TableHead>Mentor ID</TableHead>
                   <TableHead>Event Name</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Time</TableHead>
@@ -209,19 +218,31 @@ export default function MeetingLogsContent() {
                     <TableCell className="font-medium">
                       {log.student?.studentName || "Unknown Student"}
                     </TableCell>
+                    <TableCell className="text-xs text-gray-500">
+                      {log.studentId || "-"}
+                    </TableCell>
                     <TableCell>
                       {log.mentor?.mentorName || "Unknown Mentor"}
+                    </TableCell>
+                    <TableCell className="text-xs text-gray-500">
+                      {log.mentorId || "-"}
                     </TableCell>
                     <TableCell>{log.eventName}</TableCell>
                     <TableCell>{log.formatedDate}</TableCell>
                     <TableCell>{log.selectedTime}</TableCell>
                     <TableCell>
                       <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        log.paymentStatus 
-                          ? "bg-green-100 text-green-800" 
-                          : "bg-yellow-100 text-yellow-800"
+                        log.isFirstSession
+                          ? "bg-blue-100 text-blue-800" 
+                          : log.paymentStatus 
+                            ? "bg-green-100 text-green-800" 
+                            : "bg-yellow-100 text-yellow-800"
                       }`}>
-                        {log.paymentStatus ? "Paid" : "Pending"}
+                        {log.isFirstSession 
+                          ? "First Session" 
+                          : log.paymentStatus 
+                            ? "Paid" 
+                            : "Pending"}
                       </span>
                     </TableCell>
                   </TableRow>

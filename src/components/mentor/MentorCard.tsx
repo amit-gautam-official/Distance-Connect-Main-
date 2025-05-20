@@ -186,24 +186,25 @@ export function MentorCard({ mentor }: MentorCardProps) {
         </div>
         
         {/* Footer */}
-        <div className="border-t border-border bg-muted/10 p-4 mt-auto">
+        <div className="border-t border-border bg-muted/10 py-4  m-auto mt-auto">
           <div className="flex items-center justify-between gap-2">
-            <Link href={`/mentors/${mentor.userId}`} className="flex-1">
-              <Button variant="outline" size="sm" className="w-full hover:bg-primary/5">
+            <Link href={`/mentors/${mentor.userId}`} className="">
+              <Button variant="outline" size="sm" className="hover:bg-primary/5">
                 View Profile
               </Button>
             </Link>
-            <div className="flex flex-1 gap-2">
-              <Button 
+            <Button 
                 size="sm"
                 variant="outline"
-                className="flex-1 gap-1"
+                className=""
                 disabled={isCheckingMeeting || !canChat}
                 onClick={() => createChatRoom.mutate({ mentorUserId: mentor.userId })}
               >
                 <MessageSquare className="h-4 w-4" />
                 Chat
               </Button>
+            <div className="">
+             
               <Button 
                 size="sm"
                 className="flex-1 bg-primary/90 hover:bg-primary"

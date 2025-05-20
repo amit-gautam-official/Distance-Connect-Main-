@@ -473,7 +473,7 @@ function MeetingTimeDateSelection({
             <div className="ml-3">
               <h3 className="text-sm font-medium text-green-800">First Session Free</h3>
               <div className="mt-1 text-sm text-green-700">
-                <p>Your first mentorship session is completely free! Regular sessions are ₹{eventInfo.price}.</p>
+                <p>Your first mentorship session is completely free!</p>
               </div>
             </div>
           </div>

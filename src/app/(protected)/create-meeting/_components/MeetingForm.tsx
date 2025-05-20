@@ -28,6 +28,7 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
   const [eventName, setEventName] = useState<string>();
   const [duration, setDuration] = useState<Number>(30);
   const [email, setEmail] = useState<string>("example@gmail.com");
+  const [confirmEmail, setConfirmEmail] = useState<string>("");
   const [description, setDescription] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [customEventName, setCustomEventName] = useState<boolean>(false);
@@ -75,6 +76,12 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
     // Verify that the email is a Gmail address
     if (!email.endsWith("@gmail.com")) {
       toast.error("Please use a Gmail address for Google Meet integration.");
+      setLoading(false);
+      return;
+    }
+    // Confirm email match
+    if (email !== confirmEmail) {
+      toast.error("Email and Confirm Email do not match.");
       setLoading(false);
       return;
     }
@@ -257,6 +264,22 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
                   placeholder="example@gmail.com"
                   onChange={(event) => setEmail(event.target.value)}
                   className="h-11"
+                  value={email}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  Confirm Email Address
+                </label>
+                <Input
+                  placeholder="Re-enter your Gmail address"
+                  onChange={(event) => setConfirmEmail(event.target.value)}
+                  className="h-11"
+                  value={confirmEmail}
+                  onCopy={e => { e.preventDefault(); toast.error('Copying is disabled for this field.'); }}
+                  onPaste={e => { e.preventDefault(); toast.error('Pasting is disabled for this field.'); }}
+                  onCut={e => { e.preventDefault(); toast.error('Cutting is disabled for this field.'); }}
                 />
               </div>
 
@@ -284,7 +307,7 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
               loading ? "bg-gray-300" : "bg-blue-600 hover:bg-blue-700"
             }`}
             disabled={
-              loading || !eventName || !duration || !email || !description
+              loading || !eventName || !duration || !email || !description || !confirmEmail || email !== confirmEmail || !email.endsWith("@gmail.com")
             }
             onClick={() => onCreateClick()}
           >

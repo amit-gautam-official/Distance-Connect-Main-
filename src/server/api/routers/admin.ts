@@ -89,26 +89,60 @@ export const adminRouter = createTRPCRouter({
       where.paymentStatus = false;
     }
     
-    return ctx.db.scheduledMeetings.findMany({
-      where,
+    // Get all scheduled meetings with their details
+    const meetings = await ctx.db.scheduledMeetings.findMany({
+      where ,
       orderBy: {
         createdAt: 'desc',
       },
       include: {
         student: {
           select: {
+            id: true, // Include student database ID
             studentName: true,
-            userId: true,
+            userId: true, // This is the reference to the User table
+            hasUsedFreeSession: true,
+            scheduledMeetings: {
+              where : {
+                paymentStatus : true
+              },
+              orderBy: {
+                createdAt: 'asc'
+              },
+              take: 2,
+              select: {
+                id: true,
+                createdAt: true
+              }
+            }
           },
         },
         mentor: {
           select: {
+            id: true, // Include mentor database ID
             mentorName: true,
-            userId: true,
+            userId: true, // This is the reference to the User table
           },
         },
-        
       },
+    });
+    
+    // Process the meetings to determine if each is a first session
+    return meetings.map(meeting => {
+      // Check if this is the student's first meeting
+      const isFirstSession = meeting.student?.scheduledMeetings?.[0]?.id === meeting.id;
+      
+      // Remove the scheduledMeetings array from the response to keep it clean
+      const { student, ...rest } = meeting;
+      const { scheduledMeetings, ...studentRest } = student;
+      
+      return {
+        ...rest,
+        student: studentRest,
+        studentId: student.id, // Add studentId to the top level
+        mentorId: meeting.mentor.id, // Add mentorId to the top level
+        isFirstSession
+      };
     });
   }),
 })

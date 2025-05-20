@@ -89,20 +89,29 @@ const checkTimeSlot = (time: string) => {
             const isBooked = checkTimeSlot(time);
             const isSelected = time === selectedTime;
 
+            // Check if this time slot is in the past (for today)
+            let isPast = false;
+            const now = new Date();
+            const slotDateTime = getDateTimeFromDateAndTime(date, time);
+            if (
+              date.toDateString() === now.toDateString() &&
+              slotDateTime < now
+            ) {
+              isPast = true;
+            }
             return (
               <Button
                 key={index}
-                disabled={!enableTimeSlot || isBooked}
+                disabled={!enableTimeSlot || isBooked || isPast}
                 onClick={() => setSelectedTime(time)}
-                className={`  ${isSelected ? "bg-primary text-white" : "border-primary bg-white text-primary"} ${isBooked ? "opacity-50" : "hover:opacity-90"} h-auto min-h-[44px] py-3 px-1 text-xs transition-all active:scale-95`}
+                className={`  ${isSelected ? "bg-primary text-white" : "border-primary bg-white text-primary"} ${(isBooked || isPast) ? "opacity-50" : "hover:opacity-90"} h-auto min-h-[44px] py-3 px-1 text-xs transition-all active:scale-95`}
                 variant="outline"
                 role="radio"
                 aria-checked={isSelected}
                 aria-label={`Select time ${time}`}
-                
               >
                 {time}
-                {isBooked && <span className="sr-only"> (already booked)</span>}
+                {(isBooked || isPast) && <span className="sr-only"> ({isBooked ? "already booked" : "past time"})</span>}
               </Button>
             );
           })}
