@@ -103,13 +103,11 @@ model Student {
   experience  String?
   industry    String?
 
-
-  
-
-  scheduledMeetings ScheduledMeetings[]
-  chatRooms         ChatRoom[]
-  orders            RazorpayOrder[]
-  hasUsedFreeSession Boolean @default(false)
+  scheduledMeetings   ScheduledMeetings[]
+  chatRooms           ChatRoom[]
+  orders              RazorpayOrder[]
+  workshopEnrollments WorkshopEnrollment[]
+  hasUsedFreeSession  Boolean              @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -124,8 +122,8 @@ model Mentor {
 
   mentorTier              String?
   mentorSessionPriceRange String?
-  tierReasoning         String?
-  
+  tierReasoning           String?
+
   mentorName           String?
   currentCompany       String?
   jobTitle             String?
@@ -150,13 +148,11 @@ model Mentor {
   availability      Availability?
   scheduledMeetings ScheduledMeetings[]
   chatRooms         ChatRoom[]
-
+  workshops         Workshop[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
-
 
 enum OrderStatus {
   pending
@@ -171,19 +167,20 @@ model RazorpayOrder {
   scheduledMeetingId String?            @db.ObjectId
   scheduledMeeting   ScheduledMeetings? @relation(fields: [scheduledMeetingId], references: [id])
 
+  workshopEnrollmentId String?             @db.ObjectId
+  workshopEnrollment   WorkshopEnrollment? @relation(fields: [workshopEnrollmentId], references: [id])
+
   status            OrderStatus @default(pending)
-  razorpayOrderId   String @unique
+  razorpayOrderId   String      @unique
   razorpayPaymentId String?
   amount            Int // Amount in paise (e.g., 700 for ₹7.00)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Student   Student? @relation(fields: [studentUserId], references: [userId])
+  Student       Student? @relation(fields: [studentUserId], references: [userId])
   studentUserId String?  @db.ObjectId
 }
-  
-
 
 // 🚀 Startup Model
 model Startup {
@@ -242,22 +239,22 @@ model ScheduledMeetings {
   student       Student @relation(fields: [studentUserId], references: [userId])
   studentUserId String  @db.ObjectId
 
-  feedback          String?
-  star              Int?
-  selectedTime      String
-  selectedDate      DateTime
-  formatedDate      String
-  formatedTimeStamp String
-  duration          Int
-  meetUrl           String?
-  eventId           String
-  eventName         String
-  userNote          String
-  userEmailForMeet  String
+  feedback           String?
+  star               Int?
+  selectedTime       String
+  selectedDate       DateTime
+  formatedDate       String
+  formatedTimeStamp  String
+  duration           Int
+  meetUrl            String?
+  eventId            String
+  eventName          String
+  userNote           String
+  userEmailForMeet   String
   mentorEmailForMeet String
-  completed         Boolean  @default(false)
+  completed          Boolean  @default(false)
 
-  paymentStatus    Boolean  @default(false)
+  paymentStatus Boolean @default(false)
 
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
@@ -308,3 +305,47 @@ model chatMessage {
 
   @@index([chatRoomId, createdAt], name: "chatRoom_createdAt_index")
 }
+
+// 📚 Workshop Model
+model Workshop {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId])
+  mentorUserId String @db.ObjectId
+
+  name             String
+  description      String
+  numberOfDays     Int
+  scheduleType     String  @default("recurring") // "recurring" or "custom"
+  startDate        DateTime? // Start date for recurring schedule
+  schedule         Json[] // Array of objects with day and time for recurring, or date and time for custom
+  price            Int // Price in paise (e.g., 70000 for ₹700.00)
+  learningOutcomes String[]
+  courseDetails    Json
+  otherDetails     String?
+  meetLinks        Json? // Map of day index to meet link and scheduled date
+
+  enrollments WorkshopEnrollment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 📝 Workshop Enrollment Model
+model WorkshopEnrollment {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  workshop   Workshop @relation(fields: [workshopId], references: [id])
+  workshopId String   @db.ObjectId
+
+  student       Student @relation(fields: [studentUserId], references: [userId])
+  studentUserId String  @db.ObjectId
+
+  paymentStatus Boolean         @default(false)
+  orders        RazorpayOrder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([workshopId, studentUserId])
+}
+
+

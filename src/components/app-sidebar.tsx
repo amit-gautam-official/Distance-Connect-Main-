@@ -13,6 +13,7 @@ import {
   RotateCcw,
   MessageCircleReply,
   SquareChartGantt,
+  Blocks,
 } from "lucide-react";
 
 import {
@@ -77,6 +78,11 @@ export function AppSidebar({ role }: { role: string }) {
       icon: Presentation,
     },
     {
+      title: "Workshops",
+      url: "/student-dashboard/workshops",
+      icon: Blocks,
+    },
+    {
       title: "Mentors",
       url: "/student-dashboard/mentors",
       icon: Users,
@@ -93,7 +99,7 @@ export function AppSidebar({ role }: { role: string }) {
     },
   ];
 
-  // Student navigation items
+  // Mentor navigation items
   const Mentoritems = [
     {
       title: "Dashboard",
@@ -109,6 +115,11 @@ export function AppSidebar({ role }: { role: string }) {
       title: "Meetings",
       url: "/mentor-dashboard/meetings",
       icon: Presentation,
+    },
+    {
+      title: "Workshops",
+      url: "/mentor-dashboard/workshops",
+      icon: Blocks,
     },
     {
       title: "Inbox",
