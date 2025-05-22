@@ -79,11 +79,11 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
   // Loading skeleton
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
         {[1, 2, 3].map((i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader className="h-16 bg-gray-200 rounded-t-lg"></CardHeader>
-            <CardContent className="p-4 space-y-3">
+            <CardContent className="p-3 sm:p-4 space-y-3">
               <div className="h-6 bg-gray-200 rounded w-3/4"></div>
               <div className="h-4 bg-gray-200 rounded w-full"></div>
               <div className="h-4 bg-gray-200 rounded w-5/6"></div>
@@ -96,7 +96,7 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
                 <div className="h-4 bg-gray-200 rounded w-1/3"></div>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between p-4 border-t">
+            <CardFooter className="flex justify-between p-3 sm:p-4 border-t">
               <div className="h-8 bg-gray-200 rounded w-1/4"></div>
               <div className="h-8 bg-gray-200 rounded w-1/4"></div>
             </CardFooter>
@@ -109,7 +109,7 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
   // Empty state
   if (workshops.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center border rounded-lg bg-gray-50">
+      <div className="flex flex-col items-center justify-center p-4 sm:p-8 text-center border rounded-lg bg-gray-50/80 backdrop-blur-sm shadow-sm mx-2 sm:mx-4 border-gray-100">
         <h3 className="text-lg font-medium text-gray-900">No workshops yet</h3>
         <p className="mt-1 text-sm text-gray-500">
           Create your first workshop to get started
@@ -132,10 +132,10 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
         {workshops.map((workshop) => (
-          <Card key={workshop.id} className="overflow-hidden">
-            <CardHeader className="bg-primary/5 pb-2">
+          <Card key={workshop.id} className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] bg-white/80 backdrop-blur-sm border border-gray-100">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/0 pb-2 group-hover:from-primary/10 group-hover:to-primary/5 transition-all">
               <h3 className="text-xl font-semibold text-gray-900 line-clamp-1">
                 {workshop.name}
               </h3>
@@ -143,19 +143,19 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
                 {workshop.numberOfDays} day{workshop.numberOfDays > 1 ? "s" : ""} workshop
               </p>
             </CardHeader>
-            <CardContent className="p-4 space-y-3">
+            <CardContent className="p-3 sm:p-4 space-y-3">
               <p className="text-sm text-gray-600 line-clamp-2">
                 {workshop.description}
               </p>
               
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-gray-600 group-hover:text-primary transition-colors">
                 <Calendar className="h-4 w-4 text-primary" />
                 <span>
                   {workshop.schedule.map(s => s.day).join(", ")}
                 </span>
               </div>
               
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-gray-600 group-hover:text-primary transition-colors">
                 <Clock className="h-4 w-4 text-primary" />
                 <span>
                   {workshop.schedule.map(s => s.time).join(", ")}
@@ -169,37 +169,39 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
                 </span>
               </div>
               
-              <div className="mt-2 text-lg font-bold text-primary">
+              <div className="mt-3 text-lg font-bold text-primary bg-primary/5 inline-block px-3 py-1 rounded-full group-hover:bg-primary/10 transition-all">
                 {formatPrice(workshop.price)}
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between p-4 border-t bg-gray-50">
-              <div className="flex gap-2">
+            <CardFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 sm:justify-between p-3 sm:p-4 border-t bg-gradient-to-r from-gray-50/80 to-white/80 backdrop-blur-sm group-hover:from-gray-100/80 group-hover:to-white/90 transition-all">
+              <div className="flex gap-2 w-full sm:w-auto">
                 <Button
                   variant="outline"
+                  className="flex-1 sm:flex-initial transition-all hover:bg-primary/5"
                   size="sm"
                   onClick={() => setWorkshopToEdit(workshop)}
                 >
                   <Edit className="h-4 w-4 mr-1" />
-                  Edit
+                  Edit Workshop
                 </Button>
                 <Button
                   variant="outline"
+                  className="flex-1 sm:flex-initial text-red-600 hover:text-red-700 hover:bg-red-50 transition-all"
                   size="sm"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
                   onClick={() => setWorkshopToDelete(workshop.id)}
                 >
                   <Trash className="h-4 w-4 mr-1" />
-                  Delete
+                  Delete Workshop
                 </Button>
               </div>
               <Button
                 variant="default"
+                className="w-full sm:w-auto transition-all bg-primary hover:bg-primary/90"
                 size="sm"
                 onClick={() => router.push(`/mentor-dashboard/workshops/${workshop.id}`)}
               >
                 <Eye className="h-4 w-4 mr-1" />
-                View
+                View Details
               </Button>
             </CardFooter>
           </Card>
@@ -220,7 +222,7 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="bg-red-600 text-white hover:bg-red-700 transition-colors"
             >
               Delete
             </AlertDialogAction>

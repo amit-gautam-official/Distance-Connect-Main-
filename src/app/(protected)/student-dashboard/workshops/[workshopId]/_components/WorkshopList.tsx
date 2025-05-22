@@ -116,7 +116,7 @@ export default function WorkshopList({
   // Empty state
   if (workshops.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center border rounded-lg bg-gray-50">
+      <div className="flex flex-col items-center justify-center p-4 sm:p-8 text-center border rounded-lg bg-gray-50/80 backdrop-blur-sm shadow-sm mx-2 sm:mx-4">
         <h3 className="text-lg font-medium text-gray-900">
           {isEnrolled 
             ? "You haven't enrolled in any workshops yet" 
@@ -152,7 +152,7 @@ export default function WorkshopList({
     <>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {workshops.map((workshop) => (
-          <Card key={workshop.id} className="overflow-hidden">
+          <Card key={workshop.id} className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] bg-white/80 backdrop-blur-sm">
             <CardHeader className="bg-primary/5 pb-2">
               <div className="flex justify-between items-start">
                 <div>
@@ -190,14 +190,14 @@ export default function WorkshopList({
                 {workshop.description}
               </p>
               
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors">
                 <Calendar className="h-4 w-4 text-primary" />
                 <span>
                   {workshop.schedule.map(s => `${s.day}`).join(", ")}
                 </span>
               </div>
               
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors">
                 <Clock className="h-4 w-4 text-primary" />
                 <span>
                   {workshop.schedule.map(s => `${s.time}`).join(", ")}
@@ -213,15 +213,16 @@ export default function WorkshopList({
                 </div>
               )}
               
-              <div className="mt-2 text-lg font-bold text-primary">
+              <div className="mt-3 text-lg font-bold text-primary bg-primary/5 inline-block px-3 py-1 rounded-full">
                 {formatPrice(workshop.price)}
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between p-4 border-t bg-gray-50">
+            <CardFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 sm:justify-between p-3 sm:p-4 border-t bg-gradient-to-r from-gray-50 to-white">
               {isEnrolled ? (
                 <>
                   <Button
                     variant="outline"
+                    className="w-full sm:w-auto transition-all hover:bg-primary/5"
                     size="sm"
                     onClick={() => router.push(`/student-dashboard/workshops/${workshop.id}`)}
                   >
@@ -230,6 +231,7 @@ export default function WorkshopList({
                   {workshop.meetLinks && Object.keys(workshop.meetLinks as Record<string, any>).length > 0 ? (
                     <Button
                       variant="default"
+                    className="w-full sm:w-auto transition-all"
                       size="sm"
                       onClick={() => router.push(`/student-dashboard/workshops/${workshop.id}`)}
                     >
@@ -239,6 +241,7 @@ export default function WorkshopList({
                   ) : workshop.meetUrl ? (
                     <Button
                       variant="default"
+                    className="w-full sm:w-auto transition-all"
                       size="sm"
                       onClick={() => window.open(workshop.meetUrl!, "_blank")}
                     >
@@ -251,6 +254,7 @@ export default function WorkshopList({
                 <>
                   <Button
                     variant="outline"
+                    className="w-full sm:w-auto transition-all hover:bg-primary/5"
                     size="sm"
                     onClick={() => router.push(`/student-dashboard/workshops/${workshop.id}`)}
                   >
@@ -258,6 +262,7 @@ export default function WorkshopList({
                   </Button>
                   <Button
                     variant="default"
+                    className="w-full sm:w-auto transition-all"
                     size="sm"
                     onClick={() => setWorkshopToEnroll(workshop.id)}
                   >

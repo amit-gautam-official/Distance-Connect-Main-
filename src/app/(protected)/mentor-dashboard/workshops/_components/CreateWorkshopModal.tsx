@@ -366,7 +366,7 @@ export default function CreateWorkshopModal({
                 />
                 <div className="mt-4">
                   <Label>Recurring Schedule</Label>
-                  <div className="space-y-2 mt-2">
+                  <div className="space-y-2 mt-2 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
                     {recurringSchedule.map((item, index) => (
                       <div key={index} className="flex items-center gap-2">
                         <Select
@@ -428,7 +428,7 @@ export default function CreateWorkshopModal({
             {form.scheduleType === "custom" && (
               <div>
                 <Label>Custom Schedule</Label>
-                <div className="space-y-2 mt-2">
+                <div className="space-y-2 mt-2 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
                   {customSchedule.map((item, index) => (
                     <div key={index} className="flex items-center gap-2">
                       <div className="flex-1">
@@ -465,6 +465,7 @@ export default function CreateWorkshopModal({
                         size="icon"
                         onClick={() => removeCustomScheduleItem(index)}
                         disabled={customSchedule.length <= 1}
+                        className="hover:bg-red-50 hover:text-red-500 transition-colors"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -488,7 +489,7 @@ export default function CreateWorkshopModal({
 
             <div>
               <Label>Learning Outcomes</Label>
-              <div className="space-y-2 mt-2">
+              <div className="space-y-2 mt-2 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
                 {form.learningOutcomes.map((outcome, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <Input
@@ -514,7 +515,7 @@ export default function CreateWorkshopModal({
                   variant="outline"
                   size="sm"
                   onClick={addLearningOutcome}
-                  className="mt-2"
+                  className="mt-2 w-full sm:w-auto transition-all hover:bg-primary/5"
                 >
                   <Plus className="h-4 w-4 mr-1" />
                   Add Outcome
@@ -524,7 +525,7 @@ export default function CreateWorkshopModal({
 
             <div>
               <Label>Course Details</Label>
-              <div className="space-y-3 mt-2">
+              <div className="space-y-3 mt-2 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
                 {Object.keys(courseDetails).map((day) => (
                   <div key={day}>
                     <Label htmlFor={day} className="text-sm font-medium">
@@ -561,6 +562,7 @@ export default function CreateWorkshopModal({
             <Button
               type="button"
               variant="outline"
+              className="w-full sm:w-auto transition-all hover:bg-primary/5"
               onClick={() => {
                 resetForm();
                 onClose();
@@ -568,7 +570,10 @@ export default function CreateWorkshopModal({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={createWorkshop.isPending}>
+            <Button 
+              type="submit" 
+              disabled={createWorkshop.isPending}
+              className="w-full sm:w-auto transition-all bg-primary hover:bg-primary/90">
               {createWorkshop.isPending ? "Creating..." : "Create Workshop"}
             </Button>
           </DialogFooter>

@@ -91,8 +91,8 @@ export default function WorkshopDetailPage() {
   // Loading state
   if (isLoading || isLoadingEnrolled) {
     return (
-      <div className="container mx-auto p-6 space-y-8">
-        <div className="flex items-center gap-4 mb-6">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-6 sm:space-y-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
           <Button
             variant="ghost"
             onClick={() => router.back()}
@@ -103,8 +103,8 @@ export default function WorkshopDetailPage() {
           <Skeleton className="h-8 w-64" />
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="md:col-span-2 space-y-6">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             <Skeleton className="h-64 w-full" />
           </div>
           <div>
@@ -118,7 +118,7 @@ export default function WorkshopDetailPage() {
   // Workshop not found
   if (!workshop) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
         <div className="flex flex-col items-center justify-center p-8 text-center">
           <h2 className="text-2xl font-bold text-gray-900">Workshop not found</h2>
           <p className="mt-2 text-gray-600">
@@ -133,8 +133,8 @@ export default function WorkshopDetailPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
-      <div className="flex items-center gap-4 mb-6">
+    <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-6 sm:space-y-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
         <Button
           variant="ghost"
           onClick={() => router.push("/student-dashboard/workshops")}
@@ -247,9 +247,9 @@ export default function WorkshopDetailPage() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">Price</span>
-                <span className="font-bold text-lg text-primary">
+                <div className="mt-4 text-lg font-bold text-primary bg-primary/5 inline-block px-3 py-1 rounded-full">
                   {formatPrice(workshop.price)}
-                </span>
+                </div>
               </div>
               
               <div className="flex items-center justify-between">
@@ -271,7 +271,7 @@ export default function WorkshopDetailPage() {
                 </Button>
               ) : workshop.meetLinks && Object.keys(workshop.meetLinks).length > 0 ? (
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 bg-primary/5 p-3 rounded-md">
+                  <div className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors">
                     <Video className="h-5 w-5 text-primary flex-shrink-0" />
                     <div className="truncate text-sm">Meeting links available</div>
                   </div>
@@ -290,13 +290,13 @@ export default function WorkshopDetailPage() {
                       });
                       
                       return (
-                        <div key={key} className="border rounded-md p-3">
+                        <div key={key} className="border rounded-md p-2 sm:p-3 hover:border-primary/20 transition-colors">
                           <div className="flex justify-between items-center mb-2">
                             <span className="font-medium">Day {dayNumber}</span>
                             <span className="text-xs text-gray-500">{formattedDate}</span>
                           </div>
                           <Button 
-                            className="w-full" 
+                            className="w-full transition-all hover:shadow-md"
                             onClick={() => window.open(value.link, "_blank")}
                             size="sm"
                           >
@@ -309,7 +309,7 @@ export default function WorkshopDetailPage() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-amber-50 text-amber-800 p-3 rounded-md text-sm">
+                <div className="bg-amber-50/80 backdrop-blur-sm text-amber-800 p-2 sm:p-3 rounded-md text-sm shadow-sm">
                   The meeting link will be available soon. Check back later.
                 </div>
               )}
@@ -317,12 +317,12 @@ export default function WorkshopDetailPage() {
           </Card>
 
           {isEnrolled && (
-            <Card>
+            <Card className="transition-all duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle>Your Enrollment</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="bg-green-50 text-green-700 p-4 rounded-md">
+                <div className="bg-green-50/80 backdrop-blur-sm text-green-700 p-3 sm:p-4 rounded-md shadow-sm border border-green-100">
                   <p className="font-medium">You&apos;re enrolled in this workshop!</p>
                   <p className="mt-1 text-sm">
                     You&apos;ll receive updates and access to the workshop materials.

@@ -279,7 +279,7 @@ export default function EditWorkshopModal({
 
             <div>
               <Label>Workshop Schedule</Label>
-              <div className="space-y-2 mt-2">
+              <div className="space-y-2 mt-2 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
                 {schedule.map((item, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <Select
@@ -324,6 +324,7 @@ export default function EditWorkshopModal({
                       size="icon"
                       onClick={() => removeScheduleItem(index)}
                       disabled={schedule.length <= 1}
+                      className="hover:bg-red-50 hover:text-red-500 transition-colors"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -334,7 +335,7 @@ export default function EditWorkshopModal({
                   variant="outline"
                   size="sm"
                   onClick={addScheduleItem}
-                  className="mt-2"
+                  className="mt-2 w-full sm:w-auto transition-all hover:bg-primary/5"
                 >
                   <Plus className="h-4 w-4 mr-1" />
                   Add Schedule
@@ -344,7 +345,7 @@ export default function EditWorkshopModal({
 
             <div>
               <Label>Learning Outcomes</Label>
-              <div className="space-y-2 mt-2">
+              <div className="space-y-2 mt-2 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
                 {form.learningOutcomes.map((outcome, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <Input
@@ -360,6 +361,7 @@ export default function EditWorkshopModal({
                       size="icon"
                       onClick={() => removeLearningOutcome(index)}
                       disabled={form.learningOutcomes.length <= 1}
+                      className="hover:bg-red-50 hover:text-red-500 transition-colors"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -370,7 +372,7 @@ export default function EditWorkshopModal({
                   variant="outline"
                   size="sm"
                   onClick={addLearningOutcome}
-                  className="mt-2"
+                  className="mt-2 w-full sm:w-auto transition-all hover:bg-primary/5"
                 >
                   <Plus className="h-4 w-4 mr-1" />
                   Add Outcome
@@ -380,7 +382,7 @@ export default function EditWorkshopModal({
 
             <div>
               <Label>Course Details</Label>
-              <div className="space-y-3 mt-2">
+              <div className="space-y-3 mt-2 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
                 {Object.keys(courseDetails).map((day) => (
                   <div key={day}>
                     <Label htmlFor={day} className="text-sm font-medium">
@@ -417,11 +419,15 @@ export default function EditWorkshopModal({
             <Button
               type="button"
               variant="outline"
+              className="w-full sm:w-auto transition-all hover:bg-primary/5"
               onClick={onClose}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={updateWorkshop.isPending}>
+            <Button 
+              type="submit" 
+              disabled={updateWorkshop.isPending}
+              className="w-full sm:w-auto transition-all bg-primary hover:bg-primary/90">
               {updateWorkshop.isPending ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
