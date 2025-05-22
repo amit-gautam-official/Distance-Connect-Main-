@@ -10,6 +10,7 @@ export const workshopRouter = createTRPCRouter({
       name: z.string().min(3, "Name must be at least 3 characters"),
       description: z.string().min(10, "Description must be at least 10 characters"),
       numberOfDays: z.number().int().min(1, "Workshop must have at least 1 day"),
+      bannerImage: z.string().optional(),
       scheduleType: z.enum(["recurring", "custom"]),
       startDate: z.string().optional(), // ISO string for recurring schedule start date
       schedule: z.array(
@@ -47,6 +48,7 @@ export const workshopRouter = createTRPCRouter({
           name: input.name,
           description: input.description,
           numberOfDays: input.numberOfDays,
+          bannerImage: input.bannerImage,
           scheduleType: input.scheduleType,
           startDate: input.startDate ? new Date(input.startDate) : undefined,
           schedule: input.schedule,
@@ -66,6 +68,7 @@ export const workshopRouter = createTRPCRouter({
       name: z.string().min(3, "Name must be at least 3 characters").optional(),
       description: z.string().min(10, "Description must be at least 10 characters").optional(),
       numberOfDays: z.number().int().min(1, "Workshop must have at least 1 day").optional(),
+      bannerImage: z.string().optional(),
       scheduleType: z.enum(["recurring", "custom"]).optional(),
       startDate: z.string().optional(), // ISO string for recurring schedule start date
       schedule: z.union([
@@ -193,9 +196,11 @@ export const workshopRouter = createTRPCRouter({
         where: { id: input.id },
         include: {
           mentor: {
+
             include: {
               user: {
                 select: {
+                  id: true,
                   name: true,
                   image: true,
                 },

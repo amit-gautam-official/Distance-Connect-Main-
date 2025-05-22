@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { toast } from "sonner";
 import {
   Select,
@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Plus, Calendar } from "lucide-react";
+import { X, Plus, Calendar, Camera } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { TRPCError } from "@trpc/server";
 
@@ -51,6 +51,11 @@ export default function CreateWorkshopModal({
   onClose,
   onSuccess,
 }: CreateWorkshopModalProps) {
+  const [bannerImage, setBannerImage] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string>("");
+  const [isUploading, setIsUploading] = useState(false);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -74,6 +79,31 @@ export default function CreateWorkshopModal({
 
   const [courseDetails, setCourseDetails] = useState<Record<string, string>>({
     "Day 1": "",
+  });
+
+  const uploadImage = api.file.upload.useMutation({
+    onSuccess: (data) => {
+      if (data?.url) {
+        // After successful image upload, create the workshop with the banner URL
+        createWorkshop.mutate({
+          name: form.name,
+          description: form.description,
+          numberOfDays: parseInt(form.numberOfDays),
+          bannerImage: data.url,
+          scheduleType: form.scheduleType,
+          startDate: form.startDate,
+          schedule: form.scheduleType === "recurring" ? recurringSchedule : customSchedule,
+          price: parseInt(form.price),
+          learningOutcomes: form.learningOutcomes.filter((outcome) => outcome !== ""),
+          courseDetails,
+          otherDetails: form.otherDetails,
+        });
+      }
+    },
+    onError: (error) => {
+      setIsUploading(false);
+      toast.error("Failed to upload banner: " + error.message);
+    },
   });
 
   const createWorkshop = api.workshop.createWorkshop.useMutation({
@@ -206,6 +236,36 @@ export default function CreateWorkshopModal({
     }
   };
 
+  const handleBannerSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const ALLOWED_IMAGE_TYPES = [
+      "image/jpeg", 
+      "image/png", 
+      "image/webp"
+    ];
+
+    // Validate file type
+    if (!file.type || !ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      toast.error("Please select an image file (JPEG, PNG, or WebP)");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size should be less than 5MB");
+      return;
+    }
+
+    setBannerImage(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setBannerPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -227,33 +287,44 @@ export default function CreateWorkshopModal({
       return;
     }
 
-    // Prepare schedule data based on schedule type
-    const scheduleData =
-      form.scheduleType === "recurring"
-        ? {
-            type: "recurring" as const,
-            schedule: recurringSchedule,
-          }
-        : {
-            type: "custom" as const,
-            schedule: customSchedule,
-          };
+    if (bannerImage) {
+      setIsUploading(true);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        const base64Content = base64String.split(",")[1]; // Remove the data URL prefix
+        if (!base64Content) return;
+        
+        uploadImage.mutate({
+          bucketName: "dc-public-files",
+          fileName: `workshop-banner-${Date.now()}`,
+          fileType: bannerImage.type,
+          fileContent: base64Content,
+          folderName: "dc-ws-banner-image"
+        });
+      };
+      reader.readAsDataURL(bannerImage);
+      return;
+    }
 
     createWorkshop.mutate({
       name: form.name,
       description: form.description,
-      startDate: form.startDate,
-      numberOfDays: Number(form.numberOfDays),
-      price: Number(form.price),
-      learningOutcomes: filteredOutcomes,
-      otherDetails: form.otherDetails,
-      schedule: scheduleData.schedule,
+      numberOfDays: parseInt(form.numberOfDays),
       scheduleType: form.scheduleType,
+      startDate: form.startDate,
+      schedule: form.scheduleType === "recurring" ? recurringSchedule : customSchedule,
+      price: parseInt(form.price),
+      learningOutcomes: filteredOutcomes,
       courseDetails,
+      otherDetails: form.otherDetails,
     });
   };
 
   const resetForm = () => {
+    setBannerImage(null);
+    setBannerPreview("");
+    setIsUploading(false);
     setForm({
       name: "",
       description: "",
@@ -326,6 +397,39 @@ export default function CreateWorkshopModal({
                 rows={3}
                 required
               />
+            </div>
+
+            <div className="grid gap-4 py-4">
+              <div>
+                <Label>Workshop Banner</Label>
+                <div 
+                  className="mt-2 relative h-[200px] w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-50/50 cursor-pointer"
+                  onClick={() => bannerInputRef.current?.click()}
+                >
+                  {bannerPreview ? (
+                    <img 
+                      src={bannerPreview} 
+                      alt="Workshop banner preview" 
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <div className="text-center">
+                        <Camera className="mx-auto h-8 w-8 text-gray-400" />
+                        <span className="mt-2 block text-sm text-gray-500">Click to upload banner image</span>
+                      </div>
+                    </div>
+                  )}
+                  <input
+                    ref={bannerInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/jpg"
+                    className="hidden"
+                    onChange={handleBannerSelect}
+                    disabled={isUploading}
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -586,9 +690,9 @@ export default function CreateWorkshopModal({
             </Button>
             <Button 
               type="submit" 
-              disabled={createWorkshop.isPending}
+              disabled={createWorkshop.isPending || isUploading}
               className="w-full sm:w-auto transition-all ">
-              {createWorkshop.isPending ? "Creating..." : "Create Workshop"}
+              {isUploading ? "Uploading Banner..." : createWorkshop.isPending ? "Creating..." : "Create Workshop"}
             </Button>
           </DialogFooter>
         </form>

@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 export default function WorkshopDetailPage() {
   const router = useRouter();
@@ -152,18 +153,48 @@ export default function WorkshopDetailPage() {
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="md:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Workshop Information</CardTitle>
-              <CardDescription>
-                {workshop.numberOfDays} day{workshop.numberOfDays > 1 ? "s" : ""} workshop by{" "}
-                <span className="font-medium">
-                  {workshop.mentor.mentorName || workshop.mentor.user.name || "Mentor"}
-                </span>
-              </CardDescription>
-            </CardHeader>
+          <Card className="transition-all duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm overflow-hidden">
+            {workshop.bannerImage ? (
+              <div className="relative h-64 w-full">
+                <img
+                  src={workshop.bannerImage}
+                  alt={workshop.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <CardHeader className="absolute bottom-0 left-0 right-0 text-white">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-12 w-12 border-2 border-white/20">
+                      <AvatarImage src={workshop.mentor.user.image || undefined} />
+                      <AvatarFallback>{workshop.mentor.user.name?.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <CardTitle className="text-2xl font-bold text-white">{workshop.name}</CardTitle>
+                      <CardDescription className="text-gray-200">
+                        <Link className="hover:underline" href={`/mentors/${workshop.mentor.user.id}`}>by {workshop.mentor.mentorName || workshop.mentor.user.name}</Link>
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+              </div>
+            ) : (
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 border-2 border-primary/10">
+                    <AvatarImage src={workshop.mentor.user.image || undefined} />
+                    <AvatarFallback>{workshop.mentor.user.name?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <CardTitle>{workshop.name}</CardTitle>
+                    <CardDescription>
+                      by {workshop.mentor.mentorName || workshop.mentor.user.name}
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            )}
             <CardContent className="space-y-6">
-              <div className="flex items-center gap-3">
+              {/* <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
                   <AvatarImage
                     src={workshop.mentor.user.image || ""}
@@ -185,9 +216,9 @@ export default function WorkshopDetailPage() {
                       : "Workshop Instructor"}
                   </p>
                 </div>
-              </div>
+              </div> */}
 
-              <div>
+              <div className="mt-2">
                 <h3 className="text-lg font-medium">Description</h3>
                 <p className="mt-2 text-gray-700">{workshop.description}</p>
               </div>

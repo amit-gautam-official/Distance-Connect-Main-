@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/trpc/react";
 import { Calendar, Clock, Edit, Eye, Trash, Users } from "lucide-react";
 import { useState } from "react";
@@ -40,6 +40,7 @@ type Workshop = {
   meetUrl: string | null;
   createdAt: Date;
   _count?: { enrollments: number };
+  bannerImage: string | null;
 };
 
 interface WorkshopListProps {
@@ -80,9 +81,25 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader className="h-16 bg-gray-200 rounded-t-lg"></CardHeader>
+        {workshops.map((workshop) => (
+          <Card key={workshop.id} className="animate-pulse">
+            {workshop.bannerImage ? (
+              <div className="relative h-48 w-full">
+                <img
+                  src={workshop.bannerImage}
+                  alt={workshop.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <CardHeader className="absolute bottom-0 left-0 right-0 text-white">
+                  <CardTitle className="text-xl font-bold">{workshop.name}</CardTitle>
+                </CardHeader>
+              </div>
+            ) : (
+              <CardHeader>
+                <CardTitle>{workshop.name}</CardTitle>
+              </CardHeader>
+            )}
             <CardContent className="p-3 sm:p-4 space-y-3">
               <div className="h-6 bg-gray-200 rounded w-3/4"></div>
               <div className="h-4 bg-gray-200 rounded w-full"></div>
@@ -135,14 +152,28 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
       <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
         {workshops.map((workshop) => (
           <Card key={workshop.id} className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] bg-white/80 backdrop-blur-sm border border-gray-100">
-            <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/0 pb-2 group-hover:from-primary/10 group-hover:to-primary/5 transition-all">
-              <h3 className="text-xl font-semibold text-gray-900 line-clamp-1">
-                {workshop.name}
-              </h3>
-              <p className="text-sm text-gray-500">
-                {workshop.numberOfDays} day{workshop.numberOfDays > 1 ? "s" : ""} workshop
-              </p>
-            </CardHeader>
+            {workshop.bannerImage ? (
+              <div className="relative h-48 w-full">
+                <img
+                  src={workshop.bannerImage}
+                  alt={workshop.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <CardHeader className="absolute bottom-0 left-0 right-0 text-white">
+                  <CardTitle className="text-xl font-bold">{workshop.name}</CardTitle>
+                </CardHeader>
+              </div>
+            ) : (
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/0 pb-2 group-hover:from-primary/10 group-hover:to-primary/5 transition-all">
+                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                  {workshop.name}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {workshop.numberOfDays} day{workshop.numberOfDays > 1 ? "s" : ""} workshop
+                </p>
+              </CardHeader>
+            )}
             <CardContent className="p-3 sm:p-4 space-y-3">
               <p className="text-sm text-gray-600 line-clamp-2">
                 {workshop.description}

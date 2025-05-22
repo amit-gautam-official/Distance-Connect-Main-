@@ -79,6 +79,7 @@ export default function WorkshopDetailPage() {
     otherDetails: workshop?.otherDetails,
     meetLinks: workshop?.meetLinks,
     createdAt: workshop?.createdAt,
+    bannerImage: workshop?.bannerImage,
   }
 
   // Fetch workshop enrollments
@@ -366,31 +367,48 @@ if (!workshop) {
 
 return (
   <div className="container   mx-auto px-2 sm:px-6 py-4 pb-16 md:pb-6 sm:py-6 space-y-6 sm:space-y-8">
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
       <Button
         variant="ghost"
-        size="sm"
-        onClick={() => router.back()}
-        className="hover:bg-gray-100 transition-all"
+        onClick={() => router.push("/mentor-dashboard/workshops")}
+        className="h-8 w-8 p-0"
       >
-        <ArrowLeft className="h-4 w-4 mr-1" />
-        Back
+        <ArrowLeft className="h-4 w-4" />
       </Button>
-    </div>
-
-    <div className="flex items-center gap-4">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900">
-          {workshop.name}
-        </h1>
-      </div>
+      <h1 className="text-2xl font-bold text-gray-900">{workshop.name}</h1>
       <Button
+        variant="outline"
         onClick={() => setIsEditModalOpen(true)}
-        className="ml-auto  transition-all"
+        className="ml-auto"
       >
         Edit Workshop
       </Button>
     </div>
+
+    {workshop.bannerImage && (
+      <div className="relative h-64 w-full mb-6 rounded-lg overflow-hidden">
+        <img
+          src={workshop.bannerImage}
+          alt={workshop.name}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-12 w-12 border-2 border-white/20">
+              <AvatarImage src={workshop.mentor.user.image || undefined} />
+              <AvatarFallback>{workshop.mentor.user.name?.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h2 className="text-2xl font-bold text-white">{workshop.name}</h2>
+              <p className="text-gray-200">
+                by {workshop.mentor.mentorName || workshop.mentor.user.name}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
 
     <div className="grid gap-2  sm:gap-6 lg:grid-cols-3">
       <div className="lg:col-span-2 w-full">

@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import {
   Select,
@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Plus } from "lucide-react";
+import { X, Plus, Camera } from "lucide-react";
 
 type Workshop = {
   id: string;
@@ -34,6 +34,7 @@ type Workshop = {
   courseDetails: Record<string, any>;
   otherDetails: string | null;
   meetUrl: string | null;
+  bannerImage: string | null;
   createdAt: Date;
 };
 
@@ -50,6 +51,11 @@ export default function EditWorkshopModal({
   onClose,
   onSuccess,
 }: EditWorkshopModalProps) {
+  const [bannerImage, setBannerImage] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string>("");
+  const [isUploading, setIsUploading] = useState(false);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -70,6 +76,9 @@ export default function EditWorkshopModal({
   // Initialize form with workshop data
   useEffect(() => {
     if (workshop) {
+      if (workshop.bannerImage) {
+        setBannerPreview(workshop.bannerImage);
+      }
       setForm({
         name: workshop.name,
         description: workshop.description,
@@ -79,12 +88,37 @@ export default function EditWorkshopModal({
           ? workshop.learningOutcomes 
           : [""],
         otherDetails: workshop.otherDetails || "",
+        
       });
       
       setSchedule(workshop.schedule as { day: string; time: string }[]);
       setCourseDetails(workshop.courseDetails as Record<string, string>);
     }
   }, [workshop]);
+
+  const uploadImage = api.file.upload.useMutation({
+    onSuccess: (data) => {
+      if (data?.url) {
+        // After successful image upload, update the workshop with the banner URL
+        updateWorkshop.mutate({
+          id: workshop.id,
+          name: form.name,
+          description: form.description,
+          numberOfDays: form.numberOfDays,
+          schedule,
+          price: form.price * 100,
+          learningOutcomes: form.learningOutcomes.filter((outcome) => outcome !== ""),
+          courseDetails,
+          otherDetails: form.otherDetails,
+          bannerImage: data.url,
+        });
+      }
+    },
+    onError: (error) => {
+      setIsUploading(false);
+      toast.error("Failed to upload banner: " + error.message);
+    },
+  });
 
   const updateWorkshop = api.workshop.updateWorkshop.useMutation({
     onSuccess: () => {
@@ -163,17 +197,67 @@ export default function EditWorkshopModal({
     }
   };
 
+  const handleBannerSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Please select a valid image file (JPEG, PNG, or WebP)");
+      return;
+    }
+
+    // Validate file size (5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > maxSize) {
+      toast.error("Image size should be less than 5MB");
+      return;
+    }
+
+    setBannerImage(file);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setBannerPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    if (bannerImage) {
+      setIsUploading(true);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        const base64Content = base64String.split(",")[1]; // Remove the data URL prefix
+        if (!base64Content) return;
+
+        uploadImage.mutate({
+          bucketName: "dc-public-files",
+          fileName: `workshop-banner-${Date.now()}`,
+          fileType: bannerImage.type,
+          fileContent: base64Content,
+          folderName: "dc-ws-banner-image",
+        });
+      };
+      reader.readAsDataURL(bannerImage);
+      return;
+    }
+
     // Filter out empty learning outcomes
-    const filteredOutcomes = form.learningOutcomes.filter(outcome => outcome.trim() !== "");
-    
+    const filteredOutcomes = form.learningOutcomes.filter(
+      (outcome) => outcome.trim() !== ""
+    );
+
     if (filteredOutcomes.length === 0) {
       toast.error("Please add at least one learning outcome");
       return;
     }
-    
+
     try {
       await updateWorkshop.mutateAsync({
         id: workshop.id,
@@ -224,7 +308,44 @@ export default function EditWorkshopModal({
           <DialogTitle>Edit Workshop</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
-          <div className="space-y-4">
+          <div className="space-y-6">
+            <div>
+              <Label>Banner Image</Label>
+              <div
+                className="mt-2 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg h-48 bg-gray-50/50 relative cursor-pointer hover:border-primary/50 transition-colors"
+                onClick={() => bannerInputRef.current?.click()}
+              >
+                <input
+                  ref={bannerInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleBannerSelect}
+                />
+                {bannerPreview ? (
+                  <div className="relative w-full h-full">
+                    <img
+                      src={bannerPreview}
+                      alt="Banner preview"
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity rounded-lg">
+                      <Camera className="h-8 w-8 text-white" />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <Camera className="mx-auto h-8 w-8 text-gray-400" />
+                    <div className="mt-2 text-sm text-gray-500">
+                      Click to upload banner image
+                      <p className="text-xs text-gray-400">
+                        JPEG, PNG, WebP up to 5MB
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
             <div>
               <Label htmlFor="name">Workshop Name</Label>
               <Input

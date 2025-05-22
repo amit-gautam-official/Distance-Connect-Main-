@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/trpc/react";
 import { Calendar, Clock, ExternalLink, Users } from "lucide-react";
 import { useState } from "react";
@@ -33,6 +33,7 @@ type Workshop = {
   meetUrl: string | null;
   meetLinks?: Record<string, any> | null;
   createdAt: Date;
+  bannerImage: string | null;
   mentor: {
     mentorName: string;
     user: {
@@ -152,24 +153,48 @@ export default function WorkshopList({
     <>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {workshops.map((workshop) => (
-          <Card key={workshop.id} className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] bg-white/80 backdrop-blur-sm">
-            <CardHeader className="bg-primary/5 pb-2">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 line-clamp-1">
-                    {workshop.name}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {workshop.numberOfDays} day{workshop.numberOfDays > 1 ? "s" : ""} workshop
-                  </p>
-                </div>
-                {isEnrolled && (
-                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                    Enrolled
-                  </Badge>
-                )}
+          <Card key={workshop.id} className="group hover:shadow-md transition-all overflow-hidden">
+            {workshop.bannerImage ? (
+              <div className="relative h-48 w-full">
+                <img
+                  src={workshop.bannerImage}
+                  alt={workshop.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <CardHeader className="absolute bottom-0 left-0 right-0 text-white">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-12 w-12 border-2 border-white/20">
+                      <AvatarImage src={workshop.mentor.user.image || undefined} />
+                      <AvatarFallback>{workshop.mentor.user.name?.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <CardTitle className="text-xl font-bold text-white">{workshop.name}</CardTitle>
+                      <p className="text-sm text-gray-200">
+                        by {workshop.mentor.mentorName || workshop.mentor.user.name}
+                      </p>
+                    </div>
+                  </div>
+                </CardHeader>
               </div>
-            </CardHeader>
+            ) : (
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 border-2 border-primary/10">
+                    <AvatarImage src={workshop.mentor.user.image || undefined} />
+                    <AvatarFallback>{workshop.mentor.user.name?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                      {workshop.name}
+                    </h3>
+                    <p className="text-sm text-gray-500 flex items-center gap-1">
+                      by <span className="font-medium">{workshop.mentor.user.name}</span>
+                    </p>
+                  </div>
+                </div>
+              </CardHeader>
+            )}
             <CardContent className="p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <Avatar className="h-6 w-6">

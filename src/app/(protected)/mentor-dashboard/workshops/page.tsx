@@ -29,6 +29,7 @@ type Workshop = {
   meetUrl: string | null;
   createdAt: Date;
   _count?: { enrollments: number };
+  bannerImage: string | null;
 };
 export default function WorkshopsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
