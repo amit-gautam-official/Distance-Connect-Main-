@@ -1,0 +1,350 @@
+// Prisma Client Generator
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+// MongoDB Database Connection
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// 🧑‍💻 User Model
+model User {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  username String?
+
+  email         String    @unique
+  name          String?
+  password      String?
+  image         String?
+  emailVerified DateTime?
+
+  accounts     Account[]
+  role         Role      @default(USER)
+  isRegistered Boolean   @default(false)
+
+  // Relations (One-to-One)
+  student Student?
+  mentor  Mentor?
+  startup Startup?
+  message chatMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+}
+
+model VerificationToken {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  email   String
+  token   String
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+// Enum for User Role
+enum Role {
+  USER
+  STUDENT
+  MENTOR
+  STARTUP
+  ADMIN
+}
+
+enum SrudentRole {
+  HIGHSCHOOL
+  COLLEGE
+  WORKING
+}
+
+// 🎓 Student Model
+model Student {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  user        User    @relation(fields: [userId], references: [id])
+  userId      String  @unique @db.ObjectId
+  linkedinUrl String?
+
+  studentRole SrudentRole?
+  studentName String?
+
+  //High School
+  institutionName String?
+  pinCode         Int?
+  state           String?
+  interestFields  String[]
+
+  //College
+  courseSpecialization String?
+
+  //Working
+  companyName String?
+  jobTitle    String?
+  experience  String?
+  industry    String?
+
+  scheduledMeetings   ScheduledMeetings[]
+  chatRooms           ChatRoom[]
+  orders              RazorpayOrder[]
+  workshopEnrollments WorkshopEnrollment[]
+  hasUsedFreeSession  Boolean              @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 🧑‍🏫 Mentor Model
+model Mentor {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  user        User    @relation(fields: [userId], references: [id])
+  userId      String  @unique @db.ObjectId
+  linkedinUrl String?
+
+  mentorTier              String?
+  mentorSessionPriceRange String?
+  tierReasoning           String?
+
+  mentorName           String?
+  currentCompany       String?
+  jobTitle             String?
+  experience           String?
+  industry             String?
+  pinCode              Int?
+  state                String?
+  hiringFields         String[]
+  companyType          String
+  bio                  String?
+  education            Json[]
+  wholeExperience      Json[] // Array of objects
+  skills               String[]
+  profileBanner        String?
+  companyEmail         String?
+  companyEmailVerified Boolean  @default(false)
+  verified             Boolean  @default(false)
+  messageFromAdmin     String?
+  mentorPhoneNumber    String?
+
+  meetingEvents     MeetingEvent[]
+  availability      Availability?
+  scheduledMeetings ScheduledMeetings[]
+  chatRooms         ChatRoom[]
+  workshops         Workshop[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum OrderStatus {
+  pending
+  completed
+  failed
+  refunded
+}
+
+model RazorpayOrder {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  scheduledMeetingId String?            @db.ObjectId
+  scheduledMeeting   ScheduledMeetings? @relation(fields: [scheduledMeetingId], references: [id])
+
+  workshopEnrollmentId String?             @db.ObjectId
+  workshopEnrollment   WorkshopEnrollment? @relation(fields: [workshopEnrollmentId], references: [id])
+
+  status            OrderStatus @default(pending)
+  razorpayOrderId   String      @unique
+  razorpayPaymentId String?
+  amount            Int // Amount in paise (e.g., 700 for ₹7.00)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Student       Student? @relation(fields: [studentUserId], references: [userId])
+  studentUserId String?  @db.ObjectId
+}
+
+// 🚀 Startup Model
+model Startup {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique @db.ObjectId
+
+  comapanyName   String?
+  companyUrl     String?
+  industry       String?
+  pinCode        Int?
+  state          String?
+  interestFields String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 📅 MeetingEvent Model
+model MeetingEvent {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId])
+  mentorUserId String @db.ObjectId
+
+  eventName   String
+  duration    Int
+  description String?
+  meetEmail   String
+
+  eventPrice Int? // Price in paise (e.g., 700 for ₹7.00)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Availability {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId])
+  mentorUserId String @unique @db.ObjectId
+
+  daysAvailable Json
+  bufferTime    Int  @default(15) // Default buffer time of 15 minutes between meetings
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ScheduledMeetings {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId])
+  mentorUserId String @db.ObjectId
+
+  student       Student @relation(fields: [studentUserId], references: [userId])
+  studentUserId String  @db.ObjectId
+
+  feedback           String?
+  star               Int?
+  selectedTime       String
+  selectedDate       DateTime
+  formatedDate       String
+  formatedTimeStamp  String
+  duration           Int
+  meetUrl            String?
+  eventId            String
+  eventName          String
+  userNote           String
+  userEmailForMeet   String
+  mentorEmailForMeet String
+  completed          Boolean  @default(false)
+
+  paymentStatus Boolean @default(false)
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  RazorpayOrder RazorpayOrder[]
+}
+
+model ChatRoom {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId])
+  mentorUserId String @db.ObjectId
+
+  student       Student @relation(fields: [studentUserId], references: [userId])
+  studentUserId String  @db.ObjectId
+
+  lastMessage        String
+  mentorUnreadCount  Int           @default(0)
+  studentUnreadCount Int           @default(0)
+  chatMessages       chatMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([mentorUserId, studentUserId], name: "mentor_student_index")
+}
+
+model chatMessage {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  senderId   String
+  senderRole String
+  message    String?
+
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  chatRoomId String   @db.ObjectId
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @db.ObjectId
+
+  imageName String?
+  imagePath String?
+  fileName  String?
+
+  type String @default("TEXT")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chatRoomId, createdAt], name: "chatRoom_createdAt_index")
+}
+
+// 📚 Workshop Model
+model Workshop {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId])
+  mentorUserId String @db.ObjectId
+
+  name             String
+  description      String
+  numberOfDays     Int
+  bannerImage      String?
+  introVideo       String?
+  scheduleType     String    @default("recurring") // "recurring" or "custom"
+  startDate        DateTime? // Start date for recurring schedule
+  schedule         Json[] // Array of objects with day and time for recurring, or date and time for custom
+  price            Int // Price in paise (e.g., 70000 for ₹700.00)
+  learningOutcomes String[]
+  courseDetails    Json
+  otherDetails     String?
+  meetLinks        Json? // Map of day index to meet link and scheduled date
+  enrollments      WorkshopEnrollment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 📝 Workshop Enrollment Model
+model WorkshopEnrollment {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  workshop   Workshop @relation(fields: [workshopId], references: [id])
+  workshopId String   @db.ObjectId
+
+  student       Student @relation(fields: [studentUserId], references: [userId])
+  studentUserId String  @db.ObjectId
+
+  paymentStatus Boolean         @default(false)
+  orders        RazorpayOrder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([workshopId, studentUserId])
+}
