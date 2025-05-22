@@ -61,7 +61,7 @@ export default function WorkshopsPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
+    <div className="container mx-auto pb-16 md:pb-6 px-4 sm:px-6 py-4 sm:py-6">
       <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Workshops</h1>
@@ -71,7 +71,7 @@ export default function WorkshopsPage() {
         </div>
         <Button
           onClick={() => setIsCreateModalOpen(true)}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-300 hover:shadow-md bg-primary"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-300 hover:shadow-md"
         >
           <Plus className="h-4 w-4" />
           Create Workshop

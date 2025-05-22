@@ -12,22 +12,24 @@ export const workshopRouter = createTRPCRouter({
       numberOfDays: z.number().int().min(1, "Workshop must have at least 1 day"),
       scheduleType: z.enum(["recurring", "custom"]),
       startDate: z.string().optional(), // ISO string for recurring schedule start date
-      schedule: z.union([
-        // Recurring schedule (day and time)
-        z.array(z.object({
-          day: z.string(),
-          time: z.string(),
-        })),
-        // Custom schedule (specific date and time for each session)
-        z.array(z.object({
-          date: z.string(), // ISO date string
-          time: z.string(),
-        }))
-      ]),
+      schedule: z.array(
+        z.union([
+          // Recurring schedule (day and time)
+          z.object({
+            day: z.string(),
+            time: z.string(),
+          }),
+          // Custom schedule (specific date and time)
+          z.object({
+            date: z.string(), // ISO date string
+            time: z.string(),
+          })
+        ])
+      ),
       price: z.number().int().min(0, "Price cannot be negative"),
       learningOutcomes: z.array(z.string()),
       courseDetails: z.record(z.any()),
-      otherDetails: z.string().optional(),
+      otherDetails: z.string().optional()
     }))
     .mutation(async ({ ctx, input }) => {
       // Verify the user is a mentor

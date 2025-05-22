@@ -174,35 +174,37 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
               </div>
             </CardContent>
             <CardFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 sm:justify-between p-3 sm:p-4 border-t bg-gradient-to-r from-gray-50/80 to-white/80 backdrop-blur-sm group-hover:from-gray-100/80 group-hover:to-white/90 transition-all">
-              <div className="flex gap-2 w-full sm:w-auto">
-                <Button
-                  variant="outline"
-                  className="flex-1 sm:flex-initial transition-all hover:bg-primary/5"
-                  size="sm"
-                  onClick={() => setWorkshopToEdit(workshop)}
-                >
-                  <Edit className="h-4 w-4 mr-1" />
-                  Edit Workshop
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 sm:flex-initial text-red-600 hover:text-red-700 hover:bg-red-50 transition-all"
-                  size="sm"
-                  onClick={() => setWorkshopToDelete(workshop.id)}
-                >
-                  <Trash className="h-4 w-4 mr-1" />
-                  Delete Workshop
-                </Button>
-              </div>
+              
               <Button
                 variant="default"
-                className="w-full sm:w-auto transition-all bg-primary hover:bg-primary/90"
+                className="w-full sm:w-auto transition-all "
                 size="sm"
                 onClick={() => router.push(`/mentor-dashboard/workshops/${workshop.id}`)}
               >
                 <Eye className="h-4 w-4 mr-1" />
                 View Details
               </Button>
+              <div className="flex gap-2 w-full ml-4 sm:w-auto">
+                <Button
+                  variant="outline"
+                  className="flex-1 sm:flex-initial transition-all hover:bg-primary/5"
+                  size="sm"
+                  onClick={() => setWorkshopToEdit(workshop)}
+                >
+                  <Edit className="h-4 w-4" />
+                  
+                </Button>
+                
+              <Button
+                  variant="outline"
+                  className="flex-1 sm:flex-initial text-red-600 hover:text-red-700 hover:bg-red-50 transition-all"
+                  size="sm"
+                  onClick={() => setWorkshopToDelete(workshop.id)}
+                >
+                  <Trash className="h-4 w-4" />
+                  
+                </Button>
+              </div>
             </CardFooter>
           </Card>
         ))}

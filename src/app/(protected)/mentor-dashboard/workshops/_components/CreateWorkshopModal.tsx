@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { X, Plus, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { TRPCError } from "@trpc/server";
 
 interface CreateWorkshopModalProps {
   isOpen: boolean;
@@ -53,8 +54,8 @@ export default function CreateWorkshopModal({
   const [form, setForm] = useState({
     name: "",
     description: "",
-    numberOfDays: 1,
-    price: 0,
+    numberOfDays: "1",
+    price: "0",
     learningOutcomes: [""],
     otherDetails: "",
     scheduleType: "recurring" as "recurring" | "custom",
@@ -80,8 +81,9 @@ export default function CreateWorkshopModal({
       resetForm();
       onSuccess();
     },
-    onError: (error) => {
-      toast.error(error.message);
+    onError: (error  ) => {
+        const message = error?.shape?.message;
+        toast(message);
     },
   });
 
@@ -89,9 +91,25 @@ export default function CreateWorkshopModal({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+    
+    // Validate number inputs
+    if (name === "numberOfDays") {
+      const days = parseInt(value);
+      if (value !== "" && (!Number.isInteger(days) || days <= 0)) {
+        toast.error("Number of days must be a positive integer");
+        return;
+      }
+    } else if (name === "price") {
+      const price = parseFloat(value);
+      if (value !== "" && (isNaN(price) || price < 0)) {
+        toast.error("Price must be a non-negative number");
+        return;
+      }
+    }
+
     setForm({
       ...form,
-      [name]: name === "price" || name === "numberOfDays" ? Number(value) : value,
+      [name]: value
     });
 
     // If number of days changes, update course details
@@ -145,7 +163,7 @@ export default function CreateWorkshopModal({
   };
 
   const addCustomScheduleItem = () => {
-    if (customSchedule.length < form.numberOfDays) {
+    if (customSchedule.length < Number(form.numberOfDays)) {
       setCustomSchedule([...customSchedule, { 
         date: getTodayDateString(), 
         time: "10:00 AM" 
@@ -204,24 +222,34 @@ export default function CreateWorkshopModal({
       toast.error("Please select a start date for recurring schedule");
       return;
     }
+    if (form.description.length < 100) {
+      toast.error("Description must be at least 100 characters");
+      return;
+    }
 
     // Prepare schedule data based on schedule type
-    const scheduleData = form.scheduleType === "recurring" 
-      ? recurringSchedule 
-      : customSchedule;
+    const scheduleData =
+      form.scheduleType === "recurring"
+        ? {
+            type: "recurring" as const,
+            schedule: recurringSchedule,
+          }
+        : {
+            type: "custom" as const,
+            schedule: customSchedule,
+          };
 
-    // Create workshop
     createWorkshop.mutate({
       name: form.name,
       description: form.description,
-      numberOfDays: form.numberOfDays,
-      price: form.price,
+      startDate: form.startDate,
+      numberOfDays: Number(form.numberOfDays),
+      price: Number(form.price),
       learningOutcomes: filteredOutcomes,
       otherDetails: form.otherDetails,
+      schedule: scheduleData.schedule,
       scheduleType: form.scheduleType,
-      startDate: form.startDate,
-      schedule: scheduleData,
-      courseDetails: courseDetails,
+      courseDetails,
     });
   };
 
@@ -229,8 +257,8 @@ export default function CreateWorkshopModal({
     setForm({
       name: "",
       description: "",
-      numberOfDays: 1,
-      price: 0,
+      numberOfDays: "1",
+      price: "0",
       learningOutcomes: [""],
       otherDetails: "",
       scheduleType: "recurring",
@@ -306,30 +334,16 @@ export default function CreateWorkshopModal({
                 <Input
                   id="numberOfDays"
                   name="numberOfDays"
-                  type="number"
-                  min={1}
-                  onKeyDown={(e) => {
-                    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-                      e.preventDefault();
-                    }
-                  }}
                   value={form.numberOfDays}
                   onChange={handleInputChange}
                   required
                 />
-              </div>
+              </div>  
               <div>
                 <Label htmlFor="price">Price (₹)</Label>
                 <Input
                   id="price"
                   name="price"
-                  type="number"
-                  min={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-                      e.preventDefault();
-                    }
-                  }}
                   value={form.price}
                   onChange={handleInputChange}
                   required
@@ -471,7 +485,7 @@ export default function CreateWorkshopModal({
                       </Button>
                     </div>
                   ))}
-                  {customSchedule.length < form.numberOfDays && (
+                  {customSchedule.length < Number(form.numberOfDays) && (
                     <Button
                       type="button"
                       variant="outline"
@@ -573,7 +587,7 @@ export default function CreateWorkshopModal({
             <Button 
               type="submit" 
               disabled={createWorkshop.isPending}
-              className="w-full sm:w-auto transition-all bg-primary hover:bg-primary/90">
+              className="w-full sm:w-auto transition-all ">
               {createWorkshop.isPending ? "Creating..." : "Create Workshop"}
             </Button>
           </DialogFooter>

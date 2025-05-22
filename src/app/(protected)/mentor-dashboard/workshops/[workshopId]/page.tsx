@@ -365,7 +365,7 @@ if (!workshop) {
 }
 
 return (
-  <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-6 sm:space-y-8">
+  <div className="container   mx-auto px-2 sm:px-6 py-4 pb-16 md:pb-6 sm:py-6 space-y-6 sm:space-y-8">
     <div className="flex items-center gap-2">
       <Button
         variant="ghost"
@@ -386,14 +386,14 @@ return (
       </div>
       <Button
         onClick={() => setIsEditModalOpen(true)}
-        className="ml-auto bg-primary hover:bg-primary/90 transition-all"
+        className="ml-auto  transition-all"
       >
         Edit Workshop
       </Button>
     </div>
 
-    <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
-      <div className="lg:col-span-2">
+    <div className="grid gap-2  sm:gap-6 lg:grid-cols-3">
+      <div className="lg:col-span-2 w-full">
         <Tabs defaultValue="details" value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
           <TabsList className="bg-white/80 backdrop-blur-sm border border-gray-100">
             <TabsTrigger value="details">Details</TabsTrigger>
@@ -410,7 +410,7 @@ return (
               <CardContent className="space-y-4">
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Description</h3>
-                  <p className="mt-1 text-gray-900">{workshop.description}</p>
+                  <p className="mt-1 text-gray-900 text-wrap">{workshop.description}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -616,13 +616,14 @@ return (
                         <TableHead>Student</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Enrolled On</TableHead>
+                        
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {enrollments.map((enrollment : any) => (
                         <TableRow key={enrollment.id}>
                           <TableCell className="flex items-center gap-2">
-                            <Avatar className="h-8 w-8">
+                            <Avatar className="h-6 w-6 md:h-8 md:w-8">
                               <AvatarImage
                                 src={enrollment.student.user.image || ""}
                                 alt={enrollment.student.user.name || ""}
@@ -633,14 +634,14 @@ return (
                                   .toUpperCase() || "S"}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="font-medium">
+                            <span className="font-medium text-xs md:text-base">
                               {enrollment.student.user.name ||
                                 enrollment.student.studentName ||
                                 "Student"}
                             </span>
                           </TableCell>
-                          <TableCell>{enrollment.student.user.email}</TableCell>
-                          <TableCell>
+                          <TableCell className="text-xs md:text-base">{enrollment.student.user.email}</TableCell>
+                          <TableCell className="text-xs md:text-base">
                             {new Date(enrollment.createdAt).toLocaleDateString()}
                           </TableCell>
                         </TableRow>
@@ -665,7 +666,7 @@ return (
       </div>
 
       <div>
-        <Card className="transition-all duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm border border-gray-100">
+        <Card className="transition-all w-[90%] duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm border border-gray-100">
           <CardHeader>
             <CardTitle>Workshop Stats</CardTitle>
           </CardHeader>

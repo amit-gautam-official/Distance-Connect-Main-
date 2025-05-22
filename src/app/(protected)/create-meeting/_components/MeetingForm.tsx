@@ -28,26 +28,25 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
   const [eventName, setEventName] = useState<string>();
   const [duration, setDuration] = useState<Number>(30);
   const [email, setEmail] = useState<string>("example@gmail.com");
-  const [confirmEmail, setConfirmEmail] = useState<string>("");
   const [description, setDescription] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [customEventName, setCustomEventName] = useState<boolean>(false);
   const router = useRouter();
-  const [price, setPrice] = useState<number>();
-
- 
-
-
-
   const getMeQuery = api.mentor.getMentor.useQuery();
 
   const mentorSessionPriceRange = getMeQuery.data?.mentorSessionPriceRange; //Ex: "500-700" //string
-
   const [minPrice, maxPrice] = mentorSessionPriceRange
-  ? mentorSessionPriceRange.split("-").map(Number)
-  : [500, 700]; // Default range
+    ? mentorSessionPriceRange.split("-").map(Number)
+    : [undefined, undefined];
 
+  const [price, setPrice] = useState<number | undefined>();
 
+  // Update price when mentor data loads
+  useEffect(() => {
+    if (minPrice) {
+      setPrice(minPrice);
+    }
+  }, [minPrice]);
 
   const createMeetingEvent = api.meetingEvent.createMeetingEvent.useMutation({
     onSuccess: () => {
@@ -66,9 +65,9 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
       duration: duration,
       email: email,
       description: description,
-      price: price ?? Number(minPrice),
+      price: price ?? minPrice,
     });
-  }, [eventName, duration, email, description, price]);
+  }, [eventName, duration, email, description, minPrice]);
 
   const onCreateClick = async () => {
     setLoading(true);
@@ -79,21 +78,18 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
       setLoading(false);
       return;
     }
-    // Confirm email match
-    if (email !== confirmEmail) {
-      toast.error("Email and Confirm Email do not match.");
-      setLoading(false);
-      return;
-    }
 
     await createMeetingEvent.mutateAsync({
       eventName: eventName as string,
       duration: duration as number,
       description: description as string,
       meetEmail: email as string,
-      price: price ? Number(price) : Number(minPrice),
+      price: price ?? minPrice as number,
 
     });
+
+    router.push("/mentor-dashboard/services");
+    setLoading(false);
   };
 
   return (
@@ -228,19 +224,27 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
     <h3 className="text-lg font-semibold text-gray-900">Session Price</h3>
   </div>
   <div className="space-y-2">
-    <label className="text-sm font-medium text-gray-700">
-      Choose your session price (₹{minPrice}–₹{maxPrice})
-    </label>
-    <input
-      type="range"
-      min={minPrice}
-      max={maxPrice}
-      step={50}
-      value={price ?? minPrice}
-      onChange={(e) => setPrice(Number(e.target.value))}
-      className="w-full"
-    />
-    <div className="text-sm text-gray-600">Selected: ₹{price ?? minPrice}</div>
+    {getMeQuery.isLoading ? (
+      <div className="text-sm text-gray-600">Loading price range...</div>
+    ) : !mentorSessionPriceRange ? (
+      <div className="text-sm text-red-600">Wait for your Profile to be verified</div>
+    ) : (
+      <>
+        <label className="text-sm font-medium text-gray-700">
+          Choose your session price (₹{minPrice}–₹{maxPrice})
+        </label>
+        <input
+          type="range"
+          min={minPrice}
+          max={maxPrice}
+          step={50}
+          value={price ?? minPrice}
+          onChange={(e) => setPrice(Number(e.target.value))}
+          className="w-full"
+        />
+        <div className="text-sm text-gray-600">Selected: ₹{price}</div>
+      </>
+    )}
   </div>
 </div>
 
@@ -264,22 +268,6 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
                   placeholder="example@gmail.com"
                   onChange={(event) => setEmail(event.target.value)}
                   className="h-11"
-                  value={email}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <Mail className="h-4 w-4 text-gray-500" />
-                  Confirm Email Address
-                </label>
-                <Input
-                  placeholder="Re-enter your Gmail address"
-                  onChange={(event) => setConfirmEmail(event.target.value)}
-                  className="h-11"
-                  value={confirmEmail}
-                  onCopy={e => { e.preventDefault(); toast.error('Copying is disabled for this field.'); }}
-                  onPaste={e => { e.preventDefault(); toast.error('Pasting is disabled for this field.'); }}
-                  onCut={e => { e.preventDefault(); toast.error('Cutting is disabled for this field.'); }}
                 />
               </div>
 
@@ -307,7 +295,7 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
               loading ? "bg-gray-300" : "bg-blue-600 hover:bg-blue-700"
             }`}
             disabled={
-              loading || !eventName || !duration || !email || !description || !confirmEmail || email !== confirmEmail || !email.endsWith("@gmail.com")
+              loading || !eventName || !duration || !email || !description
             }
             onClick={() => onCreateClick()}
           >
