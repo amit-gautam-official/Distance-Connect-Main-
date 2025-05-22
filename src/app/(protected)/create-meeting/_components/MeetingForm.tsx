@@ -65,7 +65,7 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
       duration: duration,
       email: email,
       description: description,
-      price: price ?? minPrice,
+      price: Number(price) ?? Number(minPrice),
     });
   }, [eventName, duration, email, description, price]);
 
@@ -84,7 +84,7 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
       duration: duration as number,
       description: description as string,
       meetEmail: email as string,
-      price: price as number,
+      price: Number(price) ?? Number(minPrice),
 
     });
   };
