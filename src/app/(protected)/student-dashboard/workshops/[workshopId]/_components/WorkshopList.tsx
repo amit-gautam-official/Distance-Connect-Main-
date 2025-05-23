@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/trpc/react";
 import { Calendar, Clock, ExternalLink, Users } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 type Workshop = {
   id: string;
@@ -34,6 +35,7 @@ type Workshop = {
   meetLinks?: Record<string, any> | null;
   createdAt: Date;
   bannerImage: string | null;
+  introductoryVideoUrl: string | null;
   mentor: {
     mentorName: string;
     user: {
@@ -59,7 +61,10 @@ export default function WorkshopList({
 }: WorkshopListProps) {
   const router = useRouter();
   const [workshopToEnroll, setWorkshopToEnroll] = useState<string | null>(null);
+  const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({}); 
   
+  const MAX_DESC_LENGTH = 120; // Maximum characters for description
+
   const enrollInWorkshop = api.workshop.enrollInWorkshop.useMutation({
     onSuccess: () => {
       toast.success("Successfully enrolled in workshop!");
@@ -123,17 +128,14 @@ export default function WorkshopList({
             ? "You haven't enrolled in any workshops yet" 
             : "No workshops available at the moment"}
         </h3>
-        <p className="mt-1 text-sm text-gray-500">
-          {isEnrolled 
-            ? "Explore available workshops to enhance your skills" 
-            : "Check back later for new workshop opportunities"}
+        <p className="mt-1 text-sm text-gray-600">
+          {isEnrolled
+            ? "Explore available workshops and start your learning journey!"
+            : "Check back later for new and exciting workshops."}
         </p>
-        {isEnrolled && (
-          <Button 
-            onClick={() => router.push("/student-dashboard/workshops")} 
-            className="mt-4"
-          >
-            Explore Workshops
+        {!isEnrolled && (
+          <Button onClick={() => router.push('/student-dashboard/workshops')} className="mt-4">
+            Explore All Workshops
           </Button>
         )}
       </div>
@@ -151,78 +153,95 @@ export default function WorkshopList({
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
         {workshops.map((workshop) => (
-          <Card key={workshop.id} className="group hover:shadow-md transition-all overflow-hidden">
-            {workshop.bannerImage ? (
-              <div className="relative h-48 w-full">
-                <img
-                  src={workshop.bannerImage}
-                  alt={workshop.name}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <CardHeader className="absolute bottom-0 left-0 right-0 text-white">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-12 w-12 border-2 border-white/20">
-                      <AvatarImage src={workshop.mentor.user.image || undefined} />
-                      <AvatarFallback>{workshop.mentor.user.name?.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <CardTitle className="text-xl font-bold text-white">{workshop.name}</CardTitle>
-                      <p className="text-sm text-gray-200">
-                        by {workshop.mentor.mentorName || workshop.mentor.user.name}
-                      </p>
-                    </div>
-                  </div>
+          <Card key={workshop.id} className="overflow-hidden group rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-white flex flex-col">
+            {(workshop.bannerImage || workshop.introductoryVideoUrl) ? (
+              <div
+                className="relative h-48 w-full"
+                onMouseEnter={() => {
+                  if (workshop.introductoryVideoUrl && videoRefs.current[workshop.id]) {
+                    videoRefs.current[workshop.id]?.play().catch(error => console.warn("Video play failed:", error));
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (workshop.introductoryVideoUrl && videoRefs.current[workshop.id]) {
+                    videoRefs.current[workshop.id]?.pause();
+                    if (videoRefs.current[workshop.id]) { // Check again before setting currentTime
+                        videoRefs.current[workshop.id]!.currentTime = 0;
+                    }
+                  }
+                }}
+              >
+                {workshop.bannerImage && (
+                  <img
+                    src={workshop.bannerImage}
+                    alt={workshop.name}
+                    className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-300 ${workshop.introductoryVideoUrl ? 'group-hover:opacity-0' : 'opacity-100'}`}
+                  />
+                )}
+                {workshop.introductoryVideoUrl && (
+                  <video
+                    ref={(el) => { if (videoRefs.current) videoRefs.current[workshop.id] = el; }}
+                    src={workshop.introductoryVideoUrl}
+                    className="absolute top-0 left-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    loop
+                    muted
+                    playsInline
+                    poster={workshop.bannerImage ?? undefined}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+                {/* Fallback background if only video is present and not hovered */}
+                {workshop.introductoryVideoUrl && !workshop.bannerImage && (
+                   <div className="absolute top-0 left-0 w-full h-full bg-gray-200 group-hover:opacity-0 transition-opacity duration-300" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent z-10" />
+                <CardHeader className="absolute bottom-0 left-0 right-0 text-white p-3 sm:p-4 z-20">
+                  <CardTitle className="text-lg sm:text-xl font-bold">{workshop.name}</CardTitle>
+                  {/* Mentor details can be added here if needed, similar to mentor's card */}
+                  <Link href={`/mentor-dashboard/workshops/${workshop.id}`} className="text-sm text-gray-200 mt-1 hover:underline">
+                    by {workshop.mentor.user.name}
+                  </Link>
                 </CardHeader>
               </div>
             ) : (
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10 border-2 border-primary/10">
-                    <AvatarImage src={workshop.mentor.user.image || undefined} />
-                    <AvatarFallback>{workshop.mentor.user.name?.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary transition-colors">
-                      {workshop.name}
-                    </h3>
-                    <p className="text-sm text-gray-500 flex items-center gap-1">
-                      by <span className="font-medium">{workshop.mentor.user.name}</span>
-                    </p>
-                  </div>
-                </div>
-              </CardHeader>
-            )}
-            <CardContent className="p-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage 
-                    src={workshop.mentor.user.image || ""} 
-                    alt={workshop.mentor.mentorName || workshop.mentor.user.name || ""}
-                  />
-                  <AvatarFallback>
-                    {(workshop.mentor.mentorName || workshop.mentor.user.name || "M").charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-medium">
-                  {workshop.mentor.mentorName || workshop.mentor.user.name || "Mentor"}
-                </span>
+              // Fallback if no banner and no video, show gray background with overlay and title
+              <div className="relative h-48 w-full bg-gradient-to-br from-gray-200 to-gray-300">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent z-10" />
+                <CardHeader className="absolute bottom-0 left-0 right-0 text-white p-3 sm:p-4 z-20">
+                  <CardTitle className="text-lg sm:text-xl font-bold">{workshop.name}</CardTitle>
+                  <Link href={`/mentor-dashboard/workshops/${workshop.id}`} className="text-sm text-gray-200 mt-1 hover:underline">
+                    by {workshop.mentor.user.name}
+                  </Link>
+                </CardHeader>
               </div>
-              
-              <p className="text-sm text-gray-600 line-clamp-2">
-                {workshop.description}
+            )}
+
+            {/* Original CardHeader and CardContent structure for details below banner */}
+            {/* This CardHeader is for details like mentor avatar if not in banner */}
+            {/* <CardHeader className="p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-white"> */}
+            {/* We need to decide if the mentor avatar and name go into the banner's CardHeader or a separate one below */}
+            {/* For now, I've added mentor name to the banner's CardHeader. If a separate section is needed, adjust here. */}
+            {/* </CardHeader> */}
+
+            <CardContent className="p-4 space-y-3 flex-grow">
+              {/* Description - ensuring it's not redundant if shown in banner */}
+              <p className="text-sm text-gray-600">
+                {workshop.description.length > MAX_DESC_LENGTH 
+                  ? `${workshop.description.substring(0, MAX_DESC_LENGTH)}...` 
+                  : workshop.description}
               </p>
-              
-              <div className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors">
+
+              <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Calendar className="h-4 w-4 text-primary" />
                 <span>
                   {workshop.schedule.map(s => `${s.day}`).join(", ")}
                 </span>
               </div>
               
-              <div className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Clock className="h-4 w-4 text-primary" />
                 <span>
                   {workshop.schedule.map(s => `${s.time}`).join(", ")}

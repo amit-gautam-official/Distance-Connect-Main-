@@ -1,7 +1,16 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
-import { Role } from "@prisma/client";
+import { createCallerFactory, createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
+import { Role, Prisma } from "@prisma/client";
 import { generateMeetLink } from "@/lib/services/generate-meet-link";
+import { fileRouter } from "./file"; // Import fileRouter
+import { TRPCError } from "@trpc/server"; // Import TRPCError
+
+// Define a Zod schema for the structure of a single meet link entry
+const MeetLinkEntrySchema = z.object({
+  link: z.string(),
+  scheduledFor: z.string(), // ISO date string
+  generated: z.string(),   // ISO date string
+});
 
 export const workshopRouter = createTRPCRouter({
   // Create a new workshop (mentor only)
@@ -29,18 +38,18 @@ export const workshopRouter = createTRPCRouter({
       ),
       price: z.number().int().min(0, "Price cannot be negative"),
       learningOutcomes: z.array(z.string()),
-      courseDetails: z.record(z.any()),
+      courseDetails: z.record(z.string()), // Refined from z.any()
       otherDetails: z.string().optional()
     }))
     .mutation(async ({ ctx, input }) => {
       // Verify the user is a mentor
       if (ctx.dbUser?.role !== Role.MENTOR) {
-        throw new Error("Only mentors can create workshops");
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only mentors can create workshops" });
       }
 
       // Validate schedule based on scheduleType
       if (input.scheduleType === "recurring" && !input.startDate) {
-        throw new Error("Start date is required for recurring schedules");
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Start date is required for recurring schedules" });
       }
 
       return ctx.db.workshop.create({
@@ -85,15 +94,14 @@ export const workshopRouter = createTRPCRouter({
       ]).optional(),
       price: z.number().int().min(0, "Price cannot be negative").optional(),
       learningOutcomes: z.array(z.string()).optional(),
-      courseDetails: z.record(z.any()).optional(),
+      courseDetails: z.record(z.string()).optional(), // Refined from z.any()
       otherDetails: z.string().optional(),
-      meetUrl: z.string().optional(),
-      meetLinks: z.record(z.any()).optional(),
+      meetLinks: z.record(MeetLinkEntrySchema).optional(), // Refined from z.any()
     }))
     .mutation(async ({ ctx, input }) => {
       // Verify the user is a mentor
       if (ctx.dbUser?.role !== Role.MENTOR) {
-        throw new Error("Only mentors can update workshops");
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only mentors can update workshops" });
       }
 
       // Verify the workshop belongs to the mentor
@@ -102,37 +110,62 @@ export const workshopRouter = createTRPCRouter({
       });
 
       if (!workshop || workshop.mentorUserId !== ctx.dbUser.id) {
-        throw new Error("Workshop not found or you don't have permission to update it");
+        throw new TRPCError({ code: "FORBIDDEN", message: "You do not have permission to update this workshop" });
       }
 
-      // Validate schedule based on scheduleType
-      if (input.scheduleType === "recurring" && input.startDate === "") {
-        throw new Error("Start date is required for recurring schedules");
-      }
+      const updateData: Prisma.WorkshopUpdateInput = {};
 
-      // Prepare update data
-      const updateData: any = {};
-
-      // Only update fields that are provided
+      // Standard field updates
       if (input.name !== undefined) updateData.name = input.name;
       if (input.description !== undefined) updateData.description = input.description;
       if (input.numberOfDays !== undefined) updateData.numberOfDays = input.numberOfDays;
-      if (input.scheduleType !== undefined) updateData.scheduleType = input.scheduleType;
-      if (input.startDate !== undefined) {
-        updateData.startDate = input.startDate ? new Date(input.startDate) : null;
-      }
-      if (input.schedule !== undefined) updateData.schedule = input.schedule;
+      if (input.bannerImage !== undefined) updateData.bannerImage = input.bannerImage;
       if (input.price !== undefined) updateData.price = input.price;
       if (input.learningOutcomes !== undefined) updateData.learningOutcomes = input.learningOutcomes;
       if (input.courseDetails !== undefined) updateData.courseDetails = input.courseDetails;
       if (input.otherDetails !== undefined) updateData.otherDetails = input.otherDetails;
-      if (input.meetUrl !== undefined) updateData.meetUrl = input.meetUrl;
-      if (input.meetLinks !== undefined) updateData.meetLinks = input.meetLinks;
 
-      // If schedule type changes, clear existing meeting links
-      if (input.scheduleType !== undefined && input.scheduleType !== workshop.scheduleType) {
-        updateData.meetLinks = null;
+      // Handle scheduleType and startDate carefully
+      if (input.scheduleType !== undefined) {
+        updateData.scheduleType = input.scheduleType;
+        if (input.scheduleType === "custom") {
+          updateData.startDate = null; // Custom schedules don't have a global start date
+        } else if (input.scheduleType === "recurring") {
+          // If type is changing to recurring, startDate might be in input or not.
+          // If input.startDate is provided, it will be handled below.
+          // If input.startDate is not provided, existing startDate might persist or be null based on schema.
+        }
       }
+
+      // Handle startDate based on effective schedule type
+      // input.startDate can be string (date or empty) or undefined.
+      if (input.startDate !== undefined) { 
+        const effectiveScheduleType = input.scheduleType ?? workshop.scheduleType;
+        if (effectiveScheduleType === "recurring") {
+          // Allow setting to null if input.startDate is an empty string
+          updateData.startDate = input.startDate && input.startDate.trim() !== "" ? new Date(input.startDate) : null;
+        } else {
+          // If effective type is custom, but startDate was sent, ensure it's nulled.
+          // This case is also covered if input.scheduleType was 'custom'.
+          if (updateData.scheduleType === 'custom') { // Check if scheduleType was set to custom in this update
+             updateData.startDate = null;
+          } else if (workshop.scheduleType === 'custom' && input.scheduleType === undefined){
+             // If existing type is custom and not being changed, but startDate is sent, nullify it.
+             updateData.startDate = null;
+          }
+        }
+      }
+
+      if (input.schedule !== undefined) {
+        updateData.schedule = input.schedule;
+      }
+
+      // Reset meetLinks if scheduleType changes, as meeting generation logic might differ
+      if (input.scheduleType !== undefined && input.scheduleType !== workshop.scheduleType) {
+        updateData.meetLinks = null; // Using Prisma.DbNull for JSON field might be more explicit if needed, but null should work.
+      }
+      // Consider if meetLinks should also be reset if only startDate or schedule array changes significantly.
+      // For now, only scheduleType change triggers reset.
 
       return ctx.db.workshop.update({
         where: { id: input.id },
@@ -146,7 +179,7 @@ export const workshopRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // Verify the user is a mentor
       if (ctx.dbUser?.role !== Role.MENTOR) {
-        throw new Error("Only mentors can delete workshops");
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only mentors can delete workshops" });
       }
 
       // Verify the workshop belongs to the mentor
@@ -155,7 +188,7 @@ export const workshopRouter = createTRPCRouter({
       });
 
       if (!workshop || workshop.mentorUserId !== ctx.dbUser.id) {
-        throw new Error("Workshop not found or you don't have permission to delete it");
+        throw new TRPCError({ code: "FORBIDDEN", message: "You do not have permission to delete this workshop" });
       }
 
       // Delete all enrollments first
@@ -174,7 +207,7 @@ export const workshopRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       // Verify the user is a mentor
       if (ctx.dbUser?.role !== Role.MENTOR) {
-        throw new Error("Only mentors can access their workshops");
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only mentors can access their workshops" });
       }
 
       return ctx.db.workshop.findMany({
@@ -192,23 +225,32 @@ export const workshopRouter = createTRPCRouter({
   getWorkshopById: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      return ctx.db.workshop.findUnique({
+      const workshop = await ctx.db.workshop.findUnique({
         where: { id: input.id },
         include: {
           mentor: {
-
             include: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  image: true,
+              user: true,
+            },
+          },
+          enrollments: {
+            include: {
+              student: {
+                include: {
+                  user: true,
                 },
               },
             },
           },
+          _count: {
+            select: { enrollments: true },
+          },
         },
       });
+      if (!workshop) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Workshop not found" });
+      }
+      return workshop;
     }),
 
   // Get all available workshops (public)
@@ -243,31 +285,31 @@ export const workshopRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // Verify the user is a student
       if (ctx.dbUser?.role !== Role.STUDENT) {
-        throw new Error("Only students can enroll in workshops");
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only students can enroll in workshops" });
       }
 
       // Check if the workshop exists
       const workshop = await ctx.db.workshop.findUnique({
         where: { id: input.workshopId },
       });
-
       if (!workshop) {
-        throw new Error("Workshop not found");
+        throw new TRPCError({ code: "NOT_FOUND", message: "Workshop not found" });
       }
 
-      // Check if the student is already enrolled
-      const existingEnrollment = await ctx.db.workshopEnrollment.findFirst({
+      // Check if already enrolled
+      const existingEnrollment = await ctx.db.workshopEnrollment.findUnique({
         where: {
-          workshopId: input.workshopId,
-          studentUserId: ctx.dbUser.id,
+          workshopId_studentUserId: {
+            workshopId: input.workshopId,
+            studentUserId: ctx.dbUser.id,
+          },
         },
       });
 
       if (existingEnrollment) {
-        throw new Error("You are already enrolled in this workshop");
+        throw new TRPCError({ code: "CONFLICT", message: "You are already enrolled in this workshop" });
       }
 
-      // Create the enrollment
       return ctx.db.workshopEnrollment.create({
         data: {
           workshopId: input.workshopId,
@@ -282,9 +324,8 @@ export const workshopRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       // Verify the user is a student
       if (ctx.dbUser?.role !== Role.STUDENT) {
-        throw new Error("Only students can access their enrolled workshops");
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only students can access their enrolled workshops" });
       }
-
       return ctx.db.workshopEnrollment.findMany({
         where: {
           studentUserId: ctx.dbUser.id,
@@ -316,16 +357,15 @@ export const workshopRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       // Verify the user is a mentor
       if (ctx.dbUser?.role !== Role.MENTOR) {
-        throw new Error("Only mentors can access workshop enrollments");
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only mentors can view workshop attendees" });
       }
 
-      // Verify the workshop belongs to the mentor
       const workshop = await ctx.db.workshop.findUnique({
         where: { id: input.workshopId },
       });
 
       if (!workshop || workshop.mentorUserId !== ctx.dbUser.id) {
-        throw new Error("Workshop not found or you don't have permission to access it");
+        throw new TRPCError({ code: "FORBIDDEN", message: "You do not have permission to view attendees for this workshop" });
       }
 
       return ctx.db.workshopEnrollment.findMany({
@@ -350,6 +390,61 @@ export const workshopRouter = createTRPCRouter({
       });
     }),
 
+  // Upload workshop introductory video (mentor only)
+  uploadWorkshopIntroVideo: protectedProcedure
+    .input(z.object({
+      workshopId: z.string(),
+      video: z.object({
+        fileName: z.string(),
+        fileType: z.string(),
+        base64Content: z.string(),
+      }),
+      currentVideoUrl: z.string().optional(), // To delete the old video if replacing
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { workshopId, video, currentVideoUrl } = input;
+
+      // 1. Verify the user is a mentor
+      if (ctx.dbUser?.role !== Role.MENTOR) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only mentors can upload workshop videos." });
+      }
+
+      // 2. Verify the workshop exists and belongs to the mentor
+      const workshop = await ctx.db.workshop.findUnique({
+        where: { id: workshopId },
+      });
+
+      if (!workshop) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Workshop not found." });
+      }
+
+      if (workshop.mentorUserId !== ctx.dbUser.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "You are not authorized to modify this workshop." });
+      }
+
+      // 3. Call the file upload router using createCaller
+      const createCaller = createCallerFactory(fileRouter)
+      const fileCaller = createCaller(ctx)
+      const uploadResult = await fileCaller.upload({
+        bucketName: "dc-public-files",
+        folderName: "dc-ws-intro-video",
+        fileName: video.fileName,
+        fileType: video.fileType,
+        fileContent: video.base64Content,
+        initialAvatarUrl: currentVideoUrl, // Pass current URL to delete old video
+      });
+
+      if (!uploadResult.success) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Video upload failed. Please try again." });
+      }
+
+      // 4. Update the workshop with the new video URL
+      return ctx.db.workshop.update({
+        where: { id: workshopId },
+        data: { introductoryVideoUrl: uploadResult.url },
+      });
+    }),
+
   // Generate meeting link for a workshop (mentor only)
   generateWorkshopMeetLink: protectedProcedure
     .input(z.object({ 
@@ -360,53 +455,37 @@ export const workshopRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // Verify the user is a mentor
       if (ctx.dbUser?.role !== Role.MENTOR && ctx.dbUser?.role !== Role.ADMIN) {
-        throw new Error("Only mentors can generate meeting links");
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only mentors can generate meeting links" });
       }
 
-      // Verify the workshop belongs to the mentor (unless admin)
       const workshop = await ctx.db.workshop.findUnique({
         where: { id: input.workshopId },
         include: {
-          mentor: {
-            include: {
-              user: { select: { email: true } },
-            },
-          },
-          enrollments: {
-            where: { paymentStatus: true },
-            include: {
-              student: {
-                include: {
-                  user: { select: { email: true } },
-                },
-              },
-            },
-          },
+          mentor: { include: { user: true } },
+          enrollments: { include: { student: { include: { user: true } } } },
         },
       });
 
       if (!workshop) {
-        throw new Error("Workshop not found");
+        throw new TRPCError({ code: "NOT_FOUND", message: "Workshop not found." });
       }
-      
-      // Only the workshop owner or an admin can generate links
-      if (workshop.mentorUserId !== ctx.dbUser.id && ctx.dbUser?.role !== Role.ADMIN) {
-        throw new Error("You don't have permission to access this workshop");
+      if (workshop.mentorUserId !== ctx.dbUser.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "You do not own this workshop." });
       }
 
-      
+      const { dayIndex } = input;
       // Get current date and time
       const now = new Date();
       
       // Get day to generate link for (default to first day)
-      const dayIndex = input.dayIndex || 1;
-      if (dayIndex < 1 || dayIndex > workshop.numberOfDays) {
-        throw new Error(`Invalid day index: ${dayIndex}. Must be between 1 and ${workshop.numberOfDays}`);
+      const dayIndexToUse = dayIndex || 1;
+      if (dayIndexToUse < 1 || dayIndexToUse > workshop.numberOfDays) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: `Invalid day index: ${dayIndexToUse}. Must be between 1 and ${workshop.numberOfDays}` });
       }
       
       // Check if the workshop schedule is defined
       if (!workshop.schedule || !(workshop.schedule as any[]).length) {
-        throw new Error("Workshop schedule is not defined");
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Workshop schedule is not defined" });
       }
       
       let targetDate: Date;
@@ -414,12 +493,12 @@ export const workshopRouter = createTRPCRouter({
       // Handle different schedule types
       if (workshop.scheduleType === "custom") {
         // For custom schedule, each item has a specific date and time
-        if (dayIndex > (workshop.schedule as any[]).length) {
-          throw new Error(`Day ${dayIndex} is not defined in the custom schedule`);
+        if (dayIndexToUse > (workshop.schedule as any[]).length) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: `Day ${dayIndexToUse} is not defined in the custom schedule` });
         }
         
         // Get the specific schedule item for this day
-        const scheduleItem = workshop.schedule[dayIndex - 1];
+        const scheduleItem = workshop.schedule[dayIndexToUse - 1];
         
         // Safely extract date and time values
         const scheduleDate = typeof scheduleItem === 'object' && scheduleItem !== null && 'date' in scheduleItem
@@ -431,7 +510,7 @@ export const workshopRouter = createTRPCRouter({
           : '';
         
         if (!scheduleDate || !scheduleTime) {
-          throw new Error("Invalid custom schedule format: missing date or time");
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid custom schedule format: missing date or time" });
         }
         
         // Create date from the specific date and time
@@ -440,7 +519,7 @@ export const workshopRouter = createTRPCRouter({
         // Parse the time (assuming format like "10:00 AM")
         const [hourMin, period] = scheduleTime.split(' ');
         if (!hourMin) {
-          throw new Error("Invalid time format in workshop schedule");
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid time format in workshop schedule" });
         }
         
         const [hour, minute] = hourMin.split(':').map(Number);
@@ -449,7 +528,7 @@ export const workshopRouter = createTRPCRouter({
         if (period === 'PM' && hour !== 12) hours += 12;
         if (period === 'AM' && hour === 12) hours = 0;
         
-        targetDate.setHours(hours, minute, 0, 0);
+        targetDate.setHours(hours, minute || 0, 0, 0);
       } else {
         // For recurring schedule, calculate based on start date and day pattern
         const dayMap: Record<string, number> = {
@@ -475,13 +554,13 @@ export const workshopRouter = createTRPCRouter({
             ? String(scheduleItem.time) : '';
           
           if (!scheduleDay || !scheduleTime) {
-            throw new Error("Invalid recurring schedule format: missing day or time");
+            throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid recurring schedule format: missing day or time" });
           }
           
           // Get the day of week for this schedule item
           const dayOfWeek = dayMap[scheduleDay];
           if (dayOfWeek === undefined) {
-            throw new Error("Invalid day in workshop schedule");
+            throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid day in workshop schedule" });
           }
           
           // Calculate days to add to reach this day from the start date
@@ -506,7 +585,7 @@ export const workshopRouter = createTRPCRouter({
           // Parse and set the time
           const [hourMin, period] = scheduleTime.split(' ');
           if (!hourMin) {
-            throw new Error("Invalid time format in workshop schedule");
+            throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid time format in workshop schedule" });
           }
           
           const [hour, minute] = hourMin.split(':').map(Number);
@@ -528,32 +607,32 @@ export const workshopRouter = createTRPCRouter({
         workshopDays.sort((a, b) => a.date.getTime() - b.date.getTime());
         
         // Now calculate the date for the specific day index
-        if (dayIndex <= 0 || !workshopDays.length) {
-          throw new Error(`Invalid day index: ${dayIndex}`);
+        if (dayIndexToUse <= 0 || !workshopDays.length) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: `Invalid day index: ${dayIndexToUse}` });
         }
         
         // For day 1, return the first scheduled day
-        if (dayIndex === 1 && workshopDays.length > 0) {
+        if (dayIndexToUse === 1 && workshopDays.length > 0) {
           targetDate = new Date(workshopDays[0]?.date || 0);
         } else if (workshopDays.length > 0) {
           // For subsequent days, calculate based on the pattern
           const daysBetweenSessions = 7; // Assuming weekly recurrence
           
           // Calculate which occurrence of the pattern we need
-          const occurrenceIndex = Math.floor((dayIndex - 1) / workshopDays.length);
-          const patternIndex = (dayIndex - 1) % workshopDays.length;
+          const occurrenceIndex = Math.floor((dayIndexToUse - 1) / workshopDays.length);
+          const patternIndex = (dayIndexToUse - 1) % workshopDays.length;
           
           // Get the pattern day (ensure it exists)
           const patternDay = workshopDays[patternIndex];
           if (!patternDay) {
-            throw new Error(`Could not determine schedule for day ${dayIndex}`);
+            throw new TRPCError({ code: "BAD_REQUEST", message: `Could not determine schedule for day ${dayIndexToUse}` });
           }
           
           // Calculate the date
           targetDate = new Date(patternDay.date);
           targetDate.setDate(targetDate.getDate() + (occurrenceIndex * daysBetweenSessions));
         } else {
-          throw new Error("No valid workshop days found in schedule");
+          throw new TRPCError({ code: "BAD_REQUEST", message: "No valid workshop days found in schedule" });
         }
         
         // The time is already set in the targetDate calculation above
@@ -567,10 +646,12 @@ export const workshopRouter = createTRPCRouter({
       // Only allow generation if within time window or if force generate is true
       if (!isWithinTimeWindow && !input.forceGenerate) {
         const timeUntilAllowed = Math.ceil((threeHoursBeforeWorkshop.getTime() - now.getTime()) / (60 * 1000));
-        throw new Error(
-          `Meeting links can only be generated within 3 hours of the workshop start time. ` +
-          `You can generate this link in ${timeUntilAllowed} minutes.`
-        );
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: 
+            `Meeting links can only be generated within 3 hours of the workshop start time. ` +
+            `You can generate this link in ${timeUntilAllowed} minutes.`
+        });
       }
       
       // Get the attendees for the meeting
@@ -592,7 +673,10 @@ export const workshopRouter = createTRPCRouter({
       
       // Check if we have any attendees
       if (attendees.length === 0) {
-        throw new Error("No attendees found for this workshop. Make sure students are enrolled before generating a meeting link.");
+        throw new TRPCError({
+          code: "BAD_REQUEST", 
+          message: "No attendees found for this workshop. Make sure students are enrolled before generating a meeting link."
+        });
       }
       
       // Call the meet router to generate a meeting link
@@ -603,11 +687,11 @@ export const workshopRouter = createTRPCRouter({
       });
       
       // Get current meetLinks or initialize if null
-      const currentMeetLinks = workshop.meetLinks as Record<string, any> || {};
+      const currentMeetLinks = (workshop.meetLinks as Record<string, typeof MeetLinkEntrySchema._type>) || {};
       const updatedMeetLinks = { ...currentMeetLinks };
       
       // Store the generated link for this day
-      const sessionKey = `day${dayIndex}`;
+      const sessionKey = `day${dayIndexToUse}`;
       updatedMeetLinks[sessionKey] = {
         link: result.meetLink,
         scheduledFor: targetDate.toISOString(),
@@ -621,7 +705,7 @@ export const workshopRouter = createTRPCRouter({
       });
       
       return { 
-        dayIndex,
+        dayIndex: dayIndexToUse,
         meetLink: result.meetLink,
         scheduledFor: targetDate.toISOString()
       };

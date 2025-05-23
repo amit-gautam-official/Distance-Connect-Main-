@@ -26,10 +26,13 @@ type Workshop = {
   learningOutcomes: string[];
   courseDetails: Record<string, any>;
   otherDetails: string | null;
-  meetUrl: string | null;
+  meetUrl: string | null; // This seems to be for individual meeting URLs, not the intro video
+  introductoryVideoUrl: string | null; // Added for the workshop's intro video
   createdAt: Date;
   _count?: { enrollments: number };
   bannerImage: string | null;
+  scheduleType: "recurring" | "custom";
+  startDate: string | null;
 };
 export default function WorkshopsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -51,7 +54,8 @@ export default function WorkshopsPage() {
       
     return {
       ...workshop,
-      schedule: typedSchedule
+      schedule: typedSchedule,
+      introductoryVideoUrl: workshop.introductoryVideoUrl || null,
     };
   }) as Workshop[] | undefined;
 

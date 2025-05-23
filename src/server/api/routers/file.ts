@@ -18,21 +18,29 @@ const ALLOWED_IMAGE_TYPES = [
   "image/jpeg", 
   "image/jpg",
   "image/png", 
-  "image/webp"
+  "image/webp",
+  "delete"
 ];
 const ALLOWED_PDF_TYPE = "application/pdf";
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_VIDEO_TYPES = [
+  "video/mp4",
+  "video/webm",
+  "video/quicktime", // .mov files
+  "video/x-msvideo", // .avi files - though less common for web
+  "delete"
+];
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 export const fileRouter = createTRPCRouter({
   upload: protectedProcedure
     .input(
       z.object({
-        initialAvatarUrl: z.string().optional(),
+        initialAvatarUrl: z.string().optional(), 
         bucketName: z.string(),
         fileName: z.string(),
         fileType: z.string(),
         folderName: z.string().optional(),
-        fileContent: z.string(), // Base64 encoded file content
+        fileContent: z.string(), 
       })
     )
     .mutation(async ({ input }) => {
@@ -42,27 +50,25 @@ export const fileRouter = createTRPCRouter({
         return {
           success: true,
           url: initialAvatarUrl,
-          filePath: "",
+          filePath: "", 
         };
       }
 
-
-      
       // Validate file type
-      if (![...ALLOWED_IMAGE_TYPES, ALLOWED_PDF_TYPE].includes(fileType)) {
+      const ALL_ALLOWED_TYPES = [...ALLOWED_IMAGE_TYPES, ALLOWED_PDF_TYPE, ...ALLOWED_VIDEO_TYPES];
+      if (!ALL_ALLOWED_TYPES.includes(fileType)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Invalid file type. Only images (JPEG, PNG, WebP, JPG) and PDFs are allowed.",
+          message: `Invalid file type. Allowed types: ${ALL_ALLOWED_TYPES.join(", ")}`,
         });
       }
-      
       
       // Validate file size (Base64 is ~33% larger than binary)
       const estimatedFileSize = Math.ceil((fileContent.length * 3) / 4);
       if (estimatedFileSize > MAX_FILE_SIZE) {
         throw new TRPCError({
           code: "BAD_REQUEST", 
-          message: "File exceeds maximum size of 10MB.",
+          message: "File exceeds maximum size of 100MB.",
         });
       }
 
@@ -74,14 +80,17 @@ export const fileRouter = createTRPCRouter({
         });
       }
 
+
+
       // Delete initial image if exists
       if (initialAvatarUrl) {
         const url = new URL(initialAvatarUrl);
         const pathname = decodeURIComponent(url.pathname);
-
+        console.log("Pathname:", pathname);
         // Remove leading slash and bucket name to get the full object path
         const objectPath = pathname.replace(`/${bucketName}/`, '');
 
+        console.log("Object path:", objectPath);
 
         const initialFile = bucket.file(objectPath);
 
@@ -90,31 +99,44 @@ export const fileRouter = createTRPCRouter({
             console.log("Initial image deleted successfully");
           })
           .catch((err) => {
-            console.error("Error deleting initial image:", err);
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Error deleting initial image: " + err.message,
+            });
           });
+      }
+
+      if (fileType === "delete") {
+        return {
+          success: true,
+          url: "",
+          filePath: "", 
+        };
       }
 
       // Convert base64 to buffer
       const buffer = Buffer.from(fileContent, "base64");
       
-      let processedBuffer, uniqueFileName, fileExtension;
+      let processedBuffer, uniqueFileName, fileExtension, finalContentType;
       
       // Process differently based on file type
       if (fileType === ALLOWED_PDF_TYPE) {
         // For PDFs, no processing needed
         processedBuffer = buffer;
         fileExtension = 'pdf';
-      } else {
+        finalContentType = ALLOWED_PDF_TYPE;
+      } else if (ALLOWED_IMAGE_TYPES.includes(fileType)) {
         // Process image with Sharp
         try {
           processedBuffer = await sharp(buffer)
-            .webp({ quality: 80 }) // Convert to WebP with 80% quality
-            .resize(800, 800, { // Resize to max 800x800 while maintaining aspect ratio
+            .webp({ quality: 80 }) 
+            .resize(800, 800, { 
               fit: 'inside',
               withoutEnlargement: true
             })
             .toBuffer();
           fileExtension = 'webp';
+          finalContentType = 'image/webp';
         } catch (error) {
           console.error("Error processing image:", error);
           throw new TRPCError({
@@ -122,18 +144,34 @@ export const fileRouter = createTRPCRouter({
             message: "Invalid image file. The file could not be processed.",
           });
         }
+      } else if (ALLOWED_VIDEO_TYPES.includes(fileType)) {
+        // For Videos, no processing needed, upload as is
+        processedBuffer = buffer;
+        // Determine extension from fileType
+        const typeParts = fileType.split('/');
+        fileExtension = typeParts.length > 1 ? typeParts[1] : 'mp4'; 
+        if (fileType === 'video/quicktime') fileExtension = 'mov';
+        finalContentType = fileType;
+      } else {
+        // Should not happen due to earlier validation, but as a fallback:
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Unsupported file type for processing.",
+        });
       }
 
       // Create unique filename
-      uniqueFileName = `${fileName}-${uuidv4()}.${fileExtension}`;
+      // Sanitize fileName input to prevent issues, remove extension if present
+      const sanitizedFileName = fileName.split('.').slice(0, -1).join('.') || fileName;
+      uniqueFileName = `${sanitizedFileName}-${uuidv4()}.${fileExtension}`;
       const filePath = folderName ? `${folderName}/${uniqueFileName}` : uniqueFileName;
       const file = bucket.file(filePath);
 
       // Upload processed file
       await file.save(processedBuffer, {
-        contentType: fileType === ALLOWED_PDF_TYPE ? ALLOWED_PDF_TYPE : 'image/webp',
+        contentType: finalContentType, 
         metadata: {
-          cacheControl: "public, max-age=31536000",
+          cacheControl: "public, max-age=31536000", 
         },
       });
 
@@ -172,7 +210,7 @@ export const fileRouter = createTRPCRouter({
       const [signedUrl] = await file.getSignedUrl({
         version: "v4",
         action: "read",
-        expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
+        expires: Date.now() + 7 * 24 * 60 * 60 * 1000, 
       });
 
       return {

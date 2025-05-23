@@ -19,6 +19,8 @@ type Workshop = {
   otherDetails: string | null;
   meetUrl: string | null;
   createdAt: Date;
+  bannerImage: string | null;
+  introductoryVideoUrl: string | null;
   mentor: {
     mentorName: string;
     user: {

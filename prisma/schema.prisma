@@ -325,6 +325,7 @@ model Workshop {
   courseDetails    Json
   otherDetails     String?
   meetLinks        Json? // Map of day index to meet link and scheduled date
+  introductoryVideoUrl String? // New field for introductory video URL
   enrollments      WorkshopEnrollment[]
 
   createdAt DateTime @default(now())

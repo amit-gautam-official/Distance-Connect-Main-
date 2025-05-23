@@ -80,6 +80,7 @@ export default function WorkshopDetailPage() {
     meetLinks: workshop?.meetLinks,
     createdAt: workshop?.createdAt,
     bannerImage: workshop?.bannerImage,
+    introductoryVideoUrl: workshop?.introductoryVideoUrl,
   }
 
   // Fetch workshop enrollments
@@ -366,7 +367,7 @@ if (!workshop) {
 }
 
 return (
-  <div className="container   mx-auto px-2 sm:px-6 py-4 pb-16 md:pb-6 sm:py-6 space-y-6 sm:space-y-8">
+  <div className="container mx-auto px-2 sm:px-6 py-4 pb-16 md:pb-6 sm:py-6 space-y-6 sm:space-y-8">
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
       <Button
         variant="ghost"
@@ -385,33 +386,18 @@ return (
       </Button>
     </div>
 
-    {workshop.bannerImage && (
-      <div className="relative h-64 w-full mb-6 rounded-lg overflow-hidden">
+    {workshopDetails.bannerImage && (
+      <div className="mb-6 rounded-lg overflow-hidden shadow-lg">
         <img
-          src={workshop.bannerImage}
-          alt={workshop.name}
-          className="w-full h-full object-cover"
+          src={workshopDetails.bannerImage}
+          alt={`${workshopDetails.name ?? 'Workshop'} banner`}
+          className="w-full h-auto object-cover max-h-[250px] sm:max-h-[300px] md:max-h-[350px] lg:max-h-[400px]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12 border-2 border-white/20">
-              <AvatarImage src={workshop.mentor.user.image || undefined} />
-              <AvatarFallback>{workshop.mentor.user.name?.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <h2 className="text-2xl font-bold text-white">{workshop.name}</h2>
-              <p className="text-gray-200">
-                by {workshop.mentor.mentorName || workshop.mentor.user.name}
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     )}
 
-    <div className="grid gap-2  sm:gap-6 lg:grid-cols-3">
-      <div className="lg:col-span-2 w-full">
+    <div className="flex flex-col lg:flex-row gap-6">
+      <div className="w-full lg:w-2/3">
         <Tabs defaultValue="details" value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
           <TabsList className="bg-white/80 backdrop-blur-sm border border-gray-100">
             <TabsTrigger value="details">Details</TabsTrigger>
@@ -683,8 +669,24 @@ return (
         </Tabs>
       </div>
 
-      <div>
-        <Card className="transition-all w-[90%] duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm border border-gray-100">
+      <div className="w-full lg:w-1/3 space-y-6">
+        {workshopDetails.introductoryVideoUrl && (
+          <div>
+            <h3 className="text-xl font-semibold mb-3 text-gray-700">Introductory Video</h3>
+            <div className="aspect-video w-full rounded-lg overflow-hidden shadow-lg bg-gray-900">
+              <video
+                src={workshopDetails.introductoryVideoUrl}
+                controls
+                className="w-full h-full object-contain"
+                poster={workshopDetails.bannerImage || undefined}
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+        )}
+
+        <Card className="transition-all w-full duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm border border-gray-100">
           <CardHeader>
             <CardTitle>Workshop Stats</CardTitle>
           </CardHeader>

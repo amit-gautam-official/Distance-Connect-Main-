@@ -134,8 +134,8 @@ export default function WorkshopDetailPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-6 sm:space-y-8">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+    <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 bg-gradient-to-br from-slate-50 to-sky-100/30 min-h-screen">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
         <Button
           variant="ghost"
           onClick={() => router.push("/student-dashboard/workshops")}
@@ -151,73 +151,37 @@ export default function WorkshopDetailPage() {
         )}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <div className="md:col-span-2">
-          <Card className="transition-all duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm overflow-hidden">
-            {workshop.bannerImage ? (
-              <div className="relative h-64 w-full">
-                <img
-                  src={workshop.bannerImage}
-                  alt={workshop.name}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <CardHeader className="absolute bottom-0 left-0 right-0 text-white">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-12 w-12 border-2 border-white/20">
-                      <AvatarImage src={workshop.mentor.user.image || undefined} />
-                      <AvatarFallback>{workshop.mentor.user.name?.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <CardTitle className="text-2xl font-bold text-white">{workshop.name}</CardTitle>
-                      <CardDescription className="text-gray-200">
-                        <Link className="hover:underline" href={`/mentors/${workshop.mentor.user.id}`}>by {workshop.mentor.mentorName || workshop.mentor.user.name}</Link>
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-              </div>
-            ) : (
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10 border-2 border-primary/10">
-                    <AvatarImage src={workshop.mentor.user.image || undefined} />
-                    <AvatarFallback>{workshop.mentor.user.name?.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <CardTitle>{workshop.name}</CardTitle>
-                    <CardDescription>
-                      by {workshop.mentor.mentorName || workshop.mentor.user.name}
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-            )}
-            <CardContent className="space-y-6">
-              {/* <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage
-                    src={workshop.mentor.user.image || ""}
-                    alt={workshop.mentor.mentorName || workshop.mentor.user.name || ""}
-                  />
-                  <AvatarFallback>
-                    {(workshop.mentor.mentorName || workshop.mentor.user.name || "M")
-                      .charAt(0)
-                      .toUpperCase()}
-                  </AvatarFallback>
+      {/* Banner Image */}
+      {workshop.bannerImage && (
+        <div className="mb-6 rounded-lg overflow-hidden shadow-lg">
+          <img
+            src={workshop.bannerImage}
+            alt={`${workshop.name} banner`}
+            className="w-full h-auto object-cover max-h-[250px] sm:max-h-[300px] md:max-h-[350px] lg:max-h-[400px]"
+          />
+        </div>
+      )}
+
+      {/* Main content: Two-column layout */}
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Left Column: Workshop Details */}
+        <div className="md:w-2/3 space-y-6">
+          <Card className="transition-all duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10 border-2 border-primary/10">
+                  <AvatarImage src={workshop.mentor.user.image || undefined} />
+                  <AvatarFallback>{workshop.mentor.user.name?.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="font-medium">
-                    {workshop.mentor.mentorName || workshop.mentor.user.name || "Mentor"}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {workshop.mentor.currentCompany && workshop.mentor.jobTitle
-                      ? `${workshop.mentor.jobTitle} at ${workshop.mentor.currentCompany}`
-                      : "Workshop Instructor"}
-                  </p>
+                  <CardTitle>{workshop.name}</CardTitle>
+                  <CardDescription>
+                    by {workshop.mentor.mentorName || workshop.mentor.user.name}
+                  </CardDescription>
                 </div>
-              </div> */}
-
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
               <div className="mt-2">
                 <h3 className="text-lg font-medium">Description</h3>
                 <p className="mt-2 text-gray-700">{workshop.description}</p>
@@ -270,10 +234,29 @@ export default function WorkshopDetailPage() {
           </Card>
         </div>
 
-        <div className="space-y-6">
-          <Card>
+        {/* Right Column: Video, Metadata, Actions */}
+        <div className="md:w-1/3 space-y-6">
+          {/* Introductory Video */}
+          {workshop.introductoryVideoUrl && (
+            <div>
+              <h3 className="text-xl font-semibold mb-3 text-gray-800">Introductory Video</h3>
+              <div className="aspect-video w-full rounded-lg overflow-hidden shadow-xl bg-gray-900">
+                <video
+                  src={workshop.introductoryVideoUrl}
+                  controls
+                  className="w-full h-full object-contain"
+                  poster={workshop.bannerImage || undefined}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            </div>
+          )}
+
+          {/* Price, Mentor, etc. */}
+          <Card className="transition-all w-full duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle>Workshop Details</CardTitle>
+              <CardTitle>Workshop Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -347,8 +330,68 @@ export default function WorkshopDetailPage() {
             </CardContent>
           </Card>
 
+          {/* Enrollment Button / Status */}
+          {!isEnrolled && workshop.price > 0 && (
+            <Card className="transition-all w-full duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle>Enroll in Workshop</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button 
+                  className="w-full mt-4" 
+                  onClick={() => setIsEnrollDialogOpen(true)}
+                >
+                  Enroll Now
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+          
+
+          {/* Meeting Links (if enrolled) */}
+          {isEnrolled && workshop.meetLinks && Object.keys(workshop.meetLinks).length > 0 && (
+            <Card className="transition-all w-full duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle>Meeting Links</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* Display meeting links for each day */}
+                <div className="space-y-2">
+                  {Object.entries(workshop.meetLinks as Record<string, any>).map(([key, value]) => {
+                    const dayNumber = key.replace('day', '');
+                    const scheduledDate = new Date(value.scheduledFor);
+                    const formattedDate = scheduledDate.toLocaleDateString(undefined, {
+                      weekday: 'long',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    });
+                    
+                    return (
+                      <div key={key} className="border rounded-md p-2 sm:p-3 hover:border-primary/20 transition-colors">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium">Day {dayNumber}</span>
+                          <span className="text-xs text-gray-500">{formattedDate}</span>
+                        </div>
+                        <Button 
+                          className="w-full transition-all hover:shadow-md"
+                          onClick={() => window.open(value.link, "_blank")}
+                          size="sm"
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Join Session {dayNumber}
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {isEnrolled && (
-            <Card className="transition-all duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm">
+            <Card className="transition-all w-full duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle>Your Enrollment</CardTitle>
               </CardHeader>

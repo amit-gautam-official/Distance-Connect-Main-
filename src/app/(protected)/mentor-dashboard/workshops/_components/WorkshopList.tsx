@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/trpc/react";
 import { Calendar, Clock, Edit, Eye, Trash, Users } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -33,11 +33,14 @@ type Workshop = {
   description: string;
   numberOfDays: number;
   schedule: ScheduleItem[];
+  scheduleType: "recurring" | "custom";
+  startDate?: string | null;
   price: number;
   learningOutcomes: string[];
   courseDetails: Record<string, any>;
   otherDetails: string | null;
   meetUrl: string | null;
+  introductoryVideoUrl: string | null;
   createdAt: Date;
   _count?: { enrollments: number };
   bannerImage: string | null;
@@ -53,7 +56,10 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
   const router = useRouter();
   const [workshopToDelete, setWorkshopToDelete] = useState<string | null>(null);
   const [workshopToEdit, setWorkshopToEdit] = useState<Workshop | null>(null);
-  
+  const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
+
+  const MAX_DESC_LENGTH = 150; // Maximum characters for description
+
   const deleteWorkshop = api.workshop.deleteWorkshop.useMutation({
     onSuccess: () => {
       toast.success("Workshop deleted successfully");
@@ -114,26 +120,14 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
               </div>
             </CardContent>
             <CardFooter className="flex justify-between p-3 sm:p-4 border-t">
-              <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-              <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+              <div className="flex gap-2">
+                <div className="h-8 w-8 bg-gray-200 rounded"></div>
+                <div className="h-8 w-8 bg-gray-200 rounded"></div>
+              </div>
             </CardFooter>
           </Card>
         ))}
-      </div>
-    );
-  }
-
-  // Empty state
-  if (workshops.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center p-4 sm:p-8 text-center border rounded-lg bg-gray-50/80 backdrop-blur-sm shadow-sm mx-2 sm:mx-4 border-gray-100">
-        <h3 className="text-lg font-medium text-gray-900">No workshops yet</h3>
-        <p className="mt-1 text-sm text-gray-500">
-          Create your first workshop to get started
-        </p>
-        <Button onClick={() => router.refresh()} className="mt-4">
-          Refresh
-        </Button>
       </div>
     );
   }
@@ -144,40 +138,87 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
       style: "currency",
       currency: "INR",
       minimumFractionDigits: 0,
-    }).format(price / 100); // Convert paise to rupees
+      maximumFractionDigits: 0,
+    }).format(price);
   };
 
   return (
     <>
       <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
         {workshops.map((workshop) => (
-          <Card key={workshop.id} className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] bg-white/80 backdrop-blur-sm border border-gray-100">
-            {workshop.bannerImage ? (
-              <div className="relative h-48 w-full">
-                <img
-                  src={workshop.bannerImage}
-                  alt={workshop.name}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <CardHeader className="absolute bottom-0 left-0 right-0 text-white">
-                  <CardTitle className="text-xl font-bold">{workshop.name}</CardTitle>
+          <Card key={workshop.id} className="overflow-hidden group rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-white flex flex-col">
+            {(workshop.bannerImage || workshop.introductoryVideoUrl) ? (
+              <div
+                className="relative h-48 w-full"
+                onMouseEnter={() => {
+                  if (workshop.introductoryVideoUrl && videoRefs.current[workshop.id]) {
+                    videoRefs.current[workshop.id]?.play().catch(error => console.warn("Video play failed:", error));
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (workshop.introductoryVideoUrl && videoRefs.current[workshop.id]) {
+                    videoRefs.current[workshop.id]?.pause();
+                    if (videoRefs.current[workshop.id]) { // Check again before setting currentTime
+                        videoRefs.current[workshop.id]!.currentTime = 0;
+                    }
+                  }
+                }}
+              >
+                {workshop.bannerImage && (
+                  <img
+                    src={workshop.bannerImage }
+                    alt={workshop.name}
+                    className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-300 ${workshop.introductoryVideoUrl ? 'group-hover:opacity-0' : 'opacity-100'}`}
+                  />
+                )}
+                {workshop.introductoryVideoUrl && (
+                  <video
+                    ref={(el) => { if (videoRefs.current) videoRefs.current[workshop.id] = el; }}
+                    src={workshop.introductoryVideoUrl}
+                    className="absolute top-0 left-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    loop
+                    muted
+                    playsInline
+                    poster={workshop.bannerImage ?? undefined}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+                {/* Fallback background if only video is present and not hovered */}
+                {workshop.introductoryVideoUrl && !workshop.bannerImage && (
+                   <div className="absolute top-0 left-0 w-full h-full bg-gray-200 group-hover:opacity-0 transition-opacity duration-300" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent z-10" />
+                <CardHeader className="absolute bottom-0 left-0 right-0 text-white p-3 sm:p-4 z-20">
+                  <CardTitle className="text-lg sm:text-xl font-bold">{workshop.name}</CardTitle>
                 </CardHeader>
               </div>
             ) : (
-              <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/0 pb-2 group-hover:from-primary/10 group-hover:to-primary/5 transition-all">
-                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary transition-colors">
-                  {workshop.name}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {workshop.numberOfDays} day{workshop.numberOfDays > 1 ? "s" : ""} workshop
-                </p>
+              // Fallback if no banner and no video, regular CardHeader for title
+              <CardHeader className="p-3 sm:p-4">
+                <CardTitle>{workshop.name}</CardTitle>
               </CardHeader>
             )}
-            <CardContent className="p-3 sm:p-4 space-y-3">
-              <p className="text-sm text-gray-600 line-clamp-2">
-                {workshop.description}
-              </p>
+            
+            <CardContent className="p-3 sm:p-4 space-y-2 flex-grow">
+              <div className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+                {workshop.description.length > MAX_DESC_LENGTH ? (
+                  <>
+                    {`${workshop.description.substring(0, MAX_DESC_LENGTH)}... `}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent card click-through
+                        router.push(`/mentor-dashboard/workshops/${workshop.id}`);
+                      }}
+                      className="ml-1 inline font-medium text-primary hover:underline"
+                    >
+                      View Details
+                    </button>
+                  </>
+                ) : (
+                  workshop.description
+                )}
+              </div>
               
               <div className="flex items-center gap-2 text-sm text-gray-600 group-hover:text-primary transition-colors">
                 <Calendar className="h-4 w-4 text-primary" />

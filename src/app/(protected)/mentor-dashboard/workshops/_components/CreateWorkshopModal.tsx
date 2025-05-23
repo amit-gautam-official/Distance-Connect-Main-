@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import {
   Select,
@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Plus, Calendar, Camera } from "lucide-react";
+import { X, Plus, Calendar, Camera, Video as VideoIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { TRPCError } from "@trpc/server";
 
@@ -53,8 +53,14 @@ export default function CreateWorkshopModal({
 }: CreateWorkshopModalProps) {
   const [bannerImage, setBannerImage] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string>("");
-  const [isUploading, setIsUploading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false); 
   const bannerInputRef = useRef<HTMLInputElement>(null);
+
+  // New state for introductory video
+  const [introVideoFile, setIntroVideoFile] = useState<File | null>(null);
+  const [introVideoPreview, setIntroVideoPreview] = useState<string>("");
+  const introVideoInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -64,7 +70,7 @@ export default function CreateWorkshopModal({
     learningOutcomes: [""],
     otherDetails: "",
     scheduleType: "recurring" as "recurring" | "custom",
-    startDate: "",
+    startDate: "", 
   });
 
   // For recurring schedule (day and time)
@@ -81,39 +87,92 @@ export default function CreateWorkshopModal({
     "Day 1": "",
   });
 
+  // Helper to convert file to base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(new Error("File reading failed: " + error.target?.error?.message));
+    });
+  };
+
+  const uploadWorkshopVideo = api.workshop.uploadWorkshopIntroVideo.useMutation({
+    onSuccess: () => {
+      toast.success("Workshop introductory video uploaded!");
+    },
+    onError: (error) => {
+      toast.error("Failed to upload video: " + error.message);
+    },
+  });
+
+  const createWorkshop = api.workshop.createWorkshop.useMutation({
+    onSuccess: async (createdWorkshopData) => {
+      let videoUploadSuccess = true;
+      if (introVideoFile && createdWorkshopData?.id) {
+        setIsUploadingVideo(true);
+        try {
+          const videoBase64 = await fileToBase64(introVideoFile);
+          if (!videoBase64) {
+            throw new Error("Failed to convert video to base64");
+          }
+          await uploadWorkshopVideo.mutateAsync({
+            workshopId: createdWorkshopData.id,
+            video: {
+              fileName: introVideoFile.name,
+              fileType: introVideoFile.type,
+              base64Content: videoBase64.split(',')[1] || "", 
+            },
+          });
+        } catch (videoError: any) {
+          videoUploadSuccess = false;
+          console.error("Video upload failed after workshop creation:", videoError);
+        } finally {
+          setIsUploadingVideo(false);
+        }
+      }
+
+      if (videoUploadSuccess) {
+        toast.success("Workshop created successfully!");
+        resetForm();
+        onSuccess(); 
+      } else {
+        toast.error("Workshop created, but video upload failed. You can add it later by editing the workshop.");
+        resetForm(); 
+        onSuccess();
+      }
+    },
+    onError: (error) => {
+      setIsUploading(false); 
+      const message = error?.shape?.message || "Failed to create workshop.";
+      toast.error(message);
+    },
+  });
+
   const uploadImage = api.file.upload.useMutation({
     onSuccess: (data) => {
       if (data?.url) {
-        // After successful image upload, create the workshop with the banner URL
         createWorkshop.mutate({
           name: form.name,
           description: form.description,
           numberOfDays: parseInt(form.numberOfDays),
           bannerImage: data.url,
           scheduleType: form.scheduleType,
-          startDate: form.startDate,
+          startDate: form.startDate || undefined,
           schedule: form.scheduleType === "recurring" ? recurringSchedule : customSchedule,
-          price: parseInt(form.price),
-          learningOutcomes: form.learningOutcomes.filter((outcome) => outcome !== ""),
+          price: parseInt(form.price) * 100, 
+          learningOutcomes: form.learningOutcomes.filter((outcome) => outcome.trim() !== ""),
           courseDetails,
           otherDetails: form.otherDetails,
         });
+      } else {
+        setIsUploading(false);
+        toast.error("Banner upload succeeded but URL was not returned.");
       }
     },
     onError: (error) => {
       setIsUploading(false);
       toast.error("Failed to upload banner: " + error.message);
-    },
-  });
-
-  const createWorkshop = api.workshop.createWorkshop.useMutation({
-    onSuccess: () => {
-      resetForm();
-      onSuccess();
-    },
-    onError: (error  ) => {
-        const message = error?.shape?.message;
-        toast(message);
     },
   });
 
@@ -236,95 +295,87 @@ export default function CreateWorkshopModal({
     }
   };
 
-  const handleBannerSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handler for intro video selection
+  const handleIntroVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (file) {
+      const allowedTypes = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"];
+      const maxSize = 100 * 1024 * 1024; 
 
-    const ALLOWED_IMAGE_TYPES = [
-      "image/jpeg", 
-      "image/png", 
-      "image/webp"
-    ];
-
-    // Validate file type
-    if (!file.type || !ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      toast.error("Please select an image file (JPEG, PNG, or WebP)");
-      return;
+      if (!allowedTypes.includes(file.type)) {
+        toast.error(`Invalid video type. Allowed: MP4, WebM, MOV.`);
+        if (introVideoInputRef.current) introVideoInputRef.current.value = "";
+        setIntroVideoFile(null);
+        setIntroVideoPreview("");
+        return;
+      }
+      if (file.size > maxSize) {
+        toast.error("Video file is too large (max 100MB).");
+        if (introVideoInputRef.current) introVideoInputRef.current.value = "";
+        setIntroVideoFile(null);
+        setIntroVideoPreview("");
+        return;
+      }
+      setIntroVideoFile(file);
+      setIntroVideoPreview(URL.createObjectURL(file));
+    } else {
+      setIntroVideoFile(null);
+      setIntroVideoPreview("");
     }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image size should be less than 5MB");
-      return;
-    }
-
-    setBannerImage(file);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setBannerPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Filter out empty learning outcomes
-    const filteredOutcomes = form.learningOutcomes.filter(outcome => outcome.trim() !== "");
-    
-    if (filteredOutcomes.length === 0) {
-      toast.error("Please add at least one learning outcome");
+    if (!form.name.trim() || !form.description.trim()) {
+      toast.error("Workshop name and description are required.");
       return;
     }
-    
-    // Validate schedule based on type
-    if (form.scheduleType === "recurring" && !form.startDate) {
-      toast.error("Please select a start date for recurring schedule");
+    if (parseInt(form.numberOfDays) <=0) {
+      toast.error("Number of days must be greater than 0.");
       return;
     }
-    if (form.description.length < 100) {
-      toast.error("Description must be at least 100 characters");
+    if (parseInt(form.price) < 0) {
+      toast.error("Price cannot be negative.");
       return;
     }
+
+    setIsUploading(true); 
 
     if (bannerImage) {
-      setIsUploading(true);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        const base64Content = base64String.split(",")[1]; // Remove the data URL prefix
-        if (!base64Content) return;
-        
+      try {
+        const bannerBase64 = await fileToBase64(bannerImage);
+        if (!bannerBase64) {
+          throw new Error("Failed to convert banner image to base64");
+        }
         uploadImage.mutate({
           bucketName: "dc-public-files",
-          fileName: `workshop-banner-${Date.now()}`,
+          folderName: "dc-ws-banner",
+          fileName: bannerImage.name,
           fileType: bannerImage.type,
-          fileContent: base64Content,
-          folderName: "dc-ws-banner-image"
+          fileContent: bannerBase64.split(',')[1] || "", 
         });
-      };
-      reader.readAsDataURL(bannerImage);
-      return;
+      } catch (error) {
+        setIsUploading(false);
+        toast.error("Error processing banner image.");
+        return;
+      }
+    } else {
+      createWorkshop.mutate({
+        name: form.name,
+        description: form.description,
+        numberOfDays: parseInt(form.numberOfDays),
+        scheduleType: form.scheduleType,
+        startDate: form.startDate || undefined,
+        schedule: form.scheduleType === "recurring" ? recurringSchedule : customSchedule,
+        price: parseInt(form.price) * 100, 
+        learningOutcomes: form.learningOutcomes.filter((outcome) => outcome.trim() !== ""),
+        courseDetails,
+        otherDetails: form.otherDetails,
+      });
     }
-
-    createWorkshop.mutate({
-      name: form.name,
-      description: form.description,
-      numberOfDays: parseInt(form.numberOfDays),
-      scheduleType: form.scheduleType,
-      startDate: form.startDate,
-      schedule: form.scheduleType === "recurring" ? recurringSchedule : customSchedule,
-      price: parseInt(form.price),
-      learningOutcomes: filteredOutcomes,
-      courseDetails,
-      otherDetails: form.otherDetails,
-    });
   };
 
   const resetForm = () => {
-    setBannerImage(null);
-    setBannerPreview("");
-    setIsUploading(false);
     setForm({
       name: "",
       description: "",
@@ -334,37 +385,43 @@ export default function CreateWorkshopModal({
       otherDetails: "",
       scheduleType: "recurring",
       startDate: "",
+      
     });
+    setBannerImage(null);
+    setBannerPreview("");
+    if (bannerInputRef.current) bannerInputRef.current.value = "";
+
+    setIntroVideoFile(null);
+    setIntroVideoPreview("");
+    if (introVideoInputRef.current) introVideoInputRef.current.value = "";
+
     setRecurringSchedule([{ day: "Monday", time: "10:00 AM" }]);
     setCustomSchedule([{ date: getTodayDateString(), time: "10:00 AM" }]);
-    setCourseDetails({ "Day 1": "" });
+    setCourseDetails({
+      "Day 1": "",
+    });
+
+    
+
+    setIsUploading(false);
+    setIsUploadingVideo(false);
   };
 
-  const days = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-  ];
+  useEffect(() => {
+    const days = parseInt(form.numberOfDays) || 0;
+    const newCourseDetails: Record<string, string> = {};
+    for (let i = 1; i <= days; i++) {
+      newCourseDetails[`Day ${i}`] = courseDetails[`Day ${i}`] || "";
+    }
+    setCourseDetails(newCourseDetails);
 
-  const times = [
-    "8:00 AM",
-    "9:00 AM",
-    "10:00 AM",
-    "11:00 AM",
-    "12:00 PM",
-    "1:00 PM",
-    "2:00 PM",
-    "3:00 PM",
-    "4:00 PM",
-    "5:00 PM",
-    "6:00 PM",
-    "7:00 PM",
-    "8:00 PM",
-  ];
+    if (form.scheduleType === 'custom' && customSchedule.length > days && days > 0) {
+      setCustomSchedule(prev => prev.slice(0, days));
+    }
+
+  }, [form.numberOfDays, form.scheduleType]); 
+
+  if (!isOpen) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -425,10 +482,82 @@ export default function CreateWorkshopModal({
                     type="file"
                     accept="image/jpeg,image/png,image/webp,image/jpg"
                     className="hidden"
-                    onChange={handleBannerSelect}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+
+                      const ALLOWED_IMAGE_TYPES = [
+                        "image/jpeg", 
+                        "image/png", 
+                        "image/webp"
+                      ];
+
+                      if (!file.type || !ALLOWED_IMAGE_TYPES.includes(file.type)) {
+                        toast.error("Please select an image file (JPEG, PNG, or WebP)");
+                        return;
+                      }
+
+                      if (file.size > 5 * 1024 * 1024) {
+                        toast.error("Image size should be less than 5MB");
+                        return;
+                      }
+
+                      setBannerImage(file);
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setBannerPreview(reader.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    }}
                     disabled={isUploading}
                   />
                 </div>
+              </div>
+            </div>
+
+            <div>
+              <Label>Introductory Video (Optional)</Label>
+              <div className="mt-2 flex flex-col items-center space-y-2 p-3 border border-dashed rounded-lg">
+                <Input
+                  id="introVideo"
+                  type="file"
+                  accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
+                  className="hidden"
+                  ref={introVideoInputRef}
+                  onChange={handleIntroVideoSelect}
+                />
+                {!introVideoPreview && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full transition-all hover:bg-primary/5"
+                    onClick={() => introVideoInputRef.current?.click()}
+                  >
+                    <VideoIcon className="h-5 w-5 mr-2" />
+                    Choose Video (Max 100MB)
+                  </Button>
+                )}
+                {introVideoPreview && (
+                  <div className="w-full space-y-2">
+                    <video src={introVideoPreview} controls className="w-full rounded-md max-h-60" />
+                    <p className="text-sm text-muted-foreground truncate">
+                      Selected: {introVideoFile?.name}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => {
+                        setIntroVideoFile(null);
+                        setIntroVideoPreview("");
+                        if (introVideoInputRef.current) introVideoInputRef.current.value = "";
+                      }}
+                    >
+                      <X className="h-4 w-4 mr-1" /> Remove Video
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -495,7 +624,7 @@ export default function CreateWorkshopModal({
                             <SelectValue placeholder="Select day" />
                           </SelectTrigger>
                           <SelectContent>
-                            {days.map((day) => (
+                            {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
                               <SelectItem key={day} value={day}>
                                 {day}
                               </SelectItem>
@@ -510,7 +639,7 @@ export default function CreateWorkshopModal({
                             <SelectValue placeholder="Select time" />
                           </SelectTrigger>
                           <SelectContent>
-                            {times.map((time) => (
+                            {["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM"].map((time) => (
                               <SelectItem key={time} value={time}>
                                 {time}
                               </SelectItem>
@@ -569,7 +698,7 @@ export default function CreateWorkshopModal({
                             <SelectValue placeholder="Select time" />
                           </SelectTrigger>
                           <SelectContent>
-                            {times.map((time) => (
+                            {["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM"].map((time) => (
                               <SelectItem key={time} value={time}>
                                 {time}
                               </SelectItem>
@@ -690,9 +819,15 @@ export default function CreateWorkshopModal({
             </Button>
             <Button 
               type="submit" 
-              disabled={createWorkshop.isPending || isUploading}
+              disabled={uploadImage.isPending || createWorkshop.isPending || isUploadingVideo || isUploading}
               className="w-full sm:w-auto transition-all ">
-              {isUploading ? "Uploading Banner..." : createWorkshop.isPending ? "Creating..." : "Create Workshop"}
+              {isUploadingVideo 
+                ? "Uploading Video..." 
+                : (uploadImage.isPending 
+                  ? "Uploading Banner..." 
+                  : (createWorkshop.isPending 
+                    ? "Creating Workshop..." 
+                    : "Create Workshop"))}
             </Button>
           </DialogFooter>
         </form>
