@@ -255,8 +255,8 @@ export const workshopRouter = createTRPCRouter({
 
     
 
-  // Get a specific workshop by ID (public)
-  getWorkshopById: publicProcedure
+  // Get a specific workshop by ID 
+  getWorkshopById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const workshop = await ctx.db.workshop.findUnique({
@@ -285,7 +285,9 @@ export const workshopRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Workshop not found" });
       }
       const isWorkshopPaid = workshop.price > 0;
-      const currentUserEnrollment = workshop.enrollments.length > 0 ? workshop.enrollments[0] : null;
+      const currentUserEnrollment = workshop.enrollments.find(
+        (enrollment) => enrollment.student.userId === ctx?.dbUser?.id
+      ) ?? null;
 
       let filteredMeetLinks: Record<string, { link: string; scheduledFor: string; generated: string }> | null = null;
 
