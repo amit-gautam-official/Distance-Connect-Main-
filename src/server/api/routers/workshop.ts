@@ -375,6 +375,104 @@ export const workshopRouter = createTRPCRouter({
       });
     }),
 
+  // Get all workshops for public listing
+  getPublicWorkshops: publicProcedure
+    .input(z.object({ limit: z.number().min(1).max(100).nullish(), cursor: z.string().nullish() })) // Optional pagination
+    .query(async ({ ctx, input }) => {
+      const limit = input.limit ?? 10; // Default limit
+      const { cursor } = input;
+      const workshops = await ctx.db.workshop.findMany({
+        take: limit + 1, // get an extra item to see if there's a next page
+        cursor: cursor ? { id: cursor } : undefined,
+        where: {
+          // Add any conditions for public workshops, e.g., published: true if you add such a field
+        },
+        select: {
+          id: true,
+          name: true,
+          description: true, // Consider truncating this on the client for list view
+          bannerImage: true,
+          price: true,
+          numberOfDays: true,
+          learningOutcomes: true, // Consider taking only a few for list view
+          mentor: {
+            select: {
+              user: {
+                select: {
+                  name: true,
+                  image: true,
+                },
+              },
+            },
+          },
+          _count: {
+            select: { enrollments: true },
+          },
+          createdAt: true, // For sorting or display
+        },
+        orderBy: {
+          createdAt: 'desc', // Or any other preferred order
+        },
+      });
+
+      let nextCursor: typeof cursor | undefined = undefined;
+      if (workshops.length > limit) {
+        const nextItem = workshops.pop(); // remove the extra item
+        nextCursor = nextItem!.id;
+      }
+      return {
+        workshops,
+        nextCursor,
+      };
+    }),
+
+  // Get a specific workshop by ID for public detailed view
+  getPublicWorkshopById: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const workshop = await ctx.db.workshop.findUnique({
+        where: { id: input.id },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          bannerImage: true,
+          introductoryVideoUrl: true,
+          price: true,
+          numberOfDays: true,
+          scheduleType: true,
+          startDate: true,
+          schedule: true, // This is JSON, client can parse
+          learningOutcomes: true,
+          courseDetails: true, // This is JSON, client can parse
+          otherDetails: true,
+          mentor: {
+            select: {
+              user: {
+                select: {
+                  id: true, // For linking to mentor's public profile if you have one
+                  name: true,
+                  image: true,
+                },
+              },
+              bio: true,
+              jobTitle: true,
+              currentCompany: true,
+              skills: true, // Added skills
+            },
+          },
+          _count: {
+            select: { enrollments: true },
+          },
+        },
+      });
+
+      if (!workshop) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Workshop not found" });
+      }
+      return workshop;
+    }),
+
   // Enroll in a workshop (student only)
   enrollInWorkshop: protectedProcedure
     .input(z.object({ 

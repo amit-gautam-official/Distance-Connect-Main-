@@ -11,6 +11,7 @@ import { auth } from "@/server/auth";
 
 import { db } from "@/server/db";
 import { SessionUser } from "@/types/sessionUser";
+import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   title: "Distance Connect",
@@ -44,9 +45,11 @@ export default async function RootLayout({
 
   return (
     <>
+      <SessionProvider session={session}>
       <Navbar role={role!} blogs={initialBlogs} loggedId={loggedIn} />
       {children}
       <Footer />
+      </SessionProvider>
     </>
   );
 }

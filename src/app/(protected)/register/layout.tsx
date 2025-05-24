@@ -17,7 +17,12 @@ export const metadata: Metadata = {
 export default async function Layout({ children }: { children: React.ReactNode }) {
 
   const session = await auth();
+
   const user = session?.user as SessionUser | undefined;
+
+  if (!user) {
+    redirect('/auth/login');
+  }
   const dbUser = await db.user.findUnique({
     where: { id: user?.id },
     select: {
