@@ -178,7 +178,7 @@ model RazorpayOrder {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Student       Student? @relation(fields: [studentUserId], references: [userId])
+  student       Student? @relation(fields: [studentUserId], references: [userId])
   studentUserId String?  @db.ObjectId
 }
 
@@ -312,22 +312,22 @@ model Workshop {
   mentor       Mentor @relation(fields: [mentorUserId], references: [userId])
   mentorUserId String @db.ObjectId
 
-  name             String
-  description      String
-  numberOfDays     Int
-  bannerImage      String?
-  introVideo       String?
-  scheduleType     String    @default("recurring") // "recurring" or "custom"
-  startDate        DateTime? // Start date for recurring schedule
-  schedule         Json[] // Array of objects with day and time for recurring, or date and time for custom
-  price            Int // Price in paise (e.g., 70000 for ₹700.00)
-  learningOutcomes String[]
-  courseDetails    Json
-  otherDetails     String?
-  meetLinks        Json? // Map of day index to meet link and scheduled date
+  name                 String
+  description          String
+  numberOfDays         Int
+  bannerImage          String?
+  introVideo           String?
+  scheduleType         String               @default("recurring") // "recurring" or "custom"
+  startDate            DateTime? // Start date for recurring schedule
+  schedule             Json[] // Array of objects with day and time for recurring, or date and time for custom
+  price                Int // Price in paise (e.g., 70000 for ₹700.00)
+  learningOutcomes     String[]
+  courseDetails        Json
+  otherDetails         String?
+  meetLinks            Json? // Map of day index to meet link and scheduled date
   introductoryVideoUrl String? // New field for introductory video URL
-  enrollments      WorkshopEnrollment[]
-  initialFreeSessions Int @default(0)
+  enrollments          WorkshopEnrollment[]
+  initialFreeSessions  Int                  @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -341,8 +341,6 @@ model WorkshopEnrollment {
 
   student       Student @relation(fields: [studentUserId], references: [userId])
   studentUserId String  @db.ObjectId
-
-  
 
   paymentStatus Boolean         @default(false)
   orders        RazorpayOrder[]

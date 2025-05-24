@@ -221,6 +221,40 @@ export const workshopRouter = createTRPCRouter({
       });
     }),
 
+
+    getWorkshopDetailsByIdForMentor: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const workshop = await ctx.db.workshop.findUnique({
+        where: { id: input.id },
+        include: {
+          mentor: {
+            include: {
+              user: true,
+            },
+          },
+          enrollments: {
+            include: {
+              student: {
+                include: {
+                  user: true,
+                },
+              },
+            },
+          },
+          _count: {
+            select: { enrollments: true },
+          },
+        },
+      });
+      if (!workshop || workshop.mentorUserId !== ctx?.dbUser?.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "You do not have permission to view this workshop" });
+      }
+      return workshop;
+    }),
+
+    
+
   // Get a specific workshop by ID (public)
   getWorkshopById: publicProcedure
     .input(z.object({ id: z.string() }))
@@ -395,6 +429,16 @@ export const workshopRouter = createTRPCRouter({
           studentUserId: ctx.dbUser.id,
         },
         include: {
+          student: {
+            include: {
+              user: {
+                select: {
+                  name: true,
+                  email: true,
+                },
+              },
+            },
+          },
           workshop: {
             include: {
               mentor: {
