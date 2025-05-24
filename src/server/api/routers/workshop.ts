@@ -38,7 +38,7 @@ export const workshopRouter = createTRPCRouter({
       ),
       price: z.number().int().min(0, "Price cannot be negative"),
       learningOutcomes: z.array(z.string()),
-      courseDetails: z.record(z.string()), // Refined from z.any()
+      courseDetails: z.record(z.string(), z.object({ description: z.string().min(1, "Session description cannot be empty."), isFreeSession: z.boolean() })), // Corrected schema
       otherDetails: z.string().optional()
     }))
     .mutation(async ({ ctx, input }) => {
@@ -94,7 +94,7 @@ export const workshopRouter = createTRPCRouter({
       ]).optional(),
       price: z.number().int().min(0, "Price cannot be negative").optional(),
       learningOutcomes: z.array(z.string()).optional(),
-      courseDetails: z.record(z.string()).optional(), // Refined from z.any()
+      courseDetails: z.record(z.object({ description: z.string().min(1, "Session description cannot be empty."), isFreeSession: z.boolean() })).optional(), // Updated schema
       otherDetails: z.string().optional(),
       meetLinks: z.record(MeetLinkEntrySchema).optional(), // Refined from z.any()
     }))
@@ -250,7 +250,70 @@ export const workshopRouter = createTRPCRouter({
       if (!workshop) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Workshop not found" });
       }
-      return workshop;
+      const isWorkshopPaid = workshop.price > 0;
+      const currentUserEnrollment = workshop.enrollments.length > 0 ? workshop.enrollments[0] : null;
+
+      let filteredMeetLinks: Record<string, { link: string; scheduledFor: string; generated: string }> | null = null;
+
+      if (workshop.meetLinks && typeof workshop.meetLinks === 'object') {
+        filteredMeetLinks = {}; // Initialize if meetLinks exist
+
+        for (const dayKey of Object.keys(workshop.meetLinks)) {
+          const meetLinkData = (workshop.meetLinks as Record<string, any>)[dayKey];
+          if (!meetLinkData || !meetLinkData.link) continue;
+
+          // Find the corresponding session detail from courseDetails
+          const sessionKeyInCourseDetails = dayKey.startsWith('day') ? `Day ${dayKey.substring(3)}` : dayKey;
+          const actualSessionDetail = (workshop.courseDetails as Record<string, { description: string; isFreeSession: boolean }>)[
+            sessionKeyInCourseDetails
+          ];
+
+          if (!actualSessionDetail) {
+            // If no specific session detail, assume it's part of the main workshop payment structure
+            if (isWorkshopPaid) {
+              if (currentUserEnrollment && currentUserEnrollment.paymentStatus) {
+                filteredMeetLinks[dayKey] = meetLinkData;
+              }
+            } else { // Free workshop
+              if (currentUserEnrollment) {
+                filteredMeetLinks[dayKey] = meetLinkData;
+              }
+            }
+            continue; // Move to next meet link
+          }
+
+          const isSessionActuallyFree = actualSessionDetail.isFreeSession === true;
+
+          if (isSessionActuallyFree) {
+            // Free session: only requires enrollment
+            if (currentUserEnrollment) {
+              filteredMeetLinks[dayKey] = meetLinkData;
+            }
+          } else {
+            // Not a free session (i.e., paid or part of overall workshop cost)
+            if (isWorkshopPaid) {
+              // Workshop itself is paid
+              if (currentUserEnrollment && currentUserEnrollment.paymentStatus) {
+                filteredMeetLinks[dayKey] = meetLinkData;
+              }
+            } else {
+              // Workshop itself is free (this case implies the session is part of the free workshop)
+              if (currentUserEnrollment) {
+                filteredMeetLinks[dayKey] = meetLinkData;
+              }
+            }
+          }
+        }
+        // If filteredMeetLinks is empty after processing, set it back to null
+        if (Object.keys(filteredMeetLinks).length === 0) {
+          filteredMeetLinks = null;
+        }
+      }
+
+      return {
+        ...workshop,
+        meetLinks: filteredMeetLinks,
+      };
     }),
 
   // Get all available workshops (public)
@@ -280,7 +343,6 @@ export const workshopRouter = createTRPCRouter({
   enrollInWorkshop: protectedProcedure
     .input(z.object({ 
       workshopId: z.string(),
-      paymentStatus: z.boolean().default(false),
     }))
     .mutation(async ({ ctx, input }) => {
       // Verify the user is a student
@@ -310,11 +372,13 @@ export const workshopRouter = createTRPCRouter({
         throw new TRPCError({ code: "CONFLICT", message: "You are already enrolled in this workshop" });
       }
 
+      const isFreeWorkshop = workshop.price === 0;
+
       return ctx.db.workshopEnrollment.create({
         data: {
           workshopId: input.workshopId,
           studentUserId: ctx.dbUser.id,
-          paymentStatus: input.paymentStatus,
+          paymentStatus: isFreeWorkshop, // Set paymentStatus to true if workshop is free
         },
       });
     }),
@@ -329,7 +393,6 @@ export const workshopRouter = createTRPCRouter({
       return ctx.db.workshopEnrollment.findMany({
         where: {
           studentUserId: ctx.dbUser.id,
-          paymentStatus: true,
         },
         include: {
           workshop: {
@@ -371,7 +434,6 @@ export const workshopRouter = createTRPCRouter({
       return ctx.db.workshopEnrollment.findMany({
         where: {
           workshopId: input.workshopId,
-          paymentStatus: true,
         },
         include: {
           student: {

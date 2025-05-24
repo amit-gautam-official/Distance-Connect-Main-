@@ -81,7 +81,6 @@ export default function WorkshopList({
       try {
         await enrollInWorkshop.mutateAsync({ 
           workshopId: workshopToEnroll,
-          paymentStatus: true // In a real app, this would be set after payment confirmation
         });
       } catch (error) {
         // Error handled in the mutation

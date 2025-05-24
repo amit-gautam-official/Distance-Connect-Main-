@@ -83,8 +83,11 @@ export default function CreateWorkshopModal({
     { date: getTodayDateString(), time: "10:00 AM" },
   ]);
 
-  const [courseDetails, setCourseDetails] = useState<Record<string, string>>({
-    "Day 1": "",
+  const [courseDetails, setCourseDetails] = useState<Record<string, {description: string, isFreeSession: boolean}>>({
+    "Day 1": {
+      description: "",
+      isFreeSession: false,
+    },
   });
 
   // Helper to convert file to base64
@@ -205,10 +208,15 @@ export default function CreateWorkshopModal({
     if (name === "numberOfDays") {
       const days = parseInt(value);
       if (!isNaN(days) && days > 0) {
-        const newCourseDetails: Record<string, string> = {};
+        const newCourseDetails: Record<string, {description: string, isFreeSession: boolean}> = {};
         for (let i = 1; i <= days; i++) {
           const dayKey = `Day ${i}`;
-          newCourseDetails[dayKey] = courseDetails[dayKey] || "";
+          // If the day already exists in courseDetails, preserve its properties
+          // Otherwise initialize with empty description and isFreeSession = false
+          newCourseDetails[dayKey] = courseDetails[dayKey] || {
+            description: "",
+            isFreeSession: false
+          };
         }
         setCourseDetails(newCourseDetails);
         
@@ -267,11 +275,31 @@ export default function CreateWorkshopModal({
   };
 
   const handleCourseDetailChange = (day: string, value: string) => {
-    setCourseDetails({
-      ...courseDetails,
-      [day]: value,
+    setCourseDetails((prevDetails) => {
+      const current = prevDetails[day] ?? { description: "", isFreeSession: false };
+      return {
+        ...prevDetails,
+        [day]: {
+          ...current,
+          description: value,
+        },
+      };
     });
   };
+  
+  const handleFreeSessionToggle = (day: string, isFree: boolean) => {
+    setCourseDetails((prevDetails) => {
+      const current = prevDetails[day] ?? { description: "", isFreeSession: false };
+      return {
+        ...prevDetails,
+        [day]: {
+          ...current,
+          isFreeSession: isFree,
+        },
+      };
+    });
+  };
+  
 
   const handleLearningOutcomeChange = (index: number, value: string) => {
     const newOutcomes = [...form.learningOutcomes];
@@ -294,136 +322,141 @@ export default function CreateWorkshopModal({
       });
     }
   };
+// Handler for intro video selection
+const handleIntroVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    const allowedTypes = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"];
+    const maxSize = 100 * 1024 * 1024;
 
-  // Handler for intro video selection
-  const handleIntroVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const allowedTypes = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"];
-      const maxSize = 100 * 1024 * 1024; 
-
-      if (!allowedTypes.includes(file.type)) {
-        toast.error(`Invalid video type. Allowed: MP4, WebM, MOV.`);
-        if (introVideoInputRef.current) introVideoInputRef.current.value = "";
-        setIntroVideoFile(null);
-        setIntroVideoPreview("");
-        return;
-      }
-      if (file.size > maxSize) {
-        toast.error("Video file is too large (max 100MB).");
-        if (introVideoInputRef.current) introVideoInputRef.current.value = "";
-        setIntroVideoFile(null);
-        setIntroVideoPreview("");
-        return;
-      }
-      setIntroVideoFile(file);
-      setIntroVideoPreview(URL.createObjectURL(file));
-    } else {
+    if (!allowedTypes.includes(file.type)) {
+      toast.error(`Invalid video type. Allowed: MP4, WebM, MOV.`);
+      if (introVideoInputRef.current) introVideoInputRef.current.value = "";
       setIntroVideoFile(null);
       setIntroVideoPreview("");
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.name.trim() || !form.description.trim()) {
-      toast.error("Workshop name and description are required.");
-      return;
-    }
-    if (parseInt(form.numberOfDays) <=0) {
-      toast.error("Number of days must be greater than 0.");
-      return;
-    }
-    if (parseInt(form.price) < 0) {
-      toast.error("Price cannot be negative.");
       return;
     }
 
-    setIsUploading(true); 
-
-    if (bannerImage) {
-      try {
-        const bannerBase64 = await fileToBase64(bannerImage);
-        if (!bannerBase64) {
-          throw new Error("Failed to convert banner image to base64");
-        }
-        uploadImage.mutate({
-          bucketName: "dc-public-files",
-          folderName: "dc-ws-banner",
-          fileName: bannerImage.name,
-          fileType: bannerImage.type,
-          fileContent: bannerBase64.split(',')[1] || "", 
-        });
-      } catch (error) {
-        setIsUploading(false);
-        toast.error("Error processing banner image.");
-        return;
-      }
-    } else {
-      createWorkshop.mutate({
-        name: form.name,
-        description: form.description,
-        numberOfDays: parseInt(form.numberOfDays),
-        scheduleType: form.scheduleType,
-        startDate: form.startDate || undefined,
-        schedule: form.scheduleType === "recurring" ? recurringSchedule : customSchedule,
-        price: parseInt(form.price) * 100, 
-        learningOutcomes: form.learningOutcomes.filter((outcome) => outcome.trim() !== ""),
-        courseDetails,
-        otherDetails: form.otherDetails,
-      });
+    if (file.size > maxSize) {
+      toast.error("Video file is too large (max 100MB).");
+      if (introVideoInputRef.current) introVideoInputRef.current.value = "";
+      setIntroVideoFile(null);
+      setIntroVideoPreview("");
+      return;
     }
-  };
 
-  const resetForm = () => {
-    setForm({
-      name: "",
-      description: "",
-      numberOfDays: "1",
-      price: "0",
-      learningOutcomes: [""],
-      otherDetails: "",
-      scheduleType: "recurring",
-      startDate: "",
-      
-    });
-    setBannerImage(null);
-    setBannerPreview("");
-    if (bannerInputRef.current) bannerInputRef.current.value = "";
-
+    setIntroVideoFile(file);
+    setIntroVideoPreview(URL.createObjectURL(file));
+  } else {
     setIntroVideoFile(null);
     setIntroVideoPreview("");
-    if (introVideoInputRef.current) introVideoInputRef.current.value = "";
+  }
+};
 
-    setRecurringSchedule([{ day: "Monday", time: "10:00 AM" }]);
-    setCustomSchedule([{ date: getTodayDateString(), time: "10:00 AM" }]);
-    setCourseDetails({
-      "Day 1": "",
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!form.name.trim() || !form.description.trim()) {
+    toast.error("Workshop name and description are required.");
+    return;
+  }
+  if (parseInt(form.numberOfDays) <= 0) {
+    toast.error("Number of days must be greater than 0.");
+    return;
+  }
+  if (parseInt(form.price) < 0) {
+    toast.error("Price cannot be negative.");
+    return;
+  }
+
+  setIsUploading(true);
+
+  if (bannerImage) {
+    try {
+      const bannerBase64 = await fileToBase64(bannerImage);
+      if (!bannerBase64) throw new Error("Failed to convert banner image to base64");
+
+      uploadImage.mutate({
+        bucketName: "dc-public-files",
+        folderName: "dc-ws-banner",
+        fileName: bannerImage.name,
+        fileType: bannerImage.type,
+        fileContent: bannerBase64.split(',')[1] || "",
+      });
+    } catch (error) {
+      setIsUploading(false);
+      toast.error("Error processing banner image.");
+      return;
+    }
+  } else {
+    createWorkshop.mutate({
+      name: form.name,
+      description: form.description,
+      numberOfDays: parseInt(form.numberOfDays),
+      scheduleType: form.scheduleType,
+      startDate: form.startDate || undefined,
+      schedule: form.scheduleType === "recurring" ? recurringSchedule : customSchedule,
+      price: parseInt(form.price) * 100,
+      learningOutcomes: form.learningOutcomes.filter(outcome => outcome.trim() !== ""),
+      courseDetails,
+      otherDetails: form.otherDetails,
     });
+  }
+};
 
-    
+const resetForm = () => {
+  setForm({
+    name: "",
+    description: "",
+    numberOfDays: "1",
+    price: "0",
+    learningOutcomes: [""],
+    otherDetails: "",
+    scheduleType: "recurring",
+    startDate: "",
+  });
 
-    setIsUploading(false);
-    setIsUploadingVideo(false);
-  };
+  setBannerImage(null);
+  setBannerPreview("");
+  if (bannerInputRef.current) bannerInputRef.current.value = "";
 
-  useEffect(() => {
-    const days = parseInt(form.numberOfDays) || 0;
-    const newCourseDetails: Record<string, string> = {};
-    for (let i = 1; i <= days; i++) {
-      newCourseDetails[`Day ${i}`] = courseDetails[`Day ${i}`] || "";
-    }
-    setCourseDetails(newCourseDetails);
+  setIntroVideoFile(null);
+  setIntroVideoPreview("");
+  if (introVideoInputRef.current) introVideoInputRef.current.value = "";
 
-    if (form.scheduleType === 'custom' && customSchedule.length > days && days > 0) {
-      setCustomSchedule(prev => prev.slice(0, days));
-    }
+  setRecurringSchedule([{ day: "Monday", time: "10:00 AM" }]);
+  setCustomSchedule([{ date: getTodayDateString(), time: "10:00 AM" }]);
+  setCourseDetails({
+    "Day 1": {
+      description: "",
+      isFreeSession: false,
+    },
+  });
 
-  }, [form.numberOfDays, form.scheduleType]); 
+  setIsUploading(false);
+  setIsUploadingVideo(false); // Optional: remove if unused elsewhere
+};
 
-  if (!isOpen) return null;
+useEffect(() => {
+  const days = parseInt(form.numberOfDays) || 0;
+  const newCourseDetails: Record<string, { description: string; isFreeSession: boolean }> = {};
+  for (let i = 1; i <= days; i++) {
+    const dayKey = `Day ${i}`;
+    newCourseDetails[dayKey] = courseDetails[dayKey] || {
+      description: "",
+      isFreeSession: false,
+    };
+  }
+  setCourseDetails(newCourseDetails);
 
-  return (
+  if (form.scheduleType === "custom" && customSchedule.length > days && days > 0) {
+    setCustomSchedule(prev => prev.slice(0, days));
+  }
+}, [form.numberOfDays, form.scheduleType]);
+
+if (!isOpen) return null;
+
+return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -774,13 +807,29 @@ export default function CreateWorkshopModal({
               <Label>Course Details</Label>
               <div className="space-y-3 mt-2 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
                 {Object.keys(courseDetails).map((day) => (
-                  <div key={day}>
-                    <Label htmlFor={day} className="text-sm font-medium">
-                      {day}
-                    </Label>
+                  <div key={day} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <Label htmlFor={day} className="text-sm font-medium">
+                        {day}
+                      </Label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={`${day}-free`}
+                          checked={courseDetails[day]?.isFreeSession}
+                          onChange={(e) => 
+                            handleFreeSessionToggle(day, e.target.checked)
+                          }
+                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary/20"
+                        />
+                        <Label htmlFor={`${day}-free`} className="text-xs font-medium cursor-pointer">
+                          Free Session
+                        </Label>
+                      </div>
+                    </div>
                     <Textarea
                       id={day}
-                      value={courseDetails[day]}
+                      value={courseDetails[day]?.description}
                       onChange={(e) =>
                         handleCourseDetailChange(day, e.target.value)
                       }

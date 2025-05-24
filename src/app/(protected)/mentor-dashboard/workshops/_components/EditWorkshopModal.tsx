@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { X, Plus, Camera, Video as VideoIcon } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface RecurringScheduleItem {
   day: string;
@@ -43,7 +44,7 @@ type Workshop = {
   schedule: any[];
   price: number;
   learningOutcomes: string[];
-  courseDetails: Record<string, any>;
+  courseDetails: Record<string, { description: string; isFreeSession: boolean }>;
   otherDetails: string | null;
   bannerImage: string | null;
   introductoryVideoUrl?: string | null;
@@ -86,16 +87,16 @@ export default function EditWorkshopModal({
     startDate: "",
   });
 
-  const [recurringSchedule, setRecurringSchedule] = useState<RecurringScheduleItem[]>([
-    { day: "Monday", time: "10:00 AM" },
-  ]);
+  const [recurringSchedule, setRecurringSchedule] = useState<RecurringScheduleItem[]>(
+    [{ day: "Monday", time: "10:00 AM" }]
+  );
   const [customSchedule, setCustomSchedule] = useState<CustomScheduleItem[]>([
     { date: new Date().toISOString().split("T")[0] || "", time: "10:00 AM" },
   ]);
 
-  const [courseDetails, setCourseDetails] = useState<Record<string, string>>({
-    "Day 1": "",
-  });
+  const [courseDetails, setCourseDetails] = useState<
+    Record<string, { description: string; isFreeSession: boolean }>
+  >({});
 
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -123,7 +124,9 @@ export default function EditWorkshopModal({
           : [""],
         otherDetails: workshop.otherDetails || "",
         scheduleType: workshop.scheduleType || "recurring",
-        startDate: workshop.startDate? new Date(workshop.startDate).toISOString().split("T")[0] || "": "",
+        startDate: workshop.startDate
+          ? new Date(workshop.startDate).toISOString().split("T")[0] || ""
+          : "",
       });
 
       if (workshop.scheduleType === "custom" && Array.isArray(workshop.schedule)) {
@@ -131,13 +134,12 @@ export default function EditWorkshopModal({
           workshop.schedule.map((s: Partial<CustomScheduleItem>) => ({
             date: s.date
               ? s.date.includes("T")
-                ? new Date(s.date).toISOString().split("T")[0] || ""
-                : s.date || ""
+                ? s.date.split("T")[0] || ""
+                : s.date
               : new Date().toISOString().split("T")[0] || "",
             time: s.time || "10:00 AM",
           }))
         );
-        setRecurringSchedule([{ day: "Monday", time: "10:00 AM" }]);
       } else if (workshop.scheduleType === "recurring" && Array.isArray(workshop.schedule)) {
         setRecurringSchedule(
           workshop.schedule.map((s: Partial<RecurringScheduleItem>) => ({
@@ -145,13 +147,34 @@ export default function EditWorkshopModal({
             time: s.time || "10:00 AM",
           }))
         );
-        setCustomSchedule([{ date: new Date().toISOString().split("T")[0] || "", time: "10:00 AM" }]);
-      } else {
-        setRecurringSchedule([{ day: "Monday", time: "10:00 AM" }]);
-        setCustomSchedule([{ date: new Date().toISOString().split("T")[0] || "", time: "10:00 AM" }]);
       }
 
-      setCourseDetails(workshop.courseDetails as Record<string, string> || { "Day 1": "" });
+      const newCourseDetailsState: Record<string, { description: string; isFreeSession: boolean }> =
+        {};
+      const numDaysToIterate = workshop.numberOfDays;
+
+      for (let i = 1; i <= numDaysToIterate; i++) {
+        const dayKey = `Day ${i}`;
+        const existingDetail = workshop.courseDetails?.[dayKey];
+
+        if (existingDetail && typeof existingDetail === "object" && "description" in existingDetail) {
+          newCourseDetailsState[dayKey] = {
+            description: String(existingDetail.description),
+            isFreeSession: !!existingDetail.isFreeSession,
+          };
+        } else if (typeof existingDetail === "string") {
+          newCourseDetailsState[dayKey] = { description: existingDetail, isFreeSession: false };
+        } else {
+          newCourseDetailsState[dayKey] = { description: "", isFreeSession: false };
+        }
+      }
+      for (let i = 1; i <= workshop.numberOfDays; i++) {
+        const dayKey = `Day ${i}`;
+        if (!newCourseDetailsState[dayKey]) {
+          newCourseDetailsState[dayKey] = { description: "", isFreeSession: false };
+        }
+      }
+      setCourseDetails(newCourseDetailsState);
     }
   }, [workshop]);
 
@@ -210,9 +233,12 @@ export default function EditWorkshopModal({
 
     if (name === "numberOfDays") {
       const days = parseInt(value) || 0;
-      const newCourseDetails: Record<string, string> = {};
+      const newCourseDetails: Record<string, { description: string; isFreeSession: boolean }> = {};
       for (let i = 1; i <= days; i++) {
-        newCourseDetails[`Day ${i}`] = courseDetails[`Day ${i}`] || "";
+        newCourseDetails[`Day ${i}`] = courseDetails[`Day ${i}`] || {
+          description: "",
+          isFreeSession: false,
+        };
       }
       setCourseDetails(newCourseDetails);
       if (form.scheduleType === "custom" && customSchedule.length > days && days > 0) {
@@ -233,7 +259,7 @@ export default function EditWorkshopModal({
     value: string
   ) => {
     const updated = [...recurringSchedule];
-    updated[index] = { ...updated[index], [field]: value } as any ;
+    updated[index] = { ...updated[index], [field]: value } as any;
     setRecurringSchedule(updated);
   };
   const addRecurringScheduleItem = () =>
@@ -255,8 +281,18 @@ export default function EditWorkshopModal({
   const removeCustomScheduleItem = (index: number) =>
     setCustomSchedule(customSchedule.filter((_, i) => i !== index));
 
-  const handleCourseDetailChange = (day: string, value: string) => {
-    setCourseDetails((prev) => ({ ...prev, [day]: value }));
+  const handleCourseDetailChange = (
+    day: string,
+    field: "description" | "isFreeSession",
+    value: string | boolean
+  ) => {
+    setCourseDetails((prev) => ({
+      ...prev,
+      [day]: {
+        ...(prev[day] || { description: "", isFreeSession: false }), // Ensure prev[day] exists
+        [field]: value,
+      },
+    }));
   };
 
   const handleLearningOutcomeChange = (index: number, value: string) => {
@@ -336,7 +372,6 @@ export default function EditWorkshopModal({
 
     if (bannerImage) {
       try {
-
         const bannerBase64 = await fileToBase64(bannerImage);
         if (!bannerBase64) {
           throw new Error("Failed to convert banner image to base64.");
@@ -770,18 +805,30 @@ export default function EditWorkshopModal({
               <div className="space-y-3 mt-2 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
                 {Object.keys(courseDetails).map((day) => (
                   <div key={day}>
-                    <Label htmlFor={day} className="text-sm font-medium">
-                      {day}
+                    <Label htmlFor={`${day}-desc`} className="text-sm font-medium">
+                      {day} Description
                     </Label>
                     <Textarea
-                      id={day}
-                      value={courseDetails[day]}
+                      id={`${day}-desc`}
+                      value={courseDetails[day]?.description || ""}
                       onChange={(e) =>
-                        handleCourseDetailChange(day, e.target.value)
+                        handleCourseDetailChange(day, "description", e.target.value)
                       }
                       placeholder={`What will be covered on ${day}`}
                       rows={2}
                     />
+                    <div className="mt-2 flex items-center space-x-2">
+                      <Checkbox
+                        id={`${day}-isFree`}
+                        checked={courseDetails[day]?.isFreeSession || false}
+                        onCheckedChange={(checked) =>
+                          handleCourseDetailChange(day, "isFreeSession", !!checked)
+                        }
+                      />
+                      <Label htmlFor={`${day}-isFree`} className="text-sm font-normal text-gray-700">
+                        This is a free session for enrolled students
+                      </Label>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -488,7 +488,7 @@ return (
                   <h3 className="text-sm font-medium text-gray-500">Course Details</h3>
                   <div className="mt-2 space-y-3">
                     {workshop.courseDetails && typeof workshop.courseDetails === 'object' && !Array.isArray(workshop.courseDetails) && 
-                      Object.entries(workshop.courseDetails as Record<string, unknown>).map(([day, content], index) => {
+                      Object.entries(workshop.courseDetails as Record<string, { description: string; isFreeSession: boolean }>).map(([day, content], index) => {
                         const dayNumber = parseInt(day.replace(/[^0-9]/g, ''));
                         const dayLink = getWorkshopDayLinks().find(link => link.dayIndex === dayNumber);
                         const scheduleIndex = (dayNumber - 1) % (workshop.schedule as any[]).length;
@@ -507,7 +507,7 @@ return (
                                 })}
                               </div>
                             </div>
-                            <p className="mt-1 mb-3 text-gray-700">{content as string}</p>
+                            <p className="mt-1 mb-3 text-gray-700">{(content as { description: string; isFreeSession: boolean }).description}</p>
                             
                             {/* Meeting link section - Always show a placeholder */}
                             <div className="mt-3 pt-3 border-t border-gray-200">

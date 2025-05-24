@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
-import { ArrowLeft, Calendar, Clock, ExternalLink, Users, Video } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, ExternalLink, Users, Video, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner";
@@ -32,6 +32,7 @@ import Link from "next/link";
 export default function WorkshopDetailPage() {
   const router = useRouter();
   const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
+  
 
   // Unwrap params using React.use()
   const params = useParams<{ workshopId: string }>();
@@ -73,7 +74,6 @@ export default function WorkshopDetailPage() {
     try {
       await enrollInWorkshop.mutateAsync({ 
         workshopId: params.workshopId,
-        paymentStatus: true // In a real app, this would be set after payment confirmation
       });
     } catch (error) {
       // Error handled in the mutation
@@ -217,7 +217,7 @@ export default function WorkshopDetailPage() {
                     {Object.entries(workshop.courseDetails).map(([day, content]) => (
                       <div key={day} className="bg-gray-50 p-4 rounded-md">
                         <h4 className="font-medium text-gray-900">{day}</h4>
-                        <p className="mt-1 text-gray-700">{content as string}</p>
+                        <p className="mt-1 text-gray-700">{(content as { description: string; isFreeSession: boolean }).description}</p>
                       </div>
                     ))}
                   </div>
@@ -323,9 +323,15 @@ export default function WorkshopDetailPage() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-amber-50/80 backdrop-blur-sm text-amber-800 p-2 sm:p-3 rounded-md text-sm shadow-sm">
-                  The meeting link will be available soon. Check back later.
-                </div>
+                (workshop.price > 0 && workshop.enrollments && workshop.enrollments.length > 0 && workshop.enrollments[0]?.paymentStatus === false) ? (
+                  <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-md text-orange-700 text-xs">
+                    Purchase this workshop to access session links.
+                  </div>
+                ) : (
+                  <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-700 text-xs">
+                    The meeting link will be available soon. Check back later.
+                  </div>
+                )
               )}
             </CardContent>
           </Card>
@@ -407,6 +413,69 @@ export default function WorkshopDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Session Breakdown */}
+      {workshop.courseDetails && Object.keys(workshop.courseDetails).length > 0 && (
+        <Card className="transition-all w-full duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle>Session Breakdown</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {Object.entries(workshop.courseDetails as Record<string, { description: string; isFreeSession: boolean }>)
+              .sort(([dayA], [dayB]) => {
+                const numA = parseInt(dayA.replace(/\D/g, ''), 10) || 0;
+                const numB = parseInt(dayB.replace(/\D/g, ''), 10) || 0;
+                return numA - numB;
+              })
+              .map(([day, details]) => {
+                const isWorkshopPaid = workshop.price > 0;
+                let sessionStatusType: 'free' | 'included' | 'unlocked' | 'locked';
+                let badgeConfig: { text: string; variant: "outline" | "destructive"; icon?: React.ElementType; className?: string };
+
+                if (details.isFreeSession) {
+                  sessionStatusType = 'free';
+                  badgeConfig = { text: "Free Session", variant: "outline", className: "bg-green-100 text-green-700 border-green-200" };
+                } else if (!isWorkshopPaid) { // Workshop itself is free, session is not marked free (so it's included)
+                  sessionStatusType = 'included';
+                  badgeConfig = { text: "Included", variant: "outline", className: "bg-blue-100 text-blue-700 border-blue-200" };
+                } else { // Workshop is PAID, and this session is NOT free. Requires purchase.
+                  sessionStatusType = 'locked'; // Stays locked until a separate purchase action
+                  badgeConfig = { text: "Requires Purchase", variant: "destructive", icon: Lock };
+                }
+                const isSessionEffectivelyLocked = sessionStatusType === 'locked';
+
+                return (
+                  <div 
+                    key={day} 
+                    className={`p-3.5 rounded-lg border shadow-sm ${ 
+                      isSessionEffectivelyLocked 
+                        ? 'bg-slate-50 border-slate-200'
+                        : 'bg-white border-gray-200'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center mb-1.5">
+                      <h4 className="font-medium text-gray-900">{day}</h4>
+                      <Badge variant={badgeConfig.variant} className={`text-xs px-2.5 py-0.5 ${badgeConfig.className || ''}`}>
+                        {badgeConfig.icon && <badgeConfig.icon className="h-3 w-3 mr-1.5 inline-block align-middle" />}
+                        <span className="align-middle">{badgeConfig.text}</span>
+                      </Badge>
+                    </div>
+                    <p className={`text-sm ${isSessionEffectivelyLocked ? 'text-slate-500' : 'text-slate-700'}`}>
+                      {(details as { description: string; isFreeSession: boolean }).description || <span className="italic text-slate-400">No description provided.</span>}
+                    </p>
+                    {isSessionEffectivelyLocked && (
+                      <p className="text-xs text-amber-700 mt-2 font-medium">
+                        {isWorkshopPaid && !details.isFreeSession 
+                          ? "Purchase the workshop to access this session."
+                          : "Enroll in the workshop to access this session."}
+                      </p>
+                    )}
+                  </div>
+                );
+            })}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Enrollment confirmation dialog */}
       <AlertDialog open={isEnrollDialogOpen} onOpenChange={setIsEnrollDialogOpen}>
