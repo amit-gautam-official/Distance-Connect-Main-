@@ -154,13 +154,45 @@ export default function WorkshopDetailPage() {
       // Format time until allowed
       let timeUntilAllowed;
       if (!isWithinTimeWindow) {
-        const minutesUntilAllowed = Math.ceil((threeHoursBeforeWorkshop.getTime() - now.getTime()) / (60 * 1000));
-        if (minutesUntilAllowed < 60) {
-          timeUntilAllowed = `${minutesUntilAllowed} minutes`;
+        const totalMsUntilAllowed = threeHoursBeforeWorkshop.getTime() - now.getTime();
+        // Ensure that if the time is very close (e.g. few seconds), it rounds up to 1 minute.
+        let totalMinutesUntilAllowed = Math.ceil(totalMsUntilAllowed / (60 * 1000));
+
+        if (totalMinutesUntilAllowed <= 0) {
+          // This case implies the time is now or past the 3-hour-before window,
+          // which contradicts !isWithinTimeWindow if threeHoursBeforeWorkshop is in the future.
+          // It acts as a safeguard.
+          timeUntilAllowed = "soon"; 
         } else {
-          const hoursUntilAllowed = Math.floor(minutesUntilAllowed / 60);
-          const remainingMinutes = minutesUntilAllowed % 60;
-          timeUntilAllowed = `${hoursUntilAllowed} hour${hoursUntilAllowed > 1 ? 's' : ''}${remainingMinutes > 0 ? ` ${remainingMinutes} min` : ''}`;
+          const days = Math.floor(totalMinutesUntilAllowed / (24 * 60));
+          const hours = Math.floor((totalMinutesUntilAllowed % (24 * 60)) / 60);
+          const minutes = totalMinutesUntilAllowed % 60;
+
+          const timeParts = [];
+          if (days > 0) {
+            timeParts.push(`${days} day${days !== 1 ? 's' : ''}`);
+          }
+          if (hours > 0) {
+            timeParts.push(`${hours} hour${hours !== 1 ? 's' : ''}`);
+          }
+          // Add minutes part if it's > 0.
+          // If totalMinutesUntilAllowed was 1 (e.g. 30s rounded up), days=0, hours=0, minutes=1. This will add "1 min".
+          // If totalMinutesUntilAllowed was 60 (1hr), days=0, hours=1, minutes=0. This will not add "0 min".
+          if (minutes > 0) {
+            timeParts.push(`${minutes} min${minutes !== 1 ? 's' : ''}`);
+          }
+          
+          // If timeParts is empty, it means totalMinutesUntilAllowed resulted in 0d, 0h, 0m.
+          // This would only happen if totalMinutesUntilAllowed itself was 0 (or less).
+          // But that's caught by the (totalMinutesUntilAllowed <= 0) check.
+          // So, if totalMinutesUntilAllowed >= 1, timeParts should have at least one element.
+          if (timeParts.length > 0) {
+            timeUntilAllowed = timeParts.join(' ');
+          } else {
+            // This fallback should ideally not be reached if totalMinutesUntilAllowed >= 1.
+            // If it is reached, default to "soon" or handle as per requirements for 0 duration.
+            timeUntilAllowed = "soon"; 
+          }
         }
       }
       
