@@ -44,6 +44,7 @@ type Workshop = {
   createdAt: Date;
   _count?: { enrollments: number };
   bannerImage: string | null;
+  mentorGmailId: string;
 };
 
 interface WorkshopListProps {

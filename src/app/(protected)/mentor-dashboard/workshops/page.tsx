@@ -33,6 +33,7 @@ type Workshop = {
   bannerImage: string | null;
   scheduleType: "recurring" | "custom";
   startDate: string | null;
+  mentorGmailId: string;
 };
 export default function WorkshopsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
