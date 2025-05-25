@@ -124,6 +124,7 @@ model Mentor {
   mentorSessionPriceRange String?
   tierReasoning           String?
 
+  
   mentorName           String?
   currentCompany       String?
   jobTitle             String?

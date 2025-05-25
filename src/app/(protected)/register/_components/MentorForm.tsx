@@ -61,6 +61,9 @@ const formSchema = z.object({
   jobTitle: z.string().min(2, {
     message: "Job title is required",
   }),
+  mentorPhoneNumber: z.string().min(2, {
+    message: "Phone number is required",
+  }),
   experience: z.string().min(2, {
     message: "Experience is required",
   }),
@@ -108,6 +111,7 @@ export default function MentorForm({
       lastName: user?.name?.split(" ")[1] ?? "",
       currentCompany: "",
       jobTitle: "",
+      mentorPhoneNumber: "",
       experience: "",
       industry: "",
       pinCode: "",
@@ -149,6 +153,7 @@ export default function MentorForm({
       name: values?.firstName + " " + values?.lastName,
       currentCompany: values?.currentCompany,
       jobTitle: values?.jobTitle,
+      mentorPhoneNumber: values?.mentorPhoneNumber,
       experience: values?.experience,
       industry: values?.industry,
       pinCode: Number(values?.pinCode),
@@ -271,6 +276,21 @@ export default function MentorForm({
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="mentorPhoneNumber"
+                render={({ field }) => (
+                  <FormItem className="relative flex flex-col">
+                    <FormLabel className="absolute left-[10px] top-[0px] bg-white px-1 font-inter text-[14px] font-normal leading-[16px] text-[#8A8A8A] peer-focus:text-black">
+                      Phone Number
+                    </FormLabel>
+                    <FormControl className="floating-input peer w-[300px]">
+                      <Input placeholder={""} type="text" {...field} required />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
@@ -309,7 +329,11 @@ export default function MentorForm({
                 )}
               />
 
-              <FormField
+             
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <FormField
                 control={form.control}
                 name="industry"
                 render={({ field }) => (
@@ -381,9 +405,6 @@ export default function MentorForm({
                   </FormItem>
                 )}
               />
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="companyType"

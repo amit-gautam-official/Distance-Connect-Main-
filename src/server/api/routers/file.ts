@@ -87,7 +87,12 @@ export const fileRouter = createTRPCRouter({
         const url = new URL(initialAvatarUrl);
         const pathname = decodeURIComponent(url.pathname);
         console.log("Pathname:", pathname);
+        //check if bucket name is present in the url
+        if (pathname.includes(`/${bucketName}/`)) {
+          
+        
         // Remove leading slash and bucket name to get the full object path
+        
         const objectPath = pathname.replace(`/${bucketName}/`, '');
 
         console.log("Object path:", objectPath);
@@ -104,6 +109,7 @@ export const fileRouter = createTRPCRouter({
               message: "Error deleting initial image: " + err.message,
             });
           });
+        }
       }
 
       if (fileType === "delete") {
