@@ -91,6 +91,42 @@ export default function CreateWorkshopModal({
     },
   });
 
+  // useEffect to sync customSchedule length with numberOfDays when scheduleType is 'custom'
+  useEffect(() => {
+    if (form.scheduleType === 'custom') {
+      const numDays = parseInt(form.numberOfDays, 10);
+
+      if (!isNaN(numDays) && numDays > 0) {
+        if (numDays !== customSchedule.length) { // Only update if length is different
+            const currentCustomLength = customSchedule.length;
+            if (numDays > currentCustomLength) {
+            const newEntries = Array(numDays - currentCustomLength)
+                .fill(null)
+                .map(() => ({
+                date: getTodayDateString(), // Uses the helper function
+                time: '10:00 AM', // Default time
+                }));
+            setCustomSchedule(prevSchedule => [...prevSchedule, ...newEntries]);
+            } else { // numDays < currentCustomLength
+            setCustomSchedule(prevSchedule => prevSchedule.slice(0, numDays));
+            }
+        }
+      } else if (form.numberOfDays === "" || numDays <= 0) {
+        // If numberOfDays is empty or invalid (e.g., 0 or negative),
+        // reset customSchedule to a single default entry.
+        // This check prevents unnecessary updates if it's already the default.
+        const today = getTodayDateString(); // Cache for comparison
+        if (customSchedule.length !== 1 || 
+            customSchedule[0]?.date !== today || 
+            customSchedule[0]?.time !== "10:00 AM") {
+           setCustomSchedule([{ date: today, time: "10:00 AM" }]);
+        }
+      }
+    }
+    // If scheduleType is not 'custom', this effect does nothing, preserving customSchedule.
+    // Resetting of customSchedule when switching away from 'custom' is handled in handleInputChange.
+  }, [form.numberOfDays, form.scheduleType, customSchedule.length]); // Dependencies
+
   // Helper to convert file to base64
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
