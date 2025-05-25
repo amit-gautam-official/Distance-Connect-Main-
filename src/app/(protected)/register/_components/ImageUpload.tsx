@@ -25,12 +25,12 @@ export const ImageUpload = ({
     initialAvatarUrl || "https://i.sstatic.net/l60Hf.png",
   );
   const [isUploading, setIsUploading] = useState(false);
-  console.log("initialAvatarUrl", initialAvatarUrl);
+  // console.log("initialAvatarUrl", initialAvatarUrl);
 
   // Update preview URL when initialAvatarUrl changes
   React.useEffect(() => {
     if (initialAvatarUrl) {
-      console.log("initialAvatarUrl", initialAvatarUrl);
+      // console.log("initialAvatarUrl", initialAvatarUrl);
       setPreviewUrl(initialAvatarUrl);
     }
   }, [initialAvatarUrl]);

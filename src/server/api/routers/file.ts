@@ -29,7 +29,6 @@ const ALLOWED_VIDEO_TYPES = [
   "video/x-msvideo", // .avi files - though less common for web
   "delete"
 ];
-const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 export const fileRouter = createTRPCRouter({
   upload: protectedProcedure
@@ -62,13 +61,22 @@ export const fileRouter = createTRPCRouter({
           message: `Invalid file type. Allowed types: ${ALL_ALLOWED_TYPES.join(", ")}`,
         });
       }
+
+      //fileType == vide0 then allow 50MB if fileType == image then allow 5MB
+      let MAX_FILE_SIZE = 50 * 1024 * 1024;
+      if(fileType === "image/jpeg" || fileType === "image/png" || fileType === "image/webp") {
+        MAX_FILE_SIZE = 5 * 1024 * 1024;
+      }
+      if(fileType === "application/pdf") {
+        MAX_FILE_SIZE = 5 * 1024 * 1024;
+      }
       
       // Validate file size (Base64 is ~33% larger than binary)
       const estimatedFileSize = Math.ceil((fileContent.length * 3) / 4);
       if (estimatedFileSize > MAX_FILE_SIZE) {
         throw new TRPCError({
           code: "BAD_REQUEST", 
-          message: "File exceeds maximum size of 100MB.",
+          message: `File exceeds maximum size of ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
         });
       }
 

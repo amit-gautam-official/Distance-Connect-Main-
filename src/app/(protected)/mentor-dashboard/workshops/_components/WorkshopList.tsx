@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/trpc/react";
-import { Calendar, Clock, Edit, Eye, Trash, Users } from "lucide-react";
+import { Calendar, Clock, Edit, Eye, Share2, Trash, Users } from "lucide-react";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import {
@@ -82,6 +82,24 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
     setWorkshopToEdit(null);
     onRefresh();
     toast.success("Workshop updated successfully");
+  };
+
+  // Handle share workshop link
+  const handleShare = (workshopId: string, workshopName: string) => {
+    // Get the base URL from the window location
+    // In production, you might want to use an environment variable for the domain
+    const baseUrl = window.location.origin;
+    const shareUrl = `${baseUrl}/student-dashboard/workshops/${workshopId}`;
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => {
+        toast.success(`Workshop link for "${workshopName}" copied to clipboard`);
+      })
+      .catch((error) => {
+        console.error("Error copying to clipboard:", error);
+        toast.error("Failed to copy link. Please try again.");
+      });
   };
 
   // Loading skeleton
@@ -243,7 +261,7 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
               </div>
               
               <div className="mt-3 text-lg font-bold text-primary bg-primary/5 inline-block px-3 py-1 rounded-full group-hover:bg-primary/10 transition-all">
-                {formatPrice(workshop.price)}
+                {formatPrice(workshop.price/100)}
               </div>
             </CardContent>
             <CardFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 sm:justify-between p-3 sm:p-4 border-t bg-gradient-to-r from-gray-50/80 to-white/80 backdrop-blur-sm group-hover:from-gray-100/80 group-hover:to-white/90 transition-all">
@@ -262,20 +280,30 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
                   variant="outline"
                   className="flex-1 sm:flex-initial transition-all hover:bg-primary/5"
                   size="sm"
+                  onClick={() => handleShare(workshop.id, workshop.name)}
+                  title="Share workshop link"
+                >
+                  <Share2 className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="flex-1 sm:flex-initial transition-all hover:bg-primary/5"
+                  size="sm"
                   onClick={() => setWorkshopToEdit(workshop)}
+                  title="Edit workshop"
                 >
                   <Edit className="h-4 w-4" />
-                  
                 </Button>
                 
-              <Button
+                <Button
                   variant="outline"
                   className="flex-1 sm:flex-initial text-red-600 hover:text-red-700 hover:bg-red-50 transition-all"
                   size="sm"
                   onClick={() => setWorkshopToDelete(workshop.id)}
+                  title="Delete workshop"
                 >
                   <Trash className="h-4 w-4" />
-                  
                 </Button>
               </div>
             </CardFooter>

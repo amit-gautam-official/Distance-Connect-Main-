@@ -30,26 +30,27 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
+import { JSONValue } from "node_modules/superjson/dist/types";
 
 type Workshop = {
   id: string;
   name: string;
   description: string;
   numberOfDays: number;
-  schedule: { day: string; time: string }[];
+  schedule: any[];
   price: number;
   learningOutcomes: string[];
-  courseDetails: Record<string, any>;
+  courseDetails: JSONValue;
   otherDetails: string | null;
-  meetUrl: string | null;
-  meetLinks?: Record<string, any> | null;
+  meetLinks?: JSONValue;
   createdAt: Date;
   bannerImage: string | null;
   introductoryVideoUrl: string | null;
+  scheduleType: string;
   mentor: {
-    mentorName: string;
+    mentorName: string | null;
     user: {
-      name: string | null;
+      name: string | null;  
       image: string | null;
     };
   };
@@ -61,13 +62,15 @@ interface WorkshopListProps {
   isLoading: boolean;
   isEnrolled: boolean;
   onEnrollmentSuccess?: () => void;
+  enrolledWorkshopIds?: string[];
 }
 
 export default function WorkshopList({ 
   workshops, 
   isLoading, 
   isEnrolled,
-  onEnrollmentSuccess 
+  onEnrollmentSuccess,
+  enrolledWorkshopIds = []
 }: WorkshopListProps) {
   const router = useRouter();
   const [workshopToEnroll, setWorkshopToEnroll] = useState<string | null>(null);
@@ -75,6 +78,7 @@ export default function WorkshopList({
   const [studentGmailId, setStudentGmailId] = useState<string>("");
   const MAX_DESC_LENGTH = 120; // Maximum characters for description
 
+  // console.log(workshops);
   const enrollInWorkshop = api.workshop.enrollInWorkshop.useMutation({
     onSuccess: () => {
       toast.success("Successfully enrolled in workshop!");
@@ -247,14 +251,18 @@ export default function WorkshopList({
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Calendar className="h-4 w-4 text-primary" />
                 <span>
-                  {workshop.schedule.map(s => `${s.day}`).join(", ")}
+                  {
+                    workshop.scheduleType === "recurring" ? 
+                    (workshop.schedule as { day: string; time: string }[]).map(s => `${s.day}`).join(", ") :
+                    (workshop.schedule[0] as { date: string; time: string }).date ? `${new Date((workshop.schedule[0] as { date: string; time: string }).date).toLocaleDateString()}` : ""
+                  } 
                 </span>
               </div>
               
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Clock className="h-4 w-4 text-primary" />
                 <span>
-                  {workshop.schedule.map(s => `${s.time}`).join(", ")}
+                  {(workshop.schedule as { day: string; time: string }[] | { date: string; time: string }[]).map(s => `${s.time}`).join(", ")}
                 </span>
               </div>
               
@@ -272,7 +280,7 @@ export default function WorkshopList({
               </div>
             </CardContent>
             <CardFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 sm:justify-between p-3 sm:p-4 border-t bg-gradient-to-r from-gray-50 to-white">
-              {isEnrolled ? (
+              {isEnrolled || enrolledWorkshopIds.includes(workshop.id) ? (
                 <>
                   <Button
                     variant="outline"
@@ -292,17 +300,10 @@ export default function WorkshopList({
                       <ExternalLink className="h-4 w-4 mr-1" />
                       View Sessions
                     </Button>
-                  ) : workshop.meetUrl ? (
-                    <Button
-                      variant="default"
-                    className="w-full sm:w-auto transition-all"
-                      size="sm"
-                      onClick={() => window.open(workshop.meetUrl!, "_blank")}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-1" />
-                      Join Meeting
-                    </Button>
-                  ) : null}
+                  ) : (
+                    <>
+                    </>
+                  )}
                 </>
               ) : (
                 <>

@@ -21,6 +21,8 @@ type Workshop = {
   createdAt: Date;
   bannerImage: string | null;
   introductoryVideoUrl: string | null;
+  scheduleType: string;
+
   mentor: {
     mentorName: string;
     user: {
@@ -71,25 +73,10 @@ export default function StudentWorkshopsPage() {
 
         <TabsContent value="available">
           <WorkshopList 
-            workshops={availableWorkshops?.map(workshop => {
-              // Ensure schedule is properly typed as { day: string; time: string; }[]
-              const typedWorkshop = workshop as unknown as Workshop;
-              if (typedWorkshop.schedule && Array.isArray(typedWorkshop.schedule)) {
-                // Make sure schedule has the correct shape
-                typedWorkshop.schedule = typedWorkshop.schedule.map(s => {
-                  if (typeof s === 'object' && s !== null) {
-                    return {
-                      day: typeof s.day === 'string' ? s.day : String(s.day),
-                      time: typeof s.time === 'string' ? s.time : String(s.time)
-                    };
-                  }
-                  return { day: '', time: '' }; // Fallback for invalid data
-                });
-              }
-              return typedWorkshop;
-            }) || []} 
+            workshops={availableWorkshops!}
             isLoading={isLoadingAvailable}
             isEnrolled={false}
+            enrolledWorkshopIds={enrolledWorkshops?.map(enrollment => enrollment.workshop.id) || []}
             onEnrollmentSuccess={() => {
               void refetchEnrolled();
               setActiveTab("enrolled");
@@ -99,23 +86,46 @@ export default function StudentWorkshopsPage() {
 
         <TabsContent value="enrolled">
           <WorkshopList 
-            workshops={enrolledWorkshops?.map(e => {
-              // Ensure schedule is properly typed as { day: string; time: string; }[]
-              const workshop = e.workshop as unknown as Workshop;
-              if (workshop.schedule && Array.isArray(workshop.schedule)) {
-                // Make sure schedule has the correct shape
-                workshop.schedule = workshop.schedule.map(s => {
-                  if (typeof s === 'object' && s !== null) {
-                    return {
-                      day: typeof s.day === 'string' ? s.day : String(s.day),
-                      time: typeof s.time === 'string' ? s.time : String(s.time)
-                    };
-                  }
-                  return { day: '', time: '' }; // Fallback for invalid data
-                });
-              }
-              return workshop;
-            }) || []} 
+            // workshops={enrolledWorkshops?.map(enrollment => {
+            //   const originalWorkshop = enrollment.workshop as unknown as Workshop;
+
+            //   let processedSchedule: Array<Record<string, string | undefined | null>>;
+
+            //   if (originalWorkshop.schedule && Array.isArray(originalWorkshop.schedule)) {
+            //     processedSchedule = originalWorkshop.schedule.map(s => {
+            //       if (typeof s === 'object' && s !== null) {
+            //         if (originalWorkshop.scheduleType === "recurring") {
+            //           return {
+            //             day: typeof s.day === 'string' ? s.day : String(s.day ?? 'N/A'),
+            //             time: typeof s.time === 'string' ? s.time : String(s.time ?? 'N/A')
+            //           };
+            //         } else { // 'custom' scheduleType
+            //           return {
+            //             date: typeof s.date === 'string' ? s.date : String(s.date ?? new Date().toISOString()),
+            //             startTime: typeof s.startTime === 'string' ? s.startTime : String(s.startTime ?? "09:00"),
+            //             endTime: typeof s.endTime === 'string' ? s.endTime : String(s.endTime ?? "17:00")
+            //           };
+            //         }
+            //       }
+            //       // Fallback for s if not a valid object or if s is null/not an object
+            //       if (originalWorkshop.scheduleType === "recurring") {
+            //         return { day: 'N/A', time: 'N/A' };
+            //       } else { // 'custom'
+            //         return { date: new Date().toISOString(), startTime: "09:00", endTime: "17:00" };
+            //       }
+            //     });
+            //   } else {
+            //     // If originalWorkshop.schedule doesn't exist or isn't an array, initialize processedSchedule as empty
+            //     processedSchedule = [];
+            //   }
+
+            //   // Return a new workshop object with all original properties and the processed schedule
+            //   return {
+            //     ...originalWorkshop,
+            //     schedule: processedSchedule,
+            //   };
+            // })} 
+            workshops={enrolledWorkshops?.map(enrollment => enrollment.workshop) || []}
             isLoading={isLoadingEnrolled}
             isEnrolled={true}
           />

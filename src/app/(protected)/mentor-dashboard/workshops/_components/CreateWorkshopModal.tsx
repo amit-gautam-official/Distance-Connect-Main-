@@ -365,7 +365,7 @@ const handleIntroVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) =>
   const file = e.target.files?.[0];
   if (file) {
     const allowedTypes = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"];
-    const maxSize = 100 * 1024 * 1024;
+    const maxSize = 50 * 1024 * 1024;
 
     if (!allowedTypes.includes(file.type)) {
       toast.error(`Invalid video type. Allowed: MP4, WebM, MOV.`);
@@ -376,7 +376,7 @@ const handleIntroVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) =>
     }
 
     if (file.size > maxSize) {
-      toast.error("Video file is too large (max 100MB).");
+      toast.error("Video file is too large (max 50MB).");
       if (introVideoInputRef.current) introVideoInputRef.current.value = "";
       setIntroVideoFile(null);
       setIntroVideoPreview("");
@@ -559,7 +559,8 @@ return (
                     <div className="flex h-full w-full items-center justify-center">
                       <div className="text-center">
                         <Camera className="mx-auto h-8 w-8 text-gray-400" />
-                        <span className="mt-2 block text-sm text-gray-500">Click to upload banner image</span>
+                        <span className="mt-2 block text-sm text-gray-500">Upload 4:1 aspect ratio image for best results </span>
+                        <p className="text-xs text-gray-500">Recommended size: 1600x400px</p>
                       </div>
                     </div>
                   )}
@@ -620,7 +621,7 @@ return (
                     onClick={() => introVideoInputRef.current?.click()}
                   >
                     <VideoIcon className="h-5 w-5 mr-2" />
-                    Choose Video (Max 100MB)
+                    Choose Video (Max 50MB)
                   </Button>
                 )}
                 {introVideoPreview && (
@@ -693,6 +694,7 @@ return (
                   id="startDate"
                   name="startDate"
                   type="date"
+                  min={new Date().toISOString().split("T")[0]} // disables past dates
                   value={form.startDate}
                   onChange={handleInputChange}
                   required
@@ -725,7 +727,7 @@ return (
                             <SelectValue placeholder="Select time" />
                           </SelectTrigger>
                           <SelectContent>
-                            {["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM"].map((time) => (
+                            {["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM", "10:00 PM", "11:00 PM", "12:00 AM", "1:00 AM", "2:00 AM", "3:00 AM", "4:00 AM", "5:00 AM", "6:00 AM", "7:00 AM"].map((time) => (
                               <SelectItem key={time} value={time}>
                                 {time}
                               </SelectItem>
@@ -784,7 +786,9 @@ return (
                             <SelectValue placeholder="Select time" />
                           </SelectTrigger>
                           <SelectContent>
-                            {["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM"].map((time) => (
+                            {/* make it full time */}
+                            
+                            {["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM", "10:00 PM", "11:00 PM", "12:00 AM", "1:00 AM", "2:00 AM", "3:00 AM", "4:00 AM", "5:00 AM", "6:00 AM", "7:00 AM"].map((time) => (
                               <SelectItem key={time} value={time}>
                                 {time}
                               </SelectItem>

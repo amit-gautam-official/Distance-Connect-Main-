@@ -412,7 +412,9 @@ export default function WorkshopDetailPage() {
                 <div>
                   <CardTitle>{workshop.name}</CardTitle>
                   <CardDescription>
-                    by {workshop.mentor.mentorName || workshop.mentor.user.name}
+                    <Link className="" href={`/mentors/${workshop.mentor.user.id}`}>
+                      by <span className="text-blue-600 hover:underline">@{workshop.mentor.mentorName || workshop.mentor.user.name}</span>
+                    </Link>
                   </CardDescription>
                 </div>
               </div>
@@ -707,7 +709,7 @@ export default function WorkshopDetailPage() {
                 <div className="bg-green-50/80 backdrop-blur-sm text-green-700 p-3 sm:p-4 rounded-md shadow-sm border border-green-100">
                   <p className="font-medium">You&apos;re enrolled in this workshop!</p>
                   <p className="mt-1 text-sm">
-                    You&apos;ll receive updates and access to the workshop materials.
+                  Meeting links will be available 3 hours before the scheduled time. You will receive an email with the details accordingly.
                   </p>
                 </div>
               </CardContent>

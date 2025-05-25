@@ -1,20 +1,22 @@
-import React from "react";
-import dynamic from "next/dynamic";
+"use client"
+import React, { useEffect } from "react";
 import MeetingEventSkeleton from "./_components/MeetingEventSkeleton";
 
-const MeetingEventList = dynamic(() => import("./_components/MeetingEventList"), {
-  loading: () => <MeetingEventSkeleton />,
-});
+import MeetingEventList from "./_components/MeetingEventList";
+
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import { api } from "@/trpc/server";
+import { api } from "@/trpc/react";
 
-export default async function ServicesPage() {
-  const mentor = await api.mentor.getMentor()
+export default function ServicesPage() {
+  const { data: mentor, isLoading } = api.mentor.getMentor.useQuery()
 
 
-  if(!mentor?.verified){
+
+
+
+  if(!mentor?.verified && !isLoading){
     return(
       //show a message to verify the account
       <div className="container mx-auto px-4 py-4 sm:px-6 sm:py-8">
@@ -44,7 +46,13 @@ export default async function ServicesPage() {
       </div>
 
       <div className="mb-20 rounded-lg sm:p-6 md:mb-0">
-        <MeetingEventList />
+        {
+          isLoading ? (
+            <MeetingEventSkeleton />
+          ) : (
+            <MeetingEventList />
+          )
+        }
       </div>
     </div>
   );
