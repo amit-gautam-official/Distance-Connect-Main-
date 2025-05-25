@@ -396,6 +396,13 @@ export const workshopRouter = createTRPCRouter({
           bannerImage: true,
           price: true,
           numberOfDays: true,
+          scheduleType: true,
+          schedule: true,
+          startDate: true,
+          introductoryVideoUrl: true,
+          courseDetails: true,
+          otherDetails: true,
+          
           learningOutcomes: true, // Consider taking only a few for list view
           mentor: {
             select: {
