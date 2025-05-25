@@ -81,6 +81,10 @@ export default function WorkshopDetailPage() {
     createdAt: workshop?.createdAt,
     bannerImage: workshop?.bannerImage,
     introductoryVideoUrl: workshop?.introductoryVideoUrl,
+    mentorGmailId: workshop?.mentorGmailId,
+    scheduleType: workshop?.scheduleType,
+    startDate: workshop?.startDate,
+    
   }
 
   // Fetch workshop enrollments
@@ -144,7 +148,7 @@ export default function WorkshopDetailPage() {
       const scheduledDate = calculateWorkshopDayDate(i, scheduleItem);
       
       // Check if within 3 hours of the workshop
-      const threeHoursBeforeWorkshop = new Date((scheduledDate?.getTime() || 0) - (3 * 60 * 60 * 1000));
+      const threeHoursBeforeWorkshop = new Date((scheduledDate.scheduledFor.getTime() || 0) - (3 * 60 * 60 * 1000));
       const isWithinTimeWindow = now >= threeHoursBeforeWorkshop;
       
       // Format time until allowed
@@ -173,7 +177,7 @@ export default function WorkshopDetailPage() {
         dayLinks.push({
           dayIndex: i,
           link: '',
-          scheduledFor: scheduledDate?.toISOString() || '',
+          scheduledFor: scheduledDate.scheduledFor.toISOString(),
           canGenerate: isWithinTimeWindow,
           timeUntilAllowed
         });
@@ -183,8 +187,34 @@ export default function WorkshopDetailPage() {
     return dayLinks;
   };
   
-  // Helper function to calculate the date for a workshop day
-  const calculateWorkshopDayDate = (dayIndex: number, scheduleItem: any) => {
+  interface WorkshopCountdown {
+    days: number;
+    hours: number;
+    minutes: number;
+    isPast: boolean;
+    scheduledFor: Date;
+  }
+
+  const calculateTimeDifference = (targetDate: Date | null, now: Date): WorkshopCountdown => {
+    if (!targetDate || isNaN(targetDate.getTime())) {
+      return { days: 0, hours: 0, minutes: 0, isPast: true, scheduledFor: new Date() };
+    }
+
+    const diff = targetDate.getTime() - now.getTime();
+
+    if (diff <= 0) {
+      return { days: 0, hours: 0, minutes: 0, isPast: true, scheduledFor: targetDate };
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    return { days, hours, minutes, isPast: false, scheduledFor: targetDate };
+  };
+
+  const calculateWorkshopDayDate = (dayIndex: number, scheduleItem: any): WorkshopCountdown => {
+    const now = new Date(); // Get current time once
     // Check if we're using a custom schedule (with specific dates) or recurring schedule
     const isCustomSchedule = workshop?.scheduleType === "custom";
     
@@ -208,9 +238,9 @@ export default function WorkshopDetailPage() {
           }
         }
         
-        return customDate;
+        return calculateTimeDifference(customDate, now);
       }
-      return new Date(); // Fallback
+      return calculateTimeDifference(null, now); // Fallback for custom schedule if item is invalid
     } else {
       // For recurring schedule
       const dayMap: Record<string, number> = {
@@ -226,7 +256,7 @@ export default function WorkshopDetailPage() {
       
       // Get all scheduled days in the workshop
       const schedule = workshop?.schedule as any[] || [];
-      if (!schedule.length) return new Date(); // Fallback if no schedule
+      if (!schedule.length) return calculateTimeDifference(null, now); // Fallback if no schedule
       
       // Create an ordered list of workshop days based on the start date
       const workshopDays: {day: number; scheduleIndex: number; date: Date}[] = [];
@@ -286,11 +316,11 @@ export default function WorkshopDetailPage() {
       workshopDays.sort((a, b) => a.date.getTime() - b.date.getTime());
       
       // Now calculate the date for the specific day index
-      if (dayIndex <= 0 || !workshopDays.length) return new Date(); // Invalid index
+      if (dayIndex <= 0 || !workshopDays.length) return calculateTimeDifference(null, now); // Invalid index
       
       // For day 1, return the first scheduled day
       if (dayIndex === 1) {
-        return workshopDays[0]?.date;
+        return calculateTimeDifference(workshopDays[0]?.date || null, now);
       }
       
       // For subsequent days, calculate based on the pattern
@@ -308,7 +338,7 @@ export default function WorkshopDetailPage() {
       const resultDate = new Date(patternDay?.date || new Date());
       resultDate.setDate(resultDate.getDate() + (occurrenceIndex * daysBetweenSessions));
       
-      return resultDate;
+      return calculateTimeDifference(resultDate, now);
     }
   };
 
@@ -415,6 +445,12 @@ return (
                 <CardTitle>Workshop Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* workshop name */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Name</h3>
+                  <p className="mt-1 text-gray-900 text-wrap">{workshop.name}</p>
+                </div>
+                {/* workshop description */}
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Description</h3>
                   <p className="mt-1 text-gray-900 text-wrap">{workshop.description}</p>
@@ -448,7 +484,7 @@ return (
                           <div key={index} className="flex items-center gap-2 ml-6">
                             <Clock className="h-4 w-4 text-gray-500" />
                             <span className="text-gray-900">
-                              {item.day} at {item.time}
+                              {item.day} at {(typeof item === 'object' && item !== null && 'time' in item && item.time) ? String(item.time) : ''}
                             </span>
                           </div>
                         ))}
@@ -466,7 +502,7 @@ return (
                                   weekday: 'long',
                                   month: 'short',
                                   day: 'numeric'
-                                })} at {item.time}
+                                })} at {(typeof item === 'object' && item !== null && 'time' in item && item.time) ? String(item.time) : ''}
                               </span>
                             </div>
                           );
@@ -503,11 +539,15 @@ return (
                             <div className="flex justify-between items-center">
                               <h4 className="font-medium text-gray-900">{day}</h4>
                               <div className="text-sm text-gray-500">
-                                {sessionDate?.toLocaleDateString(undefined, {
-                                  weekday: 'short',
-                                  month: 'short',
-                                  day: 'numeric'
-                                })}
+                                {
+                                  sessionDate.isPast ? (
+                                    `Passed: ${sessionDate.scheduledFor.toLocaleDateString(undefined, {
+                                      weekday: 'short', month: 'short', day: 'numeric'
+                                    })}${(typeof scheduleItem === 'object' && scheduleItem !== null && 'time' in scheduleItem && scheduleItem.time) ? `, ${String(scheduleItem.time)}` : ''}`
+                                  ) : (
+                                    `Starts in: ${sessionDate.days}d ${sessionDate.hours}h ${sessionDate.minutes}m`
+                                  )
+                                }
                               </div>
                             </div>
                             <p className="mt-1 mb-3 text-gray-700">{(content as { description: string; isFreeSession: boolean }).description}</p>

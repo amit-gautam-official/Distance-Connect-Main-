@@ -13,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useParams } from 'next/navigation'
 import {
@@ -38,12 +37,146 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 declare global {
   interface Window {
     Razorpay: any; // For Razorpay Checkout
   }
 }
+
+interface WorkshopCountdown {
+  days: number;
+  hours: number;
+  minutes: number;
+  isPast: boolean;
+  scheduledFor: Date;
+}
+
+const calculateTimeDifference = (targetDate: Date | null, now: Date): WorkshopCountdown => {
+  if (!targetDate || isNaN(targetDate.getTime())) {
+    return { days: 0, hours: 0, minutes: 0, isPast: true, scheduledFor: new Date(0) }; // Return a clearly past date
+  }
+
+  const diff = targetDate.getTime() - now.getTime();
+
+  if (diff <= 0) {
+    return { days: 0, hours: 0, minutes: 0, isPast: true, scheduledFor: targetDate };
+  }
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+  return { days, hours, minutes, isPast: false, scheduledFor: targetDate };
+};
+
+const calculateWorkshopDayDate = (workshop: any, dayIndex: number, scheduleItem: any): WorkshopCountdown => {
+  const now = new Date(); // Get current time once
+  const isCustomSchedule = workshop?.scheduleType === "custom";
+
+  if (isCustomSchedule) {
+    if (typeof scheduleItem === 'object' && scheduleItem !== null && 'date' in scheduleItem && 'time' in scheduleItem) {
+      const customDate = new Date(scheduleItem.date as string);
+      const time = String(scheduleItem.time);
+
+      if (time) {
+        const [hourMin, period] = time.split(' ');
+        if (hourMin) {
+          const [hourStr, minuteStr] = hourMin.split(':');
+          const hour = parseInt(hourStr || "0", 10);
+          const minute = parseInt(minuteStr || "0", 10);
+          
+          let hours = hour || 0;
+          if (period === 'PM' && hour !== 12) hours += 12;
+          if (period === 'AM' && hour === 12) hours = 0;
+          
+          customDate.setHours(hours, minute || 0, 0, 0);
+        }
+      }
+      return calculateTimeDifference(customDate, now);
+    }
+    return calculateTimeDifference(null, now); 
+  } else { 
+    const dayMap: Record<string, number> = {
+      "Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, 
+      "Thursday": 4, "Friday": 5, "Saturday": 6
+    };
+    
+    let startDate = new Date();
+    if (workshop?.startDate) {
+      startDate = new Date(workshop.startDate as string | Date);
+    }
+    
+    const schedule = workshop?.schedule as any[] || [];
+    if (!schedule.length) return calculateTimeDifference(null, now); 
+    
+    const workshopDays: {day: number; scheduleIndex: number; date: Date}[] = [];
+    
+    for (let i = 0; i < schedule.length; i++) {
+      const currentScheduleItem = schedule[i];
+      const day = typeof currentScheduleItem === 'object' && currentScheduleItem !== null && 'day' in currentScheduleItem
+        ? String(currentScheduleItem.day) : '';
+      const time = typeof currentScheduleItem === 'object' && currentScheduleItem !== null && 'time' in currentScheduleItem
+        ? String(currentScheduleItem.time) : '';
+      
+      const dayOfWeek = dayMap[day];
+      if (dayOfWeek === undefined) continue;
+      
+      const startDayOfWeek = startDate.getDay();
+      let daysToAdd = 0;
+      
+      if (dayOfWeek < startDayOfWeek) {
+        daysToAdd = 7 - (startDayOfWeek - dayOfWeek);
+      } else if (dayOfWeek > startDayOfWeek) {
+        daysToAdd = dayOfWeek - startDayOfWeek;
+      } else {
+        daysToAdd = 0;
+      }
+      
+      const workshopDate = new Date(startDate);
+      workshopDate.setDate(startDate.getDate() + daysToAdd);
+      
+      if (time) {
+        const [hourMin, period] = time.split(' ');
+        if (hourMin) {
+          const [hourStr, minuteStr] = hourMin.split(':');
+          const hour = parseInt(hourStr || "0", 10);
+          const minute = parseInt(minuteStr || "0", 10);
+
+          let hours = hour || 0;
+          if (period === 'PM' && hour !== 12) hours += 12;
+          if (period === 'AM' && hour === 12) hours = 0;
+          
+          workshopDate.setHours(hours, minute || 0, 0, 0);
+        }
+      }
+      
+      workshopDays.push({
+        day: dayOfWeek,
+        scheduleIndex: i,
+        date: workshopDate
+      });
+    }
+    
+    workshopDays.sort((a, b) => a.date.getTime() - b.date.getTime());
+    
+    if (dayIndex <= 0 || !workshopDays.length) return calculateTimeDifference(null, now); 
+    
+    if (dayIndex === 1) {
+      return calculateTimeDifference(workshopDays[0]?.date || null, now);
+    }
+    
+    const baseDayInfo = workshopDays[(dayIndex - 1) % workshopDays.length];
+    if (!baseDayInfo) return calculateTimeDifference(null, now);
+
+    const weekOffset = Math.floor((dayIndex - 1) / workshopDays.length);
+    const resultDate = new Date(baseDayInfo.date);
+    resultDate.setDate(resultDate.getDate() + weekOffset * 7);
+    
+    return calculateTimeDifference(resultDate, now);
+  }
+};
 
 export default function WorkshopDetailPage() {
   const router = useRouter();
@@ -293,14 +426,37 @@ export default function WorkshopDetailPage() {
               <div>
                 <h3 className="text-lg font-medium">Schedule</h3>
                 <div className="mt-2 space-y-2">
-                  {workshop.schedule.map((item: any, index: number) => (
-                    <div key={index} className="flex items-center gap-2 text-gray-700">
-                      <Calendar className="h-5 w-5 text-primary" />
-                      <span>
-                        {item.day} at {item.time}
-                      </span>
-                    </div>
-                  ))}
+                  {(workshop.schedule as any[])?.map((item: any, index: number) => {
+                    const dayNumber = index + 1;
+                    const sessionDate = calculateWorkshopDayDate(workshop, dayNumber, item);
+                    const itemTime = (typeof item === 'object' && item !== null && 'time' in item && item.time) ? String(item.time) : '';
+                    const itemDayOrDate = workshop.scheduleType === 'recurring' 
+                      ? (typeof item === 'object' && item !== null && 'day' in item && item.day ? String(item.day) : `Session ${dayNumber}`) 
+                      : sessionDate.scheduledFor.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+
+                    return (
+                      <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-md">
+                        <Calendar className="h-5 w-5 text-blue-600 mt-1 flex-shrink-0" />
+                        <div className="flex-grow">
+                          <p className="font-semibold text-gray-800">
+                            {workshop.scheduleType === 'recurring' ? `Day ${dayNumber}: ${itemDayOrDate}` : itemDayOrDate}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {sessionDate.isPast ? (
+                              `Passed: ${sessionDate.scheduledFor.toLocaleDateString(undefined, {
+                                weekday: 'short', month: 'short', day: 'numeric'
+                              })}${itemTime ? `, ${itemTime}` : ''}`
+                            ) : (
+                              `Starts in: ${sessionDate.days}d ${sessionDate.hours}h ${sessionDate.minutes}m${itemTime ? ` (at ${itemTime})` : ''}`
+                            )}
+                          </p>
+                          {typeof item === 'object' && item !== null && 'description' in item && item.description && (
+                            <p className="text-xs text-gray-500 mt-1 italic">{(item as {description: string}).description}</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 

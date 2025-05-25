@@ -512,7 +512,7 @@ export const workshopRouter = createTRPCRouter({
 
       if (existingEnrollment) {
         throw new TRPCError({ code: "CONFLICT", message: "You are already enrolled in this workshop" });
-      }
+      } 
 
       const isFreeWorkshop = workshop.price === 0;
 

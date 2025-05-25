@@ -48,6 +48,7 @@ type Workshop = {
   otherDetails: string | null;
   bannerImage: string | null;
   introductoryVideoUrl?: string | null;
+  mentorGmailId: string;
 };
 
 interface EditWorkshopModalProps {
@@ -79,12 +80,13 @@ export default function EditWorkshopModal({
   const [form, setForm] = useState({
     name: "",
     description: "",
-    numberOfDays: 1,
-    price: 0,
+    numberOfDays: "",
+    price: "",
     learningOutcomes: [""],
     otherDetails: "",
     scheduleType: "recurring" as "recurring" | "custom",
     startDate: "",
+    mentorGmailId: "",
   });
 
   const [recurringSchedule, setRecurringSchedule] = useState<RecurringScheduleItem[]>(
@@ -97,6 +99,29 @@ export default function EditWorkshopModal({
   const [courseDetails, setCourseDetails] = useState<
     Record<string, { description: string; isFreeSession: boolean }>
   >({});
+
+  // Effect to synchronize custom schedule length with number of days
+  useEffect(() => {
+    if (form.scheduleType === "custom") {
+      const numDays = parseInt(form.numberOfDays, 10) || 0; // Ensure numDays is a number here
+      setCustomSchedule((currentCustomSchedule) => {
+        const currentLength = currentCustomSchedule.length;
+        if (currentLength < numDays) {
+          const newItems = Array(numDays - currentLength)
+            .fill(null)
+            .map(() => ({
+              date: new Date().toISOString().split("T")[0] || "",
+              time: "10:00 AM",
+            }));
+          return [...currentCustomSchedule, ...newItems];
+        } else if (currentLength > numDays) {
+          return currentCustomSchedule.slice(0, numDays);
+        }
+        return currentCustomSchedule; // No change needed if lengths match
+      });
+    }
+    // When switching away from custom, customSchedule is reset by handleInputChange
+  }, [form.numberOfDays, form.scheduleType, setCustomSchedule]);
 
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -117,8 +142,8 @@ export default function EditWorkshopModal({
       setForm({
         name: workshop.name,
         description: workshop.description,
-        numberOfDays: workshop.numberOfDays,
-        price: workshop.price / 100,
+        numberOfDays: workshop.numberOfDays.toString(),
+        price: (workshop.price / 100).toString(),
         learningOutcomes: workshop.learningOutcomes.length > 0
           ? workshop.learningOutcomes
           : [""],
@@ -127,6 +152,7 @@ export default function EditWorkshopModal({
         startDate: workshop.startDate
           ? new Date(workshop.startDate).toISOString().split("T")[0] || ""
           : "",
+        mentorGmailId: workshop.mentorGmailId || "",
       });
 
       if (workshop.scheduleType === "custom" && Array.isArray(workshop.schedule)) {
@@ -214,37 +240,36 @@ export default function EditWorkshopModal({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setForm((prevForm) => {
-      let newStartDate = prevForm.startDate;
-      if (name === "scheduleType") {
-        if (value === "custom") {
-          newStartDate = ""; // Clear startDate when switching to custom
-        } else if (value === "recurring" && !prevForm.startDate) {
-          // Optionally set a default start date if switching to recurring and it's empty
-          // newStartDate = new Date().toISOString().split('T')[0]; 
-        }
-      }
-      return {
-        ...prevForm,
-        [name]: (name === "price" || name === "numberOfDays") && value !== "" ? Number(value) : value,
-        startDate: name === "scheduleType" ? newStartDate : prevForm.startDate,
-      };
-    });
 
     if (name === "numberOfDays") {
-      const days = parseInt(value) || 0;
-      const newCourseDetails: Record<string, { description: string; isFreeSession: boolean }> = {};
-      for (let i = 1; i <= days; i++) {
-        newCourseDetails[`Day ${i}`] = courseDetails[`Day ${i}`] || {
-          description: "",
-          isFreeSession: false,
-        };
+      const days = parseInt(value, 10);
+      if (!isNaN(days) && days >= 1) {
+        setForm((prev) => ({ ...prev, [name]: value }));
+        // Adjust courseDetails based on new number of days
+        const newCourseDetails: Record<string, { description: string; isFreeSession: boolean }> = {};
+        for (let i = 1; i <= days; i++) {
+          newCourseDetails[`Day ${i}`] = courseDetails[`Day ${i}`] || { description: "", isFreeSession: false };
+        }
+        setCourseDetails(newCourseDetails);
+      } else if (value === "") {
+        setForm((prev) => ({ ...prev, [name]: "" })); // Or handle empty string as you see fit, maybe set to 1
+        const newCourseDetails: Record<string, { description: string; isFreeSession: boolean }> = {};
+        newCourseDetails["Day 1"] = courseDetails["Day 1"] || { description: "", isFreeSession: false };
+        setCourseDetails(newCourseDetails);
       }
-      setCourseDetails(newCourseDetails);
-      if (form.scheduleType === "custom" && customSchedule.length > days && days > 0) {
-        setCustomSchedule((prev) => prev.slice(0, days));
+    } else if (name === "price") {
+      const price = parseFloat(value);
+      if (!isNaN(price) && price >= 0) {
+        setForm((prev) => ({ ...prev, [name]: value }));
+      } else if (value === "") {
+        setForm((prev) => ({ ...prev, [name]: "" }));
       }
-    } else if (name === "scheduleType") {
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
+
+    if (name === "scheduleType") {
+      // Reset schedules when type changes to avoid sending incorrect data
       if (value === "recurring") {
         setCustomSchedule([{ date: new Date().toISOString().split("T")[0] || "", time: "10:00 AM" }]);
       } else {
@@ -364,9 +389,42 @@ export default function EditWorkshopModal({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsUploading(true);
+
+    const parsedNumberOfDays = parseInt(form.numberOfDays, 10);
+    if (isNaN(parsedNumberOfDays) || parsedNumberOfDays < 1) {
+      toast.error("Number of days must be a positive integer.");
+      return;
+    }
+
+    const parsedPrice = parseFloat(form.price);
+    if (isNaN(parsedPrice) || parsedPrice < 0) {
+      toast.error("Price must be a non-negative number.");
+      return;
+    }
+
+    if (!form.mentorGmailId || !form.mentorGmailId.endsWith("@gmail.com")) {
+      toast.error("Mentor Gmail ID is required and must be a @gmail.com address.");
+      return;
+    }
+    if (form.scheduleType === "recurring" && recurringSchedule.some(item => !item.day || !item.time)) {
+      toast.error("All recurring schedule entries must have a day and time.");
+      return;
+    }
+    if (form.scheduleType === "custom" && customSchedule.some(item => !item.date || !item.time)) {
+      toast.error("All custom schedule entries must have a date and time.");
+      return;
+    }
+    if (form.scheduleType === "custom" && !form.startDate && customSchedule.length > 0) {
+        // toast.error("A start date is recommended for custom schedules if sessions are defined.");
+    }
+
+    const learningOutcomesFiltered = form.learningOutcomes.filter(outcome => outcome.trim() !== "");
+    if (learningOutcomesFiltered.length === 0) {
+        toast.error("At least one learning outcome is required.");
+        return;
+    }
 
     let finalBannerUrl = workshop.bannerImage;
 
@@ -391,7 +449,6 @@ export default function EditWorkshopModal({
         }
       } catch (error: any) {
         toast.error("Failed to upload new banner: " + error.message);
-        setIsUploading(false);
         return;
       }
     }
@@ -419,20 +476,27 @@ export default function EditWorkshopModal({
       }
     }
 
-    updateWorkshop.mutate({
+    const mutationData = {
       id: workshop.id,
       name: form.name,
       description: form.description,
-      numberOfDays: form.numberOfDays,
-      scheduleType: form.scheduleType,
-      startDate: form.scheduleType === "recurring" ? form.startDate : undefined,
-      schedule: form.scheduleType === "recurring" ? recurringSchedule : customSchedule,
-      price: form.price * 100,
-      learningOutcomes: form.learningOutcomes.filter((outcome) => outcome.trim() !== ""),
+      numberOfDays: parsedNumberOfDays,
+      price: parsedPrice * 100,
+      learningOutcomes: learningOutcomesFiltered,
       courseDetails,
       otherDetails: form.otherDetails,
+      scheduleType: form.scheduleType,
+      startDate: form.startDate || undefined,
+      schedule: form.scheduleType === "recurring" ? recurringSchedule : customSchedule,
+      mentorGmailId: form.mentorGmailId,
       bannerImage: finalBannerUrl || "",
-    });
+    };
+
+    try {
+      await updateWorkshop.mutateAsync(mutationData);
+    } catch (error: any) {
+      toast.error("Failed to update workshop: " + error.message);
+    }
   };
 
   if (!isOpen) return null;
@@ -580,8 +644,9 @@ export default function EditWorkshopModal({
                 <Input
                   id="numberOfDays"
                   name="numberOfDays"
-                  type="number"
-                  min={1}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={form.numberOfDays}
                   onChange={handleInputChange}
                   required
@@ -592,8 +657,9 @@ export default function EditWorkshopModal({
                 <Input
                   id="price"
                   name="price"
-                  type="number"
-                  min={0}
+                  type="text"
+                  inputMode="decimal"
+                  pattern="[0-9]*[.,]?[0-9]*"
                   value={form.price}
                   onChange={handleInputChange}
                   required
@@ -603,7 +669,45 @@ export default function EditWorkshopModal({
 
             <div>
               <Label>Workshop Schedule</Label>
-              <div className="space-y-2 mt-2 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
+              <div className="mt-1">
+                <Label htmlFor="scheduleType" className="text-sm font-medium">Schedule Type</Label>
+                <Select
+                  value={form.scheduleType}
+                  onValueChange={(value: "recurring" | "custom") => {
+                    handleInputChange({
+                      target: { name: "scheduleType", value },
+                    } as React.ChangeEvent<HTMLSelectElement>);
+                  }}
+                >
+                  <SelectTrigger id="scheduleType" className="w-full mt-1">
+                    <SelectValue placeholder="Select schedule type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recurring">Recurring</SelectItem>
+                    <SelectItem value="custom">Custom (Specific Dates)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Conditional Start Date for Recurring Schedule */}
+              {form.scheduleType === "recurring" && (
+                <div className="mt-3">
+                  <Label htmlFor="startDate">Start Date (for Recurring)</Label>
+                  <Input
+                    id="startDate"
+                    name="startDate"
+                    type="date"
+                    value={form.startDate}
+                    onChange={handleInputChange}
+                    className="mt-1"
+                  />
+                   <p className="text-xs text-muted-foreground mt-1">
+                    Optional for recurring. If set, first session will be on or after this date.
+                  </p>
+                </div>
+              )}
+
+              <div className="space-y-2 mt-4 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
                 {form.scheduleType === "recurring" ? (
                   recurringSchedule.map((item, index) => (
                     <div key={index} className="flex items-center gap-2">
@@ -802,6 +906,9 @@ export default function EditWorkshopModal({
 
             <div>
               <Label>Course Details</Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Define content for each day. Number of days ({form.numberOfDays}) is set above.
+              </p>
               <div className="space-y-3 mt-2 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
                 {Object.keys(courseDetails).map((day) => (
                   <div key={day}>
@@ -844,6 +951,22 @@ export default function EditWorkshopModal({
                 placeholder="Any additional information about the workshop"
                 rows={2}
               />
+            </div>
+
+            <div>
+              <Label htmlFor="mentorGmailId">Mentor Gmail ID</Label>
+              <Input
+                id="mentorGmailId"
+                name="mentorGmailId"
+                type="email"
+                value={form?.mentorGmailId }
+                onChange={handleInputChange}
+                placeholder="mentor@gmail.com"
+                required
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Required for Google Meet integration. Must be a @gmail.com address.
+              </p>
             </div>
           </div>
 
