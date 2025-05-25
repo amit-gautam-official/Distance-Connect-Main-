@@ -17,6 +17,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useParams } from 'next/navigation'
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -28,6 +37,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
 
 declare global {
   interface Window {
@@ -39,7 +49,7 @@ export default function WorkshopDetailPage() {
   const router = useRouter();
   const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-
+  const [studentGmailId, setStudentGmailId] = useState<string>("");
   // Unwrap params using React.use()
   const params = useParams<{ workshopId: string }>();
   const workshopId = params.workshopId;
@@ -86,6 +96,7 @@ export default function WorkshopDetailPage() {
     try {
       await enrollInWorkshop.mutateAsync({ 
         workshopId: params.workshopId,
+        studentGmailId: studentGmailId,
       });
     } catch (error) {
       // Error handled in the mutation
@@ -552,27 +563,40 @@ export default function WorkshopDetailPage() {
 
 
       {/* Enrollment confirmation dialog */}
-      <AlertDialog open={isEnrollDialogOpen} onOpenChange={setIsEnrollDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Enrollment</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to enroll in &quot;{workshop.name}&quot;?
-              {/* In a real app, this would include payment details */}
-              This will give you access to the workshop materials and meeting links.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleEnroll}
-              disabled={enrollInWorkshop.isPending}
-            >
-              {enrollInWorkshop.isPending ? "Processing..." : "Confirm Enrollment"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      
+<Dialog open={isEnrollDialogOpen} onOpenChange={setIsEnrollDialogOpen}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Confirm Enrollment</DialogTitle>
+      <DialogDescription>
+        Are you sure you want to enroll in &quot;{workshop.name}&quot;?
+        <br />
+        This will give you access to the workshop materials and meeting links.
+      </DialogDescription>
+    </DialogHeader>
+
+    <div className="py-2">
+      <Input
+        type="email"
+        placeholder="Enter your email (GMAIL) for Google Meet"
+        value={studentGmailId}
+        onChange={(e) => setStudentGmailId(e.target.value)}
+      />
+    </div>
+
+    <DialogFooter>
+      <Button variant="outline" onClick={() => setIsEnrollDialogOpen(false)}>
+        Cancel
+      </Button>
+      <Button
+        onClick={handleEnroll}
+        disabled={enrollInWorkshop.isPending}
+      >
+        {enrollInWorkshop.isPending ? "Processing..." : "Confirm Enrollment"}
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
     </div>
   );
 }

@@ -71,6 +71,7 @@ export default function CreateWorkshopModal({
     otherDetails: "",
     scheduleType: "recurring" as "recurring" | "custom",
     startDate: "", 
+    mentorGmailId: "",
   });
 
   // For recurring schedule (day and time)
@@ -167,6 +168,7 @@ export default function CreateWorkshopModal({
           learningOutcomes: form.learningOutcomes.filter((outcome) => outcome.trim() !== ""),
           courseDetails,
           otherDetails: form.otherDetails,
+          mentorGmailId: form.mentorGmailId, // Pass directly as it's now required
         });
       } else {
         setIsUploading(false);
@@ -368,6 +370,19 @@ const handleSubmit = async (e: React.FormEvent) => {
     toast.error("Price cannot be negative.");
     return;
   }
+  if (!form.mentorGmailId) {
+    toast.error("Mentor Gmail ID is required.");
+    return;
+  }
+  // Basic email format validation
+  if (!/^\S+@\S+\.\S+$/.test(form.mentorGmailId)) {
+    toast.error("Invalid email format for Mentor Gmail ID.");
+    return;
+  }
+  if (!form.mentorGmailId.endsWith("@gmail.com")) {
+    toast.error("Mentor Gmail ID must be a Gmail address (e.g., your.email@gmail.com).");
+    return;
+  }
 
   setIsUploading(true);
 
@@ -400,6 +415,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       learningOutcomes: form.learningOutcomes.filter(outcome => outcome.trim() !== ""),
       courseDetails,
       otherDetails: form.otherDetails,
+      mentorGmailId: form.mentorGmailId, // Pass directly as it's now required
     });
   }
 };
@@ -414,6 +430,7 @@ const resetForm = () => {
     otherDetails: "",
     scheduleType: "recurring",
     startDate: "",
+    mentorGmailId: "",
   });
 
   setBannerImage(null);
@@ -852,6 +869,22 @@ return (
                 rows={2}
               />
             </div>
+
+            <div>
+              <Label htmlFor="mentorGmailId">Mentor Gmail ID <span className="text-red-500">*</span></Label>
+              <Input
+                id="mentorGmailId"
+                name="mentorGmailId"
+                value={form.mentorGmailId}
+                onChange={handleInputChange}
+                placeholder="your.email@gmail.com"
+                required
+              />
+              <div className="text-xs text-muted-foreground">
+                Must be a valid Gmail address. Required for Google Meet integration.
+              </div>
+            </div>
+
           </div>
 
           <DialogFooter>

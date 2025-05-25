@@ -337,12 +337,12 @@ function getUpcomingWorkshopSessions(workshop: any): WorkshopDaySession[] {
  * Get all workshop attendees (mentor and enrolled students)
  */
 function getWorkshopAttendees(workshop: any): WorkshopAttendees {
-  const mentor = { email: workshop.mentor?.user?.email || '' };
+  const mentor = { email: workshop.mentorGmailId || '' };
   
   const students = workshop.enrollments
     .filter((enrollment: any) => enrollment.paymentStatus)
     .map((enrollment: any) => ({ 
-      email: enrollment.student?.user?.email || ''
+      email: enrollment.studentGmailId || ''
     }))
     .filter((student: { email: string }) => student.email !== '');
   

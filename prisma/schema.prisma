@@ -326,9 +326,8 @@ model Workshop {
   otherDetails         String?
   meetLinks            Json? // Map of day index to meet link and scheduled date
   introductoryVideoUrl String? // New field for introductory video URL
+  mentorGmailId        String // Changed to required for Google Meet integration
   enrollments          WorkshopEnrollment[]
-  initialFreeSessions  Int                  @default(0)
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -338,6 +337,7 @@ model WorkshopEnrollment {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   workshop   Workshop @relation(fields: [workshopId], references: [id])
   workshopId String   @db.ObjectId
+  studentGmailId String?
 
   student       Student @relation(fields: [studentUserId], references: [userId])
   studentUserId String  @db.ObjectId

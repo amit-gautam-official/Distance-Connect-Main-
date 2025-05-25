@@ -38,8 +38,9 @@ export const workshopRouter = createTRPCRouter({
       ),
       price: z.number().int().min(0, "Price cannot be negative"),
       learningOutcomes: z.array(z.string()),
-      courseDetails: z.record(z.string(), z.object({ description: z.string().min(1, "Session description cannot be empty."), isFreeSession: z.boolean() })), // Corrected schema
-      otherDetails: z.string().optional()
+      courseDetails: z.record(z.object({ description: z.string().min(1, "Session description cannot be empty."), isFreeSession: z.boolean() })), // Corrected schema
+      otherDetails: z.string().optional(),
+      mentorGmailId: z.string().email(), // Changed to required
     }))
     .mutation(async ({ ctx, input }) => {
       // Verify the user is a mentor
@@ -66,6 +67,7 @@ export const workshopRouter = createTRPCRouter({
           courseDetails: input.courseDetails,
           otherDetails: input.otherDetails || "",
           mentorUserId: ctx.dbUser.id,
+          mentorGmailId: input.mentorGmailId, // Now directly passed as it's required
         },
       });
     }),
@@ -477,12 +479,18 @@ export const workshopRouter = createTRPCRouter({
   enrollInWorkshop: protectedProcedure
     .input(z.object({ 
       workshopId: z.string(),
+      studentGmailId: z.string().email({ message: "Invalid email address format." })
+        .refine(email => email.toLowerCase().endsWith('@gmail.com'), {
+          message: "Email must be a Gmail address (e.g., user@gmail.com)."
+        }), 
     }))
     .mutation(async ({ ctx, input }) => {
       // Verify the user is a student
       if (ctx.dbUser?.role !== Role.STUDENT) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Only students can enroll in workshops" });
       }
+
+      console.log("Input:", input);
 
       // Check if the workshop exists
       const workshop = await ctx.db.workshop.findUnique({
@@ -512,6 +520,7 @@ export const workshopRouter = createTRPCRouter({
         data: {
           workshopId: input.workshopId,
           studentUserId: ctx.dbUser.id,
+          studentGmailId: input.studentGmailId,
           paymentStatus: isFreeWorkshop, // Set paymentStatus to true if workshop is free
         },
       });
@@ -669,6 +678,7 @@ export const workshopRouter = createTRPCRouter({
         include: {
           mentor: { include: { user: true } },
           enrollments: { include: { student: { include: { user: true } } } },
+          // courseDetails: true, // Removed: courseDetails is a direct JSON field, not a relation
         },
       });
 
@@ -788,7 +798,7 @@ export const workshopRouter = createTRPCRouter({
           const workshopDate = new Date(startDate);
           workshopDate.setDate(startDate.getDate() + daysToAdd);
           
-          // Parse and set the time
+          // Parse the time (assuming format like "10:00 AM")
           const [hourMin, period] = scheduleTime.split(' ');
           if (!hourMin) {
             throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid time format in workshop schedule" });
@@ -845,6 +855,12 @@ export const workshopRouter = createTRPCRouter({
         // No need to set the date or parse time again
       }
       
+      // Determine if the session is free
+      const courseDayKey = `day${dayIndexToUse}`;
+      const courseDetailsRecord = workshop.courseDetails as Record<string, { description: string, isFreeSession: boolean }> | null | undefined;
+      const dayCourseDetail = courseDetailsRecord && courseDetailsRecord[courseDayKey] ? courseDetailsRecord[courseDayKey] : null;
+      const isFreeSession = dayCourseDetail ? dayCourseDetail.isFreeSession : false;
+
       // Check if we're within 3 hours of the workshop start time
       const threeHoursBeforeWorkshop = new Date(targetDate.getTime() - (3 * 60 * 60 * 1000));
       const isWithinTimeWindow = now >= threeHoursBeforeWorkshop;
@@ -863,25 +879,31 @@ export const workshopRouter = createTRPCRouter({
       // Get the attendees for the meeting
       const attendees = [];
       
-      // Add enrolled students
+      // Add enrolled students conditionally
       for (const enrollment of workshop.enrollments) {
-        if (enrollment.student?.user?.email) {
-          attendees.push({ email: enrollment.student.user.email });
+        if (enrollment.studentGmailId) { // Student must have a Gmail ID
+          if (isFreeSession) { // If the session is free, add the student
+            attendees.push({ email: enrollment.studentGmailId });
+          } else { // If the session is paid
+            if (enrollment.paymentStatus === true) { // And student has paid
+              attendees.push({ email: enrollment.studentGmailId });
+            }
+          }
         }
       }
       
       // Add the mentor
-      if (workshop.mentor?.user?.email) {
-        attendees.push({ email: workshop.mentor.user.email });
-      } else if (ctx.dbUser?.email) {
+      if (workshop.mentorGmailId) {
+        attendees.push({ email: workshop.mentorGmailId });
+      } else if (workshop.mentorUserId === ctx.dbUser?.id && ctx.dbUser?.email) { // Check if current user is the mentor
         attendees.push({ email: ctx.dbUser.email });
       }
       
-      // Check if we have any attendees
+      // Check if we have any attendees (mentor should always be one if available)
       if (attendees.length === 0) {
         throw new TRPCError({
           code: "BAD_REQUEST", 
-          message: "No attendees found for this workshop. Make sure students are enrolled before generating a meeting link."
+          message: "No attendees could be added for this meeting. Ensure the mentor's Gmail ID is set and, for paid sessions, that students have completed payment."
         });
       }
       
@@ -907,7 +929,7 @@ export const workshopRouter = createTRPCRouter({
       // Update the workshop with the meeting links
       await ctx.db.workshop.update({
         where: { id: input.workshopId },
-        data: { meetLinks: updatedMeetLinks },
+        data: { meetLinks: updatedMeetLinks as any }, // Added 'as any' for Prisma JSON type compatibility
       });
       
       return { 
