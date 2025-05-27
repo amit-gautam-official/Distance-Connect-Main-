@@ -74,6 +74,8 @@ export const fileRouter = createTRPCRouter({
       // Validate file size (Base64 is ~33% larger than binary)
       const estimatedFileSize = Math.ceil((fileContent.length * 3) / 4);
       if (estimatedFileSize > MAX_FILE_SIZE) {
+        console.log("File size:", estimatedFileSize);
+        console.log("Max file size:", MAX_FILE_SIZE);
         throw new TRPCError({
           code: "BAD_REQUEST", 
           message: `File exceeds maximum size of ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
@@ -82,6 +84,7 @@ export const fileRouter = createTRPCRouter({
 
       const bucket = storage.bucket(bucketName);
       if (!bucket) {
+        console.log("Bucket not found");
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Bucket not found",
@@ -152,7 +155,7 @@ export const fileRouter = createTRPCRouter({
           fileExtension = 'webp';
           finalContentType = 'image/webp';
         } catch (error) {
-          console.error("Error processing image:", error);
+          console.log("Error processing image:", error);
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Invalid image file. The file could not be processed.",
@@ -182,13 +185,17 @@ export const fileRouter = createTRPCRouter({
       const file = bucket.file(filePath);
 
       // Upload processed file
+      try {
       await file.save(processedBuffer, {
         contentType: finalContentType, 
         metadata: {
           cacheControl: "public, max-age=31536000", 
         },
       });
-
+      } catch (error) {
+        console.log("Error uploading file:", error);
+        
+      }
       // Get the public URL (without making the file public)
       const publicUrl = `https://storage.googleapis.com/${bucketName}/${filePath}`;
 

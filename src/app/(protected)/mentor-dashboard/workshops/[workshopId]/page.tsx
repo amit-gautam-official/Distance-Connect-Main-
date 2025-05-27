@@ -115,8 +115,14 @@ export default function WorkshopDetailPage() {
         dayIndex: dayIndex
       });
     } catch (error) {
-      // Error handled in mutation
-      toast.error(error as string);
+      // Properly extract error message from Error object
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : typeof error === 'string' 
+          ? error 
+          : 'An unknown error occurred';
+      
+      toast.error(errorMessage);
     }
   };
 

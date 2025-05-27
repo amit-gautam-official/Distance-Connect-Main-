@@ -643,10 +643,11 @@ export const workshopRouter = createTRPCRouter({
       if (workshop.mentorUserId !== ctx.dbUser.id) {
         throw new TRPCError({ code: "FORBIDDEN", message: "You are not authorized to modify this workshop." });
       }
-
+      console.log("Video:", video);
       // 3. Call the file upload router using createCaller
       const createCaller = createCallerFactory(fileRouter)
       const fileCaller = createCaller(ctx)
+      try {
       const uploadResult = await fileCaller.upload({
         bucketName: "dc-public-files",
         folderName: "dc-ws-intro-video",
@@ -665,6 +666,13 @@ export const workshopRouter = createTRPCRouter({
         where: { id: workshopId },
         data: { introductoryVideoUrl: uploadResult.url },
       });
+    } catch (error) {
+      console.log("Error uploading video:", error);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Video upload failed. Please try again.",
+      });
+    }
     }),
 
   // Generate meeting link for a workshop (mentor only)
