@@ -705,12 +705,13 @@ export const workshopRouter = createTRPCRouter({
       }
 
       const { dayIndex } = input;
-      // Get current date and time in IST (UTC+5:30)
-      // Create date in UTC and then adjust to IST by adding 5 hours and 30 minutes
+      // Get current date and time
       const now = new Date();
-      // Log the current time in both UTC and IST for debugging
+      // Convert to IST by adding 5 hours and 30 minutes
+      const nowIST = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+      
       console.log(`Current time (UTC): ${now.toISOString()}`);
-      console.log(`Current time (IST): ${new Date(now.getTime() + (5.5 * 60 * 60 * 1000)).toISOString()}`);
+      console.log(`Current time (IST): ${nowIST.toISOString()}`);
       
       // Get day to generate link for (default to first day)
       const dayIndexToUse = dayIndex || 1;
@@ -884,35 +885,44 @@ export const workshopRouter = createTRPCRouter({
       const dayCourseDetail = courseDetailsRecord && courseDetailsRecord[courseDayKey] ? courseDetailsRecord[courseDayKey] : null;
       const isFreeSession = dayCourseDetail ? dayCourseDetail.isFreeSession : false;
 
-      // Check if we're within 3 hours of the workshop start time - using timestamps for consistent comparison
-      // IST is consistently used for all dates in this function
-      const threeHoursBeforeWorkshop = new Date(targetDate.getTime() - (3 * 60 * 60 * 1000));
+      // For the comparison, we need to adjust for IST timezone
+      // First, convert the target date to IST by adding 5:30 hours to account for the timezone difference
+      const targetDateIST = new Date(targetDate.getTime() + (5.5 * 60 * 60 * 1000));
       
-      // Compare timestamps (milliseconds since epoch) to avoid timezone issues
-      // This will work correctly as long as both dates are in the same timezone (IST)
-      const isWithinTimeWindow = now.getTime() >= threeHoursBeforeWorkshop.getTime();
+      // Now calculate 3 hours before the workshop in IST
+      const threeHoursBeforeWorkshop = new Date(targetDateIST.getTime() - (3 * 60 * 60 * 1000));
+      
+      // Compare timestamps (milliseconds since epoch) - using IST for both times
+      const isWithinTimeWindow = nowIST.getTime() >= threeHoursBeforeWorkshop.getTime();
       
       // Debug logging for time-related issues
       console.log({
-        targetDateISO: targetDate.toISOString(),
-        threeHoursBeforeWorkshopISO: threeHoursBeforeWorkshop.toISOString(),
-        nowISO: now.toISOString(),
-        timeDifferenceMs: now.getTime() - threeHoursBeforeWorkshop.getTime(),
-        timeDifferenceMinutes: Math.floor((now.getTime() - threeHoursBeforeWorkshop.getTime()) / (60 * 1000)),
+        // UTC times
+        targetDateUTC: targetDate.toISOString(),
+        nowUTC: now.toISOString(),
+        // IST times (explicitly adjusted)
+        targetDateIST: targetDateIST.toISOString(),
+        threeHoursBeforeWorkshopIST: threeHoursBeforeWorkshop.toISOString(),
+        nowIST: nowIST.toISOString(),
+        // Time differences
+        timeDifferenceMs: nowIST.getTime() - threeHoursBeforeWorkshop.getTime(),
+        timeDifferenceMinutes: Math.floor((nowIST.getTime() - threeHoursBeforeWorkshop.getTime()) / (60 * 1000)),
         isWithinTimeWindow,
         forceGenerate: input.forceGenerate
       });
       
       // Only allow generation if within time window or if force generate is true
       if (!isWithinTimeWindow && !input.forceGenerate) {
-        const timeUntilAllowed = Math.ceil((threeHoursBeforeWorkshop.getTime() - now.getTime()) / (60 * 1000));
+        const timeUntilAllowed = Math.ceil((threeHoursBeforeWorkshop.getTime() - nowIST.getTime()) / (60 * 1000));
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: 
             `Meeting links can only be generated within 3 hours of the workshop start time. ` +
             `You can generate this link in ${timeUntilAllowed} minutes.
-            Now: ${now.toISOString()}
-            Target Date: ${targetDate.toISOString()}
+            Current time : ${nowIST.toISOString()}
+            Workshop time : ${targetDateIST.toISOString()}
+            timezone : ${nowIST.getTimezoneOffset()}
+            3 hours before workshop : ${threeHoursBeforeWorkshop.toISOString()}
             `
         });
       }
