@@ -700,16 +700,16 @@ export const workshopRouter = createTRPCRouter({
       if (!workshop) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Workshop not found." });
       }
-      if (workshop.mentorUserId !== ctx.dbUser.id) {
+      if (ctx.dbUser.role !== Role.ADMIN && workshop.mentorUserId !== ctx.dbUser.id) {
         throw new TRPCError({ code: "FORBIDDEN", message: "You do not own this workshop." });
       }
 
       const { dayIndex } = input;
-      // Get current date and time in UTC
+      // Get current date and time - we'll treat all times as if they're already in IST
       const now = new Date();
       
-      console.log(`Current time (UTC): ${now.toISOString()}`);
-      // console.log(`Timezone offset (server local): ${now.getTimezoneOffset()} minutes`); // Informational, not used in UTC logic
+      console.log(`Current time: ${now.toISOString()}`);
+      console.log(`Timezone offset: ${now.getTimezoneOffset()} minutes`);
       
       // Get day to generate link for (default to first day)
       const dayIndexToUse = dayIndex || 1;
@@ -726,194 +726,164 @@ export const workshopRouter = createTRPCRouter({
       
       // Handle different schedule types
       if (workshop.scheduleType === "custom") {
-        // For custom schedule, each item has a specific date and time (interpreted as UTC)
+        // For custom schedule, each item has a specific date and time
         if (dayIndexToUse > (workshop.schedule as any[]).length) {
           throw new TRPCError({ code: "BAD_REQUEST", message: `Day ${dayIndexToUse} is not defined in the custom schedule` });
         }
         
+        // Get the specific schedule item for this day
         const scheduleItem = workshop.schedule[dayIndexToUse - 1];
         
-        const scheduleDateStr = typeof scheduleItem === 'object' && scheduleItem !== null && 'date' in scheduleItem
-          ? String(scheduleItem.date) // Expected YYYY-MM-DD
+        // Safely extract date and time values
+        const scheduleDate = typeof scheduleItem === 'object' && scheduleItem !== null && 'date' in scheduleItem
+          ? String(scheduleItem.date)
           : '';
         
-        const scheduleTimeStr = typeof scheduleItem === 'object' && scheduleItem !== null && 'time' in scheduleItem
-          ? String(scheduleItem.time) // Expected HH:MM or HH:MM AM/PM
+        const scheduleTime = typeof scheduleItem === 'object' && scheduleItem !== null && 'time' in scheduleItem
+          ? String(scheduleItem.time)
           : '';
         
-        if (!scheduleDateStr || !scheduleTimeStr) {
+        if (!scheduleDate || !scheduleTime) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid custom schedule format: missing date or time" });
         }
         
-        // Parse time string (HH:MM or HH:MM AM/PM) to 24-hour UTC hours and minutes
-        const [hourMinStr, period] = scheduleTimeStr.split(' ');
-        const [hourStr, minuteStr] = hourMinStr?.split(':') || ['0', '0'];
-        if (!hourStr || !minuteStr) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid custom schedule format: missing hour or minute" });
+        // Create date from the specific date and time in IST
+        targetDate = new Date(scheduleDate);
+        
+        // Parse the time (assuming format like "10:00 AM")
+        const [hourMin, period] = scheduleTime.split(' ');
+        if (!hourMin) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid time format in workshop schedule" });
         }
-        let utcHours = parseInt(hourStr);
-        const utcMinutes = parseInt(minuteStr);
-
-        if (period) { // AM/PM format
-            if (period.toUpperCase() === 'PM' && utcHours !== 12) {
-                utcHours += 12;
-            } else if (period.toUpperCase() === 'AM' && utcHours === 12) { // Midnight case 12 AM is 00 hours
-                utcHours = 0;
-            }
-        }
-        // utcHours is now 24-hour format
-
-        // Construct ISO 8601 date-time string in UTC
-        const isoDateTimeString = `${scheduleDateStr}T${String(utcHours).padStart(2, '0')}:${String(utcMinutes).padStart(2, '0')}:00.000Z`;
-        targetDate = new Date(isoDateTimeString);
-
-        if (isNaN(targetDate.getTime())) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: `Invalid date/time in custom schedule: ${isoDateTimeString}` });
-        }
-
+        
+        const [hour, minute] = hourMin.split(':').map(Number);
+        
+        let hours = hour || 0;
+        if (period === 'PM' && hour !== 12) hours += 12;
+        if (period === 'AM' && hour === 12) hours = 0;
+        
+        // Set time in IST
+        targetDate.setHours(hours, minute || 0, 0, 0);
+        
+        // Log the target date in IST
+        console.log(`Target date (IST): ${targetDate.toString()}`);
       } else {
-        // For recurring schedule, calculate based on start date and day pattern (all in UTC)
+        // For recurring schedule, calculate based on start date and day pattern
         const dayMap: Record<string, number> = {
           "Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, 
           "Thursday": 4, "Friday": 5, "Saturday": 6
         };
         
-        let baseStartDateUtc: Date;
-        if (workshop.startDate) {
-            // Assuming workshop.startDate is YYYY-MM-DD (becomes UTC midnight) or full ISO string
-            baseStartDateUtc = new Date(workshop.startDate);
-        } else {
-            // Fallback to current date's UTC midnight if workshop.startDate is not set
-            const today = new Date();
-            baseStartDateUtc = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
-        }
-        if (isNaN(baseStartDateUtc.getTime())) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: `Invalid workshop start date: ${workshop.startDate ? workshop.startDate.toISOString() : 'null'}` });
-        }
+        // Get the start date if available, otherwise use current date
+        const startDate = workshop.startDate ? new Date(workshop.startDate) : new Date();
         
+        // Create an ordered list of workshop days based on the start date
         const workshopDays: {day: number; scheduleIndex: number; date: Date}[] = [];
         
+        // First, determine the first occurrence of each scheduled day after the start date
         for (let i = 0; i < (workshop.schedule as any[]).length; i++) {
           const scheduleItem = workshop.schedule[i];
-          const scheduleDayStr = typeof scheduleItem === 'object' && scheduleItem !== null && 'day' in scheduleItem
+          
+          // Safely extract the day and time values
+          const scheduleDay = typeof scheduleItem === 'object' && scheduleItem !== null && 'day' in scheduleItem
             ? String(scheduleItem.day) : '';
-          const scheduleTimeStr = typeof scheduleItem === 'object' && scheduleItem !== null && 'time' in scheduleItem
+          
+          const scheduleTime = typeof scheduleItem === 'object' && scheduleItem !== null && 'time' in scheduleItem
             ? String(scheduleItem.time) : '';
           
-          if (!scheduleDayStr || !scheduleTimeStr) {
+          if (!scheduleDay || !scheduleTime) {
             throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid recurring schedule format: missing day or time" });
           }
           
-          const dayOfWeek = dayMap[scheduleDayStr];
+          // Get the day of week for this schedule item
+          const dayOfWeek = dayMap[scheduleDay];
           if (dayOfWeek === undefined) {
-            throw new TRPCError({ code: "BAD_REQUEST", message: `Invalid day in workshop schedule: ${scheduleDayStr}` });
+            throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid day in workshop schedule" });
           }
           
-          const startDayOfWeekUtc = baseStartDateUtc.getUTCDay();
+          // Calculate days to add to reach this day from the start date
+          const startDayOfWeek = startDate.getDay();
           let daysToAdd = 0;
-          if (dayOfWeek < startDayOfWeekUtc) {
-            daysToAdd = 7 - (startDayOfWeekUtc - dayOfWeek);
+          
+          // If the day is before or equal to the start day of week, find the next occurrence
+          if (dayOfWeek < startDayOfWeek) {
+            daysToAdd = 7 - (startDayOfWeek - dayOfWeek);
+          } else if (dayOfWeek > startDayOfWeek) {
+            daysToAdd = dayOfWeek - startDayOfWeek;
           } else {
-            daysToAdd = dayOfWeek - startDayOfWeekUtc;
+            // Same day of week as start date
+            // If the workshop starts today, count today as day 1
+            daysToAdd = 0;
           }
           
-          const currentWorkshopDayDate = new Date(baseStartDateUtc.getTime());
-          currentWorkshopDayDate.setUTCDate(baseStartDateUtc.getUTCDate() + daysToAdd);
+          // Create a date for this workshop day
+          const workshopDate = new Date(startDate);
+          workshopDate.setDate(startDate.getDate() + daysToAdd);
           
-          // Parse time string (HH:MM or HH:MM AM/PM) to 24-hour UTC hours and minutes
-          const [hourMinStr, period] = scheduleTimeStr.split(' ');
-          const [hourStr, minuteStr] = hourMinStr?.split(':') || ['0', '0'];
-          if (!hourStr || !minuteStr) {
-            throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid custom schedule format: missing hour or minute" });
+          // Parse the time (assuming format like "10:00 AM")
+          const [hourMin, period] = scheduleTime.split(' ');
+          if (!hourMin) {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid time format in workshop schedule" });
           }
-          let utcHours = parseInt(hourStr);
-          const utcMinutes = parseInt(minuteStr);
-
-          if (period) { // AM/PM format
-              if (period.toUpperCase() === 'PM' && utcHours !== 12) {
-                  utcHours += 12;
-              } else if (period.toUpperCase() === 'AM' && utcHours === 12) { // Midnight case 12 AM is 00 hours
-                  utcHours = 0;
-              }
-          }
-          currentWorkshopDayDate.setUTCHours(utcHours, utcMinutes, 0, 0);
           
-          if (isNaN(currentWorkshopDayDate.getTime())) {
-            throw new TRPCError({ code: "BAD_REQUEST", message: `Invalid date/time in recurring schedule item: ${scheduleTimeStr}` });
-          }
-
+          const [hour, minute] = hourMin.split(':').map(Number);
+          
+          let hours = hour || 0;
+          if (period === 'PM' && hour !== 12) hours += 12;
+          if (period === 'AM' && hour === 12) hours = 0;
+          
+          workshopDate.setHours(hours, minute || 0, 0, 0);
+          
           workshopDays.push({
             day: dayOfWeek,
             scheduleIndex: i,
-            date: currentWorkshopDayDate
+            date: workshopDate
           });
         }
         
+        // Sort workshop days by date
         workshopDays.sort((a, b) => a.date.getTime() - b.date.getTime());
         
+        // Now calculate the date for the specific day index
         if (dayIndexToUse <= 0 || !workshopDays.length) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: `Invalid day index or no workshop days: ${dayIndexToUse}` });
+          throw new TRPCError({ code: "BAD_REQUEST", message: `Invalid day index: ${dayIndexToUse}` });
         }
         
-        const patternDay = workshopDays[(dayIndexToUse - 1) % workshopDays.length];
-        if (!patternDay) { // Should not happen if workshopDays is not empty and dayIndexToUse > 0
-            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: `Could not determine pattern day for dayIndex ${dayIndexToUse}` });
+        // For day 1, return the first scheduled day
+        if (dayIndexToUse === 1 && workshopDays.length > 0) {
+          targetDate = new Date(workshopDays[0]?.date || 0);
+        } else if (workshopDays.length > 0) {
+          // For subsequent days, calculate based on the pattern
+          const daysBetweenSessions = 7; // Assuming weekly recurrence
+          
+          // Calculate which occurrence of the pattern we need
+          const occurrenceIndex = Math.floor((dayIndexToUse - 1) / workshopDays.length);
+          const patternIndex = (dayIndexToUse - 1) % workshopDays.length;
+          
+          // Get the pattern day (ensure it exists)
+          const patternDay = workshopDays[patternIndex];
+          if (!patternDay) {
+            throw new TRPCError({ code: "BAD_REQUEST", message: `Could not determine schedule for day ${dayIndexToUse}` });
+          }
+          
+          // Calculate the date
+          targetDate = new Date(patternDay.date);
+          targetDate.setDate(targetDate.getDate() + (occurrenceIndex * daysBetweenSessions));
+        } else {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "No valid workshop days found in schedule" });
         }
-
-        const occurrenceIndex = Math.floor((dayIndexToUse - 1) / workshopDays.length);
         
-        targetDate = new Date(patternDay.date.getTime()); // Clone the date
-        targetDate.setUTCDate(targetDate.getUTCDate() + (occurrenceIndex * 7)); // Assuming weekly recurrence
+        // The time is already set in the targetDate calculation above
+        // No need to set the date or parse time again
       }
       
-      console.log(`Workshop target date (UTC): ${targetDate.toISOString()}`);
-
       // Determine if the session is free
       const courseDayKey = `day${dayIndexToUse}`;
       const courseDetailsRecord = workshop.courseDetails as Record<string, { description: string, isFreeSession: boolean }> | null | undefined;
       const dayCourseDetail = courseDetailsRecord && courseDetailsRecord[courseDayKey] ? courseDetailsRecord[courseDayKey] : null;
       const isFreeSession = dayCourseDetail ? dayCourseDetail.isFreeSession : false;
 
-      // Use the same approach as in the page.tsx that works in both environments
-      const timeDifferenceMs = targetDate.getTime() - now.getTime();
-      const threeHoursInMs = 3 * 60 * 60 * 1000;
-      
-      // We want to allow link generation when:
-      // 1. The workshop is in the past (negative time difference)
-      // 2. The workshop is less than 3 hours away (time difference is positive but <= 3 hours)
-      const isWithinTimeWindow = timeDifferenceMs < threeHoursInMs;
-      
-      // Convert to hours for logging and human-readable messages
-      const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60);
-      
-      // Debug logging for time-related issues
-      console.log({
-        targetDate: targetDate.toISOString(),
-        now: now.toISOString(),
-        timeDifferenceMs,
-        timeDifferenceHours,
-        threeHoursInMs,
-        isWorkshopInPast: timeDifferenceMs < 0,
-        isWithinThreeHours: timeDifferenceMs >= 0 && timeDifferenceMs < threeHoursInMs,
-        isWithinTimeWindow,
-        forceGenerate: input.forceGenerate
-      });
-      
-      // Only allow generation if within time window or if force generate is true
-      if (!isWithinTimeWindow && !input.forceGenerate) {
-        const timeUntilAllowedMs = timeDifferenceMs - threeHoursInMs;
-        const timeUntilAllowed = Math.ceil(timeUntilAllowedMs / (60 * 1000));
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: 
-            `Meeting links can only be generated within 3 hours of the workshop start time. ` +
-            `You can generate this link in ${timeUntilAllowed} minutes.
-            Current time (UTC): ${now.toISOString()}
-            Workshop time (UTC): ${targetDate.toISOString()}
-            Time until workshop: ${timeDifferenceHours.toFixed(2)} hours
-            `
-        });
-      }
+      // Meeting links can now be generated at any time by authorized users.
       
       // Get the attendees for the meeting
       const attendees = [];
