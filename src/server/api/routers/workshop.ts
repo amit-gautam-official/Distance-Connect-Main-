@@ -883,25 +883,31 @@ export const workshopRouter = createTRPCRouter({
       const dayCourseDetail = courseDetailsRecord && courseDetailsRecord[courseDayKey] ? courseDetailsRecord[courseDayKey] : null;
       const isFreeSession = dayCourseDetail ? dayCourseDetail.isFreeSession : false;
 
-      // Calculate time difference in hours between now and the workshop start time
-      const timeDifferenceHours = (targetDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+      // Use the same approach as in the page.tsx that works in both environments
+      const timeDifferenceMs = targetDate.getTime() - now.getTime();
+      const threeHoursInMs = 3 * 60 * 60 * 1000;
       
       // Allow generation if we're within 3 hours of the workshop or if it's in the past
-      const isWithinTimeWindow = timeDifferenceHours <= 3;
+      const isWithinTimeWindow = timeDifferenceMs <= threeHoursInMs;
+      
+      // Convert to hours for logging and human-readable messages
+      const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60);
       
       // Debug logging for time-related issues
       console.log({
         targetDate: targetDate.toISOString(),
         now: now.toISOString(),
-        timeDifferenceHours: timeDifferenceHours,
+        timeDifferenceMs,
+        timeDifferenceHours,
+        threeHoursInMs,
         isWithinTimeWindow,
         forceGenerate: input.forceGenerate
       });
       
       // Only allow generation if within time window or if force generate is true
       if (!isWithinTimeWindow && !input.forceGenerate) {
-        // Calculate minutes until the 3-hour window starts
-        const timeUntilAllowed = Math.ceil((timeDifferenceHours - 3) * 60);
+        const timeUntilAllowedMs = timeDifferenceMs - threeHoursInMs;
+        const timeUntilAllowed = Math.ceil(timeUntilAllowedMs / (60 * 1000));
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: 
@@ -910,6 +916,7 @@ export const workshopRouter = createTRPCRouter({
             Current time: ${now.toISOString()}
             Workshop time: ${targetDate.toISOString()}
             Time difference (hours): ${timeDifferenceHours.toFixed(2)}
+            Time difference (ms): ${timeDifferenceMs}
             `
         });
       }
