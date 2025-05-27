@@ -705,13 +705,11 @@ export const workshopRouter = createTRPCRouter({
       }
 
       const { dayIndex } = input;
-      // Get current date and time
+      // Get current date and time - we'll treat all times as if they're already in IST
       const now = new Date();
-      // Convert to IST by adding 5 hours and 30 minutes
-      const nowIST = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
       
-      console.log(`Current time (UTC): ${now.toISOString()}`);
-      console.log(`Current time (IST): ${nowIST.toISOString()}`);
+      console.log(`Current time: ${now.toISOString()}`);
+      console.log(`Timezone offset: ${now.getTimezoneOffset()} minutes`);
       
       // Get day to generate link for (default to first day)
       const dayIndexToUse = dayIndex || 1;
@@ -885,44 +883,33 @@ export const workshopRouter = createTRPCRouter({
       const dayCourseDetail = courseDetailsRecord && courseDetailsRecord[courseDayKey] ? courseDetailsRecord[courseDayKey] : null;
       const isFreeSession = dayCourseDetail ? dayCourseDetail.isFreeSession : false;
 
-      // For the comparison, we need to adjust for IST timezone
-      // First, convert the target date to IST by adding 5:30 hours to account for the timezone difference
-      const targetDateIST = new Date(targetDate.getTime() + (5.5 * 60 * 60 * 1000));
+      // Calculate time difference in hours between now and the workshop start time
+      const timeDifferenceHours = (targetDate.getTime() - now.getTime()) / (1000 * 60 * 60);
       
-      // Now calculate 3 hours before the workshop in IST
-      const threeHoursBeforeWorkshop = new Date(targetDateIST.getTime() - (3 * 60 * 60 * 1000));
-      
-      // Compare timestamps (milliseconds since epoch) - using IST for both times
-      const isWithinTimeWindow = nowIST.getTime() >= threeHoursBeforeWorkshop.getTime();
+      // Allow generation if we're within 3 hours of the workshop or if it's in the past
+      const isWithinTimeWindow = timeDifferenceHours <= 3;
       
       // Debug logging for time-related issues
       console.log({
-        // UTC times
-        targetDateUTC: targetDate.toISOString(),
-        nowUTC: now.toISOString(),
-        // IST times (explicitly adjusted)
-        targetDateIST: targetDateIST.toISOString(),
-        threeHoursBeforeWorkshopIST: threeHoursBeforeWorkshop.toISOString(),
-        nowIST: nowIST.toISOString(),
-        // Time differences
-        timeDifferenceMs: nowIST.getTime() - threeHoursBeforeWorkshop.getTime(),
-        timeDifferenceMinutes: Math.floor((nowIST.getTime() - threeHoursBeforeWorkshop.getTime()) / (60 * 1000)),
+        targetDate: targetDate.toISOString(),
+        now: now.toISOString(),
+        timeDifferenceHours: timeDifferenceHours,
         isWithinTimeWindow,
         forceGenerate: input.forceGenerate
       });
       
       // Only allow generation if within time window or if force generate is true
       if (!isWithinTimeWindow && !input.forceGenerate) {
-        const timeUntilAllowed = Math.ceil((threeHoursBeforeWorkshop.getTime() - nowIST.getTime()) / (60 * 1000));
+        // Calculate minutes until the 3-hour window starts
+        const timeUntilAllowed = Math.ceil((timeDifferenceHours - 3) * 60);
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: 
             `Meeting links can only be generated within 3 hours of the workshop start time. ` +
             `You can generate this link in ${timeUntilAllowed} minutes.
-            Current time : ${nowIST.toISOString()}
-            Workshop time : ${targetDateIST.toISOString()}
-            timezone : ${nowIST.getTimezoneOffset()}
-            3 hours before workshop : ${threeHoursBeforeWorkshop.toISOString()}
+            Current time: ${now.toISOString()}
+            Workshop time: ${targetDate.toISOString()}
+            Time difference (hours): ${timeDifferenceHours.toFixed(2)}
             `
         });
       }
