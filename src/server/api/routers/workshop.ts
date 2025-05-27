@@ -887,8 +887,10 @@ export const workshopRouter = createTRPCRouter({
       const timeDifferenceMs = targetDate.getTime() - now.getTime();
       const threeHoursInMs = 3 * 60 * 60 * 1000;
       
-      // Allow generation if we're within 3 hours of the workshop or if it's in the past
-      const isWithinTimeWindow = timeDifferenceMs <= threeHoursInMs;
+      // We want to allow link generation when:
+      // 1. The workshop is in the past (negative time difference)
+      // 2. The workshop is less than 3 hours away (time difference is positive but <= 3 hours)
+      const isWithinTimeWindow = timeDifferenceMs <= threeHoursInMs && timeDifferenceMs >= 0 || timeDifferenceMs < 0;
       
       // Convert to hours for logging and human-readable messages
       const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60);
@@ -900,6 +902,8 @@ export const workshopRouter = createTRPCRouter({
         timeDifferenceMs,
         timeDifferenceHours,
         threeHoursInMs,
+        isWorkshopInPast: timeDifferenceMs < 0,
+        isWithinThreeHours: timeDifferenceMs >= 0 && timeDifferenceMs <= threeHoursInMs,
         isWithinTimeWindow,
         forceGenerate: input.forceGenerate
       });
@@ -913,10 +917,9 @@ export const workshopRouter = createTRPCRouter({
           message: 
             `Meeting links can only be generated within 3 hours of the workshop start time. ` +
             `You can generate this link in ${timeUntilAllowed} minutes.
-            Current time: ${now.toISOString()}
-            Workshop time: ${targetDate.toISOString()}
-            Time difference (hours): ${timeDifferenceHours.toFixed(2)}
-            Time difference (ms): ${timeDifferenceMs}
+            Current time (UTC): ${now.toISOString()}
+            Workshop time (UTC): ${targetDate.toISOString()}
+            Time until workshop: ${timeDifferenceHours.toFixed(2)} hours
             `
         });
       }
