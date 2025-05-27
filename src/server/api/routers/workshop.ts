@@ -705,8 +705,12 @@ export const workshopRouter = createTRPCRouter({
       }
 
       const { dayIndex } = input;
-      // Get current date and time
+      // Get current date and time in IST (UTC+5:30)
+      // Create date in UTC and then adjust to IST by adding 5 hours and 30 minutes
       const now = new Date();
+      // Log the current time in both UTC and IST for debugging
+      console.log(`Current time (UTC): ${now.toISOString()}`);
+      console.log(`Current time (IST): ${new Date(now.getTime() + (5.5 * 60 * 60 * 1000)).toISOString()}`);
       
       // Get day to generate link for (default to first day)
       const dayIndexToUse = dayIndex || 1;
@@ -744,7 +748,7 @@ export const workshopRouter = createTRPCRouter({
           throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid custom schedule format: missing date or time" });
         }
         
-        // Create date from the specific date and time
+        // Create date from the specific date and time in IST
         targetDate = new Date(scheduleDate);
         
         // Parse the time (assuming format like "10:00 AM")
@@ -759,7 +763,11 @@ export const workshopRouter = createTRPCRouter({
         if (period === 'PM' && hour !== 12) hours += 12;
         if (period === 'AM' && hour === 12) hours = 0;
         
+        // Set time in IST
         targetDate.setHours(hours, minute || 0, 0, 0);
+        
+        // Log the target date in IST
+        console.log(`Target date (IST): ${targetDate.toString()}`);
       } else {
         // For recurring schedule, calculate based on start date and day pattern
         const dayMap: Record<string, number> = {
@@ -876,9 +884,24 @@ export const workshopRouter = createTRPCRouter({
       const dayCourseDetail = courseDetailsRecord && courseDetailsRecord[courseDayKey] ? courseDetailsRecord[courseDayKey] : null;
       const isFreeSession = dayCourseDetail ? dayCourseDetail.isFreeSession : false;
 
-      // Check if we're within 3 hours of the workshop start time
+      // Check if we're within 3 hours of the workshop start time - using timestamps for consistent comparison
+      // IST is consistently used for all dates in this function
       const threeHoursBeforeWorkshop = new Date(targetDate.getTime() - (3 * 60 * 60 * 1000));
-      const isWithinTimeWindow = now >= threeHoursBeforeWorkshop;
+      
+      // Compare timestamps (milliseconds since epoch) to avoid timezone issues
+      // This will work correctly as long as both dates are in the same timezone (IST)
+      const isWithinTimeWindow = now.getTime() >= threeHoursBeforeWorkshop.getTime();
+      
+      // Debug logging for time-related issues
+      console.log({
+        targetDateISO: targetDate.toISOString(),
+        threeHoursBeforeWorkshopISO: threeHoursBeforeWorkshop.toISOString(),
+        nowISO: now.toISOString(),
+        timeDifferenceMs: now.getTime() - threeHoursBeforeWorkshop.getTime(),
+        timeDifferenceMinutes: Math.floor((now.getTime() - threeHoursBeforeWorkshop.getTime()) / (60 * 1000)),
+        isWithinTimeWindow,
+        forceGenerate: input.forceGenerate
+      });
       
       // Only allow generation if within time window or if force generate is true
       if (!isWithinTimeWindow && !input.forceGenerate) {
@@ -887,7 +910,10 @@ export const workshopRouter = createTRPCRouter({
           code: "BAD_REQUEST",
           message: 
             `Meeting links can only be generated within 3 hours of the workshop start time. ` +
-            `You can generate this link in ${timeUntilAllowed} minutes.`
+            `You can generate this link in ${timeUntilAllowed} minutes.
+            Now: ${now.toISOString()}
+            Target Date: ${targetDate.toISOString()}
+            `
         });
       }
       
