@@ -44,7 +44,10 @@ type Workshop = {
   schedule: any[];
   price: number;
   learningOutcomes: string[];
-  courseDetails: Record<string, { description: string; isFreeSession: boolean }>;
+  courseDetails: Record<
+    string,
+    { description: string; isFreeSession: boolean }
+  >;
   otherDetails: string | null;
   bannerImage: string | null;
   introductoryVideoUrl?: string | null;
@@ -69,13 +72,14 @@ export default function EditWorkshopModal({
   const [isUploading, setIsUploading] = useState(false);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
-  const [currentIntroVideoUrl, setCurrentIntroVideoUrl] = useState<string | null>(
-    null
-  );
+  const [currentIntroVideoUrl, setCurrentIntroVideoUrl] = useState<
+    string | null
+  >(null);
   const [newIntroVideoFile, setNewIntroVideoFile] = useState<File | null>(null);
   const [newIntroVideoPreview, setNewIntroVideoPreview] = useState<string>("");
   const introVideoInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingNewVideo, setIsUploadingNewVideo] = useState(false);
+  const [videoUploadProgress, setVideoUploadProgress] = useState(0);
 
   const [form, setForm] = useState({
     name: "",
@@ -89,9 +93,9 @@ export default function EditWorkshopModal({
     mentorGmailId: "",
   });
 
-  const [recurringSchedule, setRecurringSchedule] = useState<RecurringScheduleItem[]>(
-    [{ day: "Monday", time: "10:00 AM" }]
-  );
+  const [recurringSchedule, setRecurringSchedule] = useState<
+    RecurringScheduleItem[]
+  >([{ day: "Monday", time: "10:00 AM" }]);
   const [customSchedule, setCustomSchedule] = useState<CustomScheduleItem[]>([
     { date: new Date().toISOString().split("T")[0] || "", time: "10:00 AM" },
   ]);
@@ -128,7 +132,8 @@ export default function EditWorkshopModal({
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(new Error("File reading failed: " + error));
+      reader.onerror = (error) =>
+        reject(new Error("File reading failed: " + error));
     });
   };
 
@@ -144,9 +149,10 @@ export default function EditWorkshopModal({
         description: workshop.description,
         numberOfDays: workshop.numberOfDays.toString(),
         price: (workshop.price / 100).toString(),
-        learningOutcomes: workshop.learningOutcomes.length > 0
-          ? workshop.learningOutcomes
-          : [""],
+        learningOutcomes:
+          workshop.learningOutcomes.length > 0
+            ? workshop.learningOutcomes
+            : [""],
         otherDetails: workshop.otherDetails || "",
         scheduleType: workshop.scheduleType || "recurring",
         startDate: workshop.startDate
@@ -155,7 +161,10 @@ export default function EditWorkshopModal({
         mentorGmailId: workshop.mentorGmailId || "",
       });
 
-      if (workshop.scheduleType === "custom" && Array.isArray(workshop.schedule)) {
+      if (
+        workshop.scheduleType === "custom" &&
+        Array.isArray(workshop.schedule)
+      ) {
         setCustomSchedule(
           workshop.schedule.map((s: Partial<CustomScheduleItem>) => ({
             date: s.date
@@ -164,60 +173,80 @@ export default function EditWorkshopModal({
                 : s.date
               : new Date().toISOString().split("T")[0] || "",
             time: s.time || "10:00 AM",
-          }))
+          })),
         );
-      } else if (workshop.scheduleType === "recurring" && Array.isArray(workshop.schedule)) {
+      } else if (
+        workshop.scheduleType === "recurring" &&
+        Array.isArray(workshop.schedule)
+      ) {
         setRecurringSchedule(
           workshop.schedule.map((s: Partial<RecurringScheduleItem>) => ({
             day: s.day || "Monday",
             time: s.time || "10:00 AM",
-          }))
+          })),
         );
       }
 
-      const newCourseDetailsState: Record<string, { description: string; isFreeSession: boolean }> =
-        {};
+      const newCourseDetailsState: Record<
+        string,
+        { description: string; isFreeSession: boolean }
+      > = {};
       const numDaysToIterate = workshop.numberOfDays;
 
       for (let i = 1; i <= numDaysToIterate; i++) {
         const dayKey = `Day ${i}`;
         const existingDetail = workshop.courseDetails?.[dayKey];
 
-        if (existingDetail && typeof existingDetail === "object" && "description" in existingDetail) {
+        if (
+          existingDetail &&
+          typeof existingDetail === "object" &&
+          "description" in existingDetail
+        ) {
           newCourseDetailsState[dayKey] = {
             description: String(existingDetail.description),
             isFreeSession: !!existingDetail.isFreeSession,
           };
         } else if (typeof existingDetail === "string") {
-          newCourseDetailsState[dayKey] = { description: existingDetail, isFreeSession: false };
+          newCourseDetailsState[dayKey] = {
+            description: existingDetail,
+            isFreeSession: false,
+          };
         } else {
-          newCourseDetailsState[dayKey] = { description: "", isFreeSession: false };
+          newCourseDetailsState[dayKey] = {
+            description: "",
+            isFreeSession: false,
+          };
         }
       }
       for (let i = 1; i <= workshop.numberOfDays; i++) {
         const dayKey = `Day ${i}`;
         if (!newCourseDetailsState[dayKey]) {
-          newCourseDetailsState[dayKey] = { description: "", isFreeSession: false };
+          newCourseDetailsState[dayKey] = {
+            description: "",
+            isFreeSession: false,
+          };
         }
       }
       setCourseDetails(newCourseDetailsState);
     }
   }, [workshop]);
 
-  const uploadWorkshopVideo = api.workshop.uploadWorkshopIntroVideo.useMutation({
-    onSuccess: (data) => {
-      toast.success("Introductory video updated successfully!");
-      setCurrentIntroVideoUrl(data.introductoryVideoUrl || null);
-      setNewIntroVideoFile(null);
-      setNewIntroVideoPreview("");
+  const uploadWorkshopVideo = api.workshop.uploadWorkshopIntroVideo.useMutation(
+    {
+      onSuccess: (data) => {
+        toast.success("Introductory video updated successfully!");
+        setCurrentIntroVideoUrl(data.introductoryVideoUrl || null);
+        setNewIntroVideoFile(null);
+        setNewIntroVideoPreview("");
+      },
+      onError: (error) => {
+        toast.error("Failed to update video: " + error.message);
+      },
+      onSettled: () => {
+        setIsUploadingNewVideo(false);
+      },
     },
-    onError: (error) => {
-      toast.error("Failed to update video: " + error.message);
-    },
-    onSettled: () => {
-      setIsUploadingNewVideo(false);
-    },
-  });
+  );
 
   const uploadImage = api.file.upload.useMutation();
 
@@ -237,7 +266,9 @@ export default function EditWorkshopModal({
   });
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
 
@@ -246,15 +277,27 @@ export default function EditWorkshopModal({
       if (!isNaN(days) && days >= 1) {
         setForm((prev) => ({ ...prev, [name]: value }));
         // Adjust courseDetails based on new number of days
-        const newCourseDetails: Record<string, { description: string; isFreeSession: boolean }> = {};
+        const newCourseDetails: Record<
+          string,
+          { description: string; isFreeSession: boolean }
+        > = {};
         for (let i = 1; i <= days; i++) {
-          newCourseDetails[`Day ${i}`] = courseDetails[`Day ${i}`] || { description: "", isFreeSession: false };
+          newCourseDetails[`Day ${i}`] = courseDetails[`Day ${i}`] || {
+            description: "",
+            isFreeSession: false,
+          };
         }
         setCourseDetails(newCourseDetails);
       } else if (value === "") {
         setForm((prev) => ({ ...prev, [name]: "" })); // Or handle empty string as you see fit, maybe set to 1
-        const newCourseDetails: Record<string, { description: string; isFreeSession: boolean }> = {};
-        newCourseDetails["Day 1"] = courseDetails["Day 1"] || { description: "", isFreeSession: false };
+        const newCourseDetails: Record<
+          string,
+          { description: string; isFreeSession: boolean }
+        > = {};
+        newCourseDetails["Day 1"] = courseDetails["Day 1"] || {
+          description: "",
+          isFreeSession: false,
+        };
         setCourseDetails(newCourseDetails);
       }
     } else if (name === "price") {
@@ -271,7 +314,12 @@ export default function EditWorkshopModal({
     if (name === "scheduleType") {
       // Reset schedules when type changes to avoid sending incorrect data
       if (value === "recurring") {
-        setCustomSchedule([{ date: new Date().toISOString().split("T")[0] || "", time: "10:00 AM" }]);
+        setCustomSchedule([
+          {
+            date: new Date().toISOString().split("T")[0] || "",
+            time: "10:00 AM",
+          },
+        ]);
       } else {
         setRecurringSchedule([{ day: "Monday", time: "10:00 AM" }]);
       }
@@ -281,35 +329,41 @@ export default function EditWorkshopModal({
   const handleRecurringScheduleChange = (
     index: number,
     field: keyof RecurringScheduleItem,
-    value: string
+    value: string,
   ) => {
     const updated = [...recurringSchedule];
     updated[index] = { ...updated[index], [field]: value } as any;
     setRecurringSchedule(updated);
   };
   const addRecurringScheduleItem = () =>
-    setRecurringSchedule([...recurringSchedule, { day: "Monday", time: "10:00 AM" }]);
+    setRecurringSchedule([
+      ...recurringSchedule,
+      { day: "Monday", time: "10:00 AM" },
+    ]);
   const removeRecurringScheduleItem = (index: number) =>
     setRecurringSchedule(recurringSchedule.filter((_, i) => i !== index));
 
   const handleCustomScheduleChange = (
     index: number,
     field: keyof CustomScheduleItem,
-    value: string
+    value: string,
   ) => {
     const updated = [...customSchedule];
     updated[index] = { ...updated[index], [field]: value } as any;
     setCustomSchedule(updated);
   };
   const addCustomScheduleItem = () =>
-    setCustomSchedule([...customSchedule, { date: new Date().toISOString().split("T")[0] || "", time: "10:00 AM" }]);
+    setCustomSchedule([
+      ...customSchedule,
+      { date: new Date().toISOString().split("T")[0] || "", time: "10:00 AM" },
+    ]);
   const removeCustomScheduleItem = (index: number) =>
     setCustomSchedule(customSchedule.filter((_, i) => i !== index));
 
   const handleCourseDetailChange = (
     day: string,
     field: "description" | "isFreeSession",
-    value: string | boolean
+    value: string | boolean,
   ) => {
     setCourseDetails((prev) => ({
       ...prev,
@@ -326,7 +380,10 @@ export default function EditWorkshopModal({
     setForm((prev) => ({ ...prev, learningOutcomes: updated }));
   };
   const addLearningOutcome = () =>
-    setForm((prev) => ({ ...prev, learningOutcomes: [...prev.learningOutcomes, ""] }));
+    setForm((prev) => ({
+      ...prev,
+      learningOutcomes: [...prev.learningOutcomes, ""],
+    }));
   const removeLearningOutcome = (index: number) => {
     if (form.learningOutcomes.length > 1) {
       setForm((prev) => ({
@@ -361,11 +418,18 @@ export default function EditWorkshopModal({
     reader.readAsDataURL(file);
   };
 
-  const handleNewIntroVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNewIntroVideoSelect = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
-      const allowedTypes = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"];
-      const maxSize = 100 * 1024 * 1024;
+      const allowedTypes = [
+        "video/mp4",
+        "video/webm",
+        "video/quicktime",
+        "video/x-msvideo",
+      ];
+      const maxSize = 50 * 1024 * 1024; // 500MB for direct upload
 
       if (!allowedTypes.includes(file.type)) {
         toast.error(`Invalid video type. Allowed: MP4, WebM, MOV.`);
@@ -375,7 +439,7 @@ export default function EditWorkshopModal({
         return;
       }
       if (file.size > maxSize) {
-        toast.error("Video file is too large (max 50MB).");
+        toast.error("Video file is too large (max 500MB).");
         if (introVideoInputRef.current) introVideoInputRef.current.value = "";
         setNewIntroVideoFile(null);
         setNewIntroVideoPreview("");
@@ -386,6 +450,66 @@ export default function EditWorkshopModal({
     } else {
       setNewIntroVideoFile(null);
       setNewIntroVideoPreview("");
+    }
+  };
+
+  const signedUrlResultMutation = api.file.getSignedUploadUrl.useMutation();
+  const updateWorkshopVideoUrlMutation =
+    api.workshop.updateWorkshopVideoUrl.useMutation();
+  // Function to upload video directly to bucket using signed URL
+  const directVideoUpload = async (): Promise<string | null> => {
+    if (!newIntroVideoFile) return null;
+
+    setIsUploadingNewVideo(true);
+    setVideoUploadProgress(0);
+
+    try {
+      // Step 1: Get a signed URL for direct upload
+      const signedUrlResult = await signedUrlResultMutation.mutateAsync({
+        bucketName: "dc-public-files",
+        folderName: "dc-ws-intro-video",
+        fileName: newIntroVideoFile.name,
+        fileType: newIntroVideoFile.type,
+        initialVideoUrl: workshop.introductoryVideoUrl || undefined,
+      });
+
+      console.log(signedUrlResult);
+
+      if (!signedUrlResult.success || !signedUrlResult.signedUrl) {
+        throw new Error("Failed to get signed upload URL");
+      }
+
+      //Step 2: upload the file
+      const response = await fetch(signedUrlResult.signedUrl, {
+        method: 'PUT',
+        body: newIntroVideoFile,
+        headers: {
+            'Content-Type': newIntroVideoFile.type,
+            'x-goog-content-length-range': '0,52428800', // use your actual allowed range here
+        }
+    });
+
+    if (response.ok) {
+        console.log('Video uploaded successfully!');
+    } else {
+        console.error('Error uploading video:', response);
+    }
+
+    
+      // Step 3: Update the workshop with the public URL
+      await updateWorkshopVideoUrlMutation.mutateAsync({
+        workshopId: workshop.id,
+        videoUrl: signedUrlResult.publicUrl,
+      });
+
+      return signedUrlResult.publicUrl
+    }catch(error: any) {
+      console.error("Direct video upload failed:", error);
+      toast.error(`Video upload failed: ${error.message || "Unknown error"}`);
+      return null;
+    } finally {
+      setIsUploadingNewVideo(false);
+      setVideoUploadProgress(0);
     }
   };
 
@@ -405,25 +529,39 @@ export default function EditWorkshopModal({
     }
 
     if (!form.mentorGmailId || !form.mentorGmailId.endsWith("@gmail.com")) {
-      toast.error("Mentor Gmail ID is required and must be a @gmail.com address.");
+      toast.error(
+        "Mentor Gmail ID is required and must be a @gmail.com address.",
+      );
       return;
     }
-    if (form.scheduleType === "recurring" && recurringSchedule.some(item => !item.day || !item.time)) {
+    if (
+      form.scheduleType === "recurring" &&
+      recurringSchedule.some((item) => !item.day || !item.time)
+    ) {
       toast.error("All recurring schedule entries must have a day and time.");
       return;
     }
-    if (form.scheduleType === "custom" && customSchedule.some(item => !item.date || !item.time)) {
+    if (
+      form.scheduleType === "custom" &&
+      customSchedule.some((item) => !item.date || !item.time)
+    ) {
       toast.error("All custom schedule entries must have a date and time.");
       return;
     }
-    if (form.scheduleType === "custom" && !form.startDate && customSchedule.length > 0) {
-        // toast.error("A start date is recommended for custom schedules if sessions are defined.");
+    if (
+      form.scheduleType === "custom" &&
+      !form.startDate &&
+      customSchedule.length > 0
+    ) {
+      // toast.error("A start date is recommended for custom schedules if sessions are defined.");
     }
 
-    const learningOutcomesFiltered = form.learningOutcomes.filter(outcome => outcome.trim() !== "");
+    const learningOutcomesFiltered = form.learningOutcomes.filter(
+      (outcome) => outcome.trim() !== "",
+    );
     if (learningOutcomesFiltered.length === 0) {
-        toast.error("At least one learning outcome is required.");
-        return;
+      toast.error("At least one learning outcome is required.");
+      return;
     }
 
     let finalBannerUrl = workshop.bannerImage;
@@ -453,26 +591,26 @@ export default function EditWorkshopModal({
       }
     }
 
+    // Handle intro video upload using direct upload method
     if (newIntroVideoFile) {
-      setIsUploadingNewVideo(true);
       try {
-        const videoBase64 = await fileToBase64(newIntroVideoFile);
-        if (!videoBase64) {
-          throw new Error("Failed to convert video to base64.");
+        // Use our direct upload method instead of base64 conversion
+        const videoUploadResult = await directVideoUpload();
+        if (!videoUploadResult) {
+          toast.error(
+            "Video upload failed. You can try again later by editing the workshop.",
+          );
+        } else {
+          // Set the current video URL to the newly uploaded one for UI update
+          setCurrentIntroVideoUrl(videoUploadResult);
+          // Clear the file input state
+          setNewIntroVideoFile(null);
+          setNewIntroVideoPreview("");
+          if (introVideoInputRef.current) introVideoInputRef.current.value = "";
         }
-        await uploadWorkshopVideo.mutateAsync({
-          workshopId: workshop.id,
-          video: {
-            fileName: newIntroVideoFile.name,
-            fileType: newIntroVideoFile.type,
-            base64Content: videoBase64.split(",")[1] || "",
-          },
-          currentVideoUrl: workshop.introductoryVideoUrl || undefined,
-        });
       } catch (error: any) {
+        console.error("Error in video upload:", error);
         toast.error("Failed to update video: " + error.message);
-      } finally {
-        setIsUploadingNewVideo(false);
       }
     }
 
@@ -487,7 +625,8 @@ export default function EditWorkshopModal({
       otherDetails: form.otherDetails,
       scheduleType: form.scheduleType,
       startDate: form.startDate || undefined,
-      schedule: form.scheduleType === "recurring" ? recurringSchedule : customSchedule,
+      schedule:
+        form.scheduleType === "recurring" ? recurringSchedule : customSchedule,
       mentorGmailId: form.mentorGmailId,
       bannerImage: finalBannerUrl || "",
     };
@@ -501,11 +640,15 @@ export default function EditWorkshopModal({
 
   if (!isOpen) return null;
 
-  const isLoading = updateWorkshop.isPending || uploadImage.isPending || isUploadingNewVideo || isUploading;
+  const isLoading =
+    updateWorkshop.isPending ||
+    uploadImage.isPending ||
+    isUploadingNewVideo ||
+    isUploading;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Workshop</DialogTitle>
         </DialogHeader>
@@ -514,7 +657,7 @@ export default function EditWorkshopModal({
             <div>
               <Label>Banner Image</Label>
               <div
-                className="mt-2 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg h-48 bg-gray-50/50 relative cursor-pointer hover:border-primary/50 transition-colors"
+                className="relative mt-2 flex h-48 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50/50 transition-colors hover:border-primary/50"
                 onClick={() => bannerInputRef.current?.click()}
               >
                 <input
@@ -525,13 +668,13 @@ export default function EditWorkshopModal({
                   onChange={handleBannerSelect}
                 />
                 {bannerPreview ? (
-                  <div className="relative w-full h-full">
+                  <div className="relative h-full w-full">
                     <img
                       src={bannerPreview}
                       alt="Banner preview"
-                      className="w-full h-full object-cover rounded-lg"
+                      className="h-full w-full rounded-lg object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity rounded-lg">
+                    <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50 opacity-0 transition-opacity hover:opacity-100">
                       <Camera className="h-8 w-8 text-white" />
                     </div>
                   </div>
@@ -551,13 +694,36 @@ export default function EditWorkshopModal({
 
             <div>
               <Label>Introductory Video</Label>
-              <div className="mt-2 space-y-2 p-3 border border-dashed rounded-lg">
-                {newIntroVideoPreview ? (
-                  <video src={newIntroVideoPreview} controls className="w-full rounded-md max-h-60" />
+              <div className="mt-2 space-y-2 rounded-lg border border-dashed p-3">
+                {isUploadingNewVideo ? (
+                  <div className="w-full">
+                    <div className="mt-1 h-2.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                      <div
+                        className="h-2.5 rounded-full bg-primary transition-all duration-300"
+                        style={{ width: `${videoUploadProgress}%` }}
+                      ></div>
+                    </div>
+                    <p className="mt-1 text-center text-xs text-muted-foreground">
+                      Uploading video directly to storage...{" "}
+                      {videoUploadProgress}%
+                    </p>
+                  </div>
+                ) : newIntroVideoPreview ? (
+                  <video
+                    src={newIntroVideoPreview}
+                    controls
+                    className="max-h-60 w-full rounded-md"
+                  />
                 ) : currentIntroVideoUrl ? (
-                  <video src={currentIntroVideoUrl} controls className="w-full rounded-md max-h-60" />
+                  <video
+                    src={currentIntroVideoUrl}
+                    controls
+                    className="max-h-60 w-full rounded-md"
+                  />
                 ) : (
-                  <p className="text-sm text-muted-foreground">No introductory video uploaded.</p>
+                  <p className="text-sm text-muted-foreground">
+                    No introductory video uploaded.
+                  </p>
                 )}
                 <Input
                   id="newIntroVideo"
@@ -566,50 +732,68 @@ export default function EditWorkshopModal({
                   className="hidden"
                   ref={introVideoInputRef}
                   onChange={handleNewIntroVideoSelect}
-                  disabled={isLoading}
+                  disabled={isLoading || isUploadingNewVideo}
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full transition-all hover:bg-primary/5"
-                  onClick={() => introVideoInputRef.current?.click()}
-                  disabled={isLoading}
-                >
-                  <VideoIcon className="h-5 w-5 mr-2" />
-                  {currentIntroVideoUrl || newIntroVideoFile ? "Replace Video" : "Add Video"} (Max 50MB)
-                </Button>
-                {(newIntroVideoPreview || (currentIntroVideoUrl && !newIntroVideoFile)) && (
+                <div className="flex items-center gap-2">
                   <Button
                     type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="w-full text-red-600 hover:bg-red-50 hover:text-red-700"
-                    onClick={async () => {
-                      if (newIntroVideoFile) {
+                    variant="outline"
+                    className="flex-1 transition-all hover:bg-primary/5"
+                    onClick={() => introVideoInputRef.current?.click()}
+                    disabled={isLoading || isUploadingNewVideo}
+                  >
+                    <VideoIcon className="mr-2 h-5 w-5" />
+                    {currentIntroVideoUrl
+                      ? "Change Video"
+                      : "Upload Video"}{" "}
+                    (Max 50MB)
+                  </Button>
+                  {newIntroVideoFile && !isUploadingNewVideo && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground transition-all hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => {
                         setNewIntroVideoFile(null);
                         setNewIntroVideoPreview("");
-                        if (introVideoInputRef.current) introVideoInputRef.current.value = "";
-                      } else if (currentIntroVideoUrl) {
-                        setIsUploadingNewVideo(true);
-                        try {
-                          await uploadWorkshopVideo.mutateAsync({
-                            workshopId: workshop.id,
-                            video: { fileName: "delete", fileType: "delete", base64Content: "delete" },
-                            currentVideoUrl: currentIntroVideoUrl,
-                          });
-                          toast.success("Introductory video removed.");
-                        } catch (error: any) {
-                          toast.error("Failed to remove videoooooo: " + error.message);
-                        } finally {
-                          setIsUploadingNewVideo(false);
-                        }
-                      }
-                    }}
-                    disabled={isLoading}
-                  >
-                    <X className="h-4 w-4 mr-1" /> Remove Video
-                  </Button>
+                        if (introVideoInputRef.current)
+                          introVideoInputRef.current.value = "";
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                {newIntroVideoFile && (
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    Selected: {newIntroVideoFile.name} (
+                    {Math.round((newIntroVideoFile.size / 1024 / 1024) * 10) /
+                      10}{" "}
+                    MB)
+                  </div>
                 )}
+                {currentIntroVideoUrl &&
+                  !newIntroVideoFile &&
+                  !isUploadingNewVideo && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      onClick={async () => {
+                        // Update workshop to remove the video URL
+                        await updateWorkshopVideoUrlMutation.mutateAsync({
+                          workshopId: workshop.id,
+                          videoUrl: "", // Empty string to remove the video
+                        });
+                        setCurrentIntroVideoUrl(null);
+                      }}
+                      disabled={isLoading}
+                    >
+                      <X className="mr-1 h-4 w-4" /> Remove Existing Video
+                    </Button>
+                  )}
               </div>
             </div>
 
@@ -670,7 +854,9 @@ export default function EditWorkshopModal({
             <div>
               <Label>Workshop Schedule</Label>
               <div className="mt-1">
-                <Label htmlFor="scheduleType" className="text-sm font-medium">Schedule Type</Label>
+                <Label htmlFor="scheduleType" className="text-sm font-medium">
+                  Schedule Type
+                </Label>
                 <Select
                   value={form.scheduleType}
                   onValueChange={(value: "recurring" | "custom") => {
@@ -679,12 +865,14 @@ export default function EditWorkshopModal({
                     } as React.ChangeEvent<HTMLSelectElement>);
                   }}
                 >
-                  <SelectTrigger id="scheduleType" className="w-full mt-1">
+                  <SelectTrigger id="scheduleType" className="mt-1 w-full">
                     <SelectValue placeholder="Select schedule type" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="recurring">Recurring</SelectItem>
-                    <SelectItem value="custom">Custom (Specific Dates)</SelectItem>
+                    <SelectItem value="custom">
+                      Custom (Specific Dates)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -701,130 +889,176 @@ export default function EditWorkshopModal({
                     onChange={handleInputChange}
                     className="mt-1"
                   />
-                   <p className="text-xs text-muted-foreground mt-1">
-                    Optional for recurring. If set, first session will be on or after this date.
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Optional for recurring. If set, first session will be on or
+                    after this date.
                   </p>
                 </div>
               )}
 
-              <div className="space-y-2 mt-4 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
-                {form.scheduleType === "recurring" ? (
-                  recurringSchedule.map((item, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Select
-                        value={item.day}
-                        onValueChange={(value) =>
-                          handleRecurringScheduleChange(index, "day", value)
-                        }
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select day" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {[
-                            "Monday",
-                            "Tuesday",
-                            "Wednesday",
-                            "Thursday",
-                            "Friday",
-                            "Saturday",
-                            "Sunday",
-                          ].map((day) => (
-                            <SelectItem key={day} value={day}>
-                              {day}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+              <div className="mt-4 space-y-2 rounded-lg border border-gray-100 bg-gray-50/50 p-3">
+                {form.scheduleType === "recurring"
+                  ? recurringSchedule.map((item, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Select
+                          value={item.day}
+                          onValueChange={(value) =>
+                            handleRecurringScheduleChange(index, "day", value)
+                          }
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select day" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {[
+                              "Monday",
+                              "Tuesday",
+                              "Wednesday",
+                              "Thursday",
+                              "Friday",
+                              "Saturday",
+                              "Sunday",
+                            ].map((day) => (
+                              <SelectItem key={day} value={day}>
+                                {day}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
 
-                      <Select
-                        value={item.time}
-                        onValueChange={(value) =>
-                          handleRecurringScheduleChange(index, "time", value)
-                        }
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select time" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {
-                            ["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM", "10:00 PM", "11:00 PM", "12:00 AM", "1:00 AM", "2:00 AM", "3:00 AM", "4:00 AM", "5:00 AM", "6:00 AM", "7:00 AM"
+                        <Select
+                          value={item.time}
+                          onValueChange={(value) =>
+                            handleRecurringScheduleChange(index, "time", value)
+                          }
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select time" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {[
+                              "8:00 AM",
+                              "9:00 AM",
+                              "10:00 AM",
+                              "11:00 AM",
+                              "12:00 PM",
+                              "1:00 PM",
+                              "2:00 PM",
+                              "3:00 PM",
+                              "4:00 PM",
+                              "5:00 PM",
+                              "6:00 PM",
+                              "7:00 PM",
+                              "8:00 PM",
+                              "9:00 PM",
+                              "10:00 PM",
+                              "11:00 PM",
+                              "12:00 AM",
+                              "1:00 AM",
+                              "2:00 AM",
+                              "3:00 AM",
+                              "4:00 AM",
+                              "5:00 AM",
+                              "6:00 AM",
+                              "7:00 AM",
                             ].map((time) => (
                               <SelectItem key={time} value={time}>
                                 {time}
                               </SelectItem>
-                            ))
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeRecurringScheduleItem(index)}
+                          disabled={recurringSchedule.length <= 1}
+                          className="transition-colors hover:bg-red-50 hover:text-red-500"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))
+                  : customSchedule.map((item, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Input
+                          type="date"
+                          value={item.date}
+                          onChange={(e) =>
+                            handleCustomScheduleChange(
+                              index,
+                              "date",
+                              e.target.value,
+                            )
                           }
-                        </SelectContent>
-                      </Select>
+                        />
 
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeRecurringScheduleItem(index)}
-                        disabled={recurringSchedule.length <= 1}
-                        className="hover:bg-red-50 hover:text-red-500 transition-colors"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))
-                ) : (
-                  customSchedule.map((item, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Input
-                        type="date"
-                        value={item.date}
-                        onChange={(e) =>
-                          handleCustomScheduleChange(index, "date", e.target.value)
-                        }
-                      />
-
-                      <Select
-                        value={item.time}
-                        onValueChange={(value) =>
-                          handleCustomScheduleChange(index, "time", value)
-                        }
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select time" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {
-                            [
-                              "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM", "10:00 PM", "11:00 PM", "12:00 AM", "1:00 AM", "2:00 AM", "3:00 AM", "4:00 AM", "5:00 AM", "6:00 AM", "7:00 AM"
+                        <Select
+                          value={item.time}
+                          onValueChange={(value) =>
+                            handleCustomScheduleChange(index, "time", value)
+                          }
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select time" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {[
+                              "8:00 AM",
+                              "9:00 AM",
+                              "10:00 AM",
+                              "11:00 AM",
+                              "12:00 PM",
+                              "1:00 PM",
+                              "2:00 PM",
+                              "3:00 PM",
+                              "4:00 PM",
+                              "5:00 PM",
+                              "6:00 PM",
+                              "7:00 PM",
+                              "8:00 PM",
+                              "9:00 PM",
+                              "10:00 PM",
+                              "11:00 PM",
+                              "12:00 AM",
+                              "1:00 AM",
+                              "2:00 AM",
+                              "3:00 AM",
+                              "4:00 AM",
+                              "5:00 AM",
+                              "6:00 AM",
+                              "7:00 AM",
                             ].map((time) => (
                               <SelectItem key={time} value={time}>
                                 {time}
                               </SelectItem>
-                            ))
-                          }
-                        </SelectContent>
-                      </Select>
+                            ))}
+                          </SelectContent>
+                        </Select>
 
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeCustomScheduleItem(index)}
-                        disabled={customSchedule.length <= 1}
-                        className="hover:bg-red-50 hover:text-red-500 transition-colors"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))
-                )}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeCustomScheduleItem(index)}
+                          disabled={customSchedule.length <= 1}
+                          className="transition-colors hover:bg-red-50 hover:text-red-500"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
                 {form.scheduleType === "recurring" ? (
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={addRecurringScheduleItem}
-                    className="mt-2 w-full sm:w-auto transition-all hover:bg-primary/5"
+                    className="mt-2 w-full transition-all hover:bg-primary/5 sm:w-auto"
                   >
-                    <Plus className="h-4 w-4 mr-1" />
+                    <Plus className="mr-1 h-4 w-4" />
                     Add Schedule
                   </Button>
                 ) : (
@@ -833,9 +1067,9 @@ export default function EditWorkshopModal({
                     variant="outline"
                     size="sm"
                     onClick={addCustomScheduleItem}
-                    className="mt-2 w-full sm:w-auto transition-all hover:bg-primary/5"
+                    className="mt-2 w-full transition-all hover:bg-primary/5 sm:w-auto"
                   >
-                    <Plus className="h-4 w-4 mr-1" />
+                    <Plus className="mr-1 h-4 w-4" />
                     Add Schedule
                   </Button>
                 )}
@@ -844,7 +1078,7 @@ export default function EditWorkshopModal({
 
             <div>
               <Label>Learning Outcomes</Label>
-              <div className="space-y-2 mt-2 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
+              <div className="mt-2 space-y-2 rounded-lg border border-gray-100 bg-gray-50/50 p-3">
                 {form.learningOutcomes.map((outcome, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <Input
@@ -860,7 +1094,7 @@ export default function EditWorkshopModal({
                       size="icon"
                       onClick={() => removeLearningOutcome(index)}
                       disabled={form.learningOutcomes.length <= 1}
-                      className="hover:bg-red-50 hover:text-red-500 transition-colors"
+                      className="transition-colors hover:bg-red-50 hover:text-red-500"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -871,9 +1105,9 @@ export default function EditWorkshopModal({
                   variant="outline"
                   size="sm"
                   onClick={addLearningOutcome}
-                  className="mt-2 w-full sm:w-auto transition-all hover:bg-primary/5"
+                  className="mt-2 w-full transition-all hover:bg-primary/5 sm:w-auto"
                 >
-                  <Plus className="h-4 w-4 mr-1" />
+                  <Plus className="mr-1 h-4 w-4" />
                   Add Outcome
                 </Button>
               </div>
@@ -881,20 +1115,28 @@ export default function EditWorkshopModal({
 
             <div>
               <Label>Course Details</Label>
-              <p className="text-xs text-muted-foreground mb-2">
-                Define content for each day. Number of days ({form.numberOfDays}) is set above.
+              <p className="mb-2 text-xs text-muted-foreground">
+                Define content for each day. Number of days ({form.numberOfDays}
+                ) is set above.
               </p>
-              <div className="space-y-3 mt-2 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
+              <div className="mt-2 space-y-3 rounded-lg border border-gray-100 bg-gray-50/50 p-3">
                 {Object.keys(courseDetails).map((day) => (
                   <div key={day}>
-                    <Label htmlFor={`${day}-desc`} className="text-sm font-medium">
+                    <Label
+                      htmlFor={`${day}-desc`}
+                      className="text-sm font-medium"
+                    >
                       {day} Description
                     </Label>
                     <Textarea
                       id={`${day}-desc`}
                       value={courseDetails[day]?.description || ""}
                       onChange={(e) =>
-                        handleCourseDetailChange(day, "description", e.target.value)
+                        handleCourseDetailChange(
+                          day,
+                          "description",
+                          e.target.value,
+                        )
                       }
                       placeholder={`What will be covered on ${day}`}
                       rows={2}
@@ -904,10 +1146,17 @@ export default function EditWorkshopModal({
                         id={`${day}-isFree`}
                         checked={courseDetails[day]?.isFreeSession || false}
                         onCheckedChange={(checked) =>
-                          handleCourseDetailChange(day, "isFreeSession", !!checked)
+                          handleCourseDetailChange(
+                            day,
+                            "isFreeSession",
+                            !!checked,
+                          )
                         }
                       />
-                      <Label htmlFor={`${day}-isFree`} className="text-sm font-normal text-gray-700">
+                      <Label
+                        htmlFor={`${day}-isFree`}
+                        className="text-sm font-normal text-gray-700"
+                      >
                         This is a free session for enrolled students
                       </Label>
                     </div>
@@ -934,13 +1183,14 @@ export default function EditWorkshopModal({
                 id="mentorGmailId"
                 name="mentorGmailId"
                 type="email"
-                value={form?.mentorGmailId }
+                value={form?.mentorGmailId}
                 onChange={handleInputChange}
                 placeholder="mentor@gmail.com"
                 required
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                Required for Google Meet integration. Must be a @gmail.com address.
+              <p className="mt-1 text-xs text-muted-foreground">
+                Required for Google Meet integration. Must be a @gmail.com
+                address.
               </p>
             </div>
           </div>
@@ -949,7 +1199,7 @@ export default function EditWorkshopModal({
             <Button
               type="button"
               variant="outline"
-              className="w-full sm:w-auto transition-all hover:bg-primary/5"
+              className="w-full transition-all hover:bg-primary/5 sm:w-auto"
               onClick={onClose}
             >
               Cancel
@@ -957,7 +1207,7 @@ export default function EditWorkshopModal({
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full sm:w-auto transition-all bg-primary hover:bg-primary/90"
+              className="w-full bg-primary transition-all hover:bg-primary/90 sm:w-auto"
             >
               {isLoading ? "Saving..." : "Save Changes"}
             </Button>

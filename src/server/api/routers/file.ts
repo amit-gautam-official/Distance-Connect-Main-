@@ -13,6 +13,10 @@ const storage = new Storage({
   },
 });
 
+
+
+
+
 // Valid mime types to accept
 const ALLOWED_IMAGE_TYPES = [
   "image/jpeg", 
@@ -237,6 +241,86 @@ export const fileRouter = createTRPCRouter({
       return {
         success: true,
         signedUrl,
+      };
+    }),
+    
+  // Generate a signed URL for direct file uploads to the bucket
+  getSignedUploadUrl: protectedProcedure
+    .input(
+      z.object({
+        bucketName: z.string(),
+        folderName: z.string(),
+        fileName: z.string(),
+        fileType: z.string(),
+        initialVideoUrl: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { bucketName, folderName, fileName, fileType, initialVideoUrl } = input;
+      
+      // Validate file type for videos
+      if (!ALLOWED_VIDEO_TYPES.includes(fileType)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Invalid file type. Allowed types: ${ALLOWED_VIDEO_TYPES.join(", ")}`,
+        });
+      }
+      
+      const bucket = storage.bucket(bucketName);
+      
+      // Delete the initial video if it exists
+      if (initialVideoUrl) {
+        try {
+          const url = new URL(initialVideoUrl);
+          const pathname = decodeURIComponent(url.pathname);
+          
+          if (pathname.includes(`/${bucketName}/`)) {
+            const objectPath = pathname.replace(`/${bucketName}/`, '');
+            const initialFile = bucket.file(objectPath);
+            
+            await initialFile.delete()
+              .then(() => {
+                console.log("Initial video deleted successfully");
+              })
+              .catch((err) => {
+                console.error("Error deleting initial video:", err.message);
+                // Continue anyway, don't block the new upload
+              });
+          }
+        } catch (error) {
+          console.error("Error processing initial video URL:", error);
+          // Continue anyway, don't block the new upload
+        }
+      }
+      
+      // Create a unique filename
+      const sanitizedFileName = fileName.split('.').slice(0, -1).join('.') || fileName;
+      const fileExtension = fileType.split('/')[1] || 'mp4';
+      const uniqueFileName = `${sanitizedFileName}-${uuidv4()}.${fileExtension}`;
+      const filePath = `${folderName}/${uniqueFileName}`;
+      
+      const file = bucket.file(filePath);
+      
+      
+      // Generate a signed URL for uploading
+      const [signedUrl] = await file.getSignedUrl({
+        version: "v4",
+        action: "write",
+        expires: Date.now() + 15 * 60 * 1000, // 15 minutes expiration
+        contentType: fileType,
+        extensionHeaders: {
+          "x-goog-content-length-range": "0,52428800", // 0-50MB range
+        },
+      });
+      
+      // Generate the public URL that will be accessible after upload
+      const publicUrl = `https://storage.googleapis.com/${bucketName}/${filePath}`;
+      
+      return {
+        success: true,
+        signedUrl,
+        publicUrl,
+        filePath,
       };
     }),
 });

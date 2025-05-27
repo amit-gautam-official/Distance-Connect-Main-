@@ -947,4 +947,32 @@ export const workshopRouter = createTRPCRouter({
         scheduledFor: targetDate.toISOString()
       };
     }),
+
+  // Update workshop introductory video URL (direct bucket upload)
+  updateWorkshopVideoUrl: protectedProcedure
+    .input(z.object({
+      workshopId: z.string(),
+      videoUrl: z.string(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { workshopId, videoUrl } = input;
+
+      const workshop = await ctx.db.workshop.findUnique({
+        where: { id: workshopId },
+      });
+
+      if (!workshop) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Workshop not found." });
+      }
+
+      if (workshop.mentorUserId !== ctx.dbUser?.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "You are not authorized to modify this workshop." });
+      }
+
+      // Update the workshop with the new video URL
+      return ctx.db.workshop.update({
+        where: { id: workshopId },
+        data: { introductoryVideoUrl: videoUrl },
+      });
+    }),
 });

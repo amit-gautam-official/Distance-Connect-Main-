@@ -61,6 +61,7 @@ export default function CreateWorkshopModal({
   const [introVideoPreview, setIntroVideoPreview] = useState<string>("");
   const introVideoInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [videoUploadProgress, setVideoUploadProgress] = useState(0);
 
   const [form, setForm] = useState({
     name: "",
@@ -150,25 +151,10 @@ export default function CreateWorkshopModal({
     onSuccess: async (createdWorkshopData) => {
       let videoUploadSuccess = true;
       if (introVideoFile && createdWorkshopData?.id) {
-        setIsUploadingVideo(true);
-        try {
-          const videoBase64 = await fileToBase64(introVideoFile);
-          if (!videoBase64) {
-            throw new Error("Failed to convert video to base64");
-          }
-          await uploadWorkshopVideo.mutateAsync({
-            workshopId: createdWorkshopData.id,
-            video: {
-              fileName: introVideoFile.name,
-              fileType: introVideoFile.type,
-              base64Content: videoBase64.split(',')[1] || "", 
-            },
-          });
-        } catch (videoError: any) {
+        // Use the new direct upload method instead of base64
+        const uploadResult = await directVideoUpload(createdWorkshopData.id);
+        if (!uploadResult) {
           videoUploadSuccess = false;
-          console.error("Video upload failed after workshop creation:", videoError);
-        } finally {
-          setIsUploadingVideo(false);
         }
       }
 
@@ -365,7 +351,7 @@ const handleIntroVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) =>
   const file = e.target.files?.[0];
   if (file) {
     const allowedTypes = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"];
-    const maxSize = 50 * 1024 * 1024;
+    const maxSize = 50 * 1024 * 1024; // 50MB for direct upload
 
     if (!allowedTypes.includes(file.type)) {
       toast.error(`Invalid video type. Allowed: MP4, WebM, MOV.`);
@@ -376,7 +362,7 @@ const handleIntroVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) =>
     }
 
     if (file.size > maxSize) {
-      toast.error("Video file is too large (max 50MB).");
+      toast.error("Video file is too large (max 500MB).");
       if (introVideoInputRef.current) introVideoInputRef.current.value = "";
       setIntroVideoFile(null);
       setIntroVideoPreview("");
@@ -388,6 +374,90 @@ const handleIntroVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) =>
   } else {
     setIntroVideoFile(null);
     setIntroVideoPreview("");
+  }
+};
+
+const getSignedUploadUrlMutation = api.file.getSignedUploadUrl.useMutation();
+const updateWorkshopVideoUrlMutation = api.workshop.updateWorkshopVideoUrl.useMutation();
+
+// Function to upload video directly to bucket using signed URL
+const directVideoUpload = async (workshopId: string): Promise<string | null> => {
+  if (!introVideoFile) return null;
+  
+  setIsUploadingVideo(true);
+  setVideoUploadProgress(0);
+  
+  try {
+    // Step 1: Get a signed URL for direct upload
+    const signedUrlResult = await getSignedUploadUrlMutation.mutateAsync({
+      bucketName: "dc-public-files",
+      folderName: "dc-ws-intro-video",
+      fileName: introVideoFile.name,
+      fileType: introVideoFile.type,
+      // We don't have initialVideoUrl for a new workshop
+    });
+    
+    if (!signedUrlResult.success || !signedUrlResult.signedUrl) {
+      throw new Error("Failed to get signed upload URL");
+    }
+    
+    // Step 2: Use fetch with XMLHttpRequest to upload directly to the bucket with progress tracking
+    await new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      
+      // Track upload progress
+      xhr.upload.addEventListener("progress", (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          setVideoUploadProgress(percentComplete);
+        }
+      });
+      
+      xhr.addEventListener("load", () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+        } else {
+          reject(new Error(`Upload failed with status: ${xhr.status}`));
+        }
+      });
+      
+      xhr.addEventListener("error", (event) => {
+        console.error('XHR upload error:', event);
+        // Check if the error might be CORS-related
+        if (xhr.status === 0) {
+          reject(new Error("Network error during upload: This might be a CORS issue. Check your bucket CORS configuration."));
+        } else {
+          reject(new Error(`Network error during upload: Status ${xhr.status} - ${xhr.statusText || 'Unknown error'}`));
+        }
+      });
+      
+      xhr.addEventListener("abort", () => {
+        reject(new Error("Upload aborted"));
+      });
+      
+      // Open connection and set headers
+      xhr.open("PUT", signedUrlResult.signedUrl);
+      xhr.setRequestHeader("Content-Type", introVideoFile.type);
+      xhr.setRequestHeader("x-goog-content-length-range","0,52428800");
+      
+      // Start upload
+      xhr.send(introVideoFile);
+    });
+    
+    // Step 3: Update the workshop with the public URL
+    await updateWorkshopVideoUrlMutation.mutateAsync({
+      workshopId,
+      videoUrl: signedUrlResult.publicUrl,
+    });
+    
+    return signedUrlResult.publicUrl;
+  } catch (error: any) {
+    console.error("Direct video upload failed:", error);
+    toast.error(`Video upload failed: ${error.message || "Unknown error"}`);
+    return null;
+  } finally {
+    setIsUploadingVideo(false);
+    setVideoUploadProgress(0);
   }
 };
 
@@ -608,41 +678,58 @@ return (
                 <Input
                   id="introVideo"
                   type="file"
+                  ref={introVideoInputRef}
                   accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
                   className="hidden"
-                  ref={introVideoInputRef}
                   onChange={handleIntroVideoSelect}
                 />
-                {!introVideoPreview && (
+                <div className="flex items-center gap-2 w-full">
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full transition-all hover:bg-primary/5"
                     onClick={() => introVideoInputRef.current?.click()}
+                    className="flex-1 text-muted-foreground hover:text-foreground transition-all hover:bg-primary/5"
+                    disabled={isUploadingVideo}
                   >
-                    <VideoIcon className="h-5 w-5 mr-2" />
-                    Choose Video (Max 50MB)
+                    {introVideoFile ? "Change Video" : "Upload Video"}
                   </Button>
-                )}
-                {introVideoPreview && (
-                  <div className="w-full space-y-2">
-                    <video src={introVideoPreview} controls className="w-full rounded-md max-h-60" />
-                    <p className="text-sm text-muted-foreground truncate">
-                      Selected: {introVideoFile?.name}
-                    </p>
+                  {introVideoFile && !isUploadingVideo && (
                     <Button
                       type="button"
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
                       onClick={() => {
                         setIntroVideoFile(null);
                         setIntroVideoPreview("");
                         if (introVideoInputRef.current) introVideoInputRef.current.value = "";
                       }}
                     >
-                      <X className="h-4 w-4 mr-1" /> Remove Video
+                      <X className="h-4 w-4" />
                     </Button>
+                  )}
+                </div>
+                {introVideoFile && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Selected: {introVideoFile.name} ({Math.round(introVideoFile.size / 1024 / 1024 * 10) / 10} MB)
+                  </div>
+                )}
+                {isUploadingVideo && (
+                  <div className="mt-2 w-full">
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-1">
+                      <div 
+                        className="bg-primary h-2.5 rounded-full transition-all duration-300" 
+                        style={{ width: `${videoUploadProgress}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Uploading video directly to storage... {videoUploadProgress}%
+                    </p>
+                  </div>
+                )}
+                {introVideoPreview && !isUploadingVideo && (
+                  <div className="mt-2 rounded-md overflow-hidden border border-border w-full">
+                    <video controls className="w-full h-auto max-h-40" src={introVideoPreview}></video>
                   </div>
                 )}
               </div>
