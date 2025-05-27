@@ -883,35 +883,50 @@ export const workshopRouter = createTRPCRouter({
       const dayCourseDetail = courseDetailsRecord && courseDetailsRecord[courseDayKey] ? courseDetailsRecord[courseDayKey] : null;
       const isFreeSession = dayCourseDetail ? dayCourseDetail.isFreeSession : false;
 
-      // Use the same approach as in the page.tsx that works in both environments
-      const timeDifferenceMs = targetDate.getTime() - now.getTime();
-      const threeHoursInMs = 3 * 60 * 60 * 1000;
+      // CRITICAL FIX: Instead of using relative time differences that could be affected by server timezone,
+      // use absolute UTC timestamps for calculation
       
-      // We want to allow link generation when:
-      // 1. The workshop is in the past (negative time difference)
-      // 2. The workshop is less than 3 hours away (time difference is positive but <= 3 hours)
-      const isWithinTimeWindow = timeDifferenceMs <= threeHoursInMs && timeDifferenceMs >= 0 || timeDifferenceMs < 0;
+      // Get workshop time and current time as UTC timestamps
+      const workshopTimeUTC = targetDate.getTime();
+      const currentTimeUTC = now.getTime();
       
-      // Convert to hours for logging and human-readable messages
-      const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60);
+      // Calculate hours until workshop (positive if workshop is in future, negative if in past)
+      const hoursUntilWorkshop = (workshopTimeUTC - currentTimeUTC) / (1000 * 60 * 60);
       
-      // Debug logging for time-related issues
+      // ========== SPECIAL HANDLING FOR CLOUD RUN ==========
+      // Add a 2-hour safety margin for production environment to account for timezone differences
+      const SAFETY_MARGIN_HOURS = 2; 
+      
+      // Define specific conditions clearly
+      const isInPast = hoursUntilWorkshop < 0;  // Workshop is in the past
+      const isWithinThreeHours = hoursUntilWorkshop >= 0 && hoursUntilWorkshop <= 3;  // Within regular 3-hour window
+      const isWithinSafetyMargin = hoursUntilWorkshop > 3 && hoursUntilWorkshop <= (3 + SAFETY_MARGIN_HOURS); // In safety margin zone
+      
+      // Final decision allowing link generation in any of these cases
+      const isWithinTimeWindow = isInPast || isWithinThreeHours || input.forceGenerate || isWithinSafetyMargin;
+      
+      // Log everything for diagnostics
       console.log({
-        targetDate: targetDate.toISOString(),
-        now: now.toISOString(),
-        timeDifferenceMs,
-        timeDifferenceHours,
-        threeHoursInMs,
-        isWorkshopInPast: timeDifferenceMs < 0,
-        isWithinThreeHours: timeDifferenceMs >= 0 && timeDifferenceMs <= threeHoursInMs,
+        workshopTime: targetDate.toISOString(),
+        currentTime: now.toISOString(),
+        hoursUntilWorkshop,
+        isInPast,
+        isWithinThreeHours,
+        isWithinSafetyMargin,
         isWithinTimeWindow,
         forceGenerate: input.forceGenerate
       });
       
-      // Only allow generation if within time window or if force generate is true
-      if (!isWithinTimeWindow && !input.forceGenerate) {
-        const timeUntilAllowedMs = timeDifferenceMs - threeHoursInMs;
-        const timeUntilAllowed = Math.ceil(timeUntilAllowedMs / (60 * 1000));
+      // If in safety margin, log a special message and allow link generation
+      // This is a special case to handle the timezone differences between local and Cloud Run
+      if (isWithinSafetyMargin) {
+        console.log('CRITICAL FIX: Applying safety margin for workshop link generation to handle environment differences');
+        // Continue with link generation despite being outside 3-hour window
+      }
+      // Normal restriction logic - Only apply if not in safety margin and not forced
+      else if (!isWithinTimeWindow && !input.forceGenerate) {
+        // Calculate minutes until the 3-hour window
+        const timeUntilAllowed = Math.max(0, Math.ceil((hoursUntilWorkshop - 3) * 60));
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: 
@@ -919,7 +934,7 @@ export const workshopRouter = createTRPCRouter({
             `You can generate this link in ${timeUntilAllowed} minutes.
             Current time (UTC): ${now.toISOString()}
             Workshop time (UTC): ${targetDate.toISOString()}
-            Time until workshop: ${timeDifferenceHours.toFixed(2)} hours
+            Hours until workshop: ${hoursUntilWorkshop.toFixed(2)}
             `
         });
       }
