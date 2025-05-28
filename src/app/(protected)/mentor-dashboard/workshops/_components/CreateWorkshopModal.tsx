@@ -362,7 +362,7 @@ const handleIntroVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) =>
     }
 
     if (file.size > maxSize) {
-      toast.error("Video file is too large (max 500MB).");
+      toast.error("Video file is too large (max 50MB).");
       if (introVideoInputRef.current) introVideoInputRef.current.value = "";
       setIntroVideoFile(null);
       setIntroVideoPreview("");
@@ -691,7 +691,7 @@ return (
                     className="flex-1 text-muted-foreground hover:text-foreground transition-all hover:bg-primary/5"
                     disabled={isUploadingVideo}
                   >
-                    {introVideoFile ? "Change Video" : "Upload Video"}
+                    {introVideoFile ? "Change Video (max 50MB)" : "Upload Video (max 50MB)"}
                   </Button>
                   {introVideoFile && !isUploadingVideo && (
                     <Button
@@ -811,14 +811,29 @@ return (
                           onValueChange={(value) => handleRecurringScheduleChange(index, "time", value)}
                         >
                           <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Select time" />
+                          <SelectValue placeholder="Select time" />
                           </SelectTrigger>
                           <SelectContent>
-                            {["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM", "10:00 PM", "11:00 PM", "12:00 AM", "1:00 AM", "2:00 AM", "3:00 AM", "4:00 AM", "5:00 AM", "6:00 AM", "7:00 AM"].map((time) => (
-                              <SelectItem key={time} value={time}>
-                                {time}
-                              </SelectItem>
-                            ))}
+                          {["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM", "10:00 PM", "11:00 PM", "12:00 AM", "1:00 AM", "2:00 AM", "3:00 AM", "4:00 AM", "5:00 AM", "6:00 AM", "7:00 AM"].map((time) => {
+                            // Only disable past times if the selected day is today
+                            const isToday = item.day === ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][new Date().getDay()];
+                            const currentHour = new Date().getHours();
+                            const timeHour = parseInt(time?.split(':')[0] || "0") + (time.includes('PM') && time.split(':')[0] !== '12' ? 12 : 0) - (time.includes('AM') && time.split(':')[0] === '12' ? 12 : 0);
+                            
+                            // Disable if it's today and the time has passed
+                            const disabled = isToday && timeHour <= currentHour;
+                            
+                            return (
+                            <SelectItem 
+                              key={time} 
+                              value={time} 
+                              disabled={disabled}
+                              className={disabled ? "opacity-50 cursor-not-allowed" : ""}
+                            >
+                              {time} {disabled ? "(Past)" : ""}
+                            </SelectItem>
+                            );
+                          })}
                           </SelectContent>
                         </Select>
                         <Button
@@ -858,6 +873,7 @@ return (
                         <Input
                           id={`date-${index}`}
                           type="date"
+                          min={new Date().toISOString().split("T")[0]} // disables past dates
                           value={item.date}
                           onChange={(e) => handleCustomScheduleChange(index, "date", e.target.value)}
                           required
@@ -873,13 +889,30 @@ return (
                             <SelectValue placeholder="Select time" />
                           </SelectTrigger>
                           <SelectContent>
-                            {/* make it full time */}
-                            
-                            {["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM", "10:00 PM", "11:00 PM", "12:00 AM", "1:00 AM", "2:00 AM", "3:00 AM", "4:00 AM", "5:00 AM", "6:00 AM", "7:00 AM"].map((time) => (
-                              <SelectItem key={time} value={time}>
-                                {time}
-                              </SelectItem>
-                            ))}
+                            {["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM", "10:00 PM", "11:00 PM", "12:00 AM", "1:00 AM", "2:00 AM", "3:00 AM", "4:00 AM", "5:00 AM", "6:00 AM", "7:00 AM"].map((time) => {
+                              // Check if selected date is today
+                              const isToday = item.date === new Date().toISOString().split("T")[0];
+                              const currentHour = new Date().getHours();
+                              
+                              // Parse the time to get hour value
+                              const timeHour = parseInt(time.split(':')[0] || "0") + 
+                                               (time.includes('PM') && time.split(':')[0] !== '12' ? 12 : 0) - 
+                                               (time.includes('AM') && time.split(':')[0] === '12' ? 12 : 0);
+                              
+                              // Disable if it's today and the time has passed
+                              const disabled = isToday && timeHour <= currentHour;
+                              
+                              return (
+                                <SelectItem 
+                                  key={time} 
+                                  value={time} 
+                                  disabled={disabled}
+                                  className={disabled ? "opacity-50 cursor-not-allowed" : ""}
+                                >
+                                  {time} {disabled ? "(Past)" : ""}
+                                </SelectItem>
+                              );
+                            })}
                           </SelectContent>
                         </Select>
                       </div>
