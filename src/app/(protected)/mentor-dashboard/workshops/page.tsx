@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import WorkshopList from "./_components/WorkshopList";
 import CreateWorkshopModal from "./_components/CreateWorkshopModal";
@@ -39,6 +39,8 @@ export default function WorkshopsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { data: workshopsData, isLoading, refetch } = api.workshop.getMentorWorkshops.useQuery();
   
+  
+
   // Transform the data to ensure schedule property is properly typed
   const workshops = workshopsData?.map(workshop => {
     // Properly transform the schedule array to match the expected type
@@ -65,6 +67,45 @@ export default function WorkshopsPage() {
     void refetch();
     toast.success("Workshop created successfully!");
   };
+  
+
+  if (workshops?.length === 0 && !isLoading) {
+    return (
+      <div className="container flex justify-center items-center h-[100dvh] w-full mx-auto px-4 sm:px-6 py-4 sm:py-6">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-800">No Workshops Available</h2>
+          <p className="mt-2 text-gray-600">
+            You have not created any workshops yet. Click the button below to create your first workshop.
+          </p>
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="mt-4 flex items-center justify-center gap-2 m-auto mt-6"
+          >
+            <Plus className="h-4 w-4" />
+            Create Workshop
+          </Button>
+          </div>
+        
+      <CreateWorkshopModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={handleCreateSuccess}
+      />
+      </div>  
+    );
+  }
+  
+
+  if(isLoading) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
+        {/* Loading state */}
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-600">Loading workshops...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto pb-16 md:pb-6 px-4 sm:px-6 py-4 sm:py-6">
@@ -76,6 +117,7 @@ export default function WorkshopsPage() {
           </p>
         </div>
         <Button
+        id="create-workshop"
           onClick={() => setIsCreateModalOpen(true)}
           className="w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-300 hover:shadow-md"
         >
@@ -89,12 +131,14 @@ export default function WorkshopsPage() {
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={handleCreateSuccess}
       />
+      <div id="workshop-list">
 
       <WorkshopList
         workshops={workshops || []}
         isLoading={isLoading}
         onRefresh={() => void refetch()}
       />
+      </div>
     </div>
   );
 }

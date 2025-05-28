@@ -108,7 +108,7 @@ const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
   };
 
   return (
-    <div className="flex flex-col">
+    <div id="profile-header" className="flex flex-col">
       {/* Profile picture and basic info */}
       <div className="flex flex-col items-center">
         <Avatar className="h-28 w-28 border-4 border-white">
@@ -130,7 +130,7 @@ const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
               : "User"}
         </p>
 
-        <Link className="mt-4" href={`/mentors/${user?.userId}`}>
+        <Link id="preview-profile" className="mt-4" href={`/mentors/${user?.userId}`}>
           <Button>Preview Mentor Profile</Button>
         </Link>
       </div>

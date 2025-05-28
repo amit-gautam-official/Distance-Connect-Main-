@@ -391,7 +391,7 @@ const MeetingsPage = () => {
                         </p>
                       </div>
                     ) : (
-                      scheduledMeetings.map((meeting) => (
+                      scheduledMeetings.map((meeting : any) => (
                         <Card key={meeting.id} className="overflow-hidden">
                           <CardContent className="p-0">
                             <div className="p-3 sm:p-4">

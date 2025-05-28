@@ -1,18 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {MainContentSkeleton, ProfileHeaderSkeleton, ProfileSkeleton} from "./components/ProfileSkeleton";
-
+import { MainContentSkeleton, ProfileHeaderSkeleton, ProfileSkeleton } from "./components/ProfileSkeleton";
 import ProfileHeader from "./components/ProfileHeader";
 import UserSettings from "./components/UserSettings";
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/trpc/react";
 import Link from "next/link";
 import { ProfileContext } from "./context";
-import dynamic from "next/dynamic";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 
-// Define proper type for mentor data
 interface MentorData {
   id: string;
   mentorName: string;
@@ -37,6 +35,8 @@ interface MentorData {
   };
   companyEmail: string | null;
 }
+
+const TOUR_STORAGE_KEY = "profile-tour-shown";
 
 const ProfilePage = () => {
   const { data: mentor, isLoading } = api.mentor.getMentorDataById.useQuery(
@@ -64,7 +64,7 @@ const ProfilePage = () => {
   });
 
   // Initialize data from mentor data when it loads
-  React.useEffect(() => {
+  useEffect(() => {
     if (mentor) {
       if (mentor.user?.image) {
         setCurrentAvatarUrl(mentor.user.image);
@@ -94,6 +94,56 @@ const ProfilePage = () => {
     }));
   };
 
+
+
+  // Function to start the tour
+  const startTour = () => {
+    if (typeof window === "undefined") return;
+
+    const driverObj = driver({
+      showProgress: true,
+      steps: [  
+    {
+      element: '#profile-settings',
+      popover: {
+        title: 'Update Profile',
+        description: 'Update your personal and professional information here. Make sure to update your experience so that you profile can be verified.',
+        side: "right",  
+        align: 'start',
+      }
+    },
+    {
+      element: '#availability',
+      popover: {
+        title: 'Update Availability',
+        description: 'Set your availability for mentoring sessions. This helps mentees know when you are available to meet.',
+        side: "right",  
+        align: 'start',
+      }
+    },
+  ],
+
+    });
+
+    driverObj.drive();
+    localStorage.setItem(TOUR_STORAGE_KEY, "true");
+  };
+
+  // Run tour only once on initial load if not done before
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hasRunTour = localStorage.getItem(TOUR_STORAGE_KEY ) === "true";
+    if (!isLoading && !hasRunTour) {
+      const el = document.querySelector("#profile-header");
+      if (el) {
+      setTimeout(() => {
+        startTour();
+      }, 500);
+      }
+
+    }
+  }, [isLoading]);
+
   if (isLoading) {
     return <ProfileSkeleton />;
   }
@@ -117,7 +167,6 @@ const ProfilePage = () => {
     education: mentor?.education || [] as JSON[],
     wholeExperience: mentor?.wholeExperience || [] as JSON[],
     commanyEmail: mentor?.companyEmail || "",
-    
   };
 
   return (
@@ -129,17 +178,19 @@ const ProfilePage = () => {
         updateProfileField,
       }}
     >
-      <div className="container  mx-auto px-2 py-4 sm:py-6">
+      <div className="container mx-auto px-2 py-4 sm:py-6">
+
+
         <div className="grid grid-cols-1 justify-center gap-4 lg:grid-cols-3 md:gap-6 lg:gap-8">
           {/* Mobile-only profile header visibility control */}
-          <div className="block lg:hidden mb-4">
+          <div className="block lg:hidden mb-4 ">
             <div className="rounded-lg bg-card p-4 shadow-sm">
               <ProfileHeader user={profileHeaderData!} />
             </div>
           </div>
-          
+
           {/* Layout for larger screens */}
-          <div className="hidden  lg:block lg:col-span-1">
+          <div  className="hidden lg:block lg:col-span-1 ">
             <div className="sticky no-scrollbar top-4 overflow-auto max-h-[calc(100vh-2rem)]">
               <div className="rounded-lg bg-card p-4 shadow-sm sm:p-6">
                 <ProfileHeader user={profileHeaderData!} />
@@ -148,7 +199,7 @@ const ProfilePage = () => {
           </div>
 
           {/* Main Content - Scrollable */}
-          <div className="col-span-1 lg:col-span-2 space-y-4">
+          <div className="col-span-1 lg:col-span-2 space-y-4 ">
             <div className="rounded-lg bg-card p-3 sm:p-6 min-h-[500px] overflow-y-auto">
               <UserSettings />
             </div>

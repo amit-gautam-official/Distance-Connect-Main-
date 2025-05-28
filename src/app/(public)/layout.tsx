@@ -16,7 +16,7 @@ import { SessionProvider } from "next-auth/react";
 export const metadata: Metadata = {
   title: "Distance Connect",
   description: "A platform for connecting students and mentors.",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [{ rel: "icon", url: "/smallLogo.png" }],
 };
 
 export default async function RootLayout({

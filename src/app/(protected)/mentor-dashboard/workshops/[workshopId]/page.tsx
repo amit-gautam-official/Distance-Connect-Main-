@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
 import { ArrowLeft, Calendar, Clock, Copy, Users, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   Tabs,
@@ -32,7 +32,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import EditWorkshopModal from "../_components/EditWorkshopModal";
 import { useParams } from 'next/navigation'
-
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 export default function WorkshopDetailPage() {
   const router = useRouter();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -96,6 +97,88 @@ export default function WorkshopDetailPage() {
         retry: 1,
       }
     );
+ const TOUR_STORAGE_KEY = "mentor-workshop-detail-tour-shown";
+  
+  
+    // Function to start the tour
+    const startTour = () => {
+      if (typeof window === "undefined") return;
+  
+      const driverObj = driver({
+        showProgress: true,
+        steps: [  
+      {
+        element: '#edit-workshop',
+        popover: {
+          title: 'Edit Workshop',
+          description: 'You can edit the workshop details, schedule, and other information here.',
+          side: "right",  
+          align: 'start',
+        }
+      },
+      {
+        element: '#ws-details',
+        popover: {
+          title: 'Workshop Details',
+          description: 'This tab contains all the details about the workshop including schedule, price, and other Details.',
+          side: "right",  
+          align: 'start',
+        }
+      },
+      {
+        element: '#ws-schedule',
+        popover: {
+          title: 'Workshop Schedule',
+          description: `If the workshop has a recurring schedule, it will show the days and times of the sessions repeated weekly.\n If it's a custom schedule, it will show the specific dates and times.`,
+          side: "right",  
+          align: 'start',
+        }
+      },
+      {
+        element: '#ws-course-details',
+        popover: {
+          title: 'Workshop Course Details',
+          description: `This section contains detailed information about each day's content, including links to meeting rooms if available. \n Meeting link generate button will appear 3 hours before the workshop starts on each day.`,
+          side: "right",  
+          align: 'start',
+        }
+      },
+      {
+        element: '#ws-students',
+        popover: {
+          title: 'Workshop Students',
+          description: `This tab shows all the students enrolled in the workshop. You can view their details and manage enrollments.`,
+          side: "right",  
+          align: 'start',
+        }
+      },
+      
+    ],
+  
+      });
+  
+      driverObj.drive();
+      localStorage.setItem(TOUR_STORAGE_KEY, "true");
+    };
+  
+    // Run tour only once on initial load if not done before
+    useEffect(() => {
+      if (typeof window === "undefined") return;  
+      
+      const hasRunTour = localStorage.getItem(TOUR_STORAGE_KEY ) === "true";
+  
+      if (!isLoading  &&  hasRunTour) {
+        const el = document.querySelector("#edit-workshop");
+        if (el) {
+        setTimeout(() => {
+          startTour();
+        }, 500);
+        }
+  
+      }
+    }, [isLoading]);
+
+
 
   // Generate meeting link mutation
   const generateMeetLink = api.workshop.generateWorkshopMeetLink.useMutation({
@@ -449,6 +532,7 @@ return (
       </Button>
       <h1 className="text-2xl font-bold text-gray-900">{workshop.name}</h1>
       <Button
+        id="edit-workshop"
         variant="outline"
         onClick={() => setIsEditModalOpen(true)}
         className="ml-auto"
@@ -471,8 +555,8 @@ return (
       <div className="w-full lg:w-2/3">
         <Tabs defaultValue="details" value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
           <TabsList className="bg-white/80 backdrop-blur-sm border border-gray-100">
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="students">
+            <TabsTrigger id="ws-details" value="details">Details</TabsTrigger>
+            <TabsTrigger id="ws-students" value="students">
               Students ({enrollments?.length || 0})
             </TabsTrigger>
           </TabsList>
@@ -507,8 +591,8 @@ return (
                   </div>
                 </div>
 
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Schedule</h3>
+                <div id="ws-schedule">
+                  <h3  className="text-sm font-medium text-gray-500">Schedule</h3>
                   <div className="mt-1 space-y-1">
                     {workshop.scheduleType === "recurring" ? (
                       <>
@@ -561,7 +645,7 @@ return (
                   </ul>
                 </div>
 
-                <div>
+                <div id="ws-course-details">
                   <h3 className="text-sm font-medium text-gray-500">Course Details</h3>
                   <div className="mt-2 space-y-3">
                     {workshop.courseDetails && typeof workshop.courseDetails === 'object' && !Array.isArray(workshop.courseDetails) && 
@@ -573,7 +657,7 @@ return (
                         const sessionDate = calculateWorkshopDayDate(dayNumber, scheduleItem);
                         
                         return (
-                          <div key={day} className="bg-gray-50 p-3 rounded-md">
+                          <div  key={day} className="bg-gray-50 p-3 rounded-md">
                             <div className="flex justify-between items-center">
                               <h4 className="font-medium text-gray-900">{day}</h4>
                               <div className="text-sm text-gray-500">
