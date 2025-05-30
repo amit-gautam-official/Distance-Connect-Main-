@@ -363,6 +363,7 @@ export const workshopRouter = createTRPCRouter({
             include: {
               user: {
                 select: {
+                  id: true, // For linking to mentor's public profile if you have one
                   name: true,
                   image: true,
                 },
@@ -549,6 +550,7 @@ export const workshopRouter = createTRPCRouter({
             include: {
               user: {
                 select: {
+                  id: true, // For linking to student's public profile if you have one
                   name: true,
                   email: true,
                 },
@@ -561,6 +563,7 @@ export const workshopRouter = createTRPCRouter({
                 include: {
                   user: {
                     select: {
+                      id: true, // For linking to mentor's public profile if you have one
                       name: true,
                       image: true,
                     },

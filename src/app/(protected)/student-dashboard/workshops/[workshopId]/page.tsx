@@ -577,6 +577,21 @@ export default function WorkshopDetailPage() {
               </div>
             </div>
           )}
+          {isEnrolled && (
+            <Card className="transition-all w-full duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle>Your Enrollment</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-green-50/80 backdrop-blur-sm text-green-700 p-3 sm:p-4 rounded-md shadow-sm border border-green-100">
+                  <p className="font-medium">You&apos;re enrolled in this workshop!</p>
+                  <p className="mt-1 text-sm">
+                  Meeting links will be available 3 hours before the scheduled time. You will receive an email with the details accordingly.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Price, Mentor, etc. */}
           <Card className="transition-all w-full duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm">
@@ -655,7 +670,11 @@ export default function WorkshopDetailPage() {
                 </Button>
               </CardContent>
             </Card>
+
+
           )} */}
+
+          
           
 
           {/* Meeting Links (if enrolled) */}
@@ -700,21 +719,7 @@ export default function WorkshopDetailPage() {
             </Card>
           )}
 
-          {isEnrolled && (
-            <Card className="transition-all w-full duration-300 hover:shadow-md bg-white/80 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle>Your Enrollment</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-green-50/80 backdrop-blur-sm text-green-700 p-3 sm:p-4 rounded-md shadow-sm border border-green-100">
-                  <p className="font-medium">You&apos;re enrolled in this workshop!</p>
-                  <p className="mt-1 text-sm">
-                  Meeting links will be available 3 hours before the scheduled time. You will receive an email with the details accordingly.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          
         </div>
       </div>
 

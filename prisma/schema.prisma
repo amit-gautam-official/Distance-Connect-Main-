@@ -87,6 +87,7 @@ model Student {
 
   studentRole SrudentRole?
   studentName String?
+  phoneNumber String?
 
   //High School
   institutionName String?

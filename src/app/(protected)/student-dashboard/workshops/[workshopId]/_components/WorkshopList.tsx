@@ -50,6 +50,7 @@ type Workshop = {
   mentor: {
     mentorName: string | null;
     user: {
+      id: string;
       name: string | null;  
       image: string | null;
     };
@@ -215,7 +216,7 @@ export default function WorkshopList({
                 <CardHeader className="absolute bottom-0 left-0 right-0 text-white p-3 sm:p-4 z-20">
                   <CardTitle className="text-lg sm:text-xl font-bold">{workshop.name}</CardTitle>
                   {/* Mentor details can be added here if needed, similar to mentor's card */}
-                  <Link href={`/mentor-dashboard/workshops/${workshop.id}`} className="text-sm text-gray-200 mt-1 hover:underline">
+                  <Link href={`/mentors/${workshop.mentor.user.id}`} className="text-sm text-gray-200 mt-1 hover:underline">
                     by {workshop.mentor.user.name}
                   </Link>
                 </CardHeader>

@@ -99,7 +99,7 @@ export function AppSidebar({ role }: { role: string }) {
       icon: Inbox,
     },
     {
-      title: "AI career assistant",
+      title: "AI assistant",
       id: "ai-assistant",
       url: "/ai",
       icon: BotMessageSquare,
@@ -212,7 +212,7 @@ export function AppSidebar({ role }: { role: string }) {
   // Render mobile view only on client-side when windowWidth is available and less than 768px
   if (windowWidth !== null && windowWidth < 768) {
     const navigationItems = role === "student" ? Studentitems : Mentoritems;
-    const limitedItems = [...navigationItems.slice(0, 5)]; // Limit to 4 items for mobile (reduced from 5 to make room for logout)
+    const limitedItems = [...navigationItems.slice(0, 8)]; // Limit to 4 items for mobile (reduced from 5 to make room for logout)
 
     if (!limitedItems.some((item) => item.title === "Profile")) {
       limitedItems.push({

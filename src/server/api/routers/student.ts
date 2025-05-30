@@ -23,6 +23,7 @@ export const studentRouter = createTRPCRouter({
       isRegistered : z.boolean(),
       image : z.string().optional(),
       name : z.string(),
+      phoneNumber : z.string().optional(),
      }))
     .mutation(async ({ ctx, input }) => {
 
@@ -41,6 +42,7 @@ export const studentRouter = createTRPCRouter({
               industry : input.industry,
               courseSpecialization : input.courseSpecialization,
               studentName : input.name,
+              phoneNumber : input.phoneNumber,
           },
         }),
         ctx.db.user.update({
