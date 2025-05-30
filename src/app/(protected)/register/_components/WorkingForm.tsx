@@ -98,7 +98,7 @@ export default function WorkingForm({
       jobTitle: "",
       experience: "",
       industry: "",
-      pinCode: "",
+      pinCode: "111111",
       state: "",
       role: "STUDENT",
       interstFields: [],
@@ -132,7 +132,7 @@ export default function WorkingForm({
       username: input.username,
       studentRole: studentRole,
       institutionName: "",
-      pinCode: Number(input.pinCode),
+      pinCode: Number(input.pinCode) || 111111,
       state: input.state,
       interestFields: input.interstFields,
       companyName: input.companyName,
@@ -340,7 +340,7 @@ export default function WorkingForm({
                 )}
               />
 
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name="pinCode"
                 render={({ field }) => (
@@ -359,7 +359,7 @@ export default function WorkingForm({
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
 
               <FormField
                 control={form.control}

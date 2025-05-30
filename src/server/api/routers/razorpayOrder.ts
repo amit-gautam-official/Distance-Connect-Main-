@@ -76,6 +76,7 @@ export const razorpayOrderRouter = createTRPCRouter({
         orderId: order.id,
         amount: order.amount,
         razorpayDbOrderId: razorpayDbOrder.id,
+        razorpayKeyId: process.env.RAZORPAY_KEY_ID,
         notes: order.notes,
         status: order.status,
         receipt: order.receipt,

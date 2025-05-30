@@ -114,7 +114,7 @@ export default function MentorForm({
       mentorPhoneNumber: "",
       experience: "",
       industry: "",
-      pinCode: "",
+      pinCode: "111111",
       state: "",
       role: "MENTOR",
       companyType: "",
@@ -156,7 +156,7 @@ export default function MentorForm({
       mentorPhoneNumber: values?.mentorPhoneNumber,
       experience: values?.experience,
       industry: values?.industry,
-      pinCode: Number(values?.pinCode),
+      pinCode: Number(values?.pinCode) || 111111,
       state: values?.state,
       role: role,
       hiringFields: selectedFields,
@@ -618,7 +618,7 @@ export default function MentorForm({
                 )}
               />
 
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name="pinCode"
                 render={({ field }) => (
@@ -637,7 +637,7 @@ export default function MentorForm({
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
             </div>
             <FormField
               control={form.control}

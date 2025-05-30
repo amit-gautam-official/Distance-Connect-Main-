@@ -63,7 +63,7 @@ const ScheduledSessions: React.FC<ScheduledSessionsProps> = ({ sessions }) => {
   }, [sessions]);
 
   // If no upcoming sessions, show message
-  if (upcomingSessions.length === 0) {
+  if (upcomingSessions?.length === 0) {
     return (
       <div className="flex h-full items-center justify-center">
         <p className="text-gray-500">No upcoming sessions scheduled</p>
@@ -73,7 +73,7 @@ const ScheduledSessions: React.FC<ScheduledSessionsProps> = ({ sessions }) => {
 
   return (
     <div className="space-y-3">
-      {upcomingSessions.map((session) => (
+      {upcomingSessions?.map((session) => (
         <div
           key={session.id}
           className="flex flex-col overflow-hidden rounded-md bg-white shadow-sm md:flex-row"

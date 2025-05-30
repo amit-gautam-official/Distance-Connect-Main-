@@ -285,11 +285,10 @@ function MeetingTimeDateSelection({
       const order = await createRazorpayOrderMutation.mutateAsync({
         scheduledMeetingId: scheduledMeetingId,
         eventId: eventInfo.id,
-
       });
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        key: order.razorpayKeyId, // Your Razorpay key ID
         amount : order.amount,
         currency: "INR",
         name: "Distance Connect",

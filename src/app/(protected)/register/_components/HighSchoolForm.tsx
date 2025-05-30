@@ -93,7 +93,7 @@ export default function HighSchoolForm({
       firstName: user.name.split(" ")[0] || "",
       lastName: user.name.split(" ")[1] || "",
       institutionName: "",
-      pinCode: "",
+      pinCode: "111111",
       state: "",
       role: "STUDENT",
       interstFields: [],
@@ -128,7 +128,7 @@ export default function HighSchoolForm({
       username: input.username,
       studentRole: studentRole,
       institutionName: input.institutionName,
-      pinCode: Number(input.pinCode),
+      pinCode: Number(input.pinCode) || 111111,
       state: input.state,
       interestFields: input.interstFields,
       companyName: "",
@@ -271,7 +271,7 @@ export default function HighSchoolForm({
                 )}
               />
 
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name="pinCode"
                 render={({ field }) => (
@@ -290,7 +290,7 @@ export default function HighSchoolForm({
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
 
               <FormField
                 control={form.control}
