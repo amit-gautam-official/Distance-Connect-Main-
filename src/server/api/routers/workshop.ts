@@ -604,7 +604,6 @@ export const workshopRouter = createTRPCRouter({
               user: {
                 select: {
                   name: true,
-                  email: true,
                   image: true,
                 },
               },

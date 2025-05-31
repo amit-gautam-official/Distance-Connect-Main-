@@ -34,6 +34,7 @@ import EditWorkshopModal from "../_components/EditWorkshopModal";
 import { useParams } from 'next/navigation'
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import EnrollmentTable from "../_components/EnrollmentTable";
 export default function WorkshopDetailPage() {
   const router = useRouter();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -778,44 +779,50 @@ return (
                     ))}
                   </div>
                 ) : enrollments && enrollments.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Student</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Enrolled On</TableHead>
-                        
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {enrollments.map((enrollment : any) => (
-                        <TableRow key={enrollment.id}>
-                          <TableCell className="flex items-center gap-2">
-                            <Avatar className="h-6 w-6 md:h-8 md:w-8">
-                              <AvatarImage
-                                src={enrollment.student.user.image || ""}
-                                alt={enrollment.student.user.name || ""}
-                              />
-                              <AvatarFallback>
-                                {enrollment.student.user.name
-                                  ?.charAt(0)
-                                  .toUpperCase() || "S"}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="font-medium text-xs md:text-base">
-                              {enrollment.student.user.name ||
-                                enrollment.student.studentName ||
-                                "Student"}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-xs md:text-base">{enrollment.student.user.email}</TableCell>
-                          <TableCell className="text-xs md:text-base">
-                            {new Date(enrollment.createdAt).toLocaleDateString()}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                  // <Table>
+                  //   <TableHeader>
+                  //     <TableRow>
+                  //       <TableHead>Student</TableHead>
+                  //       <TableHead>Enrolled On</TableHead>
+                  //       <TableHead>Status</TableHead>
+                  //     </TableRow>
+                  //   </TableHeader>
+                  //   <TableBody>
+                  //     {enrollments.map((enrollment : any) => (
+                  //       <TableRow key={enrollment.id}>
+                  //         <TableCell className="flex items-center gap-2">
+                  //           <Avatar className="h-6 w-6 md:h-8 md:w-8">
+                  //             <AvatarImage
+                  //               src={enrollment.student.user.image || ""}
+                  //               alt={enrollment.student.user.name || ""}
+                  //             />
+                  //             <AvatarFallback>
+                  //               {enrollment.student.user.name
+                  //                 ?.charAt(0)
+                  //                 .toUpperCase() || "S"}
+                  //             </AvatarFallback>
+                  //           </Avatar>
+                  //           <span className="font-medium text-xs md:text-base">
+                  //             {enrollment.student.user.name ||
+                  //               enrollment.student.studentName ||
+                  //               "Student"}
+                  //           </span>
+                  //         </TableCell>
+                  //         <TableCell className="text-xs md:text-base">
+                  //           {new Date(enrollment.createdAt).toLocaleDateString()}
+                  //         </TableCell>
+                  //         <TableCell className="text-xs md:text-base">
+                  //           {enrollment.paymentStatus === true ? (
+                  //             <Badge variant="outline" >Paid</Badge>
+                  //           ) : (
+                  //             <Badge variant="destructive">Not Paid</Badge>
+                  //           )}
+                  //         </TableCell>
+                  //       </TableRow>
+                  //     ))}
+                  //   </TableBody>
+                  // </Table>
+                  <EnrollmentTable enrollments={enrollments} />
                 ) : (
                   <div className="text-center py-6">
                     <Users className="h-12 w-12 mx-auto text-gray-400" />

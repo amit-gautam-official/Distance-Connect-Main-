@@ -286,7 +286,7 @@ export default function HighSchoolForm({
                       <Input
                         className="remove"
                         type="text"
-                        placeholder="Enter your phone number"
+                        placeholder=""
                         pattern="[0-9]{10}"
                         {...field}
                       />

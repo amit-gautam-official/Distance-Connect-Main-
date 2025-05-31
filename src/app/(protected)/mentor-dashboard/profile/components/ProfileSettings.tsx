@@ -235,13 +235,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, mentor }) => {
         <CardContent className="px-6 pt-2">
           <form onSubmit={handleSubmit}>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid text-xs w-full grid-cols-3 items-center gap-3 md:grid-cols-6">
+              <TabsList className="grid text-xs w-full grid-cols-3 items-center gap-3 md:grid-cols-5">
                 <TabsTrigger value="basic-info">Basic Info</TabsTrigger>
                 <TabsTrigger value="education">Education</TabsTrigger>
                 <TabsTrigger value="experience">Experience</TabsTrigger>
                 <TabsTrigger value="skills">Skills</TabsTrigger>
                 <TabsTrigger value="account">Account</TabsTrigger>
-                <TabsTrigger value="verifyEmail">Verification</TabsTrigger>
+                {/* <TabsTrigger value="verifyEmail">Verification</TabsTrigger> */}
               </TabsList>
 
               <TabsContent value="basic-info" className="mt-12 md:mt-6 w-full ">
@@ -281,13 +281,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, mentor }) => {
               <TabsContent value="account" className="mt-12 md:mt-6">
                 <AccountSecurityTab />
               </TabsContent>
-              <TabsContent value="verifyEmail" className="mt-12 md:mt-6">
+              {/* <TabsContent value="verifyEmail" className="mt-12 md:mt-6">
                 <CompanyEmail
                   companyEmailVerified={mentor.companyEmailVerified}
                   company={formData.currentCompany}
                   companyEmail={mentor.companyEmail || ""}
                 />
-              </TabsContent>
+              </TabsContent> */}
             </Tabs>
 
             {

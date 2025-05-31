@@ -355,7 +355,7 @@ export default function WorkingForm({
                       <Input
                         className="remove"
                         type="text"
-                        placeholder="Enter your phone number"
+                        placeholder=""
                         {...field}
                       />
                     </FormControl>

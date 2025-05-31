@@ -319,7 +319,7 @@ export default function CollegeForm({
                         className="remove"
                         type="text"
                         pattern="[0-9]{10}"
-                        placeholder= "Enter 10 digit phone number"
+                        placeholder= ""
                         {...field}
                         required
                       />
