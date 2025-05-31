@@ -88,8 +88,11 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
 
     });
 
+
     setLoading(false);
     router.push("/mentor-dashboard/services");
+
+
   };
 
   return (
