@@ -291,6 +291,9 @@ export default function WorkshopList({
                   >
                     View Details
                   </Button>
+                  <Badge className="w-full sm:w-auto mt-2 sm:mt-0" variant="secondary">
+                    Enrolled
+                  </Badge>
                   {workshop.meetLinks && Object.keys(workshop.meetLinks as Record<string, any>).length > 0 ? (
                     <Button
                       variant="default"

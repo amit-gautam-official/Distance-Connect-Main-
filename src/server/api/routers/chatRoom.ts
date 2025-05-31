@@ -122,6 +122,9 @@ createChatRoomByMentorId: protectedProcedure
                 studentUserId: ctx.dbUser!.id,
                 paymentStatus: true, // Ensure payment is completed
             },
+            orderBy: {
+                selectedDate: 'desc', // Get the most recent meeting
+            }
         });
 
         if (!scheduledMeeting) {

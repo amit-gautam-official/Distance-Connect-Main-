@@ -316,6 +316,7 @@ const MeetingsPage = () => {
     );
     return {
       id: meeting?.student.id ?? "",
+      username : meeting?.student.user.username ?? "",
       studentUserId: meeting?.student.userId ?? "",
       name: meeting?.student.user.name ?? "",
       role: meeting?.student.user.role ?? "",

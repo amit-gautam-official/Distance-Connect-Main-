@@ -75,6 +75,19 @@ export default function RootLayout({
         </TRPCReactProvider>
         <GoogleAnalytics gaId="G-D2RLQDYV1B" />
         <Toaster />
+        <Script id="zoho-salesiq-init" strategy="afterInteractive">
+        {`
+          window.$zoho = window.$zoho || {};
+          $zoho.salesiq = $zoho.salesiq || { ready: function() {} };
+        `}
+      </Script>
+
+      <Script
+        id="zsiqscript"
+        src="https://salesiq.zohopublic.in/widget?wc=siqf82bfb0a40b0fcc4bd5d0860829e420252f20700c01aff1d782b85216cb830e2"
+        strategy="afterInteractive"
+        defer
+      />
       </body>
     </html>
   );

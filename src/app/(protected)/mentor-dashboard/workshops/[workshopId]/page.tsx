@@ -167,14 +167,13 @@ export default function WorkshopDetailPage() {
       
       const hasRunTour = localStorage.getItem(TOUR_STORAGE_KEY ) === "true";
   
-      if (!isLoading  &&  hasRunTour) {
+      if (!isLoading  &&  !hasRunTour) {
         const el = document.querySelector("#edit-workshop");
         if (el) {
         setTimeout(() => {
           startTour();
         }, 500);
         }
-  
       }
     }, [isLoading]);
 

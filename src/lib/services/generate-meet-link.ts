@@ -21,7 +21,7 @@ export async function generateMeetLink(input: GenerateMeetLinkInput): Promise<{ 
       email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
       key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
       scopes: ['https://www.googleapis.com/auth/calendar'],
-      subject: 'talha@distanceconnect.in',
+      subject: 'support@distanceconnect.in',
     });
 
     const calendar = google.calendar({ version: 'v3', auth });
@@ -50,7 +50,7 @@ export async function generateMeetLink(input: GenerateMeetLinkInput): Promise<{ 
     };
 
     const response = await calendar.events.insert({
-      calendarId: 'talha@distanceconnect.in',
+      calendarId: 'support@distanceconnect.in',
       requestBody: event,
       conferenceDataVersion: 1,
     });

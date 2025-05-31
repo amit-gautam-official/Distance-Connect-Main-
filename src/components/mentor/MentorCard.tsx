@@ -18,6 +18,8 @@ import { useRouter } from "next/navigation";
 import { JSONValue } from "node_modules/superjson/dist/types";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/trpc/react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { useSession } from "next-auth/react";
 
 interface Mentor {
   availability: Avail | null;
@@ -38,12 +40,12 @@ interface Mentor {
 }
 
 interface Avail {
-    id: string | null;
-    createdAt: Date | null;
-    updatedAt: Date | null;
-    mentorUserId: string | null;
-    daysAvailable: JSONValue | null; // Use JSONValue for dynamic keys
-    bufferTime: number | null;
+  id: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  mentorUserId: string | null;
+  daysAvailable: JSONValue | null; // Use JSONValue for dynamic keys
+  bufferTime: number | null;
 }
 
 interface MentorCardProps {
@@ -55,53 +57,84 @@ export function MentorCard({ mentor }: MentorCardProps) {
   const [isExpandedBio, setIsExpandedBio] = useState(false);
   const [canChat, setCanChat] = useState<boolean>(false);
   const [isCheckingMeeting, setIsCheckingMeeting] = useState<boolean>(false);
+  const [isLoadingMeetingStatus, setIsLoadingMeetingStatus] = useState(true);
   const router = useRouter();
   const { toast } = useToast();
-  
+  const session = useSession();
+
   // Check if the student has a meeting with this mentor
   const getMeetingStatus = api.scheduledMeetings.hasMeetingWithMentor.useQuery(
     { mentorUserId: mentor.userId },
-    { enabled: false }
+    { enabled: false },
   );
-  
+    const meetingStatusQuery = api.scheduledMeetings.hasMeetingWithMentor.useQuery(
+      { mentorUserId: mentor.userId },
+      { enabled: !!session?.data?.user, refetchOnWindowFocus: false }
+    );
+
+
   // Update local state when query results change
   useEffect(() => {
-    if (getMeetingStatus.status === 'success') {
-      setCanChat(getMeetingStatus.data === true);
-      setIsCheckingMeeting(false);
-    } else if (getMeetingStatus.status === 'error') {
+    if (meetingStatusQuery.status === 'success') {
+      setCanChat(!!meetingStatusQuery.data);
+      setIsLoadingMeetingStatus(false);
+    } else if (meetingStatusQuery.status === 'error') {
       setCanChat(false);
-      setIsCheckingMeeting(false);
+      setIsLoadingMeetingStatus(false);
     }
-  }, [getMeetingStatus.status, getMeetingStatus.data]);
-  
+  }, [meetingStatusQuery.status, meetingStatusQuery.data]);
+
   const createChatRoom = api.chatRoom.createChatRoomByMentorId.useMutation();
-  
+
   // Handle chat room creation results
   useEffect(() => {
-    if (createChatRoom.status === 'success' && createChatRoom.data) {
-      router.push(`/chat/${createChatRoom.data.id}`);
-    } else if (createChatRoom.status === 'error' && createChatRoom.error) {
+    if (createChatRoom.status === "success" && createChatRoom.data) {
+      router.push(`/chat?mentorId=${mentor.userId}`);
+    } else if (createChatRoom.status === "error" && createChatRoom.error) {
       toast({
         title: "Cannot start chat",
-        description: createChatRoom.error.message || "You must book a meeting with this mentor first",
+        description:
+          createChatRoom.error.message ||
+          "You must book a meeting with this mentor first",
         variant: "destructive",
       });
     }
-  }, [createChatRoom.status, createChatRoom.data, createChatRoom.error, router, toast]);
+  }, [
+    createChatRoom.status,
+    createChatRoom.data,
+    createChatRoom.error,
+    router,
+    toast,
+  ]);
 
   // Check meeting status when the component mounts
   useEffect(() => {
     setIsCheckingMeeting(true);
     getMeetingStatus.refetch();
   }, []);
-  
+
   // Function to truncate bio text
   const truncateBio = (text: string, maxLength = 100) => {
     if (!text || text.length <= maxLength) return text;
     return text.slice(0, maxLength).trim();
   };
-  
+
+  const handleChatClick = (e: React.MouseEvent) => {
+    if (!session?.data?.user) {
+      return; // Let the link navigate to login
+    }
+    
+    // If no meeting booking, prevent navigation and show toast
+    if (!canChat) {
+      e.preventDefault();
+      toast({
+        title: "Cannot start chat",
+        description: "You need to book a meeting with this mentor before you can chat.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <>
       <Card className="group flex h-full flex-col overflow-hidden bg-white transition-all hover:shadow-lg">
@@ -109,10 +142,12 @@ export function MentorCard({ mentor }: MentorCardProps) {
         <div className="relative flex flex-col items-center p-6 pb-4">
           {/* Free session badge moved to corner */}
           <div className="absolute right-0 top-0">
-            <Badge className="bg-green-100 text-green-800 m-2">Free Session</Badge>
+            <Badge className="m-2 bg-green-100 text-green-800">
+              Free Session
+            </Badge>
           </div>
-          
-          <Avatar className="h-20 w-20 mb-4 border-2 border-white shadow">
+
+          <Avatar className="mb-4 h-20 w-20 border-2 border-white shadow">
             <AvatarImage
               src={mentor.user.image || ""}
               alt={mentor.mentorName || "Mentor Avatar"}
@@ -123,11 +158,11 @@ export function MentorCard({ mentor }: MentorCardProps) {
             </AvatarFallback>
           </Avatar>
 
-          <h3 className="mb-1 text-lg font-semibold text-center">
+          <h3 className="mb-1 text-center text-lg font-semibold">
             {mentor.mentorName || "Unnamed Mentor"}
           </h3>
-          
-          <p className="mb-2 text-sm text-muted-foreground text-center">
+
+          <p className="mb-2 text-center text-sm text-muted-foreground">
             {mentor.jobTitle || "Role not specified"}
             {mentor.experience && (
               <>
@@ -136,40 +171,57 @@ export function MentorCard({ mentor }: MentorCardProps) {
               </>
             )}
           </p>
-          
+
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Building2 className="h-4 w-4" />
-            <span className="line-clamp-1">{mentor.currentCompany || "Not specified"}</span>
+            <span className="line-clamp-1">
+              {mentor.currentCompany || "Not specified"}
+            </span>
             {mentor.companyEmailVerified === false && (
-              <Badge variant="outline" className="text-xs text-amber-600 border-amber-300 bg-amber-50">Unverified</Badge>
+              <Badge
+                variant="outline"
+                className="border-amber-300 bg-amber-50 text-xs text-amber-600"
+              >
+                Unverified
+              </Badge>
             )}
           </div>
-          
+
           <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
             <MapPin className="h-3.5 w-3.5" />
-            <span>{mentor?.state ? mentor.state.charAt(0).toUpperCase() + mentor.state.slice(1) : "Location N/A"}</span>
+            <span>
+              {mentor?.state
+                ? mentor.state.charAt(0).toUpperCase() + mentor.state.slice(1)
+                : "Location N/A"}
+            </span>
           </div>
         </div>
-        
+
         {/* Bio Section - Improved Read More/Less functionality */}
         <div className="px-6 pb-4">
           <div className="text-sm text-muted-foreground">
             {mentor.bio ? (
               truncateBio(mentor.bio) + "..."
             ) : (
-              <p className="text-muted-foreground italic">No bio available</p>
+              <p className="italic text-muted-foreground">No bio available</p>
             )}
           </div>
         </div>
-        
+
         {/* Skills */}
         <div className="flex-1 px-6 pb-4">
-          <p className="text-xs font-medium text-muted-foreground mb-2">Skills</p>
+          <p className="mb-2 text-xs font-medium text-muted-foreground">
+            Skills
+          </p>
           <div className="flex flex-wrap gap-1.5">
             {mentor.hiringFields?.length > 0 ? (
               <>
                 {mentor.hiringFields.slice(0, 3).map((field, index) => (
-                  <Badge key={`${field}-${index}`} variant="secondary" className="text-xs">
+                  <Badge
+                    key={`${field}-${index}`}
+                    variant="secondary"
+                    className="text-xs"
+                  >
                     {field}
                   </Badge>
                 ))}
@@ -180,32 +232,68 @@ export function MentorCard({ mentor }: MentorCardProps) {
                 )}
               </>
             ) : (
-              <span className="text-xs text-muted-foreground italic">No skills specified</span>
+              <span className="text-xs italic text-muted-foreground">
+                No skills specified
+              </span>
             )}
           </div>
         </div>
-        
+
         {/* Footer */}
-        <div className="border-t border-border bg-muted/10 py-4  m-auto mt-auto">
+        <div className="m-auto mt-auto border-t border-border bg-muted/10 py-4">
           <div className="flex items-center justify-between gap-2">
             <Link href={`/mentors/${mentor.userId}`} className="">
-              <Button variant="outline" size="sm" className="hover:bg-primary/5">
+              <Button
+                variant="outline"
+                size="sm"
+                className="hover:bg-primary/5"
+              >
                 View Profile
               </Button>
             </Link>
-            <Button 
-                size="sm"
-                variant="outline"
-                className=""
-                disabled={isCheckingMeeting || !canChat}
-                onClick={() => createChatRoom.mutate({ mentorUserId: mentor.userId })}
-              >
-                <MessageSquare className="h-4 w-4" />
-                Chat
-              </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href={
+                      session?.data?.user
+                        ? `/chat?mentorId=${mentor.userId}`
+                        : "/auth/login"
+                    }
+                    onClick={handleChatClick}
+                    className="block w-full"
+                  >
+                    <Button
+                      variant="outline"
+                      className={`w-full hover:bg-blue-50 ${isLoadingMeetingStatus ? "opacity-70" : ""}`}
+                      disabled={isLoadingMeetingStatus}
+                    >
+                      {isLoadingMeetingStatus ? (
+                        <>
+                          <span className=" h-4 w-4 animate-spin rounded-full border-2 border-t-transparent"></span>
+                        </>
+                      ) : (
+                          <MessageSquare className="h-4 w-4" /> 
+                      )}
+                    </Button>
+                  </Link>
+                </TooltipTrigger>
+                { session?.data?.user ? 
+                  !canChat && !isLoadingMeetingStatus && (
+                  <TooltipContent>
+                    <p>Book a meeting first to enable chat</p>
+                  </TooltipContent>
+                ) :
+                <TooltipContent>
+                  <p>Please log in to chat</p>
+                </TooltipContent>
+                }
+                
+              </Tooltip>  
+            </TooltipProvider>
+
             <div className="">
-             
-              <Button 
+              <Button
                 size="sm"
                 className="flex-1 bg-primary/90 hover:bg-primary"
                 onClick={() => setIsModalOpen(true)}
@@ -219,18 +307,18 @@ export function MentorCard({ mentor }: MentorCardProps) {
 
       {/* Booking Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-md md:max-w-xl max-h-[90vh] flex flex-col">
+        <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-md md:max-w-xl">
           <DialogHeader className="border-b pb-4">
             <DialogTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
               Book a Session with {mentor.mentorName || "Mentor"}
             </DialogTitle>
           </DialogHeader>
-          
+
           {/* Scrollable content area */}
-          <div className="overflow-y-auto py-4 flex-1">
+          <div className="flex-1 overflow-y-auto py-4">
             {/* Mentor quick info */}
-            <div className="flex items-center space-x-3 mb-6 px-1">
+            <div className="mb-6 flex items-center space-x-3 px-1">
               <Avatar className="h-12 w-12">
                 <AvatarImage
                   src={mentor.user.image || ""}
@@ -245,7 +333,9 @@ export function MentorCard({ mentor }: MentorCardProps) {
                   {mentor.currentCompany || "Company not specified"}
                 </p>
               </div>
-              <Badge className="bg-green-100 text-green-800 hover:bg-green-100">First Session Free</Badge>
+              <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                First Session Free
+              </Badge>
             </div>
 
             {/* Availability Calendar */}
@@ -253,8 +343,10 @@ export function MentorCard({ mentor }: MentorCardProps) {
               {mentor.availability ? (
                 <AvailabilityCard avail={mentor.availability} />
               ) : (
-                <div className="text-center p-6 bg-muted/20 rounded-md">
-                  <p className="text-muted-foreground">No availability information found</p>
+                <div className="rounded-md bg-muted/20 p-6 text-center">
+                  <p className="text-muted-foreground">
+                    No availability information found
+                  </p>
                 </div>
               )}
             </div>
@@ -264,7 +356,9 @@ export function MentorCard({ mentor }: MentorCardProps) {
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={() => router.push(`/mentors/${mentor.userId}/offerings`)}>
+            <Button
+              onClick={() => router.push(`/mentors/${mentor.userId}/offerings`)}
+            >
               Book a Session
             </Button>
           </DialogFooter>

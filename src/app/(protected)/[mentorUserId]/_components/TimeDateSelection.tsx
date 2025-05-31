@@ -2,8 +2,29 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import React from "react";
 import { type  ScheduledMeetings } from "@prisma/client";
+// Types for the new availability structure
+type TimeSlot = {
+  startTime: string;
+  endTime: string;
+};
 
-
+type DayAvailability = {
+  enabled: boolean;
+  timeSlots: TimeSlot[];
+};
+type DaysAvailableType = {
+  Sunday: DayAvailability;
+  Monday: DayAvailability;
+  Tuesday: DayAvailability;
+  Wednesday: DayAvailability;
+  Thursday: DayAvailability;
+  Friday: DayAvailability;
+  Saturday: DayAvailability;
+};
+type mentorAvailability = {
+    daysAvailable: DaysAvailableType;
+    bufferTime: number;
+}
 
 interface TimeDateSelectionProps {
   date: Date;
@@ -13,6 +34,7 @@ interface TimeDateSelectionProps {
   enableTimeSlot: boolean;
   selectedTime: string;
   prevBooking: ScheduledMeetings[];
+  mentorAvailability: mentorAvailability;
 }
 
 function TimeDateSelection({
@@ -23,6 +45,7 @@ function TimeDateSelection({
   enableTimeSlot,
   selectedTime,
   prevBooking,
+  mentorAvailability
 }: TimeDateSelectionProps) {
  
   // Converts "09:00 AM" + date to a Date object
@@ -64,10 +87,10 @@ const checkTimeSlot = (time: string) => {
         <div className="touch-manipulation">
           <Calendar
             mode="single"
-            selected={date}
+            selected={date} //select the first mentor availability day from now
             onSelect={(d) => handleDateChange(d!)}
             className="mx-auto mt-1 w-full max-w-[350px] rounded-md border md:mx-0"
-            disabled={(date) => date < new Date()}
+            disabled={(date) => date < new Date() || !mentorAvailability?.daysAvailable[date.toLocaleString('en-US', { weekday: 'long' }) as keyof DaysAvailableType]?.enabled}
             initialFocus
           />
         </div>

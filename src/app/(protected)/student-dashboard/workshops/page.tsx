@@ -50,7 +50,7 @@ export default function StudentWorkshopsPage() {
   } = api.workshop.getEnrolledWorkshops.useQuery();
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
+    <div className="container mx-auto pb-16 md:pb-0 px-2 md:px-4 sm:px-6 py-4 sm:py-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Workshops</h1>
         <p className="mt-1 text-gray-600">

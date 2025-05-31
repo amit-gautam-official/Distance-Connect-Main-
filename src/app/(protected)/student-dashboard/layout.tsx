@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
 import { SessionUser } from "@/types/sessionUser";
+import { SessionProvider } from "next-auth/react";
 
 export default async function Layout({
   children,
@@ -29,6 +30,8 @@ export default async function Layout({
 
 
   return (
+     <SessionProvider session={session}>
+
     <SidebarProvider>
       <AppSidebar role="student" />
       <main>
@@ -39,5 +42,6 @@ export default async function Layout({
         </div>
       </main>
     </SidebarProvider>
+     </SessionProvider>
   );
 }

@@ -63,9 +63,10 @@ export default function ChatPage() {
  
   const mentorId = searchParams?.get('mentorId')
   const studentId = searchParams?.get('studentId')
+  
 
 
-  useEffect(() => {
+useEffect(() => {
     // Initialize Ably client on the client side
     if (typeof window !== "undefined") {
       const ablyClient = new Ably.Realtime({
@@ -74,9 +75,6 @@ export default function ChatPage() {
       });
       setClient(ablyClient);
 
-      
-
-      // Cleanup on unmount
       return () => {
         ablyClient.close();
       };
@@ -96,7 +94,7 @@ export default function ChatPage() {
       setError(null);
     },
     onError: (err) => {
-      console.error("Chat creation error:", err);
+      // console.error("Chat creation error:", err);
       setError(err.message || "Could not create chat room");
       
       // If the error is about booking a meeting, we'll add a timer to redirect to offerings
@@ -134,7 +132,11 @@ export default function ChatPage() {
           setError(null);
         }
         if (!getChatRoomByBothIdQuery.data && !error) {
-          createChatRoomMutation.mutate({ mentorUserId: mentorId! });
+          try{
+            createChatRoomMutation.mutate({ mentorUserId: mentorId! });
+          }catch (err) {
+            setError("Could not create chat room. Please try again later.");
+          }
         }
       }
     }

@@ -522,6 +522,7 @@ function MeetingTimeDateSelection({
             enableTimeSlot={enableTimeSlot}
             selectedTime={selectedTime!}
             prevBooking={prevBooking}
+            mentorAvailability={mentorAvailability!}
           />
           <div className="mt-6 flex justify-end">
             <Button

@@ -463,7 +463,6 @@ const MentorsPagePublic = () => {
           : filteredMentors?.map((mentor) => (
             <>
               <MentorCard key={mentor.userId} mentor={mentor!} />
-
             </>
             ))}
       </div>

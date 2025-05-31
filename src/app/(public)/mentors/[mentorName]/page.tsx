@@ -345,6 +345,7 @@ const professionalBackground = {
           {/* Profile header */}
           <ProfileHeader
             mentor={{
+              username: mentorData?.user?.username || "",
               profileBanner: mentorData?.profileBanner || "",
               mentorName: mentorData.mentorName || "Unnamed Mentor",
               jobTitle: mentorData.jobTitle || "",
