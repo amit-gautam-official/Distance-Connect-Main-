@@ -473,7 +473,7 @@ export default function EditWorkshopModal({
         initialVideoUrl: workshop.introductoryVideoUrl || undefined,
       });
 
-      console.log(signedUrlResult);
+      // console.log(signedUrlResult);
 
       if (!signedUrlResult.success || !signedUrlResult.signedUrl) {
         throw new Error("Failed to get signed upload URL");
@@ -490,7 +490,7 @@ export default function EditWorkshopModal({
     });
 
     if (response.ok) {
-        console.log('Video uploaded successfully!');
+        // console.log('Video uploaded successfully!');
     } else {
         console.error('Error uploading video:', response);
     }

@@ -18,7 +18,7 @@ interface ScheduledSessionsProps {
 
 const ScheduledSessions: React.FC<ScheduledSessionsProps> = ({ sessions }) => {
 
-  console.log("Scheduled Sessions", sessions);
+  // console.log("Scheduled Sessions", sessions);
   // Filter sessions to only show upcoming ones
   const upcomingSessions = React.useMemo(() => {
     const now = new Date();

@@ -498,7 +498,7 @@ export const workshopRouter = createTRPCRouter({
         throw new TRPCError({ code: "FORBIDDEN", message: "Only students can enroll in workshops" });
       }
 
-      console.log("Input:", input);
+      // console.log("Input:", input);
 
       // Check if the workshop exists
       const workshop = await ctx.db.workshop.findUnique({
@@ -645,7 +645,7 @@ export const workshopRouter = createTRPCRouter({
       if (workshop.mentorUserId !== ctx.dbUser.id) {
         throw new TRPCError({ code: "FORBIDDEN", message: "You are not authorized to modify this workshop." });
       }
-      console.log("Video:", video);
+      // console.log("Video:", video);
       // 3. Call the file upload router using createCaller
       const createCaller = createCallerFactory(fileRouter)
       const fileCaller = createCaller(ctx)
@@ -669,7 +669,7 @@ export const workshopRouter = createTRPCRouter({
         data: { introductoryVideoUrl: uploadResult.url },
       });
     } catch (error) {
-      console.log("Error uploading video:", error);
+      // console.log("Error uploading video:", error);
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Video upload failed. Please try again.",
@@ -710,8 +710,8 @@ export const workshopRouter = createTRPCRouter({
       // Get current date and time - we'll treat all times as if they're already in IST
       const now = new Date();
       
-      console.log(`Current time: ${now.toISOString()}`);
-      console.log(`Timezone offset: ${now.getTimezoneOffset()} minutes`);
+      // console.log(`Current time: ${now.toISOString()}`);
+      // console.log(`Timezone offset: ${now.getTimezoneOffset()} minutes`);
       
       // Get day to generate link for (default to first day)
       const dayIndexToUse = dayIndex || 1;
@@ -768,7 +768,7 @@ export const workshopRouter = createTRPCRouter({
         targetDate.setHours(hours, minute || 0, 0, 0);
         
         // Log the target date in IST
-        console.log(`Target date (IST): ${targetDate.toString()}`);
+        // console.log(`Target date (IST): ${targetDate.toString()}`);
       } else {
         // For recurring schedule, calculate based on start date and day pattern
         const dayMap: Record<string, number> = {

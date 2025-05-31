@@ -41,7 +41,7 @@ export async function generateUpcomingWorkshopLinks(hoursBeforeStart = 3): Promi
   };
   
   try {
-    console.log("Starting workshop link generation check...");
+    // console.log("Starting workshop link generation check...");
     
     // Current time
     const now = new Date();
@@ -49,7 +49,7 @@ export async function generateUpcomingWorkshopLinks(hoursBeforeStart = 3): Promi
     
     // Don't run if executed recently (within 5 minutes) - prevents duplicate processing
     if (nowTimestamp - lastRunTimestamp < 5 * 60 * 1000) {
-      console.log("Skipping workshop link generation - ran recently");
+      // console.log("Skipping workshop link generation - ran recently");
       return;
     }
     
@@ -101,7 +101,7 @@ export async function generateUpcomingWorkshopLinks(hoursBeforeStart = 3): Promi
       skip += BATCH_SIZE;
       hasMoreWorkshops = workshopBatch.length === BATCH_SIZE;
       
-      console.log(`Processing batch of ${workshopBatch.length} workshops`);
+      // console.log(`Processing batch of ${workshopBatch.length} workshops`);
       
       // Process workshops in this batch
       await Promise.all(workshopBatch.map(async (workshop) => {
@@ -117,8 +117,8 @@ export async function generateUpcomingWorkshopLinks(hoursBeforeStart = 3): Promi
     }
     
     const duration = (Date.now() - stats.startTime) / 1000;
-    console.log(`Workshop link generation completed in ${duration.toFixed(2)}s`);
-    console.log(`Stats: ${stats.workshopsProcessed} workshops processed, ${stats.linksGenerated} links generated, ${stats.errors} errors`);
+    // console.log(`Workshop link generation completed in ${duration.toFixed(2)}s`);
+    // console.log(`Stats: ${stats.workshopsProcessed} workshops processed, ${stats.linksGenerated} links generated, ${stats.errors} errors`);
   } catch (error) {
     console.error("Error in workshop link generation:", error);
   }
@@ -201,7 +201,7 @@ async function processWorkshop(
         
         linksGenerated = true;
         stats.linksGenerated++;
-        console.log(`Generated meet link for workshop ${workshop.id}, day ${session.dayIndex}`);
+        // console.log(`Generated meet link for workshop ${workshop.id}, day ${session.dayIndex}`);
       } catch (error) {
         stats.errors++;
         console.error(`Failed to generate link for workshop ${workshop.id}, day ${session.dayIndex}:`, error);
@@ -260,7 +260,7 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries: number): Promise<T
       const delay = Math.pow(2, attempt) * 500 + Math.random() * 500;
       await sleep(delay);
       
-      console.log(`Retry attempt ${attempt + 1}/${maxRetries}`);
+      // console.log(`Retry attempt ${attempt + 1}/${maxRetries}`);
     }
   }
   
@@ -363,7 +363,7 @@ async function notifyAttendeesAboutMeetLink(
   // Implementation would depend on your notification system
   // Could use email, push notifications, or in-app notifications
   
-  console.log(`Notification would be sent for workshop ${workshopId}, day ${dayIndex}`);
-  console.log(`Meeting link: ${meetLink}`);
-  console.log(`To: Mentor (${attendees.mentor.email}) and ${attendees.students.length} students`);
+  // console.log(`Notification would be sent for workshop ${workshopId}, day ${dayIndex}`);
+  // console.log(`Meeting link: ${meetLink}`);
+  // console.log(`To: Mentor (${attendees.mentor.email}) and ${attendees.students.length} students`);
 }

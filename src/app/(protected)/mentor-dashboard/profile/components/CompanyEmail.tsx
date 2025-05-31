@@ -111,7 +111,7 @@ export default function CompanyEmail({
     try {
       setIsLoading(true);
       const data = await validateOtp(email, otp);
-      console.log('OTP validation response:', data);
+      // console.log('OTP validation response:', data);
       if(!data.verified) {
         throw new Error('Invalid OTP. Please try again.');
       }

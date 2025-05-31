@@ -54,7 +54,7 @@ export default function AdminDashboard() {
         return <div>Loading...</div>;
     }
     
-    console.log(mentors);
+    // console.log(mentors);
 
 
 

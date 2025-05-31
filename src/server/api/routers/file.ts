@@ -78,8 +78,8 @@ export const fileRouter = createTRPCRouter({
       // Validate file size (Base64 is ~33% larger than binary)
       const estimatedFileSize = Math.ceil((fileContent.length * 3) / 4);
       if (estimatedFileSize > MAX_FILE_SIZE) {
-        console.log("File size:", estimatedFileSize);
-        console.log("Max file size:", MAX_FILE_SIZE);
+        // console.log("File size:", estimatedFileSize);
+        // console.log("Max file size:", MAX_FILE_SIZE);
         throw new TRPCError({
           code: "BAD_REQUEST", 
           message: `File exceeds maximum size of ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
@@ -88,7 +88,7 @@ export const fileRouter = createTRPCRouter({
 
       const bucket = storage.bucket(bucketName);
       if (!bucket) {
-        console.log("Bucket not found");
+        // console.log("Bucket not found");
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Bucket not found",
@@ -101,7 +101,7 @@ export const fileRouter = createTRPCRouter({
       if (initialAvatarUrl) {
         const url = new URL(initialAvatarUrl);
         const pathname = decodeURIComponent(url.pathname);
-        console.log("Pathname:", pathname);
+        // console.log("Pathname:", pathname);
         //check if bucket name is present in the url
         if (pathname.includes(`/${bucketName}/`)) {
           
@@ -110,13 +110,13 @@ export const fileRouter = createTRPCRouter({
         
         const objectPath = pathname.replace(`/${bucketName}/`, '');
 
-        console.log("Object path:", objectPath);
+        // console.log("Object path:", objectPath);
 
         const initialFile = bucket.file(objectPath);
 
         await initialFile.delete()
           .then(() => {
-            console.log("Initial image deleted successfully");
+            // console.log("Initial image deleted successfully");
           })
           .catch((err) => {
             throw new TRPCError({
@@ -280,7 +280,7 @@ export const fileRouter = createTRPCRouter({
             
             await initialFile.delete()
               .then(() => {
-                console.log("Initial video deleted successfully");
+                // console.log("Initial video deleted successfully");
               })
               .catch((err) => {
                 console.error("Error deleting initial video:", err.message);

@@ -218,8 +218,8 @@ export default function WorkshopDetailPage() {
   const getWorkshopDayLinks = () => {
     // Always return an array of day links, even if meetLinks is not defined yet
     const meetLinks = workshop?.meetLinks as Record<string, any> || {};
-    console.log("MeetLinks:", meetLinks);
-    console.log("Workshop:", workshop);
+    // console.log("MeetLinks:", meetLinks);
+    // console.log("Workshop:", workshop);
     const dayLinks: {dayIndex: number; link: string; scheduledFor: string; canGenerate: boolean; timeUntilAllowed?: string}[] = [];
     
     // Current time
