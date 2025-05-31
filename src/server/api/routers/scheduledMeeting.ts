@@ -34,16 +34,21 @@ export const scheduledMeetingsRouter = createTRPCRouter({
         userNote : z.string(),
         eventName : z.string(),
         userEmailForMeet : z.string().email(),
-        mentorEmailForMeet : z.string().email()
+        mentorEmailForMeet : z.string().email(),
+        meetUrl : z.string().optional(),
+        paymentStatus : z.boolean().optional(),
       
      }))
     .mutation(async ({ ctx, input }) => {
+
+       
 
 
       const prevBooking = await ctx.db.scheduledMeetings.findMany({
         where :{
           selectedDate: input.selectedDate, 
           mentorUserId: input.mentorUserId,
+          paymentStatus : true,
         }
       })
 
@@ -69,7 +74,15 @@ export const scheduledMeetingsRouter = createTRPCRouter({
 
       
 
-      return await ctx.db.scheduledMeetings.create({
+      // Find the event details to include for admin logging
+      const eventDetails = await ctx.db.meetingEvent.findFirst({
+        where: {
+          id: input.eventId
+        }
+      });
+
+      // Create the scheduled meeting with complete information
+      const meeting = await ctx.db.scheduledMeetings.create({
         data : {
             mentorUserId : input.mentorUserId,
             selectedTime : input.selectedTime,
@@ -83,8 +96,23 @@ export const scheduledMeetingsRouter = createTRPCRouter({
             eventName : input.eventName,
             userEmailForMeet : input.userEmailForMeet,
             mentorEmailForMeet : input.mentorEmailForMeet,
+            meetUrl : input.meetUrl? input.meetUrl : "",
+            paymentStatus : input.paymentStatus ? input.paymentStatus : false,
         }
       })
+
+      await ctx.db.student.update({
+        where : {
+          userId : ctx.dbUser!.id  // Using userId instead of id to properly match with the User
+        },
+        data : {
+          hasUsedFreeSession : true
+        }
+      })
+
+      return meeting
+
+     
     }),
 
     getScheduledMeetingsList: protectedProcedure
@@ -108,7 +136,8 @@ export const scheduledMeetingsRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       return ctx.db.scheduledMeetings.findMany({
         where: {
-          mentorUserId: ctx.dbUser!.id
+          mentorUserId: ctx.dbUser!.id,
+          paymentStatus : true,
         },
         include: {
           student: true,
@@ -136,7 +165,8 @@ export const scheduledMeetingsRouter = createTRPCRouter({
       const meetings = await ctx.db.scheduledMeetings.findMany({
         where: {
           mentorUserId: ctx.dbUser!.id,
-        },
+          paymentStatus : true,
+          },
         orderBy: {
           selectedDate: 'asc',
         },
@@ -222,5 +252,37 @@ export const scheduledMeetingsRouter = createTRPCRouter({
           star: input.starRating
         },
       });
+    }),
+
+    hasMeetingWithMentor: protectedProcedure
+    .input(z.object({ mentorUserId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      if (ctx.dbUser?.role !== "STUDENT") {
+        return false;
+      }
+
+      const now = new Date();
+      
+      // Get the latest scheduled meeting between this student and mentor
+      const meeting = await ctx.db.scheduledMeetings.findFirst({
+        where: {
+          mentorUserId: input.mentorUserId,
+          studentUserId: ctx.dbUser.id,
+          paymentStatus: true, // Ensure payment is completed
+        },
+        orderBy: {
+          selectedDate: 'desc',
+        },
+      });
+
+      if (!meeting) {
+        return false;
+      }
+
+      // Check if today is before or on the meeting day
+      const meetingDate = new Date(meeting.selectedDate);
+      meetingDate.setHours(23, 59, 59); // End of the meeting day
+      
+      return now <= meetingDate;
     }),
   })

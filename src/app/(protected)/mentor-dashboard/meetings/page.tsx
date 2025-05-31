@@ -46,7 +46,6 @@ import {
 } from "@/components/ui/dialog";
 import MeetingsSkeleton from "./components/MeetingsSkeleton";
 import dynamic from "next/dynamic";
-import StudentListSkeleton from "./components/StudentListSkeleton";
 import StudentList from "../profile/components/StudentList";
 
 type MeetingStatus = "not-started" | "ongoing" | "completed" | "missed";
@@ -317,6 +316,7 @@ const MeetingsPage = () => {
     );
     return {
       id: meeting?.student.id ?? "",
+      username : meeting?.student.user.username ?? "",
       studentUserId: meeting?.student.userId ?? "",
       name: meeting?.student.user.name ?? "",
       role: meeting?.student.user.role ?? "",
@@ -392,7 +392,7 @@ const MeetingsPage = () => {
                         </p>
                       </div>
                     ) : (
-                      scheduledMeetings.map((meeting) => (
+                      scheduledMeetings.map((meeting : any) => (
                         <Card key={meeting.id} className="overflow-hidden">
                           <CardContent className="p-0">
                             <div className="p-3 sm:p-4">

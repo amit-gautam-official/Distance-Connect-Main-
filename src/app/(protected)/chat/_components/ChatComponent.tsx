@@ -165,8 +165,37 @@ export default function ChatCompo() {
   
   const createChatRoomMutation = api.chatRoom.createChatRoomByMentorId.useMutation({
     onSuccess: (data) => {
-      setSelectedChatRoom(data);
-      setChatRooms((prevRooms) => [...prevRooms, data]);
+      if ('mentor' in data && 'student' in data) {
+        setSelectedChatRoom(data as Contact);
+        setChatRooms((prevRooms) => [...prevRooms, data as Contact]);
+      } else {
+        const transformedData: Contact = {
+          id: data.id,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+          lastMessage: data.lastMessage,
+          mentorUnreadCount: data.mentorUnreadCount,
+          studentUnreadCount: data.studentUnreadCount,
+          mentor: {
+            id: data.mentorUserId,
+            mentorName: null,
+            user: {
+              image: null,
+              name: null
+            }
+          },
+          student: {
+            id: data.studentUserId,
+            studentName: null,
+            user: {
+              image: null,
+              name: null
+            }
+          }
+        };
+        setSelectedChatRoom(transformedData);
+        setChatRooms((prevRooms) => [...prevRooms, transformedData]);
+      }
     },
   });
 

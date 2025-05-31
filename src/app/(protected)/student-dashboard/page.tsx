@@ -17,7 +17,7 @@ const StudentDashboardPage = async () => {
       return student?.scheduledMeetings.filter(
         (item) =>
           Number(item?.formatedTimeStamp) >= Number(currentTimestamp) &&
-          !item?.completed,
+          !item?.completed && item.paymentStatus === true,
       );
     } else if (type === "completed") {
       return student?.scheduledMeetings.filter((item) => item?.completed);

@@ -12,6 +12,7 @@ import { chatRoomRouter } from "./routers/chatRoom";
 import { fileRouter } from "./routers/file";
 import { adminRouter } from "./routers/admin";
 import { razorpayOrderRouter } from "./routers/razorpayOrder";
+import { workshopRouter } from "./routers/workshop";
 
 /**
  * This is the primary router for your server.
@@ -31,8 +32,8 @@ export const appRouter = createTRPCRouter({
   chatRoom : chatRoomRouter,
   file: fileRouter,
   admin : adminRouter,
-  razorpayOrder: razorpayOrderRouter
-  
+  razorpayOrder: razorpayOrderRouter,
+  workshop: workshopRouter
 });
 
 // export type definition of API

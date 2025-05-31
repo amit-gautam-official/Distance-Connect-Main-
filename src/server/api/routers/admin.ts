@@ -4,8 +4,6 @@ import { createTRPCRouter, adminProcedure } from "@/server/api/trpc";
 
 export const adminRouter = createTRPCRouter({
 
-
-
   updateFromAdmin: adminProcedure
   .input(z.object({
     userId: z.string(),
@@ -72,6 +70,79 @@ export const adminRouter = createTRPCRouter({
 
 
 
+  getMeetingLogs: adminProcedure
+  .input(z.object({
+    date: z.date().optional(),
+    status: z.enum(['paid', 'pending']).optional(),
+  }))
+  .query(async ({ ctx, input }) => {
+    // Build the where clause based on input filters
+    const where: any = {};
     
-  })
-
+    if (input.date) {
+      where.selectedDate = input.date;
+    }
+    
+    if (input.status === 'paid') {
+      where.paymentStatus = true;
+    } else if (input.status === 'pending') {
+      where.paymentStatus = false;
+    }
+    
+    // Get all scheduled meetings with their details
+    const meetings = await ctx.db.scheduledMeetings.findMany({
+      where ,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        student: {
+          select: {
+            id: true, // Include student database ID
+            studentName: true,
+            userId: true, // This is the reference to the User table
+            hasUsedFreeSession: true,
+            scheduledMeetings: {
+              where : {
+                paymentStatus : true
+              },
+              orderBy: {
+                createdAt: 'asc'
+              },
+              take: 2,
+              select: {
+                id: true,
+                createdAt: true
+              }
+            }
+          },
+        },
+        mentor: {
+          select: {
+            id: true, // Include mentor database ID
+            mentorName: true,
+            userId: true, // This is the reference to the User table
+          },
+        },
+      },
+    });
+    
+    // Process the meetings to determine if each is a first session
+    return meetings.map(meeting => {
+      // Check if this is the student's first meeting
+      const isFirstSession = meeting.student?.scheduledMeetings?.[0]?.id === meeting.id;
+      
+      // Remove the scheduledMeetings array from the response to keep it clean
+      const { student, ...rest } = meeting;
+      const { scheduledMeetings, ...studentRest } = student;
+      
+      return {
+        ...rest,
+        student: studentRest,
+        studentId: student.id, // Add studentId to the top level
+        mentorId: meeting.mentor.id, // Add mentorId to the top level
+        isFirstSession
+      };
+    });
+  }),
+})

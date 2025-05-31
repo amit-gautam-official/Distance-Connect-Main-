@@ -56,6 +56,7 @@ const formSchema = z.object({
   pinCode: z.string().min(2, "Pincode is required"),
   state: z.string().min(2, "State is required"),
   role: z.string().min(2, "Role is required"),
+  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
   interstFields: z
     .array(z.string())
     .min(1, "Please select at least one hiring field"),
@@ -93,10 +94,11 @@ export default function HighSchoolForm({
       firstName: user.name.split(" ")[0] || "",
       lastName: user.name.split(" ")[1] || "",
       institutionName: "",
-      pinCode: "",
+      pinCode: "111111",
       state: "",
       role: "STUDENT",
       interstFields: [],
+      phoneNumber:  "",
     },
   });
 
@@ -128,7 +130,7 @@ export default function HighSchoolForm({
       username: input.username,
       studentRole: studentRole,
       institutionName: input.institutionName,
-      pinCode: Number(input.pinCode),
+      pinCode: Number(input.pinCode) || 111111,
       state: input.state,
       interestFields: input.interstFields,
       companyName: "",
@@ -138,6 +140,7 @@ export default function HighSchoolForm({
       courseSpecialization: "",
       role: role,
       isRegistered: true,
+      phoneNumber: input.phoneNumber,
       name: input.firstName + " " + input.lastName,
     };
 
@@ -273,17 +276,18 @@ export default function HighSchoolForm({
 
               <FormField
                 control={form.control}
-                name="pinCode"
+                name="phoneNumber"
                 render={({ field }) => (
                   <FormItem className="relative flex flex-col">
                     <FormLabel className="absolute left-[10px] top-[0px] bg-white px-1 font-inter text-[14px] font-normal leading-[16px] text-[#8A8A8A] peer-focus:text-black">
-                      Pin Code
+                      Phone Number
                     </FormLabel>
                     <FormControl className="floating-input peer w-[300px] text-[#8A8A8A]">
                       <Input
                         className="remove"
-                        type="number"
+                        type="text"
                         placeholder=""
+                        pattern="[0-9]{10}"
                         {...field}
                       />
                     </FormControl>

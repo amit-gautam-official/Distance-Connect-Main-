@@ -51,8 +51,8 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
   const createMeetingEvent = api.meetingEvent.createMeetingEvent.useMutation({
     onSuccess: () => {
       toast("New Meeting Event Created!");
-      router.push("/mentor-dashboard/services");
       setLoading(false);
+      router.push("/mentor-dashboard/services");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -88,8 +88,11 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
 
     });
 
-    router.push("/mentor-dashboard/services");
+
     setLoading(false);
+    router.push("/mentor-dashboard/services");
+
+
   };
 
   return (

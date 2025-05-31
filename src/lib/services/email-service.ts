@@ -9,7 +9,7 @@ export class EmailService {
   constructor() {
     // Get environment variables
     const host = process.env.EMAIL_HOST || 'smtp.gmail.com';
-    const port = parseInt(process.env.EMAIL_PORT || '587');
+    const port = 587;
     const user = process.env.EMAIL_USER || '';
     const pass = process.env.EMAIL_PASSWORD || '';
     this.fromEmail = process.env.EMAIL_FROM || 'support@distanceconnect.com';
@@ -18,7 +18,7 @@ export class EmailService {
     this.transporter = createTransport({
       host,
       port,
-      secure: port === 465, // true for 465, false for other ports
+      secure: false, // true for 465, false for other ports
       auth: {
         user,
         pass,

@@ -29,11 +29,11 @@ const UserSettings = () => {
   return (
     <Tabs defaultValue="profile" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="profile" className="flex items-center gap-2">
+        <TabsTrigger id="profile-settings" value="profile" className="flex items-center gap-2">
           <User className="h-4 w-4" />
           Profile Settings
         </TabsTrigger>
-        <TabsTrigger value="availability" className="flex items-center gap-2">
+        <TabsTrigger id="availability" value="availability" className="flex items-center gap-2">
           <Calendar className="h-4 w-4" />
           Availability
         </TabsTrigger>

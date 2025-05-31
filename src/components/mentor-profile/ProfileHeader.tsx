@@ -9,6 +9,7 @@ import { AvatarModal } from "./Modal";
 
 interface ProfileHeaderProps {
   mentor: {
+    username: string;
     profileBanner: string;
     mentorName: string;
     jobTitle: string;
@@ -71,6 +72,7 @@ export function ProfileHeader({
               {mentor.mentorName?.charAt(0) || "M"}
             </AvatarFallback>
           </Avatar>
+            
         </div>
 
         {/* Avatar Modal */}
@@ -86,8 +88,11 @@ export function ProfileHeader({
           <div className="flex flex-wrap items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                {mentor.mentorName}
+                {mentor.mentorName}  <span className=" bg-white px-2 py-1 text-xs text-gray-600 rounded-full shadow-sm">
+              @{mentor?.username}
+            </span>
               </h1>
+              
               <p className="text-gray-700">{mentor.jobTitle}</p>
               { mentor.companyEmailVerified ?
                 <p className="font-medium text-blue-600">
@@ -95,6 +100,7 @@ export function ProfileHeader({
               </p> : <p className="font-medium text-blue-600">
                 <span className="text-red-500">Not Verified</span> @{mentor.currentCompany}
               </p>}
+             
             </div>
             <div className="mt-2 flex items-center space-x-2 md:mt-0">
               <Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
@@ -127,6 +133,8 @@ export function ProfileHeader({
           </div>
 
           <p className="mt-6 rounded-lg border border-gray-100 bg-gray-50 p-4 text-gray-600">
+           
+            <br/>
             <span className="font-medium text-gray-800">About Me: </span>
             {mentor?.bio || "No bio available."}
           </p>

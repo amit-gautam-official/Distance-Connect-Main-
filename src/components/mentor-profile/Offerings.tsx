@@ -44,8 +44,12 @@ export function Offerings({ offerings }: OfferingsProps) {
         {filteredOfferings.map((offering) => (
           <div
             key={offering.id}
-            className="overflow-hidden rounded-xl border border-gray-200 bg-gradient-to-br from-green-50 to-green-100/30 shadow-sm transition-all hover:shadow-md"
+            className="relative overflow-hidden rounded-xl border border-gray-200 bg-gradient-to-br from-green-50 to-green-100/30 shadow-sm transition-all hover:shadow-md"
           >
+            {/* Top-right badge */}
+            <div className="absolute top-4 right-4 z-10">
+              <Badge className="bg-green-100 text-green-800 font-medium px-3 py-1 rounded-full text-xs shadow">First Session Free</Badge>
+            </div>
             <div className="p-6">
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center">
@@ -56,6 +60,7 @@ export function Offerings({ offerings }: OfferingsProps) {
                 </div>
                 
               </div>
+              
               <h3 className="mb-2 text-xl font-semibold text-gray-800">
                 {offering.title}
               </h3>

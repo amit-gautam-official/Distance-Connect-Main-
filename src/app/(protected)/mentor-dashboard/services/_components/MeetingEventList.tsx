@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Clock, Copy, Pen, Settings, Trash } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -43,12 +43,11 @@ function MeetingEventList() {
   });
 
   const { data, isError, isLoading, refetch } =
-    api.meetingEvent.getMeetingEventList.useQuery(undefined, {
-      // Reduce retries to avoid rate limit issues
-      retry: 1,
-      // Increase staleTime to reduce refetches
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    });
+    api.meetingEvent.getMeetingEventList.useQuery();
+
+  useEffect(() => {
+    refetch();
+  }, []);
 
   const deleteMeetingEvent = api.meetingEvent.deleteMeetingEvent.useMutation({
     onSuccess: () => {

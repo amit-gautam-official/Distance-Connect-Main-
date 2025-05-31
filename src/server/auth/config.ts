@@ -59,7 +59,7 @@ export const authConfig = {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return null;
     
-        console.log("User found", user);
+        // console.log("User found", user);
         return {
           id: user.id,
           name: user.name,

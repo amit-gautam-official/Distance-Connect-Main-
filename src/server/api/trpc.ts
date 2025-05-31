@@ -88,7 +88,7 @@ export const createTRPCRouter = t.router;
 const isAdmin = t.middleware(async ({ ctx, next }) => {
   // Authenticated user
   const user = ctx.user;
-  console.log("User session:", user); 
+  // console.log("User session:", user); 
   if (!user) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
@@ -128,7 +128,7 @@ const isAdmin = t.middleware(async ({ ctx, next }) => {
 const rateLimiter = t.middleware(async ({ ctx, next }) => {
   // Authenticated user
   const user = ctx.user;
-  console.log("User session:", user); 
+  // console.log("User session:", user); 
   if (!user) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',

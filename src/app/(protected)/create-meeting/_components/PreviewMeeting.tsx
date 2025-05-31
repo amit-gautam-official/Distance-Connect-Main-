@@ -125,9 +125,6 @@ function PreviewMeeting({ formValue }: { formValue: FormValue }) {
     setTimeSlots(availableSlots);
   };
 
-  const handleTimeSlotSelect = (time: string) => {
-    setSelectedTimeSlot(time);
-  };
 
   return (
     <div className="relative m-2 flex min-h-[90vh] flex-col border-t-8 p-3 py-6 shadow-lg md:m-5 md:min-h-0 md:p-5 md:py-10">
@@ -220,7 +217,7 @@ function PreviewMeeting({ formValue }: { formValue: FormValue }) {
                         ? "bg-primary text-white"
                         : "bg-transparent text-primary"
                     }`}
-                    onClick={() => handleTimeSlotSelect(time)}
+                  
                   >
                     {time}
                   </button>
@@ -240,14 +237,7 @@ function PreviewMeeting({ formValue }: { formValue: FormValue }) {
       {/* Spacer for mobile to push content up from fixed button */}
       {selectedTimeSlot && <div className="pb-20 md:mt-4 md:pb-0"></div>}
 
-      {/* Confirm Button */}
-      {selectedTimeSlot && (
-        <div className="fixed bottom-0 left-0 right-0 border-t bg-white p-4 shadow-lg md:static md:mt-6 md:flex md:justify-end md:border-0 md:bg-transparent md:p-0 md:shadow-none">
-          <Button className="w-full bg-primary hover:bg-primary/90 md:w-auto">
-            Confirm {selectedTimeSlot}
-          </Button>
-        </div>
-      )}
+      
     </div>
   );
 }

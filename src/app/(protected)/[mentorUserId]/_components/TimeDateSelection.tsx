@@ -2,8 +2,29 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import React from "react";
 import { type  ScheduledMeetings } from "@prisma/client";
+// Types for the new availability structure
+type TimeSlot = {
+  startTime: string;
+  endTime: string;
+};
 
-
+type DayAvailability = {
+  enabled: boolean;
+  timeSlots: TimeSlot[];
+};
+type DaysAvailableType = {
+  Sunday: DayAvailability;
+  Monday: DayAvailability;
+  Tuesday: DayAvailability;
+  Wednesday: DayAvailability;
+  Thursday: DayAvailability;
+  Friday: DayAvailability;
+  Saturday: DayAvailability;
+};
+type mentorAvailability = {
+    daysAvailable: DaysAvailableType;
+    bufferTime: number;
+}
 
 interface TimeDateSelectionProps {
   date: Date;
@@ -13,6 +34,7 @@ interface TimeDateSelectionProps {
   enableTimeSlot: boolean;
   selectedTime: string;
   prevBooking: ScheduledMeetings[];
+  mentorAvailability: mentorAvailability;
 }
 
 function TimeDateSelection({
@@ -23,6 +45,7 @@ function TimeDateSelection({
   enableTimeSlot,
   selectedTime,
   prevBooking,
+  mentorAvailability
 }: TimeDateSelectionProps) {
  
   // Converts "09:00 AM" + date to a Date object
@@ -64,10 +87,10 @@ const checkTimeSlot = (time: string) => {
         <div className="touch-manipulation">
           <Calendar
             mode="single"
-            selected={date}
+            selected={date} //select the first mentor availability day from now
             onSelect={(d) => handleDateChange(d!)}
             className="mx-auto mt-1 w-full max-w-[350px] rounded-md border md:mx-0"
-            disabled={(date) => date < new Date()}
+            disabled={(date) => date < new Date() || !mentorAvailability?.daysAvailable[date.toLocaleString('en-US', { weekday: 'long' }) as keyof DaysAvailableType]?.enabled}
             initialFocus
           />
         </div>
@@ -89,20 +112,29 @@ const checkTimeSlot = (time: string) => {
             const isBooked = checkTimeSlot(time);
             const isSelected = time === selectedTime;
 
+            // Check if this time slot is in the past (for today)
+            let isPast = false;
+            const now = new Date();
+            const slotDateTime = getDateTimeFromDateAndTime(date, time);
+            if (
+              date.toDateString() === now.toDateString() &&
+              slotDateTime < now
+            ) {
+              isPast = true;
+            }
             return (
               <Button
                 key={index}
-                disabled={!enableTimeSlot || isBooked}
+                disabled={!enableTimeSlot || isBooked || isPast}
                 onClick={() => setSelectedTime(time)}
-                className={`  ${isSelected ? "bg-primary text-white" : "border-primary bg-white text-primary"} ${isBooked ? "opacity-50" : "hover:opacity-90"} h-auto min-h-[44px] py-3 px-1 text-xs transition-all active:scale-95`}
+                className={`  ${isSelected ? "bg-primary text-white" : "border-primary bg-white text-primary"} ${(isBooked || isPast) ? "opacity-50" : "hover:opacity-90"} h-auto min-h-[44px] py-3 px-1 text-xs transition-all active:scale-95`}
                 variant="outline"
                 role="radio"
                 aria-checked={isSelected}
                 aria-label={`Select time ${time}`}
-                
               >
                 {time}
-                {isBooked && <span className="sr-only"> (already booked)</span>}
+                {(isBooked || isPast) && <span className="sr-only"> ({isBooked ? "already booked" : "past time"})</span>}
               </Button>
             );
           })}

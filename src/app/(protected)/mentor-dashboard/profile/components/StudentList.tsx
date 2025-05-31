@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation";
 interface Student {
   id: string;
   name: string;
+  username : string;
   role: string;
   instituteName: string;
   expertise: string[];
@@ -191,11 +192,15 @@ const StudentList = ({ studentsData }: { studentsData: Student[] }) => {
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={student.image} alt={student.name} />
                       <AvatarFallback>
-                        {student.name.charAt(0).toUpperCase()}
+                        {student.name.charAt(0).toUpperCase()} 
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="font-medium">{student.name}</h3>
+                      <h3 className="font-medium">{student.name}
+                        <span className=" bg-white px-2 py-1 text-xs text-gray-600 rounded-full shadow-sm">
+              @{student?.username}
+            </span>
+                      </h3>
                       <p className="text-sm text-gray-500">{student.role}</p>
                       <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
                         <GraduationCap className="h-4 w-4" />

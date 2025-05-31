@@ -74,7 +74,7 @@ export default function HelpSupportPage() {
     <div className="container mx-auto max-w-5xl px-4 py-8">
       {/* Contact Form Section */}
       <div className="mx-auto mb-12 max-w-3xl rounded-lg bg-yellow-50 p-6">
-        <h2 className="mb-4 text-xl font-semibold">Send us a Message</h2>
+        <h2 className="mb-4 text-xl font-semibold">Create a Ticket</h2>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
@@ -89,7 +89,7 @@ export default function HelpSupportPage() {
             </div>
             <div>
               <Input
-                placeholder="Username"
+                placeholder="Student Username (optional)"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full"

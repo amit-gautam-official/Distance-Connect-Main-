@@ -407,28 +407,63 @@ const MentorsPagePublic = () => {
       </div>
 
       {/* Mentors Grid */}
-      <div className="m grid w-[80%] grid-cols-1 gap-6 md:grid-cols-1 lg:grid-cols-1">
+      <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {isLoading
-          ? // Loading skeletons
-            Array(6)
-              .fill(0)
-              .map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <CardHeader className="space-y-4">
-                    <Skeleton className="h-12 w-12 rounded-full" />
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-2/3" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
+          ? Array(8).fill(0).map((_, i) => (
+            <Card key={i} className="group flex h-full flex-col overflow-hidden bg-white transition-all">
+              {/* Badge */}
+              <div className="absolute right-0 top-0">
+                <Skeleton className="m-2 h-6 w-24 rounded-full" />
+              </div>
+              {/* Avatar and Basic Info */}
+              <div className="relative flex flex-col items-center p-6 pb-4">
+                <Skeleton className="h-20 w-20 mb-4 rounded-full border-2 border-white shadow" />
+                <Skeleton className="mb-1 h-6 w-32 rounded" /> {/* Name */}
+                <div className="mb-2 flex flex-col items-center gap-1 w-full">
+                  <Skeleton className="h-4 w-24 mb-1" /> {/* Job title */}
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-20" /> {/* Company */}
+                    <Skeleton className="h-4 w-10" /> {/* YOE */}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground w-full justify-center">
+                  <Skeleton className="h-4 w-4 rounded" /> {/* Building Icon */}
+                  <Skeleton className="h-4 w-24 rounded" /> {/* Company Name */}
+                  <Skeleton className="h-4 w-12 rounded" /> {/* Verified badge */}
+                </div>
+                <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground w-full justify-center">
+                  <Skeleton className="h-4 w-4 rounded" /> {/* MapPin Icon */}
+                  <Skeleton className="h-4 w-16 rounded" /> {/* Location */}
+                </div>
+              </div>
+              {/* Bio Section */}
+              <div className="px-6 pb-4">
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+              {/* Skills */}
+              <div className="flex-1 px-6 pb-4">
+                <Skeleton className="mb-2 h-4 w-16" /> {/* Skills label */}
+                <div className="flex flex-wrap gap-1.5">
+                  <Skeleton className="h-6 w-16 rounded-full" />
+                  <Skeleton className="h-6 w-14 rounded-full" />
+                  <Skeleton className="h-6 w-12 rounded-full" />
+                  <Skeleton className="h-6 w-10 rounded-full" />
+                </div>
+              </div>
+              {/* Footer */}
+              <div className="border-t border-border bg-muted/10 p-4 mt-auto">
+                <div className="flex items-center justify-between gap-2">
+                  <Skeleton className="h-9 w-24 rounded" />
+                  <Skeleton className="h-9 w-24 rounded" />
+                </div>
+              </div>
+            </Card>
+          ))
           : filteredMentors?.map((mentor) => (
+            <>
               <MentorCard key={mentor.userId} mentor={mentor!} />
+            </>
             ))}
       </div>
     </div>

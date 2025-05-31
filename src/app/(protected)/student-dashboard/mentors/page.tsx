@@ -400,7 +400,7 @@ const MentorsPage = () => {
       </div>
 
       {/* Mentors Grid */}
-      <div className="grid w-full grid-cols-1 gap-4 md:gap-6 md:mb-0 mb-20">
+      <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:mb-0 mb-20">
         {isLoading
           ? // Loading skeletons
             Array(6)
