@@ -43,6 +43,7 @@ const ProfilePage = () => {
     jobTitle: "",
     experience: "",
     industry: "",
+    phoneNumber: "",
     studentRole: "",
   });
 
@@ -64,6 +65,7 @@ const ProfilePage = () => {
         experience: student.experience || "",
         industry: student.industry || "",
         studentRole: student.studentRole || "",
+        phoneNumber: student.phoneNumber || "",
       });
     }
   }, [student]);
@@ -101,6 +103,7 @@ const ProfilePage = () => {
 
   const profileHeaderData = {
     name: profileData.name || student?.studentName || "",
+    PhoneNumber: student?.phoneNumber || "",
     email: student?.user.email || "",
     image: currentAvatarUrl || student?.user.image || "",
     role: student?.user.role || "",

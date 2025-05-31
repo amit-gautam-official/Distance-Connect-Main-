@@ -148,11 +148,7 @@ export default function WorkshopList({
             ? "Explore available workshops and start your learning journey!"
             : "Check back later for new and exciting workshops."}
         </p>
-        {!isEnrolled && (
-          <Button onClick={() => router.push('/student-dashboard/workshops')} className="mt-4">
-            Explore All Workshops
-          </Button>
-        )}
+      
       </div>
     );
   }

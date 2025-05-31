@@ -49,6 +49,12 @@ export default function StudentWorkshopsPage() {
     refetch: refetchEnrolled
   } = api.workshop.getEnrolledWorkshops.useQuery();
 
+
+
+
+
+
+
   return (
     <div className="container mx-auto pb-16 md:pb-0 px-2 md:px-4 sm:px-6 py-4 sm:py-6">
       <div className="mb-8">

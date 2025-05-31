@@ -13,6 +13,7 @@ import {
   CircleDollarSign,
   Clock,
   FileText,
+  Phone,
 } from "lucide-react";
 import { api } from "@/trpc/react";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +30,7 @@ interface ProfileHeaderProps {
   instituteName: string;
   // Additional optional fields
   pinCode?: string;
+  phoneNumber?: string;
   courseSpecialization?: string;
   companyName?: string;
   jobTitle?: string;
@@ -85,7 +87,13 @@ const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <MapPin size={16} className="text-gray-400" />
           <span>
-            {user?.state}, India {user?.pinCode && `- ${user.pinCode}`}
+            {user?.state}, India 
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <Phone size={16} className="text-gray-400" />
+          <span>
+            {user?.phoneNumber}
           </span>
         </div>
 

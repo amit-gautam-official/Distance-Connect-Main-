@@ -13,6 +13,7 @@ import "driver.js/dist/driver.css";
 
 interface MentorData {
   id: string;
+  mentorPhoneNumber: string;
   mentorName: string;
   currentCompany: string;
   jobTitle: string;
@@ -61,6 +62,7 @@ const ProfilePage = () => {
     education: [] as JSON[],
     wholeExperience: [] as JSON[],
     companyEmail: "",
+    phoneNumber: "",
   });
 
   // Initialize data from mentor data when it loads
@@ -83,6 +85,7 @@ const ProfilePage = () => {
         education: mentor.education || [] as JSON[],
         wholeExperience: mentor.wholeExperience || [] as JSON[],
         companyEmail: mentor.companyEmail || "",
+        phoneNumber: mentor.mentorPhoneNumber || "",
       });
     }
   }, [mentor]);
@@ -149,6 +152,7 @@ const ProfilePage = () => {
   }
 
   const profileHeaderData = {
+    phoneNumber: mentor?.mentorPhoneNumber || "",
     name: profileData.name || mentor?.user?.name || "",
     email: mentor?.user?.email || "",
     image: currentAvatarUrl || mentor?.user?.image || "",

@@ -49,7 +49,7 @@ model Account {
   id_token          String? @db.String
   session_state     String?
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -81,13 +81,13 @@ enum SrudentRole {
 // 🎓 Student Model
 model Student {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  user        User    @relation(fields: [userId], references: [id])
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String  @unique @db.ObjectId
   linkedinUrl String?
 
   studentRole SrudentRole?
   studentName String?
-  phoneNumber String?
+  phoneNumber String?  @default("XXXXXXXXXX")
 
   //High School
   institutionName String?
@@ -117,7 +117,7 @@ model Student {
 // 🧑‍🏫 Mentor Model
 model Mentor {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  user        User    @relation(fields: [userId], references: [id])
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String  @unique @db.ObjectId
   linkedinUrl String?
 
@@ -144,7 +144,7 @@ model Mentor {
   companyEmailVerified Boolean  @default(false)
   verified             Boolean  @default(false)
   messageFromAdmin     String?
-  mentorPhoneNumber    String?
+  mentorPhoneNumber    String? @default("XXXXXXXXXX")
 
   meetingEvents     MeetingEvent[]
   availability      Availability?
@@ -167,10 +167,10 @@ model RazorpayOrder {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   scheduledMeetingId String?            @db.ObjectId
-  scheduledMeeting   ScheduledMeetings? @relation(fields: [scheduledMeetingId], references: [id])
+  scheduledMeeting   ScheduledMeetings? @relation(fields: [scheduledMeetingId], references: [id], onDelete: SetNull)
 
   workshopEnrollmentId String?             @db.ObjectId
-  workshopEnrollment   WorkshopEnrollment? @relation(fields: [workshopEnrollmentId], references: [id])
+  workshopEnrollment   WorkshopEnrollment? @relation(fields: [workshopEnrollmentId], references: [id], onDelete: SetNull)
 
   status            OrderStatus @default(pending)
   razorpayOrderId   String      @unique
@@ -187,7 +187,7 @@ model RazorpayOrder {
 // 🚀 Startup Model
 model Startup {
   id     String @id @default(auto()) @map("_id") @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @unique @db.ObjectId
 
   comapanyName   String?
@@ -205,7 +205,7 @@ model Startup {
 model MeetingEvent {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  mentor       Mentor @relation(fields: [mentorUserId], references: [userId])
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId], onDelete: Cascade)
   mentorUserId String @db.ObjectId
 
   eventName   String
@@ -235,10 +235,10 @@ model Availability {
 model ScheduledMeetings {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  mentor       Mentor @relation(fields: [mentorUserId], references: [userId])
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId], onDelete: Cascade)
   mentorUserId String @db.ObjectId
 
-  student       Student @relation(fields: [studentUserId], references: [userId])
+  student       Student @relation(fields: [studentUserId], references: [userId], onDelete: Cascade)
   studentUserId String  @db.ObjectId
 
   feedback           String?
@@ -266,10 +266,10 @@ model ScheduledMeetings {
 model ChatRoom {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  mentor       Mentor @relation(fields: [mentorUserId], references: [userId])
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId], onDelete: Cascade)
   mentorUserId String @db.ObjectId
 
-  student       Student @relation(fields: [studentUserId], references: [userId])
+  student       Student @relation(fields: [studentUserId], references: [userId], onDelete: Cascade)
   studentUserId String  @db.ObjectId
 
   lastMessage        String
@@ -290,10 +290,10 @@ model chatMessage {
   senderRole String
   message    String?
 
-  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
   chatRoomId String   @db.ObjectId
 
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @db.ObjectId
 
   imageName String?
@@ -311,7 +311,7 @@ model chatMessage {
 // 📚 Workshop Model
 model Workshop {
   id           String @id @default(auto()) @map("_id") @db.ObjectId
-  mentor       Mentor @relation(fields: [mentorUserId], references: [userId])
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId], onDelete: Cascade)
   mentorUserId String @db.ObjectId
 
   name                 String
@@ -337,11 +337,11 @@ model Workshop {
 // 📝 Workshop Enrollment Model
 model WorkshopEnrollment {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  workshop   Workshop @relation(fields: [workshopId], references: [id])
+  workshop   Workshop @relation(fields: [workshopId], references: [id], onDelete: Cascade)
   workshopId String   @db.ObjectId
   studentGmailId String?
 
-  student       Student @relation(fields: [studentUserId], references: [userId])
+  student       Student @relation(fields: [studentUserId], references: [userId], onDelete: Cascade)
   studentUserId String  @db.ObjectId
 
   paymentStatus Boolean         @default(false)

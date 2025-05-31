@@ -79,7 +79,7 @@ export default function WorkshopsPage() {
           </p>
           <Button
             onClick={() => setIsCreateModalOpen(true)}
-            className="mt-4 flex items-center justify-center gap-2 m-auto mt-6"
+            className=" flex items-center justify-center gap-2 m-auto mt-6"
           >
             <Plus className="h-4 w-4" />
             Create Workshop
