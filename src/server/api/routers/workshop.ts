@@ -880,7 +880,7 @@ export const workshopRouter = createTRPCRouter({
       }
       
       // Determine if the session is free
-      const courseDayKey = `day${dayIndexToUse}`;
+      const courseDayKey = `day ${dayIndexToUse}`;
       const courseDetailsRecord = workshop.courseDetails as Record<string, { description: string, isFreeSession: boolean }> | null | undefined;
       const dayCourseDetail = courseDetailsRecord && courseDetailsRecord[courseDayKey] ? courseDetailsRecord[courseDayKey] : null;
       const isFreeSession = dayCourseDetail ? dayCourseDetail.isFreeSession : false;
