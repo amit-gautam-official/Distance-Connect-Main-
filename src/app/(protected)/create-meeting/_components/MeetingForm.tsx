@@ -27,7 +27,7 @@ import { api } from "@/trpc/react";
 function MeetingForm({ setFormValue }: { setFormValue: Function }) {
   const [eventName, setEventName] = useState<string>();
   const [duration, setDuration] = useState<Number>(30);
-  const [email, setEmail] = useState<string>("example@gmail.com");
+  const [email, setEmail] = useState<string>("");
   const [description, setDescription] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [customEventName, setCustomEventName] = useState<boolean>(false);
