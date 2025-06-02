@@ -292,7 +292,7 @@ const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
       {/* Skills/Interests */}
       <div className="mt-6">
         <h3 className="mb-2 text-sm font-medium text-gray-700">
-          Hiring Fields
+          Skills
         </h3>
         <div className="flex flex-wrap gap-2">
           {user?.hiringFields.map((field) => (

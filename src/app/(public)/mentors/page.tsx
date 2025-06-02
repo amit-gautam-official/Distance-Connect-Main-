@@ -347,9 +347,9 @@ const MentorsPagePublic = () => {
                   </div>
                 </div>
 
-                {/* Hiring Fields */}
+                {/* Skills */}
                 <div className="space-y-4">
-                  <Label>Hiring Fields</Label>
+                  <Label>Skills</Label>
                   <div className="grid grid-cols-2 gap-2">
                     {Array.from(uniqueValues?.hiringFields || []).map(
                       (field) => (

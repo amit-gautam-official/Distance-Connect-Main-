@@ -387,42 +387,40 @@ export const workshopRouter = createTRPCRouter({
       const workshops = await ctx.db.workshop.findMany({
         take: limit + 1, // get an extra item to see if there's a next page
         cursor: cursor ? { id: cursor } : undefined,
-        where: {
-          // Add any conditions for public workshops, e.g., published: true if you add such a field
+        orderBy: {
+          createdAt: 'desc', // Or any other preferred order
         },
-        select: {
+        select:{
           id: true,
           name: true,
-          description: true, // Consider truncating this on the client for list view
+          description: true,
           bannerImage: true,
+          introductoryVideoUrl: true,
           price: true,
           numberOfDays: true,
           scheduleType: true,
-          schedule: true,
           startDate: true,
-          introductoryVideoUrl: true,
-          courseDetails: true,
+          schedule: true, // This is JSON, client can parse
+          learningOutcomes: true,
+          courseDetails: true, // This is JSON, client can parse
           otherDetails: true,
-          
-          learningOutcomes: true, // Consider taking only a few for list view
           mentor: {
             select: {
               user: {
                 select: {
+                  id: true, // For linking to mentor's public profile if you have one
                   name: true,
                   image: true,
                 },
               },
+              bio: true,
+              jobTitle: true,
+              currentCompany: true,
+              skills: true, // Added skills
+              hiringFields: true, // Added hiring fields
             },
           },
-          _count: {
-            select: { enrollments: true },
-          },
-          createdAt: true, // For sorting or display
-        },
-        orderBy: {
-          createdAt: 'desc', // Or any other preferred order
-        },
+        }
       });
 
       let nextCursor: typeof cursor | undefined = undefined;
@@ -469,6 +467,7 @@ export const workshopRouter = createTRPCRouter({
               jobTitle: true,
               currentCompany: true,
               skills: true, // Added skills
+              hiringFields: true, // Added hiring fields
             },
           },
           _count: {

@@ -125,6 +125,12 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
                   >
                     Mentors
                   </Link>
+                   <Link
+                    href="/workshops"
+                    className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
+                  >
+                      Workshops
+                  </Link>
                   <div className="relative mt-2 w-full">
                     <details className="group [&_summary::-webkit-details-marker]:hidden">
                       <summary className="flex cursor-pointer items-center justify-between text-[18px] font-normal leading-[18px] text-[#5D5A88]">
@@ -154,6 +160,7 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
                         >
                           Students
                         </Link>
+
                         <Link
                           href="/solutions/mentor"
                           className="block text-[16px] font-normal text-[#5D5A88]"
@@ -164,6 +171,7 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
                       </div>
                     </details>
                   </div>
+                  
                   <Link
                     href="/blog"
                     className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
@@ -255,6 +263,13 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
+           <NavigationMenuItem>
+                <Link href="/workshops" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Workshops
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
               <NavigationMenuItem className="">
                 <NavigationMenuTrigger>
                   <Link href="/solutions/student" className="cursor-pointer ">
@@ -291,6 +306,7 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
+
               <NavigationMenuItem>
                 <NavigationMenuTrigger>
                   <Link href="/blog" className="cursor-pointer">

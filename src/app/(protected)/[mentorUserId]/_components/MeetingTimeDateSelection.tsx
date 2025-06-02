@@ -512,7 +512,7 @@ function MeetingTimeDateSelection({
       {step === 1 ? (
         <div className="p-6">
           <h2 className="mb-4 text-xl font-bold text-gray-900">
-            Select Date and Time
+            Select Date
           </h2>
           <TimeDateSelection
             date={date}
@@ -528,7 +528,7 @@ function MeetingTimeDateSelection({
             <Button
               onClick={() => selectedTime && setStep(2)}
               disabled={!selectedTime}
-              className="bg-primary text-white hover:bg-primary/90"
+              className=" text-white "
             >
               Next
             </Button>

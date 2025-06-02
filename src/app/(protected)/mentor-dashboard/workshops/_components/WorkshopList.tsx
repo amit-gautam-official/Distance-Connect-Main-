@@ -39,7 +39,6 @@ type Workshop = {
   learningOutcomes: string[];
   courseDetails: Record<string, any>;
   otherDetails: string | null;
-  meetUrl: string | null;
   introductoryVideoUrl: string | null;
   createdAt: Date;
   _count?: { enrollments: number };
@@ -66,7 +65,7 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
       toast.success("Workshop deleted successfully");
       onRefresh();
     },
-    onError: (error) => {
+    onError: (error : any) => {
       toast.error(error.message);
     },
   });
@@ -89,7 +88,7 @@ export default function WorkshopList({ workshops, isLoading, onRefresh }: Worksh
     // Get the base URL from the window location
     // In production, you might want to use an environment variable for the domain
     const baseUrl = window.location.origin;
-    const shareUrl = `${baseUrl}/student-dashboard/workshops/${workshopId}`;
+    const shareUrl = `${baseUrl}/workshops/${workshopId}`;
     
     // Copy to clipboard
     navigator.clipboard.writeText(shareUrl)

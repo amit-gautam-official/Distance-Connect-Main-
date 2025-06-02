@@ -6,6 +6,7 @@ import { auth } from "@/server/auth";
 import { db } from "@/server/db";
 import { SessionUser } from "@/types/sessionUser";
 import { SessionProvider } from "next-auth/react";
+import PostLoginRedirect from "@/components/PostLoginRedirect";
 
 export default async function Layout({
   children,
@@ -28,10 +29,12 @@ export default async function Layout({
     redirect("/");
   }
 
+  
+
 
   return (
      <SessionProvider session={session}>
-
+    <PostLoginRedirect/>
     <SidebarProvider>
       <AppSidebar role="student" />
       <main>

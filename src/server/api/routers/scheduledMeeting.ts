@@ -165,7 +165,6 @@ export const scheduledMeetingsRouter = createTRPCRouter({
       const meetings = await ctx.db.scheduledMeetings.findMany({
         where: {
           mentorUserId: ctx.dbUser!.id,
-          paymentStatus : true,
           },
         orderBy: {
           selectedDate: 'asc',
