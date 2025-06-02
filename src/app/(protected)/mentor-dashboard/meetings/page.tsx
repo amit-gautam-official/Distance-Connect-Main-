@@ -425,7 +425,7 @@ const MeetingsPage = () => {
                                 {meeting.statusText}
                               </p>
                               {meeting?.starRating && meeting.status === "completed" &&
-                                meeting?.starRating > 0 && (
+                                meeting?.starRating > 0 && ( 
                                   <div className="mt-2 flex items-center">
                                     <span className="mr-2 text-xs text-gray-500">
                                       Rating:

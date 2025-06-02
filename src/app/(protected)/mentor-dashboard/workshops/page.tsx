@@ -42,25 +42,7 @@ export default function WorkshopsPage() {
   
 
   // Transform the data to ensure schedule property is properly typed
-  const workshops = workshopsData?.map(workshop => {
-    // Properly transform the schedule array to match the expected type
-    const typedSchedule = Array.isArray(workshop.schedule)
-      ? workshop.schedule
-        .filter((item): item is { day: string; time: string } => 
-          item !== null && 
-          typeof item === 'object' && 
-          'day' in item && 
-          typeof item.day === 'string' &&
-          'time' in item && 
-          typeof item.time === 'string')
-      : [];
-      
-    return {
-      ...workshop,
-      schedule: typedSchedule,
-      introductoryVideoUrl: workshop.introductoryVideoUrl || null,
-    };
-  }) as Workshop[] | undefined;
+  const workshops = workshopsData
 
   const handleCreateSuccess = () => {
     setIsCreateModalOpen(false);
