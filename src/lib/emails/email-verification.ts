@@ -109,6 +109,7 @@ export class EmailVerificationService extends EmailService {
     </head>
     <body>
       <div class="container">
+        <img src="https://storage.googleapis.com/dc-public-files/profile-images/logo.jpeg" alt="Distance Connect Logo" style="display: block; margin: 0 auto 20px; width: 150px; height: auto;" />
         <h2>Email Verification</h2>
         <p>Hi ${email},</p>
         <p>Thank you for signing up! Please verify your email address by clicking the button below:</p>
