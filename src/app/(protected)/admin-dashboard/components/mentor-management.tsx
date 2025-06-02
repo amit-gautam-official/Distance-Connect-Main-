@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Search, Download } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -78,10 +78,76 @@ export default function MentorManagement({
     return matchesSearch && matchesVerification;
   });
 
+  const exportToCSV = () => {
+    // Prepare CSV headers
+    const headers = [
+      'Mentor Name',
+      'Username',
+      'Email',
+      'Industry',
+      'Current Company',
+      'LinkedIn URL',
+      'Company Email',
+      'Verified Status',
+      'Company Email Verified',
+      'Mentor Tier',
+      'Price Range',
+      'Tier Reasoning'
+    ];
+
+    // Prepare CSV data
+    const csvData = filteredMentors.map(mentor => [
+      mentor.mentorName || '',
+      mentor.user.username || '',
+      mentor.user.email || '',
+      mentor.industry || '',
+      mentor.currentCompany || '',
+      mentor.linkedinUrl || '',
+      mentor.companyEmail || '',
+      mentor.verified ? 'Verified' : 'Pending',
+      mentor.companyEmailVerified ? 'Yes' : 'No',
+      mentor.mentorTier || '',
+      mentor.mentorSessionPriceRange || '',
+      mentor.tierReasoning || ''
+    ]);
+
+    // Convert to CSV format
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => 
+        row.map(field => 
+          // Escape fields that contain commas, quotes, or newlines
+          typeof field === 'string' && (field.includes(',') || field.includes('"') || field.includes('\n'))
+            ? `"${field.replace(/"/g, '""')}"` 
+            : field
+        ).join(',')
+      )
+    ].join('\n');
+
+    // Create and download the file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `mentors_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <>
       <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center md:mb-6">
         <h2 className="text-xl font-semibold md:text-2xl">Mentor Management</h2>
+        <Button 
+          onClick={exportToCSV}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <Download size={16} />
+          Export to CSV
+        </Button>
       </div>
 
       <div className="mb-4 flex flex-col gap-4 md:mb-6">

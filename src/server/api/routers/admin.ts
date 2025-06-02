@@ -73,7 +73,7 @@ export const adminRouter = createTRPCRouter({
   getMeetingLogs: adminProcedure
   .input(z.object({
     date: z.date().optional(),
-    status: z.enum(['paid', 'pending']).optional(),
+    status: z.enum(['paid', 'failed']).optional(),
   }))
   .query(async ({ ctx, input }) => {
     // Build the where clause based on input filters
@@ -85,7 +85,7 @@ export const adminRouter = createTRPCRouter({
     
     if (input.status === 'paid') {
       where.paymentStatus = true;
-    } else if (input.status === 'pending') {
+    } else if (input.status === 'failed') {
       where.paymentStatus = false;
     }
     
@@ -145,4 +145,20 @@ export const adminRouter = createTRPCRouter({
       };
     });
   }),
+
+getWorkshopLogs : adminProcedure
+  .query(async ({ ctx }) => {
+    return ctx.db.workshop.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        mentor: true,
+        enrollments: {
+          include :{
+            student : true,
+          }
+        },
+      },
+    })})
 })

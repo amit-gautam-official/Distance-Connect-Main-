@@ -70,7 +70,7 @@ export default function MeetingLogs() {
   // Fetch meeting logs from the server
   const { data: meetingLogsData, isLoading } = api.admin.getMeetingLogs.useQuery({
     date: date,
-    status: statusFilter !== "all" ? statusFilter as "paid" | "pending" : undefined
+    status: statusFilter !== "all" ? statusFilter as "paid" | "failed" : undefined
   });
   
   // Safely cast the data to our expected type
@@ -94,7 +94,7 @@ export default function MeetingLogs() {
           log.eventName,
           log.formatedDate,
           log.selectedTime,
-          log.paymentStatus ? "Paid" : "Pending"
+          log.paymentStatus ? "Paid" : "failed"
         ].join(","))
       ].join("\n");
 
@@ -166,7 +166,7 @@ export default function MeetingLogs() {
                 <SelectContent>
                   <SelectItem value="all">All statuses</SelectItem>
                   <SelectItem value="paid">Paid</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="failed">Failed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -224,7 +224,7 @@ export default function MeetingLogs() {
                             ? "bg-green-100 text-green-800" 
                             : "bg-yellow-100 text-yellow-800"
                         }`}>
-                          {log.paymentStatus ? "Paid" : "Pending"}
+                          {log.paymentStatus ? "Paid" : "Failed"}
                         </span>
                       </TableCell>
                     </TableRow>

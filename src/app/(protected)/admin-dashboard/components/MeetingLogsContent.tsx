@@ -74,7 +74,7 @@ export default function MeetingLogsContent() {
   // Fetch meeting logs from the server
   const { data: meetingLogsData, isLoading } = api.admin.getMeetingLogs.useQuery({
     date: date,
-    status: statusFilter !== "all" ? statusFilter as "paid" | "pending" : undefined
+    status: statusFilter !== "all" ? statusFilter as "paid" | "failed" : undefined
   });
   
   // Safely cast the data to our expected type
@@ -242,7 +242,7 @@ export default function MeetingLogsContent() {
                           ? "First Session" 
                           : log.paymentStatus 
                             ? "Paid" 
-                            : "Pending"}
+                            : "Failed"}
                       </span>
                     </TableCell>
                   </TableRow>
