@@ -888,14 +888,22 @@ export const workshopRouter = createTRPCRouter({
       
       // Get the attendees for the meeting
       const attendees = [];
+      console.log(`Generating meeting link for workshop: ${workshop.name}, Day Index: ${dayIndexToUse}, Target Date: ${targetDate.toISOString()}`);
+      console.log(`Is Free Session: ${isFreeSession}`);
+      console.log(`Workshop Enrollments: ${workshop.enrollments.length}`);
+      console.log("attendees before adding:", attendees.length);
       
       // Add enrolled students conditionally
       for (const enrollment of workshop.enrollments) {
+        console.log(`Processing enrollment for student: ${enrollment.studentGmailId}, Payment Status: ${enrollment.paymentStatus}`);
         if (enrollment.studentGmailId) { // Student must have a Gmail ID
+          console.log(`Adding student: ${enrollment.studentGmailId}`);
           if (isFreeSession) { // If the session is free, add the student
+            console.log(`Free session, adding student: ${enrollment.studentGmailId}`);
             attendees.push({ email: enrollment.studentGmailId });
           } else { // If the session is paid
             if (enrollment.paymentStatus === true) { // And student has paid
+              console.log(`Paid session, adding student: ${enrollment.studentGmailId}`);
               attendees.push({ email: enrollment.studentGmailId });
             }
           }
@@ -904,8 +912,10 @@ export const workshopRouter = createTRPCRouter({
       
       // Add the mentor
       if (workshop.mentorGmailId) {
+        console.log(`Adding mentor: ${workshop.mentorGmailId}`);
         attendees.push({ email: workshop.mentorGmailId });
       } else if (workshop.mentorUserId === ctx.dbUser?.id && ctx.dbUser?.email) { // Check if current user is the mentor
+        console.log(`Adding mentor from current user: ${ctx.dbUser.email}`);
         attendees.push({ email: ctx.dbUser.email });
       }
       
@@ -918,11 +928,13 @@ export const workshopRouter = createTRPCRouter({
       }
       
       // Call the meet router to generate a meeting link
+      console.log(`Generating meeting link for ${attendees.length} attendees:`, attendees);
       const result = await generateMeetLink({
         dateTime: targetDate.toISOString(),
         duration: 60, // 1 hour per session
         attendees,
       });
+      console.log(`Generated meeting link: ${result.meetLink}`);
       
       // Get current meetLinks or initialize if null
       const currentMeetLinks = (workshop.meetLinks as Record<string, typeof MeetLinkEntrySchema._type>) || {};

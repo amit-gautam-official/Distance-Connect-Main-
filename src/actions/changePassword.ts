@@ -41,7 +41,7 @@ export const changePassword = async () => {
 
     await sendChangePasswordVerificationEmail(lowerCaseEmail, verificationToken.token);
 
-    return { success: "Password Verification mail was sent." };
+    return { success: "Password Verification mail was sent on your registered email." };
 
 
   } catch (error) {

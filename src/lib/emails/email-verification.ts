@@ -80,8 +80,9 @@ export class EmailVerificationService extends EmailService {
 
         .verify-button {
           display: inline-block;
-          background-color: #2e5aac;
-          color: #fff;
+          background-color: white;
+          color: black;
+          border: 2px solid black;
           padding: 12px 24px;
           text-decoration: none;
           border-radius: 6px;
@@ -116,8 +117,8 @@ export class EmailVerificationService extends EmailService {
         <p style="text-align: center;">
           <a href="${verificationUrl}" class="verify-button">Verify Email</a>
         </p>
-        <p>If the button above doesn't work, you can also use the following verification code:</p>
-        <p class="code-box">${verificationToken}</p>
+        <p>If the button above doesn't work, you can also use the following url:</p>
+        <p class="code-box">${verificationUrl}</p>
         <p>If you did not request this, please ignore this email.</p>
       </div>
       <div class="footer">
