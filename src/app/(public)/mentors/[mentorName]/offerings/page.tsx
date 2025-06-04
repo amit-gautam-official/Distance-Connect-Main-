@@ -49,13 +49,7 @@ async function getMentorData(
         meetingEvents: true,
         availability: true,
         scheduledMeetings: {
-          include: {
-            student: {
-              include: {
-                user: true,
-              },
-            },
-          },
+          
         },
       },
     });
@@ -78,7 +72,6 @@ export default async function OfferingsPage({ params }: PageProps) {
     id: event.id ?? "",
     title: event.eventName || "",
     description: event.description || "",
-    rating: 4.8,
     duration: `${event.duration} Mins`,
     price: `₹${event.eventPrice}`,
     type: event.eventName || "",
@@ -89,7 +82,7 @@ export default async function OfferingsPage({ params }: PageProps) {
   }));
 
   return (
-    <div className="container mx-auto lg:pt-[100px]  px-4  md:px-6 lg:px-8">
+    <div className="container mx-auto lg:pt-[100px]  px-4  md:px-6 lg:px-8 pb-6">
       <div className="mb-8 rounded-lg bg-white p-6 shadow-md">
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
           <Avatar className="h-16 w-16 border-2 border-blue-100 shadow-sm">

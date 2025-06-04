@@ -49,7 +49,7 @@ model Account {
   id_token          String? @db.String
   session_state     String?
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -81,12 +81,13 @@ enum SrudentRole {
 // 🎓 Student Model
 model Student {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  user        User    @relation(fields: [userId], references: [id])
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String  @unique @db.ObjectId
   linkedinUrl String?
 
   studentRole SrudentRole?
   studentName String?
+  phoneNumber String?  @default("XXXXXXXXXX")
 
   //High School
   institutionName String?
@@ -103,9 +104,11 @@ model Student {
   experience  String?
   industry    String?
 
-  scheduledMeetings ScheduledMeetings[]
-  chatRooms         ChatRoom[]
-  orders            RazorpayOrder[]
+  scheduledMeetings   ScheduledMeetings[]
+  chatRooms           ChatRoom[]
+  orders              RazorpayOrder[]
+  workshopEnrollments WorkshopEnrollment[]
+  hasUsedFreeSession  Boolean              @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -114,13 +117,14 @@ model Student {
 // 🧑‍🏫 Mentor Model
 model Mentor {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  user        User    @relation(fields: [userId], references: [id])
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String  @unique @db.ObjectId
   linkedinUrl String?
 
   mentorTier              String?
   mentorSessionPriceRange String?
-  tierReasoning         String?
+  tierReasoning           String?
+
   
   mentorName           String?
   currentCompany       String?
@@ -140,18 +144,17 @@ model Mentor {
   companyEmailVerified Boolean  @default(false)
   verified             Boolean  @default(false)
   messageFromAdmin     String?
+  mentorPhoneNumber    String? @default("XXXXXXXXXX")
 
   meetingEvents     MeetingEvent[]
   availability      Availability?
   scheduledMeetings ScheduledMeetings[]
   chatRooms         ChatRoom[]
-
+  workshops         Workshop[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
-
 
 enum OrderStatus {
   pending
@@ -164,26 +167,27 @@ model RazorpayOrder {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   scheduledMeetingId String?            @db.ObjectId
-  scheduledMeeting   ScheduledMeetings? @relation(fields: [scheduledMeetingId], references: [id])
+  scheduledMeeting   ScheduledMeetings? @relation(fields: [scheduledMeetingId], references: [id], onDelete: SetNull)
+
+  workshopEnrollmentId String?             @db.ObjectId
+  workshopEnrollment   WorkshopEnrollment? @relation(fields: [workshopEnrollmentId], references: [id], onDelete: SetNull)
 
   status            OrderStatus @default(pending)
-  razorpayOrderId   String @unique
+  razorpayOrderId   String      @unique
   razorpayPaymentId String?
   amount            Int // Amount in paise (e.g., 700 for ₹7.00)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Student   Student? @relation(fields: [studentUserId], references: [userId])
+  student       Student? @relation(fields: [studentUserId], references: [userId])
   studentUserId String?  @db.ObjectId
 }
-  
-
 
 // 🚀 Startup Model
 model Startup {
   id     String @id @default(auto()) @map("_id") @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @unique @db.ObjectId
 
   comapanyName   String?
@@ -201,7 +205,7 @@ model Startup {
 model MeetingEvent {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  mentor       Mentor @relation(fields: [mentorUserId], references: [userId])
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId], onDelete: Cascade)
   mentorUserId String @db.ObjectId
 
   eventName   String
@@ -231,28 +235,28 @@ model Availability {
 model ScheduledMeetings {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  mentor       Mentor @relation(fields: [mentorUserId], references: [userId])
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId], onDelete: Cascade)
   mentorUserId String @db.ObjectId
 
-  student       Student @relation(fields: [studentUserId], references: [userId])
+  student       Student @relation(fields: [studentUserId], references: [userId], onDelete: Cascade)
   studentUserId String  @db.ObjectId
 
-  feedback          String?
-  star              Int?
-  selectedTime      String
-  selectedDate      DateTime
-  formatedDate      String
-  formatedTimeStamp String
-  duration          Int
-  meetUrl           String?
-  eventId           String
-  eventName         String
-  userNote          String
-  userEmailForMeet  String
+  feedback           String?
+  star               Int?
+  selectedTime       String
+  selectedDate       DateTime
+  formatedDate       String
+  formatedTimeStamp  String
+  duration           Int
+  meetUrl            String?
+  eventId            String
+  eventName          String
+  userNote           String
+  userEmailForMeet   String
   mentorEmailForMeet String
-  completed         Boolean  @default(false)
+  completed          Boolean  @default(false)
 
-  paymentStatus    Boolean  @default(false)
+  paymentStatus Boolean @default(false)
 
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
@@ -262,10 +266,10 @@ model ScheduledMeetings {
 model ChatRoom {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  mentor       Mentor @relation(fields: [mentorUserId], references: [userId])
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId], onDelete: Cascade)
   mentorUserId String @db.ObjectId
 
-  student       Student @relation(fields: [studentUserId], references: [userId])
+  student       Student @relation(fields: [studentUserId], references: [userId], onDelete: Cascade)
   studentUserId String  @db.ObjectId
 
   lastMessage        String
@@ -286,10 +290,10 @@ model chatMessage {
   senderRole String
   message    String?
 
-  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
   chatRoomId String   @db.ObjectId
 
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @db.ObjectId
 
   imageName String?
@@ -302,4 +306,49 @@ model chatMessage {
   updatedAt DateTime @updatedAt
 
   @@index([chatRoomId, createdAt], name: "chatRoom_createdAt_index")
+}
+
+// 📚 Workshop Model
+model Workshop {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId], onDelete: Cascade)
+  mentorUserId String @db.ObjectId
+
+  name                 String
+  description          String
+  numberOfDays         Int
+  bannerImage          String?
+  introVideo           String?
+  scheduleType         String               @default("recurring") // "recurring" or "custom"
+  startDate            DateTime? // Start date for recurring schedule
+  schedule             Json[] // Array of objects with day and time for recurring, or date and time for custom
+  price                Int // Price in paise (e.g., 70000 for ₹700.00)
+  learningOutcomes     String[]
+  courseDetails        Json
+  otherDetails         String?
+  meetLinks            Json? // Map of day index to meet link and scheduled date
+  introductoryVideoUrl String? // New field for introductory video URL
+  mentorGmailId        String // Changed to required for Google Meet integration
+  enrollments          WorkshopEnrollment[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 📝 Workshop Enrollment Model
+model WorkshopEnrollment {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  workshop   Workshop @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+  workshopId String   @db.ObjectId
+  studentGmailId String?
+
+  student       Student @relation(fields: [studentUserId], references: [userId], onDelete: Cascade)
+  studentUserId String  @db.ObjectId
+
+  paymentStatus Boolean         @default(false)
+  orders        RazorpayOrder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([workshopId, studentUserId])
 }

@@ -93,16 +93,16 @@ const ProfileCompletionBar: React.FC<ProfileCompletionBarProps> = ({
         name: "Skills & Expertise",
         isComplete: false,
         fields: [
-          { name: "Hiring Fields", isComplete: !!formData.hiringFields },
+          { name: "Skills", isComplete: !!formData.hiringFields },
         ],
       },
-      {
-        name: "Verification",
-        isComplete: false,
-        fields: [
-          { name: "Company Email", isComplete: !!mentor.companyEmail },
-        ],
-      },
+      // {
+      //   name: "Verification",
+      //   isComplete: false,
+      //   fields: [
+      //     { name: "Company Email", isComplete: !!mentor.companyEmail },
+      //   ],
+      // },
     ];
 
     // Calculate completion for each section

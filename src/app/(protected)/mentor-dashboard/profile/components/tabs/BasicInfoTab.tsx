@@ -26,6 +26,7 @@ interface BasicInfoTabProps {
     experience: string;
     industry: string;
     companyEmail: string;
+    mentorPhoneNumber: string;
   };
   companyType: CompanyType;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
@@ -97,6 +98,16 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="mentorPhoneNumber">Phone Number</Label>
+            <Input
+              id="mentorPhoneNumber"
+              name="mentorPhoneNumber"
+              value={formData.mentorPhoneNumber}
+              onChange={handleChange}
+              placeholder="Your phone number"
+            />
+          </div>
           <div className="space-y-2">
             <Label htmlFor="location">Location</Label>
             <Input

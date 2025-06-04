@@ -13,6 +13,7 @@ import {
   RotateCcw,
   MessageCircleReply,
   SquareChartGantt,
+  Blocks,
 } from "lucide-react";
 
 import {
@@ -63,60 +64,83 @@ export function AppSidebar({ role }: { role: string }) {
   const Studentitems = [
     {
       title: "Dashboard",
+      id: "dashboard",
       url: "/student-dashboard",
       icon: LayoutDashboard,
     },
     {
       title: "Profile",
+      id: "profile",
       url: "/student-dashboard/profile",
       icon: UserRound,
     },
     {
       title: "Meetings",
+      id: "meetings",
       url: "/student-dashboard/meetings",
       icon: Presentation,
     },
     {
+      title: "Workshops",
+      id: "workshops",
+      url: "/student-dashboard/workshops",
+      icon: Blocks,
+    },
+    {
       title: "Mentors",
+      id: "mentors",
       url: "/student-dashboard/mentors",
       icon: Users,
     },
     {
       title: "Inbox",
+      id: "inbox",
       url: "/chat",
       icon: Inbox,
     },
     {
-      title: "AI career assistant",
+      title: "AI assistant",
+      id: "ai-assistant",
       url: "/ai",
       icon: BotMessageSquare,
     },
   ];
 
-  // Student navigation items
+  // Mentor navigation items
   const Mentoritems = [
     {
       title: "Dashboard",
       url: "/mentor-dashboard",
+      id: "dashboard",
       icon: LayoutDashboard,
     },
     {
       title: "Profile",
+      id: "profile",
       url: "/mentor-dashboard/profile",
       icon: UserRound,
     },
     {
       title: "Meetings",
+      id: "meetings",
       url: "/mentor-dashboard/meetings",
       icon: Presentation,
     },
     {
+      title: "Workshops",
+      id: "workshops",
+      url: "/mentor-dashboard/workshops",
+      icon: Blocks,
+    },
+    {
       title: "Inbox",
+      id: "inbox",
       url: "/chat",
       icon: Inbox,
     },
     {
       title: "Services",
+      id: "services",
       url: "/mentor-dashboard/services",
       icon: SquareChartGantt,
     },
@@ -126,6 +150,7 @@ export function AppSidebar({ role }: { role: string }) {
   const downItems = [
     {
       title: "Help & Support",
+      id: "help-support",
       url:
         role === "student"
           ? "/student-dashboard/help-support"
@@ -134,6 +159,7 @@ export function AppSidebar({ role }: { role: string }) {
     },
     {
       title: "Logout",
+      id: "logout",
       url: "/auth/logout",
       icon: LogOut,
     },
@@ -186,11 +212,12 @@ export function AppSidebar({ role }: { role: string }) {
   // Render mobile view only on client-side when windowWidth is available and less than 768px
   if (windowWidth !== null && windowWidth < 768) {
     const navigationItems = role === "student" ? Studentitems : Mentoritems;
-    const limitedItems = [...navigationItems.slice(0, 5)]; // Limit to 4 items for mobile (reduced from 5 to make room for logout)
+    const limitedItems = [...navigationItems.slice(0, 8)]; // Limit to 4 items for mobile (reduced from 5 to make room for logout)
 
     if (!limitedItems.some((item) => item.title === "Profile")) {
       limitedItems.push({
         title: "Profile",
+        id: "profile",
         url:
           role === "student"
             ? "/student-dashboard/profile"
@@ -211,6 +238,7 @@ export function AppSidebar({ role }: { role: string }) {
             const active = isActive(item.url);
             return (
               <Link
+                id={item.id}
                 key={item.title}
                 href={item.url}
                 className={`flex w-1/7 flex-col items-center justify-center py-1 ${
@@ -228,6 +256,7 @@ export function AppSidebar({ role }: { role: string }) {
           })}
            {helpItem && (
             <Link
+              id={helpItem.id}
               key={helpItem.title}
               href={helpItem.url}
               className="flex w-1/7 flex-col items-center justify-center py-1 text-sidebar-foreground"
@@ -282,13 +311,13 @@ export function AppSidebar({ role }: { role: string }) {
             <SidebarMenu>
               {role === "student" &&
                 Studentitems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem  key={item.title}>
                     <SidebarMenuButton
                       size="lg"
                       isActive={isActive(item.url)}
                       asChild
                     >
-                      <a href={item.url}>
+                      <a id={item.id} href={item.url}>
                         <item.icon />
                         <span>{item.title}</span>
                       </a>
@@ -303,7 +332,7 @@ export function AppSidebar({ role }: { role: string }) {
                       isActive={isActive(item.url)}
                       asChild
                     >
-                      <a href={item.url}>
+                      <a id={item.id} href={item.url}>
                         <item.icon />
                         <span>{item.title}</span>
                       </a>
@@ -321,7 +350,7 @@ export function AppSidebar({ role }: { role: string }) {
                       : "/mentor-dashboard/help-support")}
                     asChild
                   >
-                    <a href={role === "student"
+                    <a id="help-support" href={role === "student"
           ? "/student-dashboard/help-support"
           : "/mentor-dashboard/help-support"}>
                       <MessageCircleQuestion />

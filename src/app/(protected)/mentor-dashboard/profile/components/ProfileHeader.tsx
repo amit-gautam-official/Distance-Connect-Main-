@@ -14,6 +14,7 @@ import {
   GraduationCap,
   ChevronDown,
   ChevronUp,
+  Phone,
 } from "lucide-react";
 import { api } from "@/trpc/react";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,7 @@ interface Experience {
 
 interface ProfileHeaderProps {
   name: string;
+  phoneNumber: string;
   email: string;
   image: string;
   role: string;
@@ -108,7 +110,7 @@ const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
   };
 
   return (
-    <div className="flex flex-col">
+    <div id="profile-header" className="flex flex-col">
       {/* Profile picture and basic info */}
       <div className="flex flex-col items-center">
         <Avatar className="h-28 w-28 border-4 border-white">
@@ -130,7 +132,7 @@ const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
               : "User"}
         </p>
 
-        <Link className="mt-4" href={`/mentors/${user?.userId}`}>
+        <Link id="preview-profile" className="mt-4" href={`/mentors/${user?.userId}`}>
           <Button>Preview Mentor Profile</Button>
         </Link>
       </div>
@@ -163,7 +165,13 @@ const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <MapPin size={16} className="text-gray-400" />
           <span>
-            {user?.state}, India {user?.pinCode && `- ${user.pinCode}`}
+            {user?.state}, India
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <Phone size={16} className="text-gray-400" />
+          <span>
+            {user?.phoneNumber}
           </span>
         </div>
 
@@ -284,7 +292,7 @@ const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
       {/* Skills/Interests */}
       <div className="mt-6">
         <h3 className="mb-2 text-sm font-medium text-gray-700">
-          Hiring Fields
+          Skills
         </h3>
         <div className="flex flex-wrap gap-2">
           {user?.hiringFields.map((field) => (

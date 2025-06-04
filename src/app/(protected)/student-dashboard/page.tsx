@@ -6,18 +6,21 @@ import ExploreMentorsBanner from "./components/ExploreMentorsBanner";
 import DashboardStats from "./components/DashboardStats";
 import TrackSessions from "./components/TrackSessions";
 import YourMentors from "./components/YourMentors";
+import PostLoginRedirect from "@/components/PostLoginRedirect";
 
 const StudentDashboardPage = async () => {
   const student = await api.student.getStudent();
 
   const currentTimestamp = new Date().getTime();
 
+  
+
   const filterMeetingList = cache((type: string) => {
     if (type === "upcoming") {
       return student?.scheduledMeetings.filter(
         (item) =>
           Number(item?.formatedTimeStamp) >= Number(currentTimestamp) &&
-          !item?.completed,
+          !item?.completed && item.paymentStatus === true,
       );
     } else if (type === "completed") {
       return student?.scheduledMeetings.filter((item) => item?.completed);

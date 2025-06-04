@@ -203,7 +203,7 @@ export default async function MentorProfilePage({ params }: PageProps) {
  
 
   // Extended skills with categories from the image
-  const skillGroups = mentorData?.skills || [];
+  const skillGroups = mentorData?.hiringFields || [];
 
   // Tools the mentor uses
   const tools = ["Figma", "VS Code", "Photoshop"];
@@ -345,6 +345,7 @@ const professionalBackground = {
           {/* Profile header */}
           <ProfileHeader
             mentor={{
+              username: mentorData?.user?.username || "",
               profileBanner: mentorData?.profileBanner || "",
               mentorName: mentorData.mentorName || "Unnamed Mentor",
               jobTitle: mentorData.jobTitle || "",

@@ -114,15 +114,52 @@ createChatRoomByMentorId: protectedProcedure
     .input(z.object({
         mentorUserId: z.string(),
     }))
-    .mutation(({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
+        // Check if the student has a scheduled meeting with this mentor
+        const scheduledMeeting = await ctx.db.scheduledMeetings.findFirst({
+            where: {
+                mentorUserId: input.mentorUserId,
+                studentUserId: ctx.dbUser!.id,
+                paymentStatus: true, // Ensure payment is completed
+            },
+            orderBy: {
+                selectedDate: 'desc', // Get the most recent meeting
+            }
+        });
+
+        if (!scheduledMeeting) {
+            throw new Error("You must book a meeting with this mentor before starting a chat");
+        }
+
+        // Check if today is after the meeting day
+        const meetingDate = new Date(scheduledMeeting.selectedDate);
+        meetingDate.setHours(23, 59, 59); // End of the meeting day
+        const now = new Date();
+
+        if (now > meetingDate) {
+            throw new Error("Chat is only available until the end of your meeting day");
+        }
+
+        // Check if the chat room already exists
+        const existingChatRoom = await ctx.db.chatRoom.findFirst({
+            where: {
+                mentorUserId: input.mentorUserId,
+                studentUserId: ctx.dbUser!.id,
+            },
+        });
+
+        if (existingChatRoom) {
+            return existingChatRoom;
+        }
+
+        // Create a new chat room if it doesn't exist
         return ctx.db.chatRoom.create({
             data: {
                 mentorUserId: input.mentorUserId,
-                studentUserId : ctx.dbUser!.id,
+                studentUserId: ctx.dbUser!.id,
                 lastMessage: "",
                 mentorUnreadCount: 0,
                 studentUnreadCount: 0,
-
             },
             select: {
                 id: true,
@@ -395,50 +432,100 @@ getChatRoomById: protectedProcedure
     
     
     getChatRoomByBackendId: protectedProcedure
-    .query(({ ctx }) => {
-    
-        const studentChatRooms = ctx.db.chatRoom.findMany({
-            where: {
-                studentUserId: ctx.dbUser!.id,
-        },
-            select: {
-                id: true,
-                lastMessage: true,
-                mentorUnreadCount: true,
-                studentUnreadCount: true,
-                createdAt: true,
-                updatedAt: true,
-                mentor : {
-                    select : {
-                        id: true,
-                        mentorName : true,
-                        user : {
-                            select : {
-                                image : true,
-                                name : true,
-                                
+    .query(async ({ ctx }) => {
+        if (ctx.dbUser!.role === "STUDENT") {
+            // Get all valid scheduled meetings for this student
+            const scheduledMeetings = await ctx.db.scheduledMeetings.findMany({
+                where: {
+                    studentUserId: ctx.dbUser!.id,
+                    paymentStatus: true,
+                },
+                select: {
+                    mentorUserId: true,
+                    selectedDate: true,
+                },
+            });
+
+            // Extract mentor IDs and create a map of mentor to meeting date
+            const mentorMeetings: Record<string, Date> = {};
+            
+            scheduledMeetings.forEach(meeting => {
+                if (!meeting.selectedDate) return;
+                const meetingDate = new Date(meeting.selectedDate);
+                
+                // Keep the latest meeting date for each mentor
+                if (!mentorMeetings[meeting.mentorUserId]) {
+                    mentorMeetings[meeting.mentorUserId] = meetingDate;
+                } else {
+                    const existingDate = new Date(mentorMeetings[meeting.mentorUserId]!);
+                    if (meetingDate > existingDate) {
+                        mentorMeetings[meeting.mentorUserId] = meetingDate;
+                    }
+                }
+            });
+
+            const mentorIds = Object.keys(mentorMeetings);
+            
+            // Only get chat rooms for mentors the student has meetings with
+            const studentChatRooms = await ctx.db.chatRoom.findMany({
+                where: {
+                    studentUserId: ctx.dbUser!.id,
+                    mentorUserId: { in: mentorIds.length > 0 ? mentorIds : ["none"] },
+                },
+                select: {
+                    id: true,
+                    lastMessage: true,
+                    mentorUnreadCount: true,
+                    studentUnreadCount: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    mentorUserId: true,
+                    mentor: {
+                        select: {
+                            id: true,
+                            mentorName: true,
+                            user: {
+                                select: {
+                                    image: true,
+                                    name: true,
+                                }
                             }
                         }
-                    }
-                },
-                student : {
-                    select : {
-                        id: true,
-                        studentName : true,
-                        user : {
-                            select : {
-                                image : true,
-                                name    : true,
+                    },
+                    student: {
+                        select: {
+                            id: true,
+                            studentName: true,
+                            user: {
+                                select: {
+                                    image: true,
+                                    name: true,
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
-        const mentorChatRooms = ctx.db.chatRoom.findMany({
+            });
+
+            // Filter chat rooms based on meeting day
+            const now = new Date();
+            const validChatRooms = studentChatRooms.filter(chatRoom => {
+                if (!chatRoom.mentorUserId || !mentorMeetings[chatRoom.mentorUserId]) return false;
+                
+                // Since we've already checked that mentorMeetings[chatRoom.mentorUserId] exists and is a Date
+                const meetingDate = new Date(mentorMeetings[chatRoom.mentorUserId]!.valueOf());
+                meetingDate.setHours(23, 59, 59); // End of meeting day
+                return now <= meetingDate;
+            });
+
+            return validChatRooms;
+        }
+        
+        // For mentors, show all chat rooms
+        const mentorChatRooms = await ctx.db.chatRoom.findMany({
             where: {
                 mentorUserId: ctx.dbUser!.id,
-        },
+            },
             select: {
                 id: true,
                 lastMessage: true,
@@ -476,9 +563,9 @@ getChatRoomById: protectedProcedure
 
         if(ctx.dbUser!.role === "MENTOR"){
             return mentorChatRooms;
-        }else if(ctx.dbUser!.role === "STUDENT"){
-            return studentChatRooms;
         }
+        
+        // For any other role (should never reach here due to the if conditions above)
         throw new Error("Not authorized to get chat rooms");
     
     })

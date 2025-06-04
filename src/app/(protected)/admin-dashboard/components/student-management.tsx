@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Download } from "lucide-react";
 
 interface Student  {
     user: {
@@ -23,8 +24,6 @@ interface Student  {
     linkedInUrl?: string | null;
 }
 
-
-
 interface StudentManagementProps {
   students: Student[];
 }
@@ -32,13 +31,44 @@ interface StudentManagementProps {
 export default function StudentManagement({
   students,
 }: StudentManagementProps) {
+  
+  const exportToCSV = () => {
+    const headers = ['Name', 'Email', 'Student Type', 'LinkedIn URL'];
+    
+    const csvContent = [
+      headers.join(','),
+      ...students.map(student => [
+        `"${student.studentName || ''}"`,
+        `"${student.user.email}"`,
+        `"${student.studentRole || ''}"`,
+        `"${student.linkedInUrl || ''}"`
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `students_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   return (
     <>
       <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center md:mb-6">
         <h2 className="text-xl font-semibold md:text-2xl">
           Student Management
         </h2>
-      
+        <Button onClick={exportToCSV} variant="outline" className="flex items-center gap-2">
+          <Download className="h-4 w-4" />
+          Export to CSV
+        </Button>
       </div>
 
       <div className="rounded-lg border shadow-sm">
@@ -55,17 +85,18 @@ export default function StudentManagement({
             <TableBody>
               {students.map((student) => (
                 <TableRow key={student.userId}>
-
-                  <TableCell className="font-medium"> <div className="flex items-center gap-2">
-                        {student.user.image && (
-                          <img
-                            src={student?.user?.image.trim()}
-                            alt={student.studentName || "Mentor"}
-                            className="h-8 w-8 rounded-full"
-                          />
-                        )}
-                        <div>{student.studentName}</div>
-                      </div></TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2">
+                      {student.user.image && (
+                        <img
+                          src={student?.user?.image.trim()}
+                          alt={student.studentName || "Student"}
+                          className="h-8 w-8 rounded-full"
+                        />
+                      )}
+                      <div>{student.studentName}</div>
+                    </div>
+                  </TableCell>
                   <TableCell>{student.user.email}</TableCell>
                   <TableCell className="hidden sm:table-cell">
                     {student.studentRole}
@@ -84,7 +115,6 @@ export default function StudentManagement({
                       "Not Available"
                     )}
                   </TableCell>
-                  
                 </TableRow>
               ))}
             </TableBody>

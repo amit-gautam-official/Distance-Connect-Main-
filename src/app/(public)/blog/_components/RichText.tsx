@@ -11,7 +11,7 @@ const options = {
       const { target } = data;
       const { fields } = target;
 
-      console.log(target);
+      // console.log(target);
 
       // Example: Render an embedded image component
       if (target?.sys?.contentType?.sys?.id === 'componentRichImage') {

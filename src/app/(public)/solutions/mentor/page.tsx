@@ -2,6 +2,7 @@ import React from "react";
 import Hero from "../_components/Hero";
 import LogoStrip from "@/app/_components/LogoStrip";
 import AltHero from "../_components/AltHero";
+import Link from "next/link";
 
 const MentorSolutionsPage = () => {
   const sections = [
@@ -77,9 +78,9 @@ const MentorSolutionsPage = () => {
               ))}
             </ul>
           </div>
-          <button className="mb-12 flex h-9 w-[135px] flex-shrink-0 items-center justify-center gap-[10px] rounded-[30px] bg-[#D9D9D9] px-[18px] py-[2px]">
+          <Link href="/auth/login" className="mb-12 flex h-9 w-[135px] flex-shrink-0 items-center justify-center gap-[10px] rounded-[30px] bg-[#D9D9D9] px-[18px] py-[2px]">
             Get Started
-          </button>
+          </Link>
         </div>
         <div className="h-[100px]"></div>
         <LogoStrip />
@@ -109,9 +110,9 @@ const MentorSolutionsPage = () => {
                 ))}
               </ul>
             </div>
-            <button className="flex h-9 w-[135px] flex-shrink-0 items-center justify-center gap-[10px] rounded-[30px] bg-[#D9D9D9] px-[18px] py-[2px]">
+            <Link href="/mentor-dashboard" className="flex h-9 w-[135px] flex-shrink-0 items-center justify-center gap-[10px] rounded-[30px] bg-[#D9D9D9] px-[18px] py-[2px]">
               Learn More
-            </button>
+            </Link>
           </div>
         </div>
       ))}

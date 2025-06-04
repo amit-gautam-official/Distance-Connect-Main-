@@ -71,20 +71,21 @@ export function ProfileTabs({
 }: ProfileTabsProps) {
   return (
     <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-      <Tabs defaultValue="profile" className="w-full">
+      <Tabs defaultValue="offerings" className="w-full">
         <TabsList className="flex w-full border-b bg-transparent p-0">
+        <TabsTrigger
+            value="offerings"
+            className="flex-1 rounded-none px-1 py-3 font-medium data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600"
+          >
+            Offerings
+          </TabsTrigger>
           <TabsTrigger
             value="profile"
             className="flex-1 rounded-none px-1 py-3 font-medium data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600"
           >
             Profile
           </TabsTrigger>
-          <TabsTrigger
-            value="offerings"
-            className="flex-1 rounded-none px-1 py-3 font-medium data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600"
-          >
-            Offerings
-          </TabsTrigger>
+         
           <TabsTrigger
             value="reviews"
             className="flex-1 rounded-none px-1 py-3 font-medium data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600"
@@ -92,6 +93,9 @@ export function ProfileTabs({
             Reviews
           </TabsTrigger>
         </TabsList>
+        <TabsContent id="offerings" value="offerings" className="p-6">
+          <Offerings offerings={offerings} />
+        </TabsContent>
 
         <TabsContent value="profile" className="space-y-8 p-6">
           {/* Professional Experience */}
@@ -109,9 +113,7 @@ export function ProfileTabs({
          
         </TabsContent>
 
-        <TabsContent id="offerings" value="offerings" className="p-6">
-          <Offerings offerings={offerings} />
-        </TabsContent>
+        
 
         <TabsContent value="reviews" className="p-6">
           <Reviews reviews={reviews} />

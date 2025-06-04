@@ -27,32 +27,32 @@ import { api } from "@/trpc/react";
 function MeetingForm({ setFormValue }: { setFormValue: Function }) {
   const [eventName, setEventName] = useState<string>();
   const [duration, setDuration] = useState<Number>(30);
-  const [email, setEmail] = useState<string>("example@gmail.com");
+  const [email, setEmail] = useState<string>("");
   const [description, setDescription] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [customEventName, setCustomEventName] = useState<boolean>(false);
   const router = useRouter();
-  const [price, setPrice] = useState<number>();
-
- 
-
-
-
   const getMeQuery = api.mentor.getMentor.useQuery();
 
   const mentorSessionPriceRange = getMeQuery.data?.mentorSessionPriceRange; //Ex: "500-700" //string
-
   const [minPrice, maxPrice] = mentorSessionPriceRange
-  ? mentorSessionPriceRange.split("-").map(Number)
-  : [500, 700]; // Default range
+    ? mentorSessionPriceRange.split("-").map(Number)
+    : [undefined, undefined];
 
+  const [price, setPrice] = useState<number | undefined>();
 
+  // Update price when mentor data loads
+  useEffect(() => {
+    if (minPrice) {
+      setPrice(minPrice);
+    }
+  }, [minPrice]);
 
   const createMeetingEvent = api.meetingEvent.createMeetingEvent.useMutation({
     onSuccess: () => {
       toast("New Meeting Event Created!");
-      router.push("/mentor-dashboard/services");
       setLoading(false);
+      router.push("/mentor-dashboard/services");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -67,7 +67,7 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
       description: description,
       price: price ?? minPrice,
     });
-  }, [eventName, duration, email, description, price]);
+  }, [eventName, duration, email, description, minPrice]);
 
   const onCreateClick = async () => {
     setLoading(true);
@@ -84,9 +84,15 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
       duration: duration as number,
       description: description as string,
       meetEmail: email as string,
-      price: price as number,
+      price: price ?? minPrice as number,
 
     });
+
+
+    setLoading(false);
+    router.push("/mentor-dashboard/services");
+
+
   };
 
   return (
@@ -221,19 +227,27 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
     <h3 className="text-lg font-semibold text-gray-900">Session Price</h3>
   </div>
   <div className="space-y-2">
-    <label className="text-sm font-medium text-gray-700">
-      Choose your session price (₹{minPrice}–₹{maxPrice})
-    </label>
-    <input
-      type="range"
-      min={minPrice}
-      max={maxPrice}
-      step={50}
-      value={price ?? minPrice}
-      onChange={(e) => setPrice(Number(e.target.value))}
-      className="w-full"
-    />
-    <div className="text-sm text-gray-600">Selected: ₹{price ?? minPrice}</div>
+    {getMeQuery.isLoading ? (
+      <div className="text-sm text-gray-600">Loading price range...</div>
+    ) : !mentorSessionPriceRange ? (
+      <div className="text-sm text-red-600">Wait for your Profile to be verified</div>
+    ) : (
+      <>
+        <label className="text-sm font-medium text-gray-700">
+          Choose your session price (₹{minPrice}–₹{maxPrice})
+        </label>
+        <input
+          type="range"
+          min={minPrice}
+          max={maxPrice}
+          step={50}
+          value={price ?? minPrice}
+          onChange={(e) => setPrice(Number(e.target.value))}
+          className="w-full"
+        />
+        <div className="text-sm text-gray-600">Selected: ₹{price}</div>
+      </>
+    )}
   </div>
 </div>
 

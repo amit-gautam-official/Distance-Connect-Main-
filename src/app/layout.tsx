@@ -6,6 +6,7 @@ import { TRPCReactProvider } from "@/trpc/react";
 import { Toaster } from "sonner";
 import { GoogleAnalytics } from '@next/third-parties/google'
 import Script from "next/script";
+import MicrosoftClarity from "./metrics/MicrosoftClarity";
 
 export const metadata: Metadata = {
   title: "Distance Connect",
@@ -62,6 +63,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
+
     <Script
           src="https://checkout.razorpay.com/v1/checkout.js"
           strategy="lazyOnload"
@@ -69,9 +71,23 @@ export default function RootLayout({
       <body>
         <TRPCReactProvider>
           {children}
+          <MicrosoftClarity />
         </TRPCReactProvider>
         <GoogleAnalytics gaId="G-D2RLQDYV1B" />
         <Toaster />
+        <Script id="zoho-salesiq-init" strategy="afterInteractive">
+        {`
+          window.$zoho = window.$zoho || {};
+          $zoho.salesiq = $zoho.salesiq || { ready: function() {} };
+        `}
+      </Script>
+
+      <Script
+        id="zsiqscript"
+        src="https://salesiq.zohopublic.in/widget?wc=siqf82bfb0a40b0fcc4bd5d0860829e420252f20700c01aff1d782b85216cb830e2"
+        strategy="afterInteractive"
+        defer
+      />
       </body>
     </html>
   );

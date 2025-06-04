@@ -20,6 +20,7 @@ import { User, Student } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import {ImageUpload} from "@/app/(protected)/register/_components/ImageUpload";
 import { useProfile } from "../context";
+import { changePassword } from "@/actions/changePassword";
 
 enum StudentRole {
   HIGHSCHOOL = "HIGHSCHOOL",
@@ -155,6 +156,29 @@ const ProfileSettings = ({
       updateProfileField("industry", value);
     }
   };
+
+   const [ploading, setPloading] = React.useState(false);
+    const [perror, setPerror] = React.useState("");
+    const [success, setSuccess] = React.useState("");
+  
+    const onSubmit = async () => {
+      setPloading(true);
+      setPerror("");
+      setSuccess("");
+  
+      try {
+        const res = await changePassword();
+        if (res.error) {
+          setPerror(res.error);
+        } else if (res.success) {
+          setSuccess(res.success);
+        }
+      } catch (err) {
+        setPerror("Something went wrong. Please try again.");
+      } finally {
+        setPloading(false);
+      }
+    };
 
   const handleRoleChange = (value: string) => {
     setStudentRole(value as StudentRole);
@@ -487,14 +511,35 @@ const ProfileSettings = ({
           </div>
 
           <div>
-            <h3 className="mb-2 text-sm font-medium">Password</h3>
-            <Button variant="outline">
-              <Key size={16} className="mr-2" />
-              Change Password
-            </Button>
+            <h3 className="mb-2 text-sm font-medium">Add/Change Password</h3>
+              <Button
+                        type="button"
+                        variant="outline"
+                        onClick={onSubmit}
+                        disabled={ploading}
+                      >
+                        {ploading ? "Sending..." : (
+                          <>
+                            <Key className="mr-2 h-4 w-4" />
+                            Add/Change Password
+                          </>
+                        )}
+                      </Button>
+                      {success && (
+          <p className="text-sm text-green-600 bg-green-50 p-2 rounded">
+            {success}
+          </p>
+        )}
+
+        {/* Error Message */}
+        {perror && (
+          <p className="text-sm text-red-600 bg-red-50 p-2 rounded">
+            {perror}
+          </p>
+        )}
           </div>
 
-          <div>
+          {/* <div>
             <h3 className="mb-2 text-sm font-medium">Account Type</h3>
             <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-800">
               <p>
@@ -502,8 +547,8 @@ const ProfileSettings = ({
                 {user?.role === "STUDENT" ? "Student" : "User"}
               </p>
             </div>
-          </div>
-
+          </div> */}
+{/* 
           <div>
             <h3 className="mb-2 text-sm font-medium text-red-600">
               Danger Zone
@@ -511,7 +556,7 @@ const ProfileSettings = ({
             <Button variant="destructive" size="sm">
               Deactivate Account
             </Button>
-          </div>
+          </div> */}
         </CardContent>
       </Card>
     </div>

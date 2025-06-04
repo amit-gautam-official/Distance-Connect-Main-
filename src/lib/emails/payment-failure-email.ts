@@ -8,6 +8,12 @@ interface PaymentFailureDetails {
   reason?: string;
 }
 
+interface WorkshopPaymentFailureEmailParams {
+  studentName: string;
+  workshopName: string;
+  reason: string;
+}
+
 export class PaymentEmailService extends EmailService {
   constructor() {
     super();
@@ -44,5 +50,25 @@ export class PaymentEmailService extends EmailService {
     };
 
     return this.sendEmail(mailOptions);
+  }
+
+  async sendWorkshopPaymentFailureEmail(to: string, params: WorkshopPaymentFailureEmailParams): Promise<void> {
+    const subject = "Workshop Payment Failed - Distance Connect";
+    const htmlBody = `
+      <p>Dear ${params.studentName},</p>
+      <p>We regret to inform you that your payment for the workshop "<strong>${params.workshopName}</strong>" could not be processed successfully.</p>
+      <p><strong>Reason:</strong> ${params.reason}</p>
+      <p>If you believe this is an error, or if you have any questions, please contact our support team.</p>
+      <p>You can try making the payment again from your workshop dashboard.</p>
+      <p>Thank you,</p>
+      <p>The Distance Connect Team</p>
+    `;
+
+    await this.transporter.sendMail({
+      from: process.env.EMAIL_FROM, // Ensure this is configured
+      to,
+      subject,
+      html: htmlBody,
+    });
   }
 }

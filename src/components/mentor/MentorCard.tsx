@@ -1,10 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, MapPin, Calendar, Clock, X } from "lucide-react";
+import { Building2, MapPin, Calendar, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import {
   Dialog,
@@ -15,6 +15,11 @@ import {
 } from "@/components/ui/dialog";
 import { AvailabilityCard } from "../mentor-profile/AvailabilityCard";
 import { useRouter } from "next/navigation";
+import { JSONValue } from "node_modules/superjson/dist/types";
+import { useToast } from "@/components/ui/use-toast";
+import { api } from "@/trpc/react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { useSession } from "next-auth/react";
 
 interface Mentor {
   availability: Avail | null;
@@ -35,13 +40,12 @@ interface Mentor {
 }
 
 interface Avail {
-    id: string;
-    createdAt: Date | null;
-    updatedAt: Date | null;
-    mentorUserId: string | null;
-    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-    daysAvailable: any | null;  
-    bufferTime: number | null;
+  id: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  mentorUserId: string | null;
+  daysAvailable: JSONValue | null; // Use JSONValue for dynamic keys
+  bufferTime: number | null;
 }
 
 interface MentorCardProps {
@@ -49,199 +53,314 @@ interface MentorCardProps {
 }
 
 export function MentorCard({ mentor }: MentorCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExpandedBio, setIsExpandedBio] = useState(false);
+  const [canChat, setCanChat] = useState<boolean>(false);
+  const [isCheckingMeeting, setIsCheckingMeeting] = useState<boolean>(false);
+  const [isLoadingMeetingStatus, setIsLoadingMeetingStatus] = useState(true);
   const router = useRouter();
+  const { toast } = useToast();
+  const session = useSession();
+
+  // Check if the student has a meeting with this mentor
+  const getMeetingStatus = api.scheduledMeetings.hasMeetingWithMentor.useQuery(
+    { mentorUserId: mentor.userId },
+    { enabled: false },
+  );
+    const meetingStatusQuery = api.scheduledMeetings.hasMeetingWithMentor.useQuery(
+      { mentorUserId: mentor.userId },
+      { enabled: !!session?.data?.user, refetchOnWindowFocus: false }
+    );
+
+
+  // Update local state when query results change
+  useEffect(() => {
+    if (meetingStatusQuery.status === 'success') {
+      setCanChat(!!meetingStatusQuery.data);
+      setIsLoadingMeetingStatus(false);
+    } else if (meetingStatusQuery.status === 'error') {
+      setCanChat(false);
+      setIsLoadingMeetingStatus(false);
+    }
+  }, [meetingStatusQuery.status, meetingStatusQuery.data]);
+
+  const createChatRoom = api.chatRoom.createChatRoomByMentorId.useMutation();
+
+  // Handle chat room creation results
+  useEffect(() => {
+    if (createChatRoom.status === "success" && createChatRoom.data) {
+      router.push(`/chat?mentorId=${mentor.userId}`);
+    } else if (createChatRoom.status === "error" && createChatRoom.error) {
+      toast({
+        title: "Cannot start chat",
+        description:
+          createChatRoom.error.message ||
+          "You must book a meeting with this mentor first",
+        variant: "destructive",
+      });
+    }
+  }, [
+    createChatRoom.status,
+    createChatRoom.data,
+    createChatRoom.error,
+    router,
+    toast,
+  ]);
+
+  // Check meeting status when the component mounts
+  useEffect(() => {
+    setIsCheckingMeeting(true);
+    getMeetingStatus.refetch();
+  }, []);
+
+  // Function to truncate bio text
+  const truncateBio = (text: string, maxLength = 100) => {
+    if (!text || text.length <= maxLength) return text;
+    return text.slice(0, maxLength).trim();
+  };
+
+  const handleChatClick = (e: React.MouseEvent) => {
+    if (!session?.data?.user) {
+      return; // Let the link navigate to login
+    }
+    
+    // If no meeting booking, prevent navigation and show toast
+    if (!canChat) {
+      e.preventDefault();
+      toast({
+        title: "Cannot start chat",
+        description: "You need to book a meeting with this mentor before you can chat.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <>
-      <Card className="relative overflow-hidden bg-white p-4">
-        <div className="absolute right-4 top-4 rounded-full bg-[#E5F7E5] px-3 py-1 text-sm">
-          First session free
-        </div>
-        <div className="flex flex-col gap-4 sm:flex-row">
-          {/* Avatar Section */}
-          <div className="relative flex justify-center sm:justify-start">
-            <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
-              <AvatarImage
-                src={mentor.user.image || ""}
-                alt={mentor.mentorName || "Mentor Avatar"}
-                className="object-cover"
-              />
-              <AvatarFallback className="text-xl">
-                {mentor.mentorName?.[0]}
-              </AvatarFallback>
-            </Avatar>
+      <Card className="group flex h-full flex-col overflow-hidden bg-white transition-all hover:shadow-lg">
+        {/* Avatar and Basic Info */}
+        <div className="relative flex flex-col items-center p-6 pb-4">
+          {/* Free session badge moved to corner */}
+          <div className="absolute right-0 top-0">
+            <Badge className="m-2 bg-green-100 text-green-800">
+              Free Session
+            </Badge>
           </div>
 
-          {/* Main Content */}
-          <div className="flex-1">
-            <h3 className="text-center text-xl font-semibold sm:text-left">
-              {mentor.mentorName}
-            </h3>
+          <Avatar className="mb-4 h-20 w-20 border-2 border-white shadow">
+            <AvatarImage
+              src={mentor.user.image || ""}
+              alt={mentor.mentorName || "Mentor Avatar"}
+              className="object-cover"
+            />
+            <AvatarFallback className="bg-primary/10 text-lg font-medium text-primary">
+              {mentor.mentorName?.[0]?.toUpperCase() || "M"}
+            </AvatarFallback>
+          </Avatar>
 
-            {/* Location and Languages */}
-            <div className="mt-1 flex flex-wrap justify-center gap-4 text-sm text-gray-600 sm:justify-start">
-              <div className="flex items-center gap-1">
-                <MapPin className="h-4 w-4" />
-                {mentor?.state
-                  ? mentor.state.charAt(0).toUpperCase() + mentor.state.slice(1)
-                  : "Location N/A"}
-              </div>
-              <div className="flex items-center gap-1">
-                <svg
-                  className="h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M19.06 18H4.94A1.94 1.94 0 0 1 3 16.06V4.94A1.94 1.94 0 0 1 4.94 3h14.12A1.94 1.94 0 0 1 21 4.94v11.12A1.94 1.94 0 0 1 19.06 18Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                  />
-                  <path
-                    d="M3 13.5h18m-13.5-9v9"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                  />
-                </svg>
-                English, Hindi
-              </div>
-            </div>
+          <h3 className="mb-1 text-center text-lg font-semibold">
+            {mentor.mentorName || "Unnamed Mentor"}
+          </h3>
 
-            {/* Company Info */}
-            <div className="mt-4 flex flex-col items-center gap-2 sm:flex-row sm:items-start">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100">
-                <Building2 className="h-4 w-4" />
-              </div>
-              <div className="text-center sm:text-left">
-                <div className="font-medium">{mentor.jobTitle}</div>
-                {mentor.companyEmailVerified ?
-                  <div className="text-sm text-gray-600">
-                  {mentor.currentCompany}
-                </div>
-                : <div className="text-sm text-gray-600">
-                  <span className="text-red-500">Not Verified</span> {mentor.currentCompany}
-                </div>}
-              </div>
-            </div>
+          <p className="mb-2 text-center text-sm text-muted-foreground">
+            {mentor.jobTitle || "Role not specified"}
+            {mentor.experience && (
+              <>
+                <span className="mx-1.5 text-xs">•</span>
+                <span>{mentor.experience} YOE</span>
+              </>
+            )}
+          </p>
 
-            {/* Skills/Hiring Fields */}
-            <div className="mt-4 flex flex-wrap justify-center gap-2 sm:justify-start">
-              {mentor.hiringFields?.slice(0, 3).map((field, index) => (
-                <Badge key={`${field}-${index}`} variant="outline">
-                  {field}
-                </Badge>
-              ))}
-              {mentor.hiringFields && mentor.hiringFields.length > 3 && (
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100">
-                  <span className="text-xs">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Building2 className="h-4 w-4" />
+            <span className="line-clamp-1">
+              {mentor.currentCompany || "Not specified"}
+            </span>
+            {mentor.companyEmailVerified === false && (
+              <Badge
+                variant="outline"
+                className="border-amber-300 bg-amber-50 text-xs text-amber-600"
+              >
+                Unverified
+              </Badge>
+            )}
+          </div>
+
+          <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+            <MapPin className="h-3.5 w-3.5" />
+            <span>
+              {mentor?.state
+                ? mentor.state.charAt(0).toUpperCase() + mentor.state.slice(1)
+                : "Location N/A"}
+            </span>
+          </div>
+        </div>
+
+        {/* Bio Section - Improved Read More/Less functionality */}
+        <div className="px-6 pb-4">
+          <div className="text-sm text-muted-foreground">
+            {mentor.bio ? (
+              truncateBio(mentor.bio) + "..."
+            ) : (
+              <p className="italic text-muted-foreground">No bio available</p>
+            )}
+          </div>
+        </div>
+
+        {/* Skills */}
+        <div className="flex-1 px-6 pb-4">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">
+            Skills
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {mentor.hiringFields?.length > 0 ? (
+              <>
+                {mentor.hiringFields.slice(0, 3).map((field, index) => (
+                  <Badge
+                    key={`${field}-${index}`}
+                    variant="secondary"
+                    className="text-xs"
+                  >
+                    {field}
+                  </Badge>
+                ))}
+                {mentor.hiringFields.length > 3 && (
+                  <Badge variant="outline" className="text-xs">
                     +{mentor.hiringFields.length - 3}
-                  </span>
-                </div>
-              )}
-            </div>
+                  </Badge>
+                )}
+              </>
+            ) : (
+              <span className="text-xs italic text-muted-foreground">
+                No skills specified
+              </span>
+            )}
           </div>
-        </div>
-
-        {/* Description */}
-        <div className="mt-4 text-sm text-gray-600">
-          {isExpanded ? (
-            <>
-              {mentor?.bio || "No bio available."}
-              {" "}
-              {mentor.bio && mentor.bio.length > 100 &&
-                <button
-                  onClick={() => setIsExpanded(false)}
-                  className="text-blue-600 hover:underline"
-                >
-                  show less
-                </button>}
-            </>
-          ) : (
-            <>
-              {(mentor?.bio && mentor.bio.length > 100 ? mentor.bio.slice(0, 100).concat("...") : mentor.bio) || "No bio available."}
-
-              {mentor.bio && mentor.bio.length > 100 &&
-                <button
-                  onClick={() => setIsExpanded(true)}
-                  className="text-blue-600 hover:underline"
-                >
-                  read more
-                </button>}
-            </>
-          )}
         </div>
 
         {/* Footer */}
-        <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-center text-sm text-gray-600 sm:text-left">
-            For:{" "}
-            <span className="font-medium">Fresher | Working Professional</span>
-          </div>
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-            <Link href={`/mentors/${mentor.userId}`} className="w-full sm:w-auto">
-              <Button variant="outline" className="w-full sm:w-auto">
+        <div className="m-auto mt-auto border-t border-border bg-muted/10 py-4">
+          <div className="flex items-center justify-between gap-2">
+            <Link href={`/mentors/${mentor.userId}`} className="">
+              <Button
+                variant="outline"
+                size="sm"
+                className="hover:bg-primary/5"
+              >
                 View Profile
               </Button>
             </Link>
-            <Button 
-              className="w-full sm:w-auto"
-              onClick={() => setIsModalOpen(true)}
-            >
-              Check Availability
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href={
+                      session?.data?.user
+                        ? `/chat?mentorId=${mentor.userId}`
+                        : "/auth/login"
+                    }
+                    onClick={handleChatClick}
+                    className="block w-full"
+                  >
+                    <Button
+                      variant="outline"
+                      className={`w-full hover:bg-blue-50 ${isLoadingMeetingStatus ? "opacity-70" : ""}`}
+                      disabled={isLoadingMeetingStatus}
+                    >
+                      {isLoadingMeetingStatus ? (
+                        <>
+                          <span className=" h-4 w-4 animate-spin rounded-full border-2 border-t-transparent"></span>
+                        </>
+                      ) : (
+                          <MessageSquare className="h-4 w-4" /> 
+                      )}
+                    </Button>
+                  </Link>
+                </TooltipTrigger>
+                { session?.data?.user ? 
+                  !canChat && !isLoadingMeetingStatus && (
+                  <TooltipContent>
+                    <p>Book a meeting first to enable chat</p>
+                  </TooltipContent>
+                ) :
+                <TooltipContent>
+                  <p>Please log in to chat</p>
+                </TooltipContent>
+                }
+                
+              </Tooltip>  
+            </TooltipProvider>
+
+            <div className="">
+              <Button
+                size="sm"
+                className="flex-1 bg-primary/90 hover:bg-primary"
+                onClick={() => setIsModalOpen(true)}
+              >
+                Book Now
+              </Button>
+            </div>
           </div>
         </div>
       </Card>
 
-      {/* Availability Modal with fixed height and scrollable content */}
+      {/* Booking Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-md md:max-w-xl max-h-[80dvh] w-full flex flex-col">
-          <DialogHeader className="px-6 py-4">
+        <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-md md:max-w-xl">
+          <DialogHeader className="border-b pb-4">
             <DialogTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              Booking Session with {mentor.mentorName}
+              Book a Session with {mentor.mentorName || "Mentor"}
             </DialogTitle>
           </DialogHeader>
-          
+
           {/* Scrollable content area */}
-          <div className="overflow-y-auto px-6 flex-1">
+          <div className="flex-1 overflow-y-auto py-4">
             {/* Mentor quick info */}
-            <div className="flex items-center space-x-3 mb-4">
+            <div className="mb-6 flex items-center space-x-3 px-1">
               <Avatar className="h-12 w-12">
                 <AvatarImage
                   src={mentor.user.image || ""}
-                  alt={mentor.mentorName || "Mentor Avatar"}
+                  alt={mentor.mentorName || "Mentor"}
                 />
-                <AvatarFallback>{mentor.mentorName?.[0]}</AvatarFallback>
+                <AvatarFallback>{mentor.mentorName?.[0] || "M"}</AvatarFallback>
               </Avatar>
-              <div>
-                <h4 className="font-medium">{mentor.mentorName}</h4>
-                <p className="text-sm text-gray-500">{mentor.jobTitle} at {mentor.currentCompany}</p>
+              <div className="flex-1">
+                <h4 className="font-medium">{mentor.mentorName || "Mentor"}</h4>
+                <p className="text-sm text-muted-foreground">
+                  {mentor.jobTitle ? `${mentor.jobTitle} at ` : ""}
+                  {mentor.currentCompany || "Company not specified"}
+                </p>
               </div>
-              <div className="ml-auto">
-                <Badge className="bg-green-100 text-green-800 hover:bg-green-200">First Session Free</Badge>
-              </div>
+              <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                First Session Free
+              </Badge>
             </div>
 
-            <div className="mt-4 my-2">
-              <AvailabilityCard
-                avail={mentor.availability!}
-              />
+            {/* Availability Calendar */}
+            <div className="mb-4">
+              {mentor.availability ? (
+                <AvailabilityCard avail={mentor.availability} />
+              ) : (
+                <div className="rounded-md bg-muted/20 p-6 text-center">
+                  <p className="text-muted-foreground">
+                    No availability information found
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
-          <DialogFooter className="px-6 py-4 border-t mt-auto">
-
-            <div className="flex gap-2 w-full sm:justify-end">
-              <Button variant="outline" onClick={() => 
-                //redirect
-                router.push(`/mentors/${mentor.userId}/offerings`)
-              }>
-                Book a Session
-              </Button>
-            </div>
+          <DialogFooter className="border-t pt-4">
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => router.push(`/mentors/${mentor.userId}/offerings`)}
+            >
+              Book a Session
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

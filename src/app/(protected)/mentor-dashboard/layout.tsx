@@ -11,6 +11,8 @@ export default async function Layout({
 }) {
   const session = await auth();
   const user = session?.user as SessionUser | undefined;
+  
+
 
     if (user) {
         if (user?.isRegistered) {

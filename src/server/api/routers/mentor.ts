@@ -20,6 +20,7 @@ export const mentorRouter = createTRPCRouter({
       image : z.string().optional(),
       companyType : z.string(),
       hiringFields : z.array(z.string()),
+      mentorPhoneNumber : z.string(),
      }))
 
 
@@ -38,7 +39,8 @@ export const mentorRouter = createTRPCRouter({
               mentorName : input.name,
               hiringFields : input.hiringFields,
               companyType : input.companyType,
-          },  
+              mentorPhoneNumber : input.mentorPhoneNumber,
+            },  
         }),
         ctx.db.user.update({
           where: { id: ctx?.dbUser?.id! },
@@ -114,6 +116,7 @@ export const mentorRouter = createTRPCRouter({
         .string({ required_error: "Company email is required" })
         .email("Please enter a valid email address")
         .optional(),
+      mentorPhoneNumber : z.string().optional(),
   
       education: z
         .array(
