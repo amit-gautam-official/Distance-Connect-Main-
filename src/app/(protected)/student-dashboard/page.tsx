@@ -6,11 +6,14 @@ import ExploreMentorsBanner from "./components/ExploreMentorsBanner";
 import DashboardStats from "./components/DashboardStats";
 import TrackSessions from "./components/TrackSessions";
 import YourMentors from "./components/YourMentors";
+import PostLoginRedirect from "@/components/PostLoginRedirect";
 
 const StudentDashboardPage = async () => {
   const student = await api.student.getStudent();
 
   const currentTimestamp = new Date().getTime();
+
+  
 
   const filterMeetingList = cache((type: string) => {
     if (type === "upcoming") {

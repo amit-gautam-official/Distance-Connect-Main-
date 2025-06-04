@@ -11,6 +11,7 @@ import MentorViewModal from "./components/modals/mentor-view-modal";
 import VerifyMentorModal from "./components/modals/verify-mentor-modal";
 import { api } from "@/trpc/react";
 import type { JsonValue } from "@prisma/client/runtime/library";
+import { WorkshopLogsContent } from "./components/WorkshopLogsContent";
 
 
 interface Mentor  {
@@ -78,10 +79,11 @@ export default function AdminDashboard() {
       
 
       <Tabs defaultValue="students" className="w-full">
-        <TabsList className="mx-auto mb-6 grid w-full max-w-md grid-cols-3 rounded-lg md:mb-8">
+        <TabsList className="mx-auto mb-6 grid w-full max-w-md grid-cols-4 rounded-lg md:mb-8">
           <TabsTrigger value="students">Students</TabsTrigger>
           <TabsTrigger value="mentors">Mentors</TabsTrigger>
           <TabsTrigger value="meeting-logs">Meeting Logs</TabsTrigger>
+          <TabsTrigger value="workshop-logs">Workshop Logs</TabsTrigger>
         </TabsList>
 
         <TabsContent value="students" className="space-y-4 md:space-y-6">
@@ -99,6 +101,9 @@ export default function AdminDashboard() {
 
         <TabsContent value="meeting-logs" className="space-y-4 md:space-y-6">
           <MeetingLogsContent />
+        </TabsContent>
+        <TabsContent value="workshop-logs" className="space-y-4 md:space-y-6">
+          <WorkshopLogsContent />
         </TabsContent>
       </Tabs>
 

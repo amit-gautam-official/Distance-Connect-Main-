@@ -1208,12 +1208,6 @@ export default function WorkshopDetailPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Enrollment</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to enroll in &quot;{workshop.name}&quot;?
-              <br />
-              This will give you access to the workshop materials and meeting
-              links.
-            </DialogDescription>
           </DialogHeader>
 
           <div className="py-2">

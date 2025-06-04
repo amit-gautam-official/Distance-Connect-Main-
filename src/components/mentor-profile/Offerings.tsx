@@ -10,7 +10,6 @@ interface Offering {
   id: string;
   title: string;
   description: string;
-  rating: number;
   duration: string;
   price: string;
   type: string;
@@ -51,15 +50,7 @@ export function Offerings({ offerings }: OfferingsProps) {
               <Badge className="bg-green-100 text-green-800 font-medium px-3 py-1 rounded-full text-xs shadow">First Session Free</Badge>
             </div>
             <div className="p-6">
-              <div className="mb-3 flex items-center justify-between">
-                <div className="flex items-center">
-                  <Star className="mr-1 h-4 w-4 fill-yellow-500 text-yellow-500" />
-                  <span className="text-sm font-medium">
-                    {offering.rating}
-                  </span>
-                </div>
-                
-              </div>
+              
               
               <h3 className="mb-2 text-xl font-semibold text-gray-800">
                 {offering.title}

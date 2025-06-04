@@ -1,96 +1,167 @@
 "use client";
 
-import React, { useRef } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, Clock, Users, Eye, PlayCircle, ExternalLink, BookOpen } from "lucide-react"; 
-import { Badge } from '@/components/ui/badge';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Calendar, Clock, Edit, Eye, Share2, Trash, Users } from "lucide-react";
+import {  useRef } from "react";
+import { toast } from "sonner";
 
-// Define the structure of a schedule item
-interface ScheduleItem {
-  day: string;
-  time: string;
-  [key: string]: any; // Allow for other properties if they exist
-}
+import { useRouter } from "next/navigation";
 
-// Define the Workshop type based on data from getPublicWorkshops
-export type Workshop = {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  numberOfDays: number;
-  bannerImage: string | null;
-  introductoryVideoUrl: string | null;
-  schedule: any; // Prisma JsonValue can be complex, be flexible
-  learningOutcomes: any;
-  courseDetails: any;
-  otherDetails: string | null;
-  createdAt: Date;
-  mentor: {
-    user: {
-      name: string | null;
-      image: string | null;
-    };
-  };
-  _count: {
-    enrollments: number;
-  };
-};
 
-interface PublicWorkshopListProps {
-  workshops: Workshop[];
+
+interface WorkshopListProps {
+  workshops: any
   isLoading: boolean;
+  onRefresh: () => void;
 }
 
-const MAX_DESC_LENGTH = 120; // Maximum characters for description
-
-// Format price to INR
-const formatPrice = (price: number) => {
-  if (price === 0) return "Free";
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0, 
-    maximumFractionDigits: 2,
-  }).format(price / 100); // Assuming price is in paise
-};
-
-export default function PublicWorkshopList({ workshops, isLoading }: PublicWorkshopListProps) {
+export default function PublicWorkshopList({
+  workshops,
+  isLoading,
+  onRefresh,
+}: WorkshopListProps) {
+  const router = useRouter();
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
 
-  const handlePlayVideo = (workshopId: string) => {
-    const videoElement = videoRefs.current[workshopId];
-    if (videoElement) {
-      if (videoElement.paused) {
-        videoElement.play();
-      } else {
-        videoElement.pause();
-      }
+  const MAX_DESC_LENGTH = 150; // Maximum characters for description
+
+  // Function to determine workshop status
+
+const getWorkshopStatus = (workshop: any): "upcoming" | "ongoing" | "passed" => {
+  let startDate: Date | null = null;
+  if (workshop.scheduleType === "custom" && !workshop.startDate) {
+    if (workshop.schedule.length === 0) {
+      throw new Error("Custom schedule is empty.");
     }
+    // Use the first date from schedule for custom type
+    startDate = new Date(workshop.schedule[0].date);
+  } else if (workshop.startDate) {
+    startDate = new Date(workshop.startDate);
+  }
+
+  if (!startDate || isNaN(startDate.getTime())) {
+    throw new Error("Invalid or missing start date.");
+  }
+
+  // Set time to 00:00:00 for date-only comparison
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const start = new Date(startDate);
+  start.setHours(0, 0, 0, 0);
+
+  const end = new Date(start);
+  end.setDate(start.getDate() + workshop.numberOfDays - 1);
+
+  if (today < start) return "upcoming";
+  if (today >= start && today <= end) return "ongoing";
+  return "passed";
+};
+
+
+
+  // Function to render status tag
+  const renderStatusTag = (workshop: any) => {
+    const status = getWorkshopStatus(workshop);
+    
+    
+    const tagConfig = {
+      ongoing: {
+        text: "Ongoing",
+        className: "bg-blue-100 text-blue-800 border-green-200"
+      },
+      passed: {
+        text: "Passed",
+        className: "bg-gray-100 text-gray-600 border-gray-200"
+      },
+      upcoming: {
+        text: "Upcoming",
+        className: " bg-green-100 text-green-800 border-blue-200"
+      }
+
+    };
+
+    const config = tagConfig[status as keyof typeof tagConfig];
+    
+    return (
+      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${config.className}`}>
+        {config.text}
+      </span>
+    );
   };
 
-  if (isLoading && workshops.length === 0) {
+  // Handle share workshop link
+  const handleShare = (workshopId: string, workshopName: string) => {
+    // Get the base URL from the window location
+    // In production, you might want to use an environment variable for the domain
+    const baseUrl = window.location.origin;
+    const shareUrl = `${baseUrl}/workshops/${workshopId}`;
+
+    // Copy to clipboard
+    navigator.clipboard
+      .writeText(shareUrl)
+      .then(() => {
+        toast.success(
+          `Workshop link for "${workshopName}" copied to clipboard`,
+        );
+      })
+      .catch((error) => {
+        console.error("Error copying to clipboard:", error);
+        toast.error("Failed to copy link. Please try again.");
+      });
+  };
+
+  // Loading skeleton
+  if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {[...Array(6)].map((_, i) => (
-          <Card key={i} className="flex flex-col overflow-hidden rounded-xl shadow-lg animate-pulse">
-            <div className="h-56 w-full bg-gray-300"></div>
-            <CardHeader className="pb-3 pt-4">
-              <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
-              <div className="h-4 bg-gray-300 rounded w-1/2"></div>
-            </CardHeader>
-            <CardContent className="flex-grow space-y-2 py-2">
-              <div className="h-4 bg-gray-300 rounded w-full"></div>
-              <div className="h-4 bg-gray-300 rounded w-full"></div>
-              <div className="h-4 bg-gray-300 rounded w-5/6"></div>
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {workshops.map((workshop : any) => (
+          <Card key={workshop.id} className="animate-pulse">
+            {workshop.bannerImage ? (
+              <div className="relative h-48 w-full">
+                <img
+                  src={workshop.bannerImage}
+                  alt={workshop.name}
+                  className="h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <CardHeader className="absolute bottom-0 left-0 right-0 text-white">
+                  <CardTitle className="text-xl font-bold">
+                    {workshop.name}
+                  </CardTitle>
+                </CardHeader>
+              </div>
+            ) : (
+              <CardHeader>
+                <CardTitle>{workshop.name}</CardTitle>
+              </CardHeader>
+            )}
+            <CardContent className="space-y-3 p-3 sm:p-4">
+              <div className="h-6 w-3/4 rounded bg-gray-200"></div>
+              <div className="h-4 w-full rounded bg-gray-200"></div>
+              <div className="h-4 w-5/6 rounded bg-gray-200"></div>
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 rounded-full bg-gray-200"></div>
+                <div className="h-4 w-1/4 rounded bg-gray-200"></div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 rounded-full bg-gray-200"></div>
+                <div className="h-4 w-1/3 rounded bg-gray-200"></div>
+              </div>
             </CardContent>
-            <CardFooter className="bg-gray-100 p-3 sm:p-4 flex justify-between items-center">
-              <div className="h-8 bg-gray-300 rounded w-1/4"></div>
-              <div className="h-10 bg-gray-300 rounded w-1/3"></div>
+            <CardFooter className="flex justify-between border-t p-3 sm:p-4">
+              <div className="h-8 w-1/3 rounded bg-gray-200"></div>
+              <div className="flex gap-2">
+                <div className="h-8 w-8 rounded bg-gray-200"></div>
+                <div className="h-8 w-8 rounded bg-gray-200"></div>
+              </div>
             </CardFooter>
           </Card>
         ))}
@@ -98,126 +169,180 @@ export default function PublicWorkshopList({ workshops, isLoading }: PublicWorks
     );
   }
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {workshops.map((workshop) => {
-        const truncatedDesc = workshop.description.length > MAX_DESC_LENGTH
-          ? workshop.description.substring(0, MAX_DESC_LENGTH) + "..."
-          : workshop.description;
+  // Format price to INR
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
 
-        return (
-          <Card key={workshop.id} className="flex flex-col overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 bg-white group">
-            <div className="relative h-56 w-full">
-              {workshop.introductoryVideoUrl ? (
-                <div className="relative h-full w-full group/video">
+  return (
+    <>
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {workshops.map((workshop : any) => (
+          <Card
+            key={workshop.id}
+            className="group flex flex-col overflow-hidden rounded-lg bg-white shadow-lg transition-all duration-300 hover:shadow-xl"
+          >
+            {workshop.bannerImage || workshop.introductoryVideoUrl ? (
+              <div
+                className="relative h-48 w-full"
+                onMouseEnter={() => {
+                  if (
+                    workshop.introductoryVideoUrl &&
+                    videoRefs.current[workshop.id]
+                  ) {
+                    videoRefs.current[workshop.id]
+                      ?.play()
+                      .catch((error) =>
+                        console.warn("Video play failed:", error),
+                      );
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (
+                    workshop.introductoryVideoUrl &&
+                    videoRefs.current[workshop.id]
+                  ) {
+                    videoRefs.current[workshop.id]?.pause();
+                    if (videoRefs.current[workshop.id]) {
+                      // Check again before setting currentTime
+                      videoRefs.current[workshop.id]!.currentTime = 0;
+                    }
+                  }
+                }}
+              >
+                {workshop.bannerImage && (
+                  <img
+                    src={workshop.bannerImage}
+                    alt={workshop.name}
+                    className={`absolute left-0 top-0 h-full w-full object-cover transition-opacity duration-300 ${workshop.introductoryVideoUrl ? "group-hover:opacity-0" : "opacity-100"}`}
+                  />
+                )}
+                {workshop.introductoryVideoUrl && (
                   <video
-                    ref={(el) => { videoRefs.current[workshop.id] = el; }}
+                    ref={(el) => {
+                      if (videoRefs.current)
+                        videoRefs.current[workshop.id] = el;
+                    }}
                     src={workshop.introductoryVideoUrl}
-                    poster={workshop.bannerImage || '/placeholder-workshop.jpg'}
-                    className="w-full h-full object-cover"
-                    controls={false} 
+                    className="absolute left-0 top-0 h-full w-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                     loop
                     muted
                     playsInline
-                    onClick={() => handlePlayVideo(workshop.id)} // Allow clicking video to play/pause
-                  />
-                  <div 
-                    className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 opacity-0 group-hover/video:opacity-100 transition-opacity duration-300 cursor-pointer"
-                    onClick={() => handlePlayVideo(workshop.id)}
+                    poster={workshop.bannerImage ?? undefined}
                   >
-                    <PlayCircle className="h-16 w-16 text-white opacity-80 group-hover/video:opacity-100" />
-                  </div>
-                   <div className="absolute top-2 right-2">
-                     <Badge variant="secondary" className="bg-black/50 text-white backdrop-blur-sm pointer-events-none">
-                       Intro Video
-                     </Badge>
-                   </div>
-                </div>
-              ) : workshop.bannerImage ? (
-                <Image 
-                  src={workshop.bannerImage}
-                  alt={workshop.name} 
-                  layout="fill"
-                  objectFit="cover"
-                />
-              ) : (
-                <div className="h-full w-full bg-gray-200 flex items-center justify-center">
-                  <BookOpen className="h-16 w-16 text-gray-400" />
-                </div>
-              )}
-            </div>
-            
-            <CardHeader className="pb-2 pt-4">
-              <CardTitle className="text-xl font-semibold text-[#3D568F] hover:text-[#2c3e6a] transition-colors">
-                <Link href={`/workshops/${workshop.id}`}>{workshop.name}</Link>
-              </CardTitle>
-              {workshop.mentor.user.name && (
-                <div className="flex items-center mt-1.5">
-                  <Avatar className="h-6 w-6 mr-2">
-                    <AvatarImage src={workshop.mentor.user.image || undefined} alt={workshop.mentor.user.name} />
-                    <AvatarFallback>{workshop.mentor.user.name.substring(0, 1).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <p className="text-sm text-gray-600">With {workshop.mentor.user.name}</p>
-                </div>
-              )}
-            </CardHeader>
-
-            <CardContent className="flex-grow pt-2 pb-3">
-              <p className="text-sm text-gray-600 mb-3 min-h-[60px]">
-                {truncatedDesc}
-                {workshop.description.length > MAX_DESC_LENGTH && (
-                  <Link href={`/workshops/${workshop.id}`} className="text-[#3D568F] hover:text-[#2c3e6a] font-medium ml-1">
-                    View Details
-                  </Link>
+                    Your browser does not support the video tag.
+                  </video>
                 )}
-              </p>
-              
-              <div className="space-y-1.5 text-sm text-gray-500">
-                {Array.isArray(workshop.schedule) && workshop.schedule.length > 0 && workshop.schedule.every(s => s.day && s.time) ? (
-                    <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-2 text-[#3D568F] flex-shrink-0" />
-                        <span>{workshop.schedule.map(s => `${s.day} at ${s.time}`).join('; ')}</span>
-                    </div>
-                ) : typeof workshop.schedule === 'string' && workshop.schedule ? (
-                     <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-2 text-[#3D568F] flex-shrink-0" />
-                        <span>{workshop.schedule}</span>
-                    </div>
-                ) : workshop.numberOfDays ? (
-                    <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-2 text-[#3D568F] flex-shrink-0" />
-                        <span>{workshop.numberOfDays} day{workshop.numberOfDays > 1 ? 's' : ''} workshop</span>
-                    </div>
-                ) : null}
-
-                <div className="flex items-center">
-                  <Users className="h-4 w-4 mr-2 text-[#3D568F] flex-shrink-0" />
-                  <span>{workshop._count.enrollments} student{workshop._count.enrollments !== 1 ? 's' : ''} enrolled</span>
+                {/* Fallback background if only video is present and not hovered */}
+                {workshop.introductoryVideoUrl && !workshop.bannerImage && (
+                  <div className="absolute left-0 top-0 h-full w-full bg-gray-200 transition-opacity duration-300 group-hover:opacity-0" />
+                )}
+                <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+                
+                {/* Status tag positioned on the image */}
+                <div className="absolute top-3 right-3 z-20">
+                  {renderStatusTag(workshop)}
                 </div>
+                
+                <CardHeader className="absolute bottom-0 left-0 right-0 z-20 p-3 text-white sm:p-4">
+                  <CardTitle className="text-lg font-bold sm:text-xl">
+                    {workshop.name}
+                  </CardTitle>
+                </CardHeader>
+              </div>
+            ) : (
+              // Fallback if no banner and no video, regular CardHeader for title
+              <CardHeader className="relative p-3 sm:p-4">
+                <div className="flex items-start justify-between">
+                  <CardTitle className="flex-1 mr-3">{workshop.name}</CardTitle>
+                  {renderStatusTag(workshop)}
+                </div>
+              </CardHeader>
+            )}
+
+            <CardContent className="flex-grow space-y-2 p-3 sm:p-4">
+              <div className="text-sm text-gray-600 transition-colors group-hover:text-gray-900">
+                {workshop.description.length > MAX_DESC_LENGTH ? (
+                  <>
+                    {`${workshop.description.substring(0, MAX_DESC_LENGTH)}... `}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent card click-through
+                        router.push(`/workshops/${workshop.id}`);
+                      }}
+                      className="ml-1 inline font-medium text-primary hover:underline"
+                    >
+                      View Details
+                    </button>
+                  </>
+                ) : (
+                  workshop.description
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 text-sm text-gray-600 transition-colors group-hover:text-primary">
+                <Calendar className="h-4 w-4 text-primary" />
+                {workshop.scheduleType === "custom" && workshop.schedule.length > 0 ? (
+                  <span>
+                    {workshop.schedule[0].date}
+                  </span>
+                ) : (
+                  <span>
+                    {workshop.startDate
+                      ? new Date(workshop.startDate).toLocaleDateString()
+                      : "No start date"}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 text-sm text-gray-600 transition-colors group-hover:text-primary">
+                <Clock className="h-4 w-4 text-primary" />
+                <span>{workshop.schedule.map((s : any) => s.time).join(", ")}</span>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Users className="h-4 w-4 text-primary" />
+                <span>
+                  {workshop._count?.enrollments || 0} student
+                  {(workshop._count?.enrollments || 0) !== 1 ? "s" : ""}{" "}
+                  enrolled
+                </span>
+              </div>
+
+              <div className="mt-3 inline-block rounded-full bg-primary/5 px-3 py-1 text-lg font-bold text-primary transition-all group-hover:bg-primary/10">
+                {formatPrice(workshop.price / 100)}
               </div>
             </CardContent>
-
-            <CardFooter className="bg-gray-50 p-3 sm:p-4 flex flex-col sm:flex-row gap-2 sm:gap-0 sm:justify-between items-stretch sm:items-center border-t">
-              <div className="text-lg font-bold text-[#3D568F] mb-2 sm:mb-0">
-                {formatPrice(workshop.price)}
-              </div>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <Link href={`/workshops/${workshop.id}`} passHref className="flex-1 sm:flex-initial">
-                  <Button variant="outline" size="sm" className="w-full transition-all hover:bg-[#3D568F]/10 border-[#3D568F] text-[#3D568F] hover:text-[#2c3e6a]">
-                    <Eye className="h-4 w-4 mr-1.5" />
-                    Details
-                  </Button>
-                </Link>
-                <Link href={`/workshops/${workshop.id}`} passHref className="flex-1 sm:flex-initial">
-                  <Button size="sm" className="w-full bg-[#3D568F] hover:bg-[#2c3e6a] text-white">
-                    Enroll Now <ExternalLink className="h-4 w-4 ml-1.5" />
-                  </Button>
-                </Link>
+            <CardFooter className="flex flex-col gap-2 border-t bg-gradient-to-r from-gray-50/80 to-white/80 p-3 backdrop-blur-sm transition-all group-hover:from-gray-100/80 group-hover:to-white/90 sm:flex-row sm:justify-between sm:gap-0 sm:p-4">
+              <Button
+                variant="default"
+                className="w-full transition-all sm:w-auto"
+                size="sm"
+                onClick={() => router.push(`/workshops/${workshop.id}`)}
+              >
+                <Eye className="mr-1 h-4 w-4" />
+                View Details
+              </Button>
+              <div className="ml-4 flex w-full gap-2 sm:w-auto">
+                <Button
+                  variant="outline"
+                  className="flex-1 transition-all hover:bg-primary/5 sm:flex-initial"
+                  size="sm"
+                  onClick={() => handleShare(workshop.id, workshop.name)}
+                  title="Share workshop link"
+                >
+                  <Share2 className="h-4 w-4" />
+                </Button>
               </div>
             </CardFooter>
           </Card>
-        );
-      })}
-    </div>
+        ))}
+      </div>
+    </>
   );
 }

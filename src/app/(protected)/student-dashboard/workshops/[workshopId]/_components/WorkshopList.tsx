@@ -79,6 +79,70 @@ export default function WorkshopList({
   const [studentGmailId, setStudentGmailId] = useState<string>("");
   const MAX_DESC_LENGTH = 120; // Maximum characters for description
 
+  const getWorkshopStatus = (workshop: any): "upcoming" | "ongoing" | "passed" => {
+  let startDate: Date | null = null;
+  if (workshop.scheduleType === "custom" && !workshop.startDate) {
+    if (workshop.schedule.length === 0) {
+      throw new Error("Custom schedule is empty.");
+    }
+    // Use the first date from schedule for custom type
+    startDate = new Date(workshop.schedule[0].date);
+  } else if (workshop.startDate) {
+    startDate = new Date(workshop.startDate);
+  }
+
+  if (!startDate || isNaN(startDate.getTime())) {
+    throw new Error("Invalid or missing start date.");
+  }
+
+  // Set time to 00:00:00 for date-only comparison
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const start = new Date(startDate);
+  start.setHours(0, 0, 0, 0);
+
+  const end = new Date(start);
+  end.setDate(start.getDate() + workshop.numberOfDays - 1);
+
+  if (today < start) return "upcoming";
+  if (today >= start && today <= end) return "ongoing";
+  return "passed";
+};
+
+
+
+  // Function to render status tag
+  const renderStatusTag = (workshop: any) => {
+    const status = getWorkshopStatus(workshop);
+    
+    
+    const tagConfig = {
+      ongoing: {
+        text: "Ongoing",
+        className: "bg-blue-100 text-blue-800 border-green-200"
+      },
+      passed: {
+        text: "Passed",
+        className: "bg-gray-100 text-gray-600 border-gray-200"
+      },
+      upcoming: {
+        text: "Upcoming",
+        className: " bg-green-100 text-green-800 border-blue-200"
+      }
+
+    };
+
+    const config = tagConfig[status as keyof typeof tagConfig];
+    
+    return (
+      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${config.className}`}>
+        {config.text}
+      </span>
+    );
+  };
+
+
   // console.log(workshops);
   const enrollInWorkshop = api.workshop.enrollInWorkshop.useMutation({
     onSuccess: () => {
@@ -208,6 +272,10 @@ export default function WorkshopList({
                 {workshop.introductoryVideoUrl && !workshop.bannerImage && (
                    <div className="absolute top-0 left-0 w-full h-full bg-gray-200 group-hover:opacity-0 transition-opacity duration-300" />
                 )}
+                <div className="absolute top-3 right-3 z-20">
+                  {renderStatusTag(workshop)}
+                </div>
+
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent z-10" />
                 <CardHeader className="absolute bottom-0 left-0 right-0 text-white p-3 sm:p-4 z-20">
                   <CardTitle className="text-lg sm:text-xl font-bold">{workshop.name}</CardTitle>
@@ -227,6 +295,9 @@ export default function WorkshopList({
                     by {workshop.mentor.user.name}
                   </Link>
                 </CardHeader>
+                  <div className="absolute top-3 right-3 z-20">
+                  {renderStatusTag(workshop)}
+                </div>
               </div>
             )}
 

@@ -387,42 +387,40 @@ export const workshopRouter = createTRPCRouter({
       const workshops = await ctx.db.workshop.findMany({
         take: limit + 1, // get an extra item to see if there's a next page
         cursor: cursor ? { id: cursor } : undefined,
-        where: {
-          // Add any conditions for public workshops, e.g., published: true if you add such a field
+        orderBy: {
+          createdAt: 'desc', // Or any other preferred order
         },
-        select: {
+        select:{
           id: true,
           name: true,
-          description: true, // Consider truncating this on the client for list view
+          description: true,
           bannerImage: true,
+          introductoryVideoUrl: true,
           price: true,
           numberOfDays: true,
           scheduleType: true,
-          schedule: true,
           startDate: true,
-          introductoryVideoUrl: true,
-          courseDetails: true,
+          schedule: true, // This is JSON, client can parse
+          learningOutcomes: true,
+          courseDetails: true, // This is JSON, client can parse
           otherDetails: true,
-          
-          learningOutcomes: true, // Consider taking only a few for list view
           mentor: {
             select: {
               user: {
                 select: {
+                  id: true, // For linking to mentor's public profile if you have one
                   name: true,
                   image: true,
                 },
               },
+              bio: true,
+              jobTitle: true,
+              currentCompany: true,
+              skills: true, // Added skills
+              hiringFields: true, // Added hiring fields
             },
           },
-          _count: {
-            select: { enrollments: true },
-          },
-          createdAt: true, // For sorting or display
-        },
-        orderBy: {
-          createdAt: 'desc', // Or any other preferred order
-        },
+        }
       });
 
       let nextCursor: typeof cursor | undefined = undefined;
@@ -469,6 +467,7 @@ export const workshopRouter = createTRPCRouter({
               jobTitle: true,
               currentCompany: true,
               skills: true, // Added skills
+              hiringFields: true, // Added hiring fields
             },
           },
           _count: {
@@ -889,14 +888,22 @@ export const workshopRouter = createTRPCRouter({
       
       // Get the attendees for the meeting
       const attendees = [];
+      console.log(`Generating meeting link for workshop: ${workshop.name}, Day Index: ${dayIndexToUse}, Target Date: ${targetDate.toISOString()}`);
+      console.log(`Is Free Session: ${isFreeSession}`);
+      console.log(`Workshop Enrollments: ${workshop.enrollments.length}`);
+      console.log("attendees before adding:", attendees.length);
       
       // Add enrolled students conditionally
       for (const enrollment of workshop.enrollments) {
+        console.log(`Processing enrollment for student: ${enrollment.studentGmailId}, Payment Status: ${enrollment.paymentStatus}`);
         if (enrollment.studentGmailId) { // Student must have a Gmail ID
+          console.log(`Adding student: ${enrollment.studentGmailId}`);
           if (isFreeSession) { // If the session is free, add the student
+            console.log(`Free session, adding student: ${enrollment.studentGmailId}`);
             attendees.push({ email: enrollment.studentGmailId });
           } else { // If the session is paid
             if (enrollment.paymentStatus === true) { // And student has paid
+              console.log(`Paid session, adding student: ${enrollment.studentGmailId}`);
               attendees.push({ email: enrollment.studentGmailId });
             }
           }
@@ -905,8 +912,10 @@ export const workshopRouter = createTRPCRouter({
       
       // Add the mentor
       if (workshop.mentorGmailId) {
+        console.log(`Adding mentor: ${workshop.mentorGmailId}`);
         attendees.push({ email: workshop.mentorGmailId });
       } else if (workshop.mentorUserId === ctx.dbUser?.id && ctx.dbUser?.email) { // Check if current user is the mentor
+        console.log(`Adding mentor from current user: ${ctx.dbUser.email}`);
         attendees.push({ email: ctx.dbUser.email });
       }
       
@@ -919,11 +928,13 @@ export const workshopRouter = createTRPCRouter({
       }
       
       // Call the meet router to generate a meeting link
+      console.log(`Generating meeting link for ${attendees.length} attendees:`, attendees);
       const result = await generateMeetLink({
         dateTime: targetDate.toISOString(),
         duration: 60, // 1 hour per session
         attendees,
       });
+      console.log(`Generated meeting link: ${result.meetLink}`);
       
       // Get current meetLinks or initialize if null
       const currentMeetLinks = (workshop.meetLinks as Record<string, typeof MeetLinkEntrySchema._type>) || {};

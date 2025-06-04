@@ -142,7 +142,7 @@ export function ProfileHeader({
           <div className="mt-6 flex flex-col justify-between gap-3 sm:flex-row">
             <div className="flex-1">
               <h3 className="mb-2 text-sm font-medium uppercase text-gray-500">
-                Hiring Fields
+                Skills
               </h3>
               <div className="flex flex-wrap gap-2">
                 {skills.slice(0, 4).map((skill, index) => (
