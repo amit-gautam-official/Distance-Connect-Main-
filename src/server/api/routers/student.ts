@@ -70,21 +70,22 @@ export const studentRouter = createTRPCRouter({
 
   updateStudent: protectedProcedure
   .input(z.object({
-    studentRole: z.enum(["HIGHSCHOOL", "COLLEGE", "WORKING"]),
-    institutionName : z.string(),
-    pinCode : z.number(),
-    interestFields : z.array(z.string()),
-    state : z.string(),
+    studentRole: z.enum(["HIGHSCHOOL", "COLLEGE", "WORKING"]).optional(),
+    institutionName : z.string().optional(),
+    pinCode : z.number().optional(),
+    interestFields : z.array(z.string()).optional(),
+    state : z.string().optional(),
+    phoneNumber : z.string().optional(),
 
     
-    linkedinUrl : z.string(),
-    courseSpecialization : z.string(),
-    companyName : z.string(),
-    jobTitle : z.string(),
-    experience : z.string(),
-    industry : z.string(),
+    linkedinUrl : z.string().optional(),
+    courseSpecialization : z.string().optional(),
+    companyName : z.string().optional(), 
+    jobTitle : z.string().optional(),
+    experience : z.string().optional(),
+    industry : z.string().optional(),
  
-    studentName : z.string(),
+    studentName : z.string().optional(),
     
     
   }))
