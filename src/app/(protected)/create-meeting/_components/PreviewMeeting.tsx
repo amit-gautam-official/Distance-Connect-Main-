@@ -214,7 +214,7 @@ function PreviewMeeting({ formValue }: { formValue: FormValue }) {
                     key={index}
                     className={`rounded-md border border-primary px-4 py-2 text-sm font-medium transition-colors ${
                       selectedTimeSlot === time
-                        ? "bg-primary text-white"
+                        ? " text-white"
                         : "bg-transparent text-primary"
                     }`}
                   

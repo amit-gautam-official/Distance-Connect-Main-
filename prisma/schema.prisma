@@ -257,6 +257,7 @@ model ScheduledMeetings {
   completed          Boolean  @default(false)
 
   paymentStatus Boolean @default(false)
+  isFreeSession Boolean @default(true) // Indicates if the session is free or paid
 
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt

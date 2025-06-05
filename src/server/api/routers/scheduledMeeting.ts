@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, protectedWithoutRateLimitProcedure, publicProcedure } from "@/server/api/trpc";
 
 const getDateTimeFromDateAndTime = (date: Date, time: string): Date => {
   const [hours, minutesPart] = time.split(":");
@@ -253,7 +253,7 @@ export const scheduledMeetingsRouter = createTRPCRouter({
       });
     }),
 
-    hasMeetingWithMentor: protectedProcedure
+    hasMeetingWithMentor: protectedWithoutRateLimitProcedure
     .input(z.object({ mentorUserId: z.string() }))
     .query(async ({ ctx, input }) => {
       if (ctx.dbUser?.role !== "STUDENT") {

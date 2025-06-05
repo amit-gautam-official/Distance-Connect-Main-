@@ -46,8 +46,8 @@ export function Offerings({ offerings }: OfferingsProps) {
             className="relative overflow-hidden rounded-xl border border-gray-200 bg-gradient-to-br from-green-50 to-green-100/30 shadow-sm transition-all hover:shadow-md"
           >
             {/* Top-right badge */}
-            <div className="absolute top-4 right-4 z-10">
-              <Badge className="bg-green-100 text-green-800 font-medium px-3 py-1 rounded-full text-xs shadow">First Session Free</Badge>
+            <div className="absolute top-2 right-2 z-10">
+              <Badge className="bg-green-100 text-green-800 hover:text-white font-medium px-3 py-1 rounded-full text-[8px] shadow">First Session Free</Badge>
             </div>
             <div className="p-6">
               

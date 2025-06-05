@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 const MentorList = () => {
-  const { data, isError, isLoading } = api.mentor.getAllMentors.useQuery(
-    undefined,
+  const { data, isError, isLoading } = api.mentor.getAllMentorsForStudent.useQuery(undefined,
     {
       // Reduce retries to avoid rate limit issues
       retry: 1,

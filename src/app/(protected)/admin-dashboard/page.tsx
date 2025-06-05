@@ -41,21 +41,9 @@ interface Mentor  {
 export default function AdminDashboard() {
   const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
-  const [isMentorViewModalOpen, setIsMentorViewModalOpen] = useState(false);
-  const [isStudentViewModalOpen, setIsStudentViewModalOpen] = useState(false);
-  const {data : mentors , isLoading : mentorLoading}  = api.mentor.getMentorsForAdmin.useQuery(
-    undefined, {
-     enabled: true, 
-    }
-  );
-    const {data : students , isLoading : studentLoading} = api.admin.getStudentsForAdmin.useQuery();
+
 
     
-    if(mentorLoading || studentLoading) {
-        return <div>Loading...</div>;
-    }
-    
-    // console.log(mentors);
 
 
 
@@ -88,13 +76,11 @@ export default function AdminDashboard() {
 
         <TabsContent value="students" className="space-y-4 md:space-y-6">
           <StudentManagement
-            students={students ?? []}
           />
         </TabsContent>
 
         <TabsContent value="mentors" className="space-y-4 md:space-y-6">
           <MentorManagement
-            mentors={mentors ?? []}
             handleVerify={handleVerify}
           />
         </TabsContent>

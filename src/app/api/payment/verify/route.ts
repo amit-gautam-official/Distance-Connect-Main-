@@ -102,7 +102,9 @@ export async function POST(req: NextRequest) {
                   where: { id: scheduledMeeting.id },
                   data: {
                       meetUrl: meet.meetLink,
-                      paymentStatus: true
+                      paymentStatus: true,
+                      isFreeSession: false, // Mark as paid session
+
                   },
                 });
               }

@@ -125,7 +125,7 @@ export const ImageUpload = ({
         </Avatar>
         <label
           htmlFor="image-upload"
-          className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-primary text-white hover:bg-primary/90"
+          className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full  text-white hover:bg-primary/90"
         >
           <Camera className="h-4 w-4" />
         </label>
