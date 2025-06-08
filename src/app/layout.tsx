@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { GoogleAnalytics } from '@next/third-parties/google'
 import Script from "next/script";
 import MicrosoftClarity from "./metrics/MicrosoftClarity";
+import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   title: "Distance Connect",
@@ -69,10 +70,14 @@ export default function RootLayout({
           strategy="lazyOnload"
         />
       <body>
+
         <TRPCReactProvider>
+          <SessionProvider>
+
           {children}
+          </SessionProvider>
           <MicrosoftClarity />
-        </TRPCReactProvider>
+       
         <GoogleAnalytics gaId="G-D2RLQDYV1B" />
         <Toaster />
         <Script id="zoho-salesiq-init" strategy="afterInteractive">
@@ -88,6 +93,7 @@ export default function RootLayout({
         strategy="afterInteractive"
         defer
       />
+       </TRPCReactProvider>
       </body>
     </html>
   );

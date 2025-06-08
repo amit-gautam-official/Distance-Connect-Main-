@@ -1,5 +1,6 @@
-"use client"
+"use client";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import Navbar from "./Navbar";
 import HeroSection from "./HeroSection";
 import LogoStrip from "./LogoStrip";
@@ -12,8 +13,10 @@ import Potential from "./Potential";
 import Testimonials from "./Testimonials";
 import Faq from "./Faq";
 import Footer from "./Footer";
+import WaitlistModal from "./WaitlistModal";
 
 import { ReactNode } from "react";
+import { useSession } from "next-auth/react";
 
 // AnimatedSection component for reusable animations
 interface AnimatedSectionProps {
@@ -24,12 +27,12 @@ interface AnimatedSectionProps {
   id?: string;
 }
 
-const AnimatedSection = ({ 
-  children, 
-  className = "", 
-  delay = 0, 
+const AnimatedSection = ({
+  children,
+  className = "",
+  delay = 0,
   distance = 50,
-  id 
+  id,
 }: AnimatedSectionProps) => {
   return (
     <motion.div
@@ -37,10 +40,10 @@ const AnimatedSection = ({
       initial={{ opacity: 0, y: distance }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
-      transition={{ 
-        duration: 0.8, 
+      transition={{
+        duration: 0.8,
         ease: "easeOut",
-        delay 
+        delay,
       }}
       className={className}
     >
@@ -56,10 +59,10 @@ interface StaggerContainerProps {
   staggerDelay?: number;
 }
 
-const StaggerContainer = ({ 
-  children, 
-  className = "", 
-  staggerDelay = 0.1 
+const StaggerContainer = ({
+  children,
+  className = "",
+  staggerDelay = 0.1,
 }: StaggerContainerProps) => {
   return (
     <motion.div
@@ -70,10 +73,10 @@ const StaggerContainer = ({
       variants={{
         visible: {
           transition: {
-            staggerChildren: staggerDelay
-          }
+            staggerChildren: staggerDelay,
+          },
         },
-        hidden: {}
+        hidden: {},
       }}
     >
       {children}
@@ -93,14 +96,14 @@ const FadeInElement = ({ children, className = "" }: FadeInElementProps) => {
       className={className}
       variants={{
         hidden: { opacity: 0, y: 20 },
-        visible: { 
-          opacity: 1, 
+        visible: {
+          opacity: 1,
           y: 0,
           transition: {
             duration: 0.6,
-            ease: "easeOut"
-          }
-        }
+            ease: "easeOut",
+          },
+        },
       }}
     >
       {children}
@@ -108,14 +111,28 @@ const FadeInElement = ({ children, className = "" }: FadeInElementProps) => {
   );
 };
 
-export default  function LandoingPage({role, blogs, loggedId}: {role: string, blogs: any[], loggedId: boolean}) {
- 
+export default function LandingPage({
+  role,
+  blogs,
+  loggedId,
+}: {
+  role: string;
+  blogs: any[];
+  loggedId: boolean;
+}) {
+  const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
+
+
+
 
   return (
     <div className="relative h-[4000px]">
       <div className="relative flex w-full items-center justify-center">
-        
-          <Navbar role={role} blogs={blogs} loggedId={loggedId} />
+        <Navbar
+          role={role}
+          blogs={blogs}
+          loggedId={loggedId}
+        />
       </div>
 
       {/* Use motion directly for Hero since it's the first thing users see */}
@@ -126,6 +143,8 @@ export default  function LandoingPage({role, blogs, loggedId}: {role: string, bl
       >
         <HeroSection />
       </motion.div>
+
+
 
       <AnimatedSection delay={0.1}>
         <LogoStrip />

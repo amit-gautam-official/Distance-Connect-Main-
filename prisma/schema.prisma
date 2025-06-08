@@ -353,3 +353,14 @@ model WorkshopEnrollment {
 
   @@unique([workshopId, studentUserId])
 }
+
+model Waitlist {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  email String @unique
+  name  String?
+  phone String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

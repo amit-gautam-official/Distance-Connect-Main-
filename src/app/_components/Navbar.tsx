@@ -27,14 +27,36 @@ import {
 
 import Link from "next/link";
 import { api } from "@/trpc/react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import WaitlistModal from "./WaitlistModal";
 
-
-const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blogs: any }) => {
+const Navbar = ({
+  role,
+  loggedId,
+  blogs,
+}: {
+  role: string;
+  loggedId: boolean;
+  blogs: any;
+}) => {
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const router = useRouter();
+
+  const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
+  const session = useSession();
+
+  const openWaitlistModal = () => {
+    setIsWaitlistModalOpen(true);
+  };
+
+    useEffect(() => {
+    if (!session.data) {
+    openWaitlistModal();
+    }
+  }, []);
 
   //get only top 4 blogs
   const top4Blogs = blogs?.slice(0, 4);
@@ -67,9 +89,12 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
     return () => window.removeEventListener("scroll", handleScroll); // Cleanup on component unmount
   }, [lastScrollY]);
 
-
   return (
     <div className="m-auto w-full">
+      <WaitlistModal
+        isOpen={isWaitlistModalOpen}
+        onClose={() => setIsWaitlistModalOpen(false)}
+      />
       {/* Mobile nav */}
       <div className="relative flex h-[55px] w-full items-center justify-between bg-white p-6 shadow-[0px_1px_3.7px_0px_rgba(0,0,0,0.10)] lg:hidden">
         <Sheet>
@@ -119,17 +144,17 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
 
               <div className="flex h-full flex-col justify-between gap-4">
                 <div className="mt-4 flex flex-col items-center justify-start gap-4 text-left">
-                <Link
+                  <Link
                     href="/mentors"
                     className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
                   >
                     Mentors
                   </Link>
-                   <Link
+                  <Link
                     href="/workshops"
                     className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
                   >
-                      Workshops
+                    Workshops
                   </Link>
                   <div className="relative mt-2 w-full">
                     <details className="group [&_summary::-webkit-details-marker]:hidden">
@@ -167,11 +192,10 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
                         >
                           Mentors
                         </Link>
-                       
                       </div>
                     </details>
                   </div>
-                  
+
                   <Link
                     href="/blog"
                     className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
@@ -179,13 +203,12 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
                     Blogs
                   </Link>
                   <Link
-                  href={"/pricing"}
-                  className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]">
+                    href={"/pricing"}
+                    className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
+                  >
                     Pricing
                   </Link>
-                
-                 
-                  
+
                   <Link
                     href="/contact-us"
                     className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
@@ -194,11 +217,10 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
                   </Link>
                 </div>
                 <div className="flex flex-col gap-16">
-                 
                   <div className="flex flex-col items-center justify-center gap-4">
                     {!loggedId ? (
                       <>
-                        <Link
+                        {/* <Link
                           href="/auth/login"
                           className="flex w-[199px] items-center justify-center gap-1 rounded-lg border border-[#E1E4ED] bg-[#F8FAFF] p-[18px_22px]"
                         >
@@ -209,24 +231,35 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
                           className="flex w-[199px] items-center justify-center gap-1 rounded-lg bg-[#6D758F] p-[18px_22px] text-white shadow-md"
                         >
                           Sign up
-                        </Link>
+                        </Link> */}
+                        <button
+                          onClick={openWaitlistModal}
+                          className="flex w-[199px] items-center justify-center gap-1 rounded-lg bg-[#6D758F] p-[18px_22px] text-white shadow-md"
+                        >
+                          Join Waitlist
+                        </button>
                       </>
                     ) : (
                       <>
                         <Link
-                          href={role === "STUDENT" ? "/student-dashboard" : "/mentor-dashboard"}
+                          href={
+                            role === "STUDENT"
+                              ? "/student-dashboard"
+                              : "/mentor-dashboard"
+                          }
                           className="flex w-[199px] items-center justify-center gap-1 rounded-lg border border-[#E1E4ED] bg-[#F8FAFF] p-[18px_22px]"
                         >
                           Dashboard
                         </Link>
-                        <div
-                          className="flex w-[199px] items-center justify-center gap-1 rounded-lg bg-[#6D758F] p-[18px_22px] text-white shadow-md"
-                        >
-                          
-      <button onClick={() => {
-        signOut()
-        router.push("/")
-        }}>Log Out</button>
+                        <div className="flex w-[199px] items-center justify-center gap-1 rounded-lg bg-[#6D758F] p-[18px_22px] text-white shadow-md">
+                          <button
+                            onClick={() => {
+                              signOut();
+                              router.push("/");
+                            }}
+                          >
+                            Log Out
+                          </button>
                         </div>
                       </>
                     )}
@@ -242,9 +275,9 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
     xl--> desktop */}
 
       <div
-        className={`fixed left-[50%] z-[50] w-full   m-auto hidden h-[78px]  translate-x-[-50%] items-center justify-between  bg-white px-[10%]  transition-transform duration-300 lg:flex ${
+        className={`fixed left-[50%] z-[50] m-auto hidden h-[78px] w-full translate-x-[-50%] items-center justify-between bg-white px-[10%] transition-transform duration-300 lg:flex ${
           showNavbar
-            ? "translate-y-[0px] transform "
+            ? "translate-y-[0px] transform"
             : "-translate-y-[100px] transform"
         }`}
       >
@@ -253,17 +286,17 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
             <img src="/logo.png" alt="logo" className="m-auto h-[80px]" />
           </Link>
         </div>
-        <div className="flex items-center justify-center font-inter leading-normal text-white lg:gap-4 lg:text-[16px] xl:gap-8 xl:text-[16px] font-[500]">
+        <div className="flex items-center justify-center font-inter font-[500] leading-normal text-white lg:gap-4 lg:text-[16px] xl:gap-8 xl:text-[16px]">
           <NavigationMenu>
-            <NavigationMenuList className="text-black text-[16px] font-[500]">
-            <NavigationMenuItem>
+            <NavigationMenuList className="text-[16px] font-[500] text-black">
+              <NavigationMenuItem>
                 <Link href="/mentors" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     Mentors
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
-           <NavigationMenuItem>
+              <NavigationMenuItem>
                 <Link href="/workshops" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     Workshops
@@ -272,7 +305,7 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
               </NavigationMenuItem>
               <NavigationMenuItem className="">
                 <NavigationMenuTrigger>
-                  <Link href="/solutions/student" className="cursor-pointer ">
+                  <Link href="/solutions/student" className="cursor-pointer">
                     Solutions
                   </Link>
                 </NavigationMenuTrigger>
@@ -280,21 +313,23 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
                   <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                     <li className="row-span-3">
                       <NavigationMenuLink asChild>
-                        <div
-                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-4 no-underline outline-none focus:shadow-md"
-                          
-                        >
-                          <img src="/logo.png" alt="logo" className="h-20 w- object-cover"  />
+                        <div className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-4 no-underline outline-none focus:shadow-md">
+                          <img
+                            src="/logo.png"
+                            alt="logo"
+                            className="w- h-20 object-cover"
+                          />
                           <div className="mb-2 mt-4 text-sm font-medium">
                             Solutions offered
                           </div>
                           <p className="text-xs leading-tight text-muted-foreground">
-                            Tailored solutions for students and mentors to connect and grow together.
+                            Tailored solutions for students and mentors to
+                            connect and grow together.
                           </p>
                         </div>
                       </NavigationMenuLink>
                     </li>
-                 
+
                     <ListItem href="/solutions/mentor" title="Mentors">
                       Monetize your expertise, build your personal brand, and
                       mentor on your own terms with full flexibility.
@@ -316,10 +351,7 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
                 <NavigationMenuContent>
                   <ul className="grid w-[400px] gap-3 p-2 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                     {components.map((component: any) => (
-                      <ListItem
-                        key={component.title}
-                        href={component.href}
-                      >
+                      <ListItem key={component.title} href={component.href}>
                         <div className="flex items-start gap-2">
                           <img
                             src={component.imageUrl}
@@ -338,8 +370,7 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-              <NavigationMenuItem>
-              </NavigationMenuItem>
+              <NavigationMenuItem></NavigationMenuItem>
               <NavigationMenuItem>
                 <Link href="/pricing" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
@@ -347,7 +378,7 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
-              
+
               <NavigationMenuItem>
                 <Link href="/contact-us" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
@@ -360,7 +391,8 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
         </div>
         {!loggedId ? (
           <div className="flex items-center justify-center gap-4">
-            <Link
+            {
+              /* <Link
               href="/auth/login"
               className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[25px] border-[0.5px] border-[rgba(94,127,203,0.6)] bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-md lg:w-[100px] xl:w-[134px]"
             >
@@ -372,25 +404,34 @@ const Navbar = ({ role, loggedId, blogs }: {role: string, loggedId: boolean; blo
 "
             >
               Sign Up
-            </Link>
+            </Link> */
+              <Button
+                onClick={openWaitlistModal}
+                className="font-roboto flex h-[41px] w-[150px] shrink-0 flex-col items-center justify-center rounded-[31px] bg-[#3D568F] p-3 text-[16px] font-medium not-italic leading-[24px] text-white shadow-md hover:shadow-sm"
+              >
+                Join Waitlist
+              </Button>
+            }
           </div>
         ) : (
           <div className="flex items-center justify-center gap-4">
             <Link
-               href={role === "STUDENT" ? "/student-dashboard" : "/mentor-dashboard"}
-
+              href={
+                role === "STUDENT" ? "/student-dashboard" : "/mentor-dashboard"
+              }
               className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[31px] border-[0.5px] border-[rgba(94,127,203,0.6)] bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-md lg:w-[100px] xl:w-[134px]"
             >
               Dashboard
             </Link>
-            <div
-              className="flex w-[102px] h-[41px] p-3 flex-col justify-center items-center shrink-0 rounded-[31px] bg-[#3D568F] shadow-md  text-white font-roboto text-[16px] not-italic font-medium leading-[24px]"
-            >
-             
-      <button onClick={() =>{
-         signOut()
-        router.push("/")
-      }}>Log Out</button>
+            <div className="font-roboto flex h-[41px] w-[102px] shrink-0 flex-col items-center justify-center rounded-[31px] bg-[#3D568F] p-3 text-[16px] font-medium not-italic leading-[24px] text-white shadow-md">
+              <button
+                onClick={() => {
+                  signOut();
+                  router.push("/");
+                }}
+              >
+                Log Out
+              </button>
             </div>
           </div>
         )}
