@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import {
@@ -22,6 +22,55 @@ interface WaitlistModalProps {
   onClose: () => void;
 }
 
+interface CountdownUnitProps {
+  targetDate: string;
+  unit: "days" | "hours" | "mins" | "secs";
+}
+
+function CountdownUnit({ targetDate, unit }: CountdownUnitProps) {
+  const [value, setValue] = useState<number>(0);
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const now = new Date();
+      const target = new Date(targetDate);
+      const difference = target.getTime() - now.getTime();
+
+      if (difference <= 0) {
+        return { days: 0, hours: 0, mins: 0, secs: 0 };
+      }
+
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(
+        (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+      );
+      const mins = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((difference % (1000 * 60)) / 1000);
+
+      return { days, hours, mins, secs };
+    };
+
+    const updateTimer = () => {
+      const timeLeft = calculateTimeLeft();
+      setValue(timeLeft[unit]);
+    };
+
+    // Initial calculation
+    updateTimer();
+
+    // Update every second
+    const interval = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(interval);
+  }, [targetDate, unit]);
+
+  // Format the value to always have 2 digits for hours, mins, secs
+  const formattedValue =
+    unit === "days" ? value.toString() : value.toString().padStart(2, "0");
+
+  return <>{formattedValue}</>;
+}
+
 export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -30,12 +79,12 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const waitlistEntry = await getWaitlistByEmail(email)
+    const waitlistEntry = await getWaitlistByEmail(email);
     if (waitlistEntry) {
       toast("You are already on the waitlist!");
       return;
     }
-    
+
     const waitListEntry = await addToWaitlist(email, name);
     if (!waitListEntry) {
       toast.error("Failed to join waitlist. Please try again later.");
@@ -48,7 +97,7 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
   };
 
   const goToLogin = () => {
-    router.push("/auth/login"); 
+    router.push("/auth/login");
     onClose();
   };
 
@@ -64,8 +113,9 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
                   Distance Connect
                 </DialogTitle>
                 <DialogDescription className="mt-2 text-gray-600">
-                  Join the waitlist to get personalized guidance from industry
-                  experts who have walked the path you aspire to follow.
+                  Join the waitlist to get the first session free.
+                  <br/>
+                  Get first access to top mentors, insider<br/> referrals, mock interviews, and more.
                 </DialogDescription>
               </DialogHeader>
 
@@ -101,7 +151,7 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
                       type="submit"
                       className="w-full bg-[#3D568F] py-2 font-semibold text-white hover:bg-[#2e4270]"
                     >
-                      Join Waitlist
+                      Notify Me
                     </Button>
                   </form>
                 ) : (
@@ -155,13 +205,12 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
           <div className="hidden w-1/2 bg-gradient-to-br from-[#3D568F]/10 to-[#f5f7fb] p-8 md:block">
             <div className="flex h-full flex-col justify-center">
               <h3 className="mb-2 text-xl font-semibold text-[#3D568F]">
-                Learn from industry experts
+                Unlock 1:1 Mentorship from Top Industry Experts.
               </h3>
               <p className="mb-6 text-gray-600">
-                Connect with mentors who can provide personalized guidance for
-                your academic and career journey.
+                Get career ready with guidance from professionals at Google, Microsoft, <br/>Maruti, McKinsey & more - all here <br/> to help you  to get hired.
               </p>
-              <div className="flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background *:data-[slot=avatar]:grayscale  items-center">
+              <div className="flex items-center -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background *:data-[slot=avatar]:grayscale">
                 <Avatar className="h-8 w-8">
                   <AvatarImage
                     src="https://storage.googleapis.com/dc-profile-image/6828b596fb786cad8f5f5f9b-1f652fc4-1fb1-4282-b34b-330c003eaff5.webp"
@@ -183,10 +232,8 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
                   />
                   <AvatarFallback>Dishank Bhan</AvatarFallback>
                 </Avatar>
-                <span
-                  className="flex items-center text-xs text-gray-600 pl-4">
-                  Mentors who have been in your shoes and
-                  understand the challenges you face.
+                <span className="flex items-center pl-4 text-xs text-gray-600">
+                  Mentors who have been in your shoes and and now they are opening doors <br/> for you.
                 </span>
               </div>
 
@@ -197,38 +244,39 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
                   <div className="relative z-10">
                     <div className="flex h-[200px] w-full items-center justify-center rounded-lg bg-[#3D568F]/5">
                       <div className="flex flex-col items-center space-y-4">
-                        <div className="flex items-end space-x-2">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#3D568F]/20">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-6 w-6 text-[#3D568F]"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                              />
-                            </svg>
-                          </div>
-                          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#3D568F]/30">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-8 w-8 text-[#3D568F]"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path d="M12 14l9-5-9-5-9 5 9 5z" />
-                              <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                            </svg>
+                        <div className="flex flex-col items-center">
+                          <p className="mb-2 text-xs text-gray-600">
+                            Launching in
+                          </p>
+                          <div className="mb-2 flex space-x-3">
+                            {["days", "hours", "mins", "secs"].map(
+                              (unit, i) => (
+                                <div
+                                  key={i}
+                                  className="flex flex-col items-center"
+                                >
+                                  <div className="flex h-10 w-12 items-center justify-center rounded-md bg-white/80 font-mono font-semibold text-[#3D568F] shadow-sm">
+                                    <CountdownUnit
+                                      targetDate="2025-06-25"
+                                      unit={
+                                        unit as
+                                          | "days"
+                                          | "hours"
+                                          | "mins"
+                                          | "secs"
+                                      }
+                                    />
+                                  </div>
+                                  <span className="mt-1 text-xs text-gray-500">
+                                    {unit}
+                                  </span>
+                                </div>
+                              ),
+                            )}
                           </div>
                         </div>
                         <p className="text-center text-sm font-medium text-[#3D568F]">
-                          Distance Connect Mentorship
+                          We are Launching on June 25! 🚀
                         </p>
                       </div>
                     </div>
