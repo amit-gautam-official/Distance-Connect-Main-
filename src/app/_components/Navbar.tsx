@@ -47,15 +47,20 @@ const Navbar = ({
 
   const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
   const session = useSession();
-
+  
   const openWaitlistModal = () => {
+    if (session.data) {
+      return;
+    }
     setIsWaitlistModalOpen(true);
   };
 
     useEffect(() => {
+
     if (!session.data) {
     openWaitlistModal();
     }
+
   }, []);
 
   //get only top 4 blogs
