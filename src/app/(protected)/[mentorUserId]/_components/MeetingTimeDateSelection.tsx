@@ -581,7 +581,7 @@ function MeetingTimeDateSelection({
           <div className="mt-6">
             <Button
               onClick={handleScheduleEvent}
-              className="w-full bg-primary text-white hover:bg-primary/90"
+              className="w-full "
               disabled={loading}
             >
               {loading ? (

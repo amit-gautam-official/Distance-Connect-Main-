@@ -35,9 +35,24 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
   const getMeQuery = api.mentor.getMentor.useQuery();
 
   const mentorSessionPriceRange = getMeQuery.data?.mentorSessionPriceRange; //Ex: "500-700" //string
-  const [minPrice, maxPrice] = mentorSessionPriceRange
-    ? mentorSessionPriceRange.split("-").map(Number)
-    : [undefined, undefined];
+
+  // Updated logic to handle price ranges with "+" format
+  let minPrice: number | undefined, maxPrice: number | undefined;
+
+  if (mentorSessionPriceRange) {
+    if (mentorSessionPriceRange.includes("+")) {
+      // Handle "1500+" format
+      minPrice = Number(mentorSessionPriceRange.replace("+", ""));
+      maxPrice = minPrice * 2; // Set a reasonable max price (double the min)
+    } else if (mentorSessionPriceRange.includes("-")) {
+      // Handle "500-700" format
+      [minPrice, maxPrice] = mentorSessionPriceRange.split("-").map(Number);
+    } else {
+      // Handle single value if ever needed
+      minPrice = Number(mentorSessionPriceRange);
+      maxPrice = minPrice;
+    }
+  }
 
   const [price, setPrice] = useState<number | undefined>();
 
@@ -84,15 +99,11 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
       duration: duration as number,
       description: description as string,
       meetEmail: email as string,
-      price: price ?? minPrice as number,
-
+      price: price ?? (minPrice as number),
     });
-
 
     setLoading(false);
     router.push("/mentor-dashboard/services");
-
-
   };
 
   return (
@@ -132,72 +143,69 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
                   <Calendar className="h-4 w-4 text-gray-500" />
                   Event Name *
                 </label>
-               { !customEventName && 
-                <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full justify-start text-left font-normal"
-                  >
-                    {eventName || "Select meeting type"}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-full">
-                  <DropdownMenuItem
-                    onClick={() => setEventName("One-on-One Mentorship")}
-                  >
-                    One-on-One Mentorship
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setEventName("Group Mentorship")}
-                  >
-                    Group Mentorship
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setEventName("Career Guidance")}
-                  >
-                    Career Guidance
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setEventName("Interview Preparation")}
-                  >
-                    Interview Preparation
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setEventName("Mock Interview Prep")}
-                  >
-                    Mock Interview Prep
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setCustomEventName(true)}
-
-                  >
-                    Custom
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              }
-                {
-                  customEventName && (
-                    <Input
-                      placeholder="Enter custom meeting type"
-                      onChange={(event) => setEventName(event.target.value)}
-                      className="h-11"
-                    />
-                  ) 
-                }
+                {!customEventName && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="h-11 w-full justify-start text-left font-normal"
+                      >
+                        {eventName || "Select meeting type"}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-full">
+                      <DropdownMenuItem
+                        onClick={() => setEventName("One-on-One Mentorship")}
+                      >
+                        One-on-One Mentorship
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setEventName("Group Mentorship")}
+                      >
+                        Group Mentorship
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setEventName("Career Guidance")}
+                      >
+                        Career Guidance
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setEventName("Interview Preparation")}
+                      >
+                        Interview Preparation
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setEventName("Mock Interview Prep")}
+                      >
+                        Mock Interview Prep
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setCustomEventName(true)}
+                      >
+                        Custom
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+                {customEventName && (
+                  <Input
+                    placeholder="Enter custom meeting type"
+                    onChange={(event) => setEventName(event.target.value)}
+                    className="h-11"
+                  />
+                )}
               </div>
 
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                   <Clock className="h-4 w-4 text-gray-500" />
                   Duration *
-
                 </label>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="h-11 w-40">
-                      {duration.toString()} Min  <ChevronDown className="h-4 w-4 text-gray-500" />
+                      {duration.toString()} Min{" "}
+                      <ChevronDown className="h-4 w-4 text-gray-500" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
@@ -215,43 +223,48 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              
               </div>
             </div>
           </div>
 
           {/* Price Selection Section */}
-<div className="rounded-lg bg-white p-6 shadow-sm">
-  <div className="mb-4 flex items-center gap-2">
-    <Clock className="h-5 w-5 text-blue-600" />
-    <h3 className="text-lg font-semibold text-gray-900">Session Price</h3>
-  </div>
-  <div className="space-y-2">
-    {getMeQuery.isLoading ? (
-      <div className="text-sm text-gray-600">Loading price range...</div>
-    ) : !mentorSessionPriceRange ? (
-      <div className="text-sm text-red-600">Wait for your Profile to be verified</div>
-    ) : (
-      <>
-        <label className="text-sm font-medium text-gray-700">
-          Choose your session price (₹{minPrice}–₹{maxPrice})
-        </label>
-        <input
-          type="range"
-          min={minPrice}
-          max={maxPrice}
-          step={50}
-          value={price ?? minPrice}
-          onChange={(e) => setPrice(Number(e.target.value))}
-          className="w-full"
-        />
-        <div className="text-sm text-gray-600">Selected: ₹{price}</div>
-      </>
-    )}
-  </div>
-</div>
-
-
+          <div className="rounded-lg bg-white p-6 shadow-sm">
+            <div className="mb-4 flex items-center gap-2">
+              <Clock className="h-5 w-5 text-blue-600" />
+              <h3 className="text-lg font-semibold text-gray-900">
+                Session Price
+              </h3>
+            </div>
+            <div className="space-y-2">
+              {getMeQuery.isLoading ? (
+                <div className="text-sm text-gray-600">
+                  Loading price range...
+                </div>
+              ) : !mentorSessionPriceRange ? (
+                <div className="text-sm text-red-600">
+                  Wait for your Profile to be verified
+                </div>
+              ) : (
+                <>
+                  <label className="text-sm font-medium text-gray-700">
+                    Choose your session price (₹{minPrice}–₹{maxPrice})
+                  </label>
+                  <input
+                    type="range"
+                    min={minPrice}
+                    max={maxPrice}
+                    step={50}
+                    value={price ?? minPrice}
+                    onChange={(e) => setPrice(Number(e.target.value))}
+                    className="w-full"
+                  />
+                  <div className="text-sm text-gray-600">
+                    Selected: ₹{price}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
 
           {/* Meeting Details Section */}
           <div className="rounded-lg bg-white p-6 shadow-sm">
@@ -295,7 +308,7 @@ function MeetingForm({ setFormValue }: { setFormValue: Function }) {
         <div className="mx-auto max-w-2xl">
           <Button
             className={`h-11 w-full text-base font-medium ${
-              loading ? "bg-gray-300" : "bg-blue-600 hover:bg-blue-700"
+              loading ? "bg-gray-300" : ""
             }`}
             disabled={
               loading || !eventName || !duration || !email || !description

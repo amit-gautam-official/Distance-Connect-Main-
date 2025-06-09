@@ -257,6 +257,7 @@ model ScheduledMeetings {
   completed          Boolean  @default(false)
 
   paymentStatus Boolean @default(false)
+  isFreeSession Boolean @default(true) // Indicates if the session is free or paid
 
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
@@ -351,4 +352,15 @@ model WorkshopEnrollment {
   updatedAt DateTime @updatedAt
 
   @@unique([workshopId, studentUserId])
+}
+
+model Waitlist {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  email String @unique
+  name  String?
+  phone String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -354,6 +354,16 @@ export const workshopRouter = createTRPCRouter({
       };
     }),
 
+
+    getAllWorkshopIds : publicProcedure
+    .query(async ({ ctx }) => {
+      // Fetch all workshop IDs for public listing
+      const workshops = await ctx.db.workshop.findMany({
+        select: { id: true },
+      });
+      return workshops.map(workshop => workshop.id);
+    }),
+
   // Get all available workshops (public)
   getAllWorkshops: publicProcedure
     .query(async ({ ctx }) => {
@@ -419,6 +429,9 @@ export const workshopRouter = createTRPCRouter({
               skills: true, // Added skills
               hiringFields: true, // Added hiring fields
             },
+          },
+          _count: {
+            select: { enrollments: true },
           },
         }
       });

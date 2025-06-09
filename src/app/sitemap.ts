@@ -1,4 +1,5 @@
 import client from '@/lib/contentful';
+import { api } from '@/trpc/server';
 import type { MetadataRoute } from 'next'
  
 
@@ -17,6 +18,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     };
   }).flat() as MetadataRoute.Sitemap;
+
+  const allWorkshopsIds = await api.workshop.getAllWorkshopIds()
+  
+  const allWorkshopsPages = allWorkshopsIds.map((workshopId: string) => {
+    return {
+      url: `https://distanceconnect.in/workshops/${workshopId}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    };
+  }).flat() as MetadataRoute.Sitemap;
+   
+
 
   return [
     {
@@ -49,6 +63,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
+    {
+      url: 'https://distanceconnect.in/workshops',
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: 'https://distanceconnect.in/blog',
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    ...allWorkshopsPages,
     ...allBlogPages,
+   
   ]
 }

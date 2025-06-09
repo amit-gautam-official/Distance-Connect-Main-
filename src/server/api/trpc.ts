@@ -177,6 +177,43 @@ const rateLimiter = t.middleware(async ({ ctx, next }) => {
   });
 });
 
+const authWithoutRateLimit = t.middleware(async ({ ctx, next }) => {
+  // Authenticated user
+  const user = ctx.user;
+  // console.log("User session:", user); 
+  if (!user) {
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: 'You must be logged in to access this resource',
+    });
+  }
+ 
+  const dbUser = await ctx.db.user.findUnique({
+    where: { id: user.id },
+  });
+ 
+  if (!user.id) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'Invalid user ID',
+    });
+  }
+
+  
+  
+
+
+
+  
+  return next({
+    ctx: {
+      ...ctx,
+      user,
+      dbUser,
+    },
+  });
+});
+
 const anonymousRatelimitMiddleware = t.middleware(async ({ ctx, next }) => {
   // Default to a generic identifier
   const identifier = 'anonymous-user';
@@ -225,6 +262,7 @@ const anonymousRatelimitMiddleware = t.middleware(async ({ ctx, next }) => {
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
+export const protectedWithoutRateLimitProcedure = t.procedure.use(authWithoutRateLimit);
 export const protectedProcedure = t.procedure.use(rateLimiter);
 export const publicProcedure = t.procedure;
 export const adminProcedure = t.procedure.use(isAdmin);

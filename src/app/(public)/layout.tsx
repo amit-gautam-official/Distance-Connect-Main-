@@ -23,14 +23,14 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   // Fetch the user session
-  const session = await auth()
+  const session = await auth();
   const user = session?.user as SessionUser | null;
 
   let loggedIn = false;
   let role = "USER";
 
   if (user) {
-    role = user?.role ?? "USER"; 
+    role = user?.role ?? "USER";
     loggedIn = true;
   }
 
@@ -46,9 +46,10 @@ export default async function RootLayout({
   return (
     <>
       <SessionProvider session={session}>
-      <Navbar role={role!} blogs={initialBlogs} loggedId={loggedIn} />
-      {children}
-      <Footer />
+        <Navbar role={role!} blogs={initialBlogs} loggedId={loggedIn} />
+
+        {children}
+        <Footer />
       </SessionProvider>
     </>
   );

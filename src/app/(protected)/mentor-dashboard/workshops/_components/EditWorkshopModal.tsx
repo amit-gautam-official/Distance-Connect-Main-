@@ -1185,7 +1185,7 @@ export default function EditWorkshopModal({
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary transition-all hover:bg-primary/90 sm:w-auto"
+              className="w-full  transition-all hover:bg-primary/90 sm:w-auto"
             >
               {isLoading ? "Saving..." : "Save Changes"}
             </Button>

@@ -100,6 +100,7 @@ const ProfileSettings = ({
     jobTitle: student?.jobTitle || "",
     experience: student?.experience || "",
     industry: student?.industry || "",
+    phoneNumber: student?.phoneNumber || "",
   });
 
   // Initialize state with user data after component mounts (client-side only)
@@ -121,6 +122,7 @@ const ProfileSettings = ({
         jobTitle: student?.jobTitle || "",
         experience: student?.experience || "",
         industry: student?.industry || "",
+        phoneNumber: student?.phoneNumber || "",
       });
     }
   }, [user, student]);
@@ -154,6 +156,9 @@ const ProfileSettings = ({
       updateProfileField("experience", value);
     } else if (name === "industry") {
       updateProfileField("industry", value);
+    }
+    else if (name === "phoneNumber") {
+      updateProfileField("phoneNumber", value);
     }
   };
 
@@ -193,6 +198,14 @@ const ProfileSettings = ({
       name: formData.name,
     });
 
+    //check if phone number is valid
+    const phoneRegex = /^\d{10}$/; // Simple regex for 10-digit phone numbers
+    if (formData.phoneNumber && !phoneRegex.test(formData.phoneNumber)) {
+      toast.error("Please enter a valid 10-digit phone number");
+      setIsSubmitting(false);
+      return;
+    }
+
     updateStudentMutation.mutate({
       studentRole,
       institutionName: formData.institutionName,
@@ -206,6 +219,7 @@ const ProfileSettings = ({
       experience: formData.experience,
       industry: formData.industry,
       studentName: formData.name,
+      phoneNumber: formData.phoneNumber,
     });
   };
 
@@ -251,6 +265,16 @@ const ProfileSettings = ({
                   value={formData.location}
                   onChange={handleChange}
                   placeholder="City, Country"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <Input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  placeholder=""
                 />
               </div>
             </div>

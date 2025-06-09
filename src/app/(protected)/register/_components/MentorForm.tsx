@@ -44,7 +44,7 @@ import { toast } from "sonner";
 
 import { hiringFields } from "@/constants/hiringFirlds";
 
-import {SessionUserSchema} from "@/schemas";
+import { SessionUserSchema } from "@/schemas";
 const formSchema = z.object({
   username: z.string().min(3, {
     message: "Username must be at least 3 characters",
@@ -97,6 +97,7 @@ export default function MentorForm({
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const [checked, setChecked] = useState(false);
+  const [customIndustry, setCustomIndustry] = useState("");
   const router = useRouter();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const handleChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,8 +129,6 @@ export default function MentorForm({
   const checkUsernameAvailability =
     api.user.checkUsernameAvailabilityMutation.useMutation();
 
-  
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!checked) {
       toast.error(
@@ -155,7 +154,8 @@ export default function MentorForm({
       jobTitle: values?.jobTitle,
       mentorPhoneNumber: values?.mentorPhoneNumber,
       experience: values?.experience,
-      industry: values?.industry,
+      // Use custom industry value if "other" is selected
+      industry: values.industry === "other" ? customIndustry : values.industry,
       pinCode: Number(values?.pinCode) || 111111,
       state: values?.state,
       role: role,
@@ -254,7 +254,7 @@ export default function MentorForm({
                     <FormLabel className="absolute left-[10px] top-[0px] bg-white px-1 font-inter text-[14px] font-normal leading-[16px] text-[#8A8A8A] peer-focus:text-black">
                       First Name
                     </FormLabel>
-                    <FormControl className="floating-input peer w-[300px]">
+                    <FormControl className="floating-input peer w-[300px] text-black">
                       <Input placeholder={""} type="text" {...field} required />
                     </FormControl>
                     <FormMessage />
@@ -269,7 +269,7 @@ export default function MentorForm({
                     <FormLabel className="absolute left-[10px] top-[0px] bg-white px-1 font-inter text-[14px] font-normal leading-[16px] text-[#8A8A8A] peer-focus:text-black">
                       Last Name
                     </FormLabel>
-                    <FormControl className="floating-input peer w-[300px]">
+                    <FormControl className="floating-input peer w-[300px] text-black">
                       <Input placeholder={""} type="text" {...field} required />
                     </FormControl>
                     <FormMessage />
@@ -284,7 +284,7 @@ export default function MentorForm({
                     <FormLabel className="absolute left-[10px] top-[0px] bg-white px-1 font-inter text-[14px] font-normal leading-[16px] text-[#8A8A8A] peer-focus:text-black">
                       Phone Number
                     </FormLabel>
-                    <FormControl className="floating-input peer w-[300px]">
+                    <FormControl className="floating-input peer w-[300px] text-black">
                       <Input placeholder={""} type="text" {...field} required />
                     </FormControl>
                     <FormMessage />
@@ -304,7 +304,7 @@ export default function MentorForm({
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
-                      <FormControl className="floating-input peer w-[300px] text-[#8A8A8A]">
+                      <FormControl className="floating-input peer w-[300px] text-black">
                         <SelectTrigger>
                           <SelectValue placeholder="" />
                         </SelectTrigger>
@@ -328,12 +328,10 @@ export default function MentorForm({
                   </FormItem>
                 )}
               />
-
-             
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <FormField
+              <FormField
                 control={form.control}
                 name="industry"
                 render={({ field }) => (
@@ -345,7 +343,7 @@ export default function MentorForm({
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
-                      <FormControl className="floating-input peer w-[300px] text-[#8A8A8A]">
+                      <FormControl className="floating-input peer w-[300px] text-black">
                         <SelectTrigger>
                           <SelectValue placeholder="" />
                         </SelectTrigger>
@@ -399,8 +397,18 @@ export default function MentorForm({
                         <SelectItem value="Biomedical & Healthcare Technology">
                           Biomedical & Healthcare Technology
                         </SelectItem>
+                        <SelectItem value="other">Other (Custom)</SelectItem>
                       </SelectContent>
                     </Select>
+                    {field.value === "other" && (
+                      <FormControl className="mt-2">
+                        <Input
+                          placeholder="Please specify your industry"
+                          value={customIndustry}
+                          onChange={(e) => setCustomIndustry(e.target.value)}
+                        />
+                      </FormControl>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -417,7 +425,7 @@ export default function MentorForm({
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
-                      <FormControl className="floating-input peer w-[300px] text-[#8A8A8A]">
+                      <FormControl className="floating-input peer w-[300px] text-black">
                         <SelectTrigger>
                           <SelectValue placeholder="" />
                         </SelectTrigger>
@@ -475,7 +483,7 @@ export default function MentorForm({
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
-                      <FormControl className="floating-input peer w-[300px] text-[#8A8A8A]">
+                      <FormControl className="floating-input peer w-[300px] text-black">
                         <SelectTrigger>
                           <SelectValue placeholder="" />
                         </SelectTrigger>
@@ -520,11 +528,9 @@ export default function MentorForm({
                         <SelectItem value="Business Analyst">
                           Business Analyst
                         </SelectItem>
-                        <SelectItem value="C-Suite">
-                         C-Suite
-                        </SelectItem>
+                        <SelectItem value="C-Suite">C-Suite</SelectItem>
                         <SelectItem value="Director / VP / Head of Department">
-                         Director / VP / Head of Department
+                          Director / VP / Head of Department
                         </SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
@@ -551,7 +557,7 @@ export default function MentorForm({
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
-                      <FormControl className="floating-input peer w-[300px] text-[#8A8A8A]">
+                      <FormControl className="floating-input peer w-[300px] text-black">
                         <SelectTrigger>
                           <SelectValue placeholder="" />
                         </SelectTrigger>

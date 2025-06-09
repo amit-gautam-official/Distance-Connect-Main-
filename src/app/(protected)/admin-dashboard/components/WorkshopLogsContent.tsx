@@ -281,7 +281,9 @@ export const WorkshopLogsContent = () => {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={workshop.scheduleType === 'recurring' ? 'default' : 'secondary'}>
+                          <Badge
+                          className="hover:text-white"
+                           variant={workshop.scheduleType === 'recurring' ? 'default' : 'secondary'}>
                             {getScheduleTypeDisplay(workshop.scheduleType)}
                           </Badge>
                         </TableCell>
@@ -306,7 +308,9 @@ export const WorkshopLogsContent = () => {
                           )}
                         </TableCell>
                         <TableCell>
-                          <Badge variant={isActive ? 'default' : 'secondary'}>
+                          <Badge
+                          className="hover:text-white"
+                           variant={isActive ? 'default' : 'secondary'}>
                             {isActive ? 'Active' : 'Inactive'}
                           </Badge>
                         </TableCell>
@@ -670,7 +674,7 @@ export const WorkshopLogsContent = () => {
                                         Paid on {format(new Date(enrollment.updatedAt), 'MMM dd, yyyy')}
                                       </div>
                                     </div>
-                                    <Badge className="bg-green-100 text-green-800 text-xs">
+                                    <Badge className="bg-green-100  text-green-800 text-xs">
                                       {formatPrice(workshop.price)}
                                     </Badge>
                                   </div>

@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, protectedWithoutRateLimitProcedure, publicProcedure } from "@/server/api/trpc";
+import { auth } from "@/server/auth";
+import { db } from "@/server/db";
 
 const getDateTimeFromDateAndTime = (date: Date, time: string): Date => {
   const [hours, minutesPart] = time.split(":");
@@ -17,6 +19,7 @@ const getDateTimeFromDateAndTime = (date: Date, time: string): Date => {
   result.setHours(hour, minute, 0, 0);
   return result;
 };
+
 
 
 
@@ -253,11 +256,30 @@ export const scheduledMeetingsRouter = createTRPCRouter({
       });
     }),
 
-    hasMeetingWithMentor: protectedProcedure
+    hasMeetingWithMentor: publicProcedure
     .input(z.object({ mentorUserId: z.string() }))
     .query(async ({ ctx, input }) => {
-      if (ctx.dbUser?.role !== "STUDENT") {
-        return false;
+      
+      const session = await auth();
+      const user = session?.user;
+      if (!user || !user.email) {
+        return false; // No user session or email available
+      }
+
+      const dbUser = await  ctx.db.user.findUnique(
+        {
+          where:{
+            email: user.email
+          }
+        }
+      )
+
+      if (!dbUser) {
+        return false; // No user found in the database
+      }
+
+      if(dbUser?.role !== "STUDENT") {
+        return false; // User is not a student
       }
 
       const now = new Date();
@@ -266,7 +288,7 @@ export const scheduledMeetingsRouter = createTRPCRouter({
       const meeting = await ctx.db.scheduledMeetings.findFirst({
         where: {
           mentorUserId: input.mentorUserId,
-          studentUserId: ctx.dbUser.id,
+          studentUserId: dbUser?.id,
           paymentStatus: true, // Ensure payment is completed
         },
         orderBy: {

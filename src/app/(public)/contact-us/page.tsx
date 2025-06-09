@@ -129,7 +129,7 @@ export default function ContactForm() {
               </div>
               <div className="flex items-center gap-3 text-center font-inter text-[18px] font-normal leading-[18px] text-[var(--Neutral-Colors-Color-900,#8D8BA7)]">
                 <Phone className="h-5 w-5" />
-                <span>+91 8750307740</span>
+                <span>+91 76781 63826</span>
               </div>
               <div className="flex gap-3 font-inter text-[18px] font-normal leading-[22px] text-[var(--Neutral-Colors-Color-900,#8D8BA7)]">
                 <MapPin className="h-5 w-5" />
@@ -163,7 +163,7 @@ export default function ContactForm() {
               />
               <p className="font-inter text-[14px] font-normal leading-5 text-[#0A0A0A]">
                 We care about your data in our {" "}
-                <a href="#" className="underline">
+                <a href="/privacy-policy" className="underline">
                   privacy policy
                 </a>
               </p>

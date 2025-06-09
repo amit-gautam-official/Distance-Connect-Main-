@@ -32,6 +32,8 @@ const ProfilePage = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
+  console.log("Student data:", student);
+
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string>("");
   const [profileData, setProfileData] = useState({
     name: "",
@@ -103,7 +105,7 @@ const ProfilePage = () => {
 
   const profileHeaderData = {
     name: profileData.name || student?.studentName || "",
-    PhoneNumber: student?.phoneNumber || "",
+    phoneNumber: student?.phoneNumber || "",
     email: student?.user.email || "",
     image: currentAvatarUrl || student?.user.image || "",
     role: student?.user.role || "",

@@ -2,6 +2,19 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 
+const paginationSchema = z.object({
+  page: z.number().min(1).default(1),
+  limit: z.number().min(1).max(50).default(12), // Max 50 items per page
+  search: z.string().optional(),
+  sortBy: z.enum(['recommended', 'pricing', 'availability']).default('recommended'),
+  filters: z.object({
+    companies: z.array(z.string()).default([]),
+    jobTitles: z.array(z.string()).default([]),
+    industries: z.array(z.string()).default([]),
+    experienceRange: z.string().default('all'),
+    hiringFields: z.array(z.string()).default([]),
+  }).optional(),
+});
 export const mentorRouter = createTRPCRouter({
  
 
@@ -277,6 +290,7 @@ export const mentorRouter = createTRPCRouter({
         mentorTier: true,
         mentorSessionPriceRange: true,
         tierReasoning: true,
+        mentorPhoneNumber: true,
         user:{
           select: {
             id: true,
@@ -284,7 +298,8 @@ export const mentorRouter = createTRPCRouter({
             username: true,
             image: true,
           },
-        }
+        },
+        scheduledMeetings : true
       }
     })
   }),
@@ -307,7 +322,7 @@ export const mentorRouter = createTRPCRouter({
   }
   ),
 
-  getAllMentors: publicProcedure
+  getAllMentorsForStudent: publicProcedure
   .query(async ({ ctx }) => {
     return ctx.db.mentor.findMany({
       where:{
@@ -342,6 +357,187 @@ export const mentorRouter = createTRPCRouter({
         }
       }
     })
+  }),
+  getAllMentors : publicProcedure
+  .input(paginationSchema)
+  .query(async ({ ctx, input }) => {
+    const { page, limit, search, sortBy, filters } = input;
+    const skip = (page - 1) * limit;
+
+    // Build where clause based on filters
+    const whereClause: any = {
+      AND: [
+        { companyEmailVerified: true },
+        { verified: true },
+      ]
+    };
+
+    // Add search conditions
+    if (search) {
+      whereClause.AND.push({
+        OR: [
+          { mentorName: { contains: search, mode: 'insensitive' } },
+          { currentCompany: { contains: search, mode: 'insensitive' } },
+          { jobTitle: { contains: search, mode: 'insensitive' } },
+        ]
+      });
+    }
+
+    // Add filter conditions
+    if (filters) {
+      if (filters.companies.length > 0) {
+        whereClause.AND.push({
+          currentCompany: { in: filters.companies }
+        });
+      }
+
+      if (filters.jobTitles.length > 0) {
+        whereClause.AND.push({
+          jobTitle: { in: filters.jobTitles }
+        });
+      }
+
+      if (filters.industries.length > 0) {
+        whereClause.AND.push({
+          industry: { in: filters.industries }
+        });
+      }
+
+      if (filters.hiringFields.length > 0) {
+        whereClause.AND.push({
+          hiringFields: { hasSome: filters.hiringFields }
+        });
+      }
+
+      if (filters.experienceRange !== 'all') {
+        const [min, max] = filters.experienceRange.includes('+') 
+          ? [parseInt(filters.experienceRange.replace('+', '')), 999]
+          : filters.experienceRange.split('-').map(Number);
+        
+        whereClause.AND.push({
+          experience: {
+            gte: (min || 0).toString(), // Ensure min is at least 0
+            ...(max !== 999 && { lte: (max || 2).toString() })
+          }
+        });
+      }
+    }
+
+    // Build orderBy clause
+    let orderBy: any = {};
+    switch (sortBy) {
+      case 'recommended':
+        orderBy = [
+          { experience: 'desc' },
+          { createdAt: 'desc' }
+        ];
+        break;
+      case 'pricing':
+        // Add pricing field when available
+        orderBy = { createdAt: 'desc' };
+        break;
+      case 'availability':
+        orderBy = { createdAt: 'desc' };
+        break;
+      default:
+        orderBy = { createdAt: 'desc' };
+    }
+
+    // Execute queries in parallel
+    const [mentors, totalCount] = await Promise.all([
+      ctx.db.mentor.findMany({
+        where: whereClause,
+        select: {
+          companyEmailVerified: true,
+          availability: true,
+          userId: true,
+          bio: true,
+          mentorName: true,
+          currentCompany: true,
+          jobTitle: true,
+          experience: true,
+          industry: true,
+          hiringFields: true,
+          companyType: true,
+          state: true,
+          user: {
+            select: {
+              image: true,
+            }
+          },
+          meetingEvents: {
+            select: {
+              id: true,
+              eventName: true,
+            }
+          }
+        },
+        orderBy,
+        skip,
+        take: limit,
+      }),
+      ctx.db.mentor.count({
+        where: whereClause,
+      })
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    return {
+      mentors,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalCount,
+        hasNextPage,
+        hasPreviousPage,
+        limit,
+      }
+    };
+  }),
+
+// Separate procedure to get filter options (for dropdown values)
+getMentorFilterOptions : publicProcedure
+  .query(async ({ ctx }) => {
+    const mentors = await ctx.db.mentor.findMany({
+      where: {
+        AND: [
+          { companyEmailVerified: true },
+          { verified: true },
+        ]
+      },
+      select: {
+        currentCompany: true,
+        jobTitle: true,
+        industry: true,
+        hiringFields: true,
+      }
+    });
+
+    const uniqueValues = mentors.reduce(
+      (acc, mentor) => {
+        if (mentor.currentCompany) acc.companies.add(mentor.currentCompany);
+        if (mentor.jobTitle) acc.jobTitles.add(mentor.jobTitle);
+        if (mentor.industry) acc.industries.add(mentor.industry);
+        mentor.hiringFields?.forEach((field) => acc.hiringFields.add(field));
+        return acc;
+      },
+      {
+        companies: new Set<string>(),
+        jobTitles: new Set<string>(),
+        industries: new Set<string>(),
+        hiringFields: new Set<string>(),
+      }
+    );
+
+    return {
+      companies: Array.from(uniqueValues.companies),
+      jobTitles: Array.from(uniqueValues.jobTitles),
+      industries: Array.from(uniqueValues.industries),
+      hiringFields: Array.from(uniqueValues.hiringFields),
+    };
   }),
 
   getMentorByUserId: publicProcedure

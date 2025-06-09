@@ -385,7 +385,7 @@ export function AppSidebar({ role }: { role: string }) {
                 >
                   <SidebarMenuButton
                     onClick={toggleProfileDropdown}
-                    className="flex h-10 cursor-pointer items-center justify-center overflow-hidden"
+                    className="flex mb-2 h-10 items-center justify-start w-full overflow-hidden"
                   >
                     
                     <Avatar className="h-12 w-12 border-4 border-white object-cover">

@@ -1,9 +1,41 @@
+"use client";
 import { Facebook, Twitter, Instagram, Linkedin, Youtube } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { toast } from "sonner";
+import { useState } from "react";
 
 export default function Footer() {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Simple email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Here you would typically make an API call to subscribe the user
+      // For now we'll simulate a successful subscription
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      toast.success("Thank you for subscribing to our newsletter!");
+      setEmail("");
+    } catch (error) {
+      toast.error("Failed to subscribe. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <footer className="bg-white py-10 text-[#B4B9C9] lg:bg-[#3D568F] lg:text-white">
       <div className="container mx-auto w-[80%] lg:px-16">
@@ -24,22 +56,28 @@ export default function Footer() {
                 <div className="text-center font-[Inter] text-[14px] font-normal leading-[22px] text-white">
                   Get the latest updates and news from us.
                 </div>
-                <div className="flex gap-2">
+                <form onSubmit={handleSubscribe} className="flex gap-2">
                   <Input
                     type="email"
                     placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full font-[Inter] text-[14px] font-normal leading-[20px] text-white"
                   />
-                  <Button className="ml-2 bg-[#EDFB90] text-[#3D568F]">
-                    Subscribe
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="ml-2 bg-[#EDFB90] text-[#3D568F]"
+                  >
+                    {loading ? "..." : "Subscribe"}
                   </Button>
-                </div>
+                </form>
               </div>
             </div>
           </div>
 
           {/* Contact Us */}
-          <div className="flex flex-col items-start justify-start ">
+          <div className="flex flex-col items-start justify-start">
             <ul className="mt-3 space-y-2">
               <h3 className="font-inter text-[16px] font-semibold leading-[22px] text-[#3D568F] lg:text-[#EAF3B2]">
                 Contact us
@@ -94,7 +132,6 @@ export default function Footer() {
                   Mentor
                 </Link>
               </li>
-         
             </ul>
           </div>
 
@@ -105,7 +142,7 @@ export default function Footer() {
                 To Explore
               </h3>
               <li>
-              <Link
+                <Link
                   href="/auth/login"
                   className="hover:text-[#EAF3B2] hover:underline"
                 >
@@ -113,8 +150,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
- 
-              <Link
+                <Link
                   href="/auth/login?screen_hint=signup"
                   className="hover:text-[#EAF3B2] hover:underline"
                 >
@@ -130,9 +166,6 @@ export default function Footer() {
                   Blogs
                 </Link>
               </li>
-
-            
-           
             </ul>
           </div>
 
@@ -200,14 +233,22 @@ export default function Footer() {
               <div className="text-center font-[Inter] text-[14px] font-normal leading-[22px] text-[#3D568F]">
                 Join our newsletter to get the latest updates.
               </div>
-              <div className="flex gap-2">
+              <form onSubmit={handleSubscribe} className="flex gap-2">
                 <Input
                   type="email"
                   placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full font-[Inter] text-[14px] font-normal leading-[20px] text-[#3D568F]"
                 />
-                <Button className="ml-2 bg-[#3D568F]">Subscribe</Button>
-              </div>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="ml-2 bg-[#3D568F]"
+                >
+                  {loading ? "..." : "Subscribe"}
+                </Button>
+              </form>
             </div>
           </div>
         </div>
@@ -218,20 +259,36 @@ export default function Footer() {
             Copyright &copy; 2025 Distance Connect | All Rights Reserved
           </p>
           <div className="mt-4 flex space-x-4 md:mt-0">
-            <Link href={"https://www.facebook.com/profile.php?id=61554968862419&mibextid=zLoPMf"} target="_blank">
-            <Facebook className="cursor-pointer hover:text-[#EAF3B2]" />
+            <Link
+              href={
+                "https://www.facebook.com/profile.php?id=61554968862419&mibextid=zLoPMf"
+              }
+              target="_blank"
+            >
+              <Facebook className="cursor-pointer hover:text-[#EAF3B2]" />
             </Link>
             <Link href={"https://twitter.com/distanceConnec"} target="_blank">
-            <Twitter className="cursor-pointer hover:text-[#EAF3B2]" />
+              <Twitter className="cursor-pointer hover:text-[#EAF3B2]" />
             </Link>
-            <Link href={"https://www.instagram.com/distanceconnect?igsh=dnV2ZDk5OXFscG1o"} target="_blank">
-            <Instagram className="cursor-pointer hover:text-[#EAF3B2]" />
+            <Link
+              href={
+                "https://www.instagram.com/distanceconnect?igsh=dnV2ZDk5OXFscG1o"
+              }
+              target="_blank"
+            >
+              <Instagram className="cursor-pointer hover:text-[#EAF3B2]" />
             </Link>
-            <Link href={"https://youtube.com/@DistanceConnect?si=118TnBciDdcSi_zP"} target="_blank">
-            <Youtube className="cursor-pointer hover:text-[#EAF3B2]" />
+            <Link
+              href={"https://youtube.com/@DistanceConnect?si=118TnBciDdcSi_zP"}
+              target="_blank"
+            >
+              <Youtube className="cursor-pointer hover:text-[#EAF3B2]" />
             </Link>
-            <Link href={"https://www.linkedin.com/company/distance-connnect/"} target="_blank">
-            <Linkedin className="cursor-pointer hover:text-[#EAF3B2]" />
+            <Link
+              href={"https://www.linkedin.com/company/distance-connnect/"}
+              target="_blank"
+            >
+              <Linkedin className="cursor-pointer hover:text-[#EAF3B2]" />
             </Link>
           </div>
         </div>

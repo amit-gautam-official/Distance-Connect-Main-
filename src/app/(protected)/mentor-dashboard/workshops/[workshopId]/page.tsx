@@ -703,7 +703,7 @@ return (
                                     </div>
                                     <Button
                                       size="sm"
-                                      className="w-full bg-primary hover:bg-primary/90 transition-all"
+                                      className="w-full  transition-all"
                                       onClick={() => handleGenerateMeetLink(dayNumber)}
                                       disabled={generateMeetLink.isPending}
                                     >

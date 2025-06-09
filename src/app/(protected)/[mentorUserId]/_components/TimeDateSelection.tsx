@@ -127,7 +127,7 @@ const checkTimeSlot = (time: string) => {
                 key={index}
                 disabled={!enableTimeSlot || isBooked || isPast}
                 onClick={() => setSelectedTime(time)}
-                className={`  ${isSelected ? "bg-primary text-white" : "border-primary bg-white text-primary"} ${(isBooked || isPast) ? "opacity-50" : "hover:opacity-90"} h-auto min-h-[44px] py-3 px-1 text-xs transition-all active:scale-95`}
+                className={`  ${isSelected ? " text-white" : " bg-white text-primary"} ${(isBooked || isPast) ? "opacity-50" : "hover:opacity-90"} h-auto min-h-[44px] py-3 px-1 text-xs transition-all active:scale-95`}
                 variant="outline"
                 role="radio"
                 aria-checked={isSelected}

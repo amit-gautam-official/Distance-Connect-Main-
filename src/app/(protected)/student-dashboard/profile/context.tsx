@@ -17,6 +17,7 @@ export interface ProfileContextType {
     experience: string;
     industry: string;
     studentRole: string;
+    phoneNumber?: string; // Optional field for phone number
   };
   updateProfileField: (field: string, value: any) => void;
 }
@@ -37,6 +38,7 @@ export const ProfileContext = createContext<ProfileContextType>({
     experience: "",
     industry: "",
     studentRole: "",
+    phoneNumber: "", // Default to empty string if not provided
   },
   updateProfileField: (field: string, value: any) => {
     // console.log(
