@@ -132,9 +132,9 @@ const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
               : "User"}
         </p>
 
-        <Link id="preview-profile" className="mt-4" href={`/mentors/${user?.userId}`}>
+        {/* <Link id="preview-profile" className="mt-4" href={`/mentors/${user?.userId}`}>
           <Button>Preview Mentor Profile</Button>
-        </Link>
+        </Link> */}
       </div>
 
       {/* Bio Section */}
@@ -168,12 +168,14 @@ const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
             {user?.state}, India
           </span>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        {user.phoneNumber && (
+          <div className="flex items-center gap-2 text-sm text-gray-600">
           <Phone size={16} className="text-gray-400" />
           <span>
             {user?.phoneNumber}
           </span>
         </div>
+        )}
 
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Mail size={16} className="text-gray-400" />

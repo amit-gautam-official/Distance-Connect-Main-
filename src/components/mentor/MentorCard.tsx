@@ -67,6 +67,7 @@ export function MentorCard({ mentor }: MentorCardProps) {
     { mentorUserId: mentor.userId },
     { enabled: false },
   );
+  
     const meetingStatusQuery = api.scheduledMeetings.hasMeetingWithMentor.useQuery(
       { mentorUserId: mentor.userId },
       { enabled: !!session?.data?.user, refetchOnWindowFocus: false }
@@ -142,7 +143,7 @@ export function MentorCard({ mentor }: MentorCardProps) {
         <div className="relative flex flex-col items-center p-6 pb-4">
           {/* Free session badge moved to corner */}
           <div className="absolute right-0 top-0">
-            <Badge className="m-2 bg-green-100 text-green-800">
+            <Badge className="m-2 bg-green-100 text-green-800 hover:bg-green-200 text-xs font-medium">
               Free Session
             </Badge>
           </div>
@@ -295,7 +296,7 @@ export function MentorCard({ mentor }: MentorCardProps) {
             <div className="">
               <Button
                 size="sm"
-                className="flex-1 bg-primary/90 hover:bg-primary"
+                className="flex-1 "
                 onClick={() => setIsModalOpen(true)}
               >
                 Book Now

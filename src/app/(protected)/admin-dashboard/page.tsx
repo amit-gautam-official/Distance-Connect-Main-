@@ -12,6 +12,7 @@ import VerifyMentorModal from "./components/modals/verify-mentor-modal";
 import { api } from "@/trpc/react";
 import type { JsonValue } from "@prisma/client/runtime/library";
 import { WorkshopLogsContent } from "./components/WorkshopLogsContent";
+import WaitlistLogs from "./components/modals/WaitlistLogs";
 
 
 interface Mentor  {
@@ -41,21 +42,9 @@ interface Mentor  {
 export default function AdminDashboard() {
   const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
-  const [isMentorViewModalOpen, setIsMentorViewModalOpen] = useState(false);
-  const [isStudentViewModalOpen, setIsStudentViewModalOpen] = useState(false);
-  const {data : mentors , isLoading : mentorLoading}  = api.mentor.getMentorsForAdmin.useQuery(
-    undefined, {
-     enabled: true, 
-    }
-  );
-    const {data : students , isLoading : studentLoading} = api.admin.getStudentsForAdmin.useQuery();
+
 
     
-    if(mentorLoading || studentLoading) {
-        return <div>Loading...</div>;
-    }
-    
-    // console.log(mentors);
 
 
 
@@ -79,22 +68,21 @@ export default function AdminDashboard() {
       
 
       <Tabs defaultValue="students" className="w-full">
-        <TabsList className="mx-auto mb-6 grid w-full max-w-md grid-cols-4 rounded-lg md:mb-8">
+        <TabsList className="mx-auto mb-6 grid w-full max-w-md grid-cols-5 rounded-lg md:mb-8">
           <TabsTrigger value="students">Students</TabsTrigger>
           <TabsTrigger value="mentors">Mentors</TabsTrigger>
           <TabsTrigger value="meeting-logs">Meeting Logs</TabsTrigger>
           <TabsTrigger value="workshop-logs">Workshop Logs</TabsTrigger>
+          <TabsTrigger value="waitlist-logs">Waitlist Logs</TabsTrigger>
         </TabsList>
 
         <TabsContent value="students" className="space-y-4 md:space-y-6">
           <StudentManagement
-            students={students ?? []}
           />
         </TabsContent>
 
         <TabsContent value="mentors" className="space-y-4 md:space-y-6">
           <MentorManagement
-            mentors={mentors ?? []}
             handleVerify={handleVerify}
           />
         </TabsContent>
@@ -104,6 +92,9 @@ export default function AdminDashboard() {
         </TabsContent>
         <TabsContent value="workshop-logs" className="space-y-4 md:space-y-6">
           <WorkshopLogsContent />
+        </TabsContent>
+        <TabsContent value="waitlist-logs" className="space-y-4 md:space-y-6">
+          <WaitlistLogs />
         </TabsContent>
       </Tabs>
 

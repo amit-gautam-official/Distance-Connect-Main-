@@ -7,6 +7,8 @@ import { Toaster } from "sonner";
 import { GoogleAnalytics } from '@next/third-parties/google'
 import Script from "next/script";
 import MicrosoftClarity from "./metrics/MicrosoftClarity";
+import { SessionProvider } from "next-auth/react";
+import { auth } from "@/server/auth";
 
 export const metadata: Metadata = {
   title: "Distance Connect",
@@ -56,11 +58,14 @@ export const metadata: Metadata = {
 
 
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+
+  const session = await auth()
+  
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
 
@@ -69,10 +74,14 @@ export default function RootLayout({
           strategy="lazyOnload"
         />
       <body>
+
         <TRPCReactProvider>
+          <SessionProvider session={session}>
+
           {children}
+          </SessionProvider>
           <MicrosoftClarity />
-        </TRPCReactProvider>
+       
         <GoogleAnalytics gaId="G-D2RLQDYV1B" />
         <Toaster />
         <Script id="zoho-salesiq-init" strategy="afterInteractive">
@@ -88,6 +97,7 @@ export default function RootLayout({
         strategy="afterInteractive"
         defer
       />
+       </TRPCReactProvider>
       </body>
     </html>
   );
