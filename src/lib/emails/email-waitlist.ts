@@ -103,7 +103,7 @@ export class EmailWaitlistService extends EmailService {
         <p>If you have any questions, feel free to reply to this email.</p>
       </div>
       <div class="footer">
-        &copy; 2024 Distance Connect. All rights reserved.
+        &copy; 2025 Distance Connect. All rights reserved.
       </div>
     </body>
     </html>
