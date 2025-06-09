@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { addToWaitlist, getWaitlistByEmail } from "@/actions/waitlist";
 import { toast } from "sonner";
+import { sendWaitlistEmail } from "@/actions/send-waitlist-email";
 
 interface WaitlistModalProps {
   isOpen: boolean;
@@ -79,7 +80,8 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const waitlistEntry = await getWaitlistByEmail(email);
+   try {
+     const waitlistEntry = await getWaitlistByEmail(email);
     if (waitlistEntry) {
       toast("You are already on the waitlist!");
       return;
@@ -92,8 +94,20 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
     }
     toast.success("Successfully joined the waitlist!");
 
-    console.log("Submitted:", { name, email });
+    const emailResult = await sendWaitlistEmail(
+      email,
+      name,
+    );
+    if (!emailResult.success) {
+      return;
+    }
+
+    // console.log("Submitted:", { name, email });
     setSubmitted(true);
+   } catch (error) {
+    console.error("Error submitting waitlist:", error);
+    toast.error("Failed to join waitlist. Please try again later.");
+   }
   };
 
   const goToLogin = () => {

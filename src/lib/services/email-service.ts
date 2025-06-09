@@ -10,9 +10,9 @@ export class EmailService {
     // Get environment variables
     const host = process.env.EMAIL_HOST || 'smtp.gmail.com';
     const port = 587;
-    const user = process.env.EMAIL_USER || '';
+    const user = "support@distanceconnect.in";
     const pass = process.env.EMAIL_PASSWORD || '';
-    this.fromEmail = process.env.EMAIL_FROM || 'support@distanceconnect.com';
+    this.fromEmail = 'support@distanceconnect.com';
 
     // Create nodemailer transporter
     this.transporter = createTransport({

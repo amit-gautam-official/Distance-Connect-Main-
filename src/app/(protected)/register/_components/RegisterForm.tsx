@@ -38,7 +38,7 @@ export default function RegisterForm({
       {/* <img src="/signin/bg.svg" className="absolute z-10" /> */}
 
       {/* Left Section */}
-      <div className="no-scrollbar relative z-20 flex min-h-screen w-full flex-col justify-between overflow-y-auto p-4 sm:p-6 md:p-8 xl:w-[55%]">
+      <div className="no-scrollbar relative z-20 flex min-h-screen w-full flex-col justify-between overflow-y-auto p-4 sm:p-6 md:p-8 xl:w-[55%] h-[100dvh] ">
         <div className="mb-6 flex items-center justify-center md:mb-8 md:justify-between">
           {/* <div className="w-[200px] bg-gradient-to-r from-[#496F74] via-[#6E9195] to-[#2D4F61] bg-clip-text text-center font-inter text-xl font-bold leading-[24px] text-transparent sm:w-[250px] sm:text-2xl md:w-[300px] xl:text-left">
             Distance Connect
@@ -116,7 +116,7 @@ export default function RegisterForm({
       </div>
 
       {/* Right Section - Only show on desktop/large tablets */}
-      <div className="relative hidden bg-[#0A64BC] lg:flex md:min-h-screen md:w-full md:items-center md:justify-center xl:w-[45%]">
+      <div className="relative hidden bg-[#0A64BC] lg:flex h-[100dvh] md:w-full md:items-center md:justify-center xl:w-[45%] ">
         <div className="absolute left-0 right-0 top-0 p-8">
           <Link href={"/contact-us"} className="flex items-center gap-4">
             <img src="/support.svg" className="cursor-pointer" alt="Support" />
