@@ -132,9 +132,9 @@ const ProfileHeader = ({ user }: { user: ProfileHeaderProps }) => {
               : "User"}
         </p>
 
-        <Link id="preview-profile" className="mt-4" href={`/mentors/${user?.userId}`}>
+        {/* <Link id="preview-profile" className="mt-4" href={`/mentors/${user?.userId}`}>
           <Button>Preview Mentor Profile</Button>
-        </Link>
+        </Link> */}
       </div>
 
       {/* Bio Section */}
