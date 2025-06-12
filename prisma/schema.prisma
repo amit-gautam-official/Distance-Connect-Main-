@@ -87,7 +87,7 @@ model Student {
 
   studentRole SrudentRole?
   studentName String?
-  phoneNumber String?  @default("XXXXXXXXXX")
+  phoneNumber String?      @default("XXXXXXXXXX")
 
   //High School
   institutionName String?
@@ -125,7 +125,6 @@ model Mentor {
   mentorSessionPriceRange String?
   tierReasoning           String?
 
-  
   mentorName           String?
   currentCompany       String?
   jobTitle             String?
@@ -144,13 +143,14 @@ model Mentor {
   companyEmailVerified Boolean  @default(false)
   verified             Boolean  @default(false)
   messageFromAdmin     String?
-  mentorPhoneNumber    String? @default("XXXXXXXXXX")
+  mentorPhoneNumber    String?  @default("XXXXXXXXXX")
 
   meetingEvents     MeetingEvent[]
   availability      Availability?
   scheduledMeetings ScheduledMeetings[]
   chatRooms         ChatRoom[]
   workshops         Workshop[]
+  bankDetails       MentorBankDetails?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -256,8 +256,9 @@ model ScheduledMeetings {
   mentorEmailForMeet String
   completed          Boolean  @default(false)
 
-  paymentStatus Boolean @default(false)
-  isFreeSession Boolean @default(true) // Indicates if the session is free or paid
+  paymentStatus            Boolean @default(false)
+  isFreeSession            Boolean @default(true) // Indicates if the session is free or paid
+  receivedPaymentFromAdmin Boolean @default(false) // Flag for admin payment to mentor
 
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
@@ -331,22 +332,23 @@ model Workshop {
   introductoryVideoUrl String? // New field for introductory video URL
   mentorGmailId        String // Changed to required for Google Meet integration
   enrollments          WorkshopEnrollment[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
 }
 
 // 📝 Workshop Enrollment Model
 model WorkshopEnrollment {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  workshop   Workshop @relation(fields: [workshopId], references: [id], onDelete: Cascade)
-  workshopId String   @db.ObjectId
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  workshop       Workshop @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+  workshopId     String   @db.ObjectId
   studentGmailId String?
 
   student       Student @relation(fields: [studentUserId], references: [userId], onDelete: Cascade)
   studentUserId String  @db.ObjectId
 
-  paymentStatus Boolean         @default(false)
-  orders        RazorpayOrder[]
+  paymentStatus            Boolean         @default(false)
+  receivedPaymentFromAdmin Boolean         @default(false) // Flag for admin payment to mentor
+  orders                   RazorpayOrder[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -357,9 +359,27 @@ model WorkshopEnrollment {
 model Waitlist {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  email String @unique
+  email String  @unique
   name  String?
   phone String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// New model for mentor bank details
+model MentorBankDetails {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId], onDelete: Cascade)
+  mentorUserId String @unique @db.ObjectId
+
+  accountHolderName String
+  bankName          String
+  accountNumber     String
+  ifscCode          String
+  panNumber         String?
+  upiId             String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

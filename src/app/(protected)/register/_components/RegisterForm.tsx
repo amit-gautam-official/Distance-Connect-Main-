@@ -71,7 +71,7 @@ export default function RegisterForm({
                 <BriefcaseBusiness className="h-4 w-4" />
                 To be a Mentor
               </button>
-              {/* <button
+              <button
                 onClick={() => {
                   setRole("STUDENT");
                   setStep(2);
@@ -80,8 +80,8 @@ export default function RegisterForm({
               >
                 <User className="mr-2 h-6 w-6" />
                 Placement Preparation
-              </button> */}
-              {/* <button
+              </button>
+              <button
                 onClick={() => {
                   setRole("STUDENT");
                   setStep(2);
@@ -89,13 +89,13 @@ export default function RegisterForm({
                 className="h-[45px] w-full flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] transition-colors hover:border-blue-400 hover:text-[#0A64BC] focus:border-blue-400 focus:text-[#0A64BC] xl:h-[65.66px]"
               >
                 Find Jobs
-              </button> */}
+              </button>
             </div>
           </div>
         ) : (
           <div className="mx-auto w-full max-w-2xl flex-grow">
             {role === "MENTOR" && <MentorForm user={user} />}
-            {/* {role === "STUDENT" && <StudentForm user={user} />} */}
+            {role === "STUDENT" && <StudentForm user={user} />}
             {/* {role === "STARTUP" && <StartupForm user={user} />} */}
           </div>
         )}

@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-import { createTRPCRouter, adminProcedure } from "@/server/api/trpc";
+import { createTRPCRouter, adminProcedure, protectedProcedure } from "@/server/api/trpc";
+import { TRPCError } from "@trpc/server";
+
 const paginationSchema = z.object({
   page: z.number().min(1).default(1),
   limit: z.number().min(1).max(100).default(10),
@@ -679,5 +681,214 @@ getWorkshopLogs : adminProcedure
           }
         },
       },
-    })})
-})
+    })}),
+
+  // Get pending mentor payments
+  getPendingMentorPayments: adminProcedure
+    .query(async ({ ctx }) => {
+      const { db } = ctx;
+      
+      // Get all session payments that are completed but not paid to mentor
+      const sessionPayments = await db.scheduledMeetings.findMany({
+        where: {
+          paymentStatus: true,
+          completed: true,
+          receivedPaymentFromAdmin: false,
+          isFreeSession: false,
+        },
+        include: {
+          mentor: {
+            include: {
+              user: {
+                select: {
+                  email: true,
+                },
+              },
+              bankDetails: true,
+            },
+          },
+          RazorpayOrder: true,
+        },
+      });
+      
+      // Get all workshop payments that are completed but not paid to mentor
+      const workshopPayments = await db.workshopEnrollment.findMany({
+        where: {
+          paymentStatus: true,
+          receivedPaymentFromAdmin: false,
+        },
+        include: {
+          workshop: {
+            include: {
+              mentor: {
+                include: {
+                  user: {
+                    select: {
+                      email: true,
+                    },
+                  },
+                  bankDetails: true,
+                },
+              },
+            },
+          },
+          orders: true,
+        },
+      });
+      
+      // Format session payments
+      const formattedSessionPayments = sessionPayments.map((meeting) => {
+        const order = meeting.RazorpayOrder[0];
+        if (!order) return null;
+        
+        return {
+          id: meeting.id,
+          type: "session",
+          title: meeting.eventName,
+          mentorId: meeting.mentorUserId,
+          mentorName: meeting.mentor.mentorName,
+          mentorEmail: meeting.mentor.user.email,
+          amount: order.amount,
+          date: meeting.selectedDate,
+          bankDetails: meeting.mentor.bankDetails,
+        };
+      }).filter(Boolean);
+      
+      // Format workshop payments
+      const formattedWorkshopPayments = workshopPayments.map((enrollment) => {
+        const order = enrollment.orders[0];
+        if (!order) return null;
+        
+        return {
+          id: enrollment.id,
+          type: "workshop",
+          title: enrollment.workshop.name,
+          mentorId: enrollment.workshop.mentorUserId,
+          mentorName: enrollment.workshop.mentor.mentorName,
+          mentorEmail: enrollment.workshop.mentor.user.email,
+          amount: order.amount,
+          date: enrollment.createdAt,
+          bankDetails: enrollment.workshop.mentor.bankDetails,
+        };
+      }).filter(Boolean);
+      console.log("Formatted Session Payments:", formattedSessionPayments);
+      console.log("Formatted Workshop Payments:", formattedWorkshopPayments);
+      return [...formattedSessionPayments, ...formattedWorkshopPayments];
+    }),
+
+  // Get completed mentor payments
+  getCompletedMentorPayments: adminProcedure
+  .query(async ({ ctx }) => {
+    const {  db } = ctx;
+    
+    // Get all session payments that are completed and paid to mentor
+    const sessionPayments = await db.scheduledMeetings.findMany({
+      where: {
+        paymentStatus: true,
+        completed: true,
+        receivedPaymentFromAdmin: true,
+      },
+      include: {
+        mentor: {
+          include: {
+            user: {
+              select: {
+                email: true,
+              },
+            },
+          },
+        },
+        RazorpayOrder: true,
+      },
+    });
+    
+    // Get all workshop payments that are completed and paid to mentor
+    const workshopPayments = await db.workshopEnrollment.findMany({
+      where: {
+        paymentStatus: true,
+        receivedPaymentFromAdmin: true,
+      },
+      include: {
+        workshop: {
+          include: {
+            mentor: {
+              include: {
+                user: {
+                  select: {
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        orders: true,
+      },
+    });
+    
+    // Format session payments
+    const formattedSessionPayments = sessionPayments.map((meeting) => {
+      const order = meeting.RazorpayOrder[0];
+      if (!order) return null;
+      
+      return {
+        id: meeting.id,
+        type: "session",
+        title: meeting.eventName,
+        mentorId: meeting.mentorUserId,
+        mentorName: meeting.mentor.mentorName,
+        mentorEmail: meeting.mentor.user.email,
+        amount: order.amount,
+        date: meeting.selectedDate,
+        paymentDate: meeting.updatedAt, // Using updatedAt as the payment date
+      };
+    }).filter(Boolean);
+    
+    // Format workshop payments
+    const formattedWorkshopPayments = workshopPayments.map((enrollment) => {
+      const order = enrollment.orders[0];
+      if (!order) return null;
+      
+      return {
+        id: enrollment.id,
+        type: "workshop",
+        title: enrollment.workshop.name,
+        mentorId: enrollment.workshop.mentorUserId,
+        mentorName: enrollment.workshop.mentor.mentorName,
+        mentorEmail: enrollment.workshop.mentor.user.email,
+        amount: order.amount,
+        date: enrollment.createdAt,
+        paymentDate: enrollment.updatedAt, // Using updatedAt as the payment date
+      };
+    }).filter(Boolean);
+    
+    return [...formattedSessionPayments, ...formattedWorkshopPayments];
+  }),
+
+  // Mark a payment as paid to mentor
+  markMentorPaymentAsPaid: adminProcedure
+  .input(
+    z.object({
+      type: z.enum(["session", "workshop"]),
+      id: z.string(),
+    })
+  )
+  .mutation(async ({ ctx, input }) => {
+    const {  db } = ctx;
+
+    
+    if (input.type === "session") {
+      await db.scheduledMeetings.update({
+        where: { id: input.id },
+        data: { receivedPaymentFromAdmin: true },
+      });
+    } else if (input.type === "workshop") {
+      await db.workshopEnrollment.update({
+        where: { id: input.id },
+        data: { receivedPaymentFromAdmin: true },
+      });
+    }
+    
+    return { success: true };
+  }),
+});

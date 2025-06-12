@@ -45,23 +45,23 @@ const Navbar = ({
   const [lastScrollY, setLastScrollY] = useState(0);
   const router = useRouter();
 
-  const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
+  // const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
   const session = useSession();
   
-  const openWaitlistModal = () => {
-    if (session.data) {
-      return;
-    }
-    setIsWaitlistModalOpen(true);
-  };
+  // const openWaitlistModal = () => {
+  //   if (session.data) {
+  //     return;
+  //   }
+  //   setIsWaitlistModalOpen(true);
+  // };
 
-    useEffect(() => {
+  //   useEffect(() => {
 
-    if (!session.data) {
-    openWaitlistModal();
-    }
+  //   if (!session.data) {
+  //   openWaitlistModal();
+  //   }
 
-  }, []);
+  // }, []);
 
   //get only top 4 blogs
   const top4Blogs = blogs?.slice(0, 4);
@@ -96,10 +96,10 @@ const Navbar = ({
 
   return (
     <div className="m-auto w-full">
-      <WaitlistModal
+      {/* <WaitlistModal
         isOpen={isWaitlistModalOpen}
         onClose={() => setIsWaitlistModalOpen(false)}
-      />
+      /> */}
       {/* Mobile nav */}
       <div className="relative flex h-[55px] w-full items-center justify-between bg-white p-6 shadow-[0px_1px_3.7px_0px_rgba(0,0,0,0.10)] lg:hidden">
         <Sheet>
@@ -150,7 +150,7 @@ const Navbar = ({
               <div className="flex h-full flex-col justify-between gap-4">
                 <div className="mt-4 flex flex-col items-center justify-start gap-4 text-left">
                   {/* <Link
-                    href="/mentors"
+                    href="pris
                     className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
                   >
                     Mentors
@@ -225,7 +225,7 @@ const Navbar = ({
                   <div className="flex flex-col items-center justify-center gap-4">
                     {!loggedId ? (
                       <>
-                        {/* <Link
+                        <Link
                           href="/auth/login"
                           className="flex w-[199px] items-center justify-center gap-1 rounded-lg border border-[#E1E4ED] bg-[#F8FAFF] p-[18px_22px]"
                         >
@@ -236,13 +236,13 @@ const Navbar = ({
                           className="flex w-[199px] items-center justify-center gap-1 rounded-lg bg-[#6D758F] p-[18px_22px] text-white shadow-md"
                         >
                           Sign up
-                        </Link> */}
-                        <button
+                        </Link>
+                        {/* <button
                           onClick={openWaitlistModal}
                           className="flex w-[199px] items-center justify-center gap-1 rounded-lg bg-[#6D758F] p-[18px_22px] text-white shadow-md"
                         >
                           Join Waitlist
-                        </button>
+                        </button> */}
                       </>
                     ) : (
                       <>
@@ -396,8 +396,8 @@ const Navbar = ({
         </div>
         {!loggedId ? (
           <div className="flex items-center justify-center gap-4">
-            {
-              /* <Link
+            
+              <Link
               href="/auth/login"
               className="font-roboto flex h-[41px] flex-shrink-0 flex-col items-center justify-center gap-[12px] rounded-[25px] border-[0.5px] border-[rgba(94,127,203,0.6)] bg-white text-[16px] font-medium leading-[24px] text-[#3D568F] shadow-md lg:w-[100px] xl:w-[134px]"
             >
@@ -409,14 +409,14 @@ const Navbar = ({
 "
             >
               Sign Up
-            </Link> */
-              <Button
+            </Link> 
+              {/* <Button
                 onClick={openWaitlistModal}
                 className="font-roboto flex h-[41px] w-[150px] shrink-0 flex-col items-center justify-center rounded-[31px] bg-[#3D568F] p-3 text-[16px] font-medium not-italic leading-[24px] text-white shadow-md hover:shadow-sm"
               >
                 Join Waitlist
-              </Button>
-            }
+              </Button> */}
+            
           </div>
         ) : (
           <div className="flex items-center justify-center gap-4">

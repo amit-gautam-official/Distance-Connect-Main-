@@ -14,6 +14,8 @@ import {
   MessageCircleReply,
   SquareChartGantt,
   Blocks,
+  BanknoteIcon,
+  CreditCard,
 } from "lucide-react";
 
 import {
@@ -144,6 +146,12 @@ export function AppSidebar({ role }: { role: string }) {
       url: "/mentor-dashboard/services",
       icon: SquareChartGantt,
     },
+    {
+      title: "Payment & Billing",
+      id: "payment-billing",
+      url: "/mentor-dashboard/payment-billing",
+      icon: CreditCard,
+    },
   ];
 
   // Bottom navigation items
@@ -201,12 +209,12 @@ export function AppSidebar({ role }: { role: string }) {
     if (url === "/student-dashboard" || url === "/mentor-dashboard") {
       return activePath === url;
     }
-    
+
     // For other URLs, check for exact match or if it's a nested route
-    return activePath === url || 
-           (url !== "/" && 
-            url.length > 1 && 
-            activePath.startsWith(url + "/"));
+    return (
+      activePath === url ||
+      (url !== "/" && url.length > 1 && activePath.startsWith(url + "/"))
+    );
   };
 
   // Render mobile view only on client-side when windowWidth is available and less than 768px
@@ -241,25 +249,27 @@ export function AppSidebar({ role }: { role: string }) {
                 id={item.id}
                 key={item.title}
                 href={item.url}
-                className={`flex w-1/7 flex-col items-center justify-center py-1 ${
-                  active
-                    ? "text-sidebar-primary"
-                    : "text-sidebar-foreground"
+                className={`w-1/7 flex flex-col items-center justify-center py-1 ${
+                  active ? "text-sidebar-primary" : "text-sidebar-foreground"
                 }`}
               >
-                <item.icon className={`h-4 w-4 ${active ? "text-[#5580D6]" : ""}`} />
-                <span className={`mt-1 w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-[8px] ${active ? "font-medium  text-[#5580D6]" : ""}`}>
+                <item.icon
+                  className={`h-4 w-4 ${active ? "text-[#5580D6]" : ""}`}
+                />
+                <span
+                  className={`mt-1 w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-[8px] ${active ? "font-medium text-[#5580D6]" : ""}`}
+                >
                   {item.title}
                 </span>
               </Link>
             );
           })}
-           {helpItem && (
+          {helpItem && (
             <Link
               id={helpItem.id}
               key={helpItem.title}
               href={helpItem.url}
-              className="flex w-1/7 flex-col items-center justify-center py-1 text-sidebar-foreground"
+              className="w-1/7 flex flex-col items-center justify-center py-1 text-sidebar-foreground"
             >
               <helpItem.icon className="h-4 w-4" />
               <span className="mt-1 w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-[8px]">
@@ -273,9 +283,8 @@ export function AppSidebar({ role }: { role: string }) {
               onClick={() => {
                 signOut();
                 router.push("/");
-
               }}
-              className="flex w-1/7 flex-col items-center justify-center py-1 text-sidebar-foreground"
+              className="w-1/7 flex flex-col items-center justify-center py-1 text-sidebar-foreground"
             >
               <logoutItem.icon className="h-4 w-4" />
               <span className="mt-1 w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-[8px]">
@@ -283,7 +292,6 @@ export function AppSidebar({ role }: { role: string }) {
               </span>
             </button>
           )}
-         
         </div>
       </div>
     );
@@ -302,16 +310,20 @@ export function AppSidebar({ role }: { role: string }) {
         <SidebarGroup className="overflow-visible">
           <SidebarGroupLabel>
             <Link href="/" className="cursor-pointer">
-              <img src="/logo.png" alt="logo" className="w- mb-[-10px] mt-[30px] h-[80px]" />
+              <img
+                src="/logo.png"
+                alt="logo"
+                className="w- mb-[-10px] mt-[30px] h-[80px]"
+              />
             </Link>
           </SidebarGroupLabel>
 
-          <SidebarGroupContent className="flex mt-[20px] h-[calc(100dvh-4rem)] flex-col justify-between overflow-visible pl-2 pt-4">
+          <SidebarGroupContent className="mt-[20px] flex h-[calc(100dvh-4rem)] flex-col justify-between overflow-visible pl-2 pt-4">
             {/* Main navigation */}
             <SidebarMenu>
               {role === "student" &&
                 Studentitems.map((item) => (
-                  <SidebarMenuItem  key={item.title}>
+                  <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       size="lg"
                       isActive={isActive(item.url)}
@@ -343,37 +355,41 @@ export function AppSidebar({ role }: { role: string }) {
 
             {/* Support and settings */}
             <SidebarMenu>
-                <SidebarMenuItem >
-                  <SidebarMenuButton 
-                    isActive={isActive(role === "student"
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={isActive(
+                    role === "student"
                       ? "/student-dashboard/help-support"
-                      : "/mentor-dashboard/help-support")}
-                    asChild
+                      : "/mentor-dashboard/help-support",
+                  )}
+                  asChild
+                >
+                  <a
+                    id="help-support"
+                    href={
+                      role === "student"
+                        ? "/student-dashboard/help-support"
+                        : "/mentor-dashboard/help-support"
+                    }
                   >
-                    <a id="help-support" href={role === "student"
-          ? "/student-dashboard/help-support"
-          : "/mentor-dashboard/help-support"}>
-                      <MessageCircleQuestion />
-                      <span>Help & Support</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem >
-                  <SidebarMenuButton 
-                  
-                    asChild
+                    <MessageCircleQuestion />
+                    <span>Help & Support</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <button
+                    onClick={() => {
+                      signOut();
+                      router.push("/");
+                    }}
                   >
-                    <button
-                      onClick={() => {
-                        signOut();
-                        router.push("/");
-                      }}>
-
-                      <LogOut />
-                      <span>Log Out</span>
-                    </button>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                    <LogOut />
+                    <span>Log Out</span>
+                  </button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
 
             {/* User profile with dropdown */}
@@ -385,15 +401,18 @@ export function AppSidebar({ role }: { role: string }) {
                 >
                   <SidebarMenuButton
                     onClick={toggleProfileDropdown}
-                    className="flex mb-2 h-10 items-center justify-start w-full overflow-hidden"
+                    className="mb-2 flex h-10 w-full items-center justify-start overflow-hidden"
                   >
-                    
                     <Avatar className="h-12 w-12 border-4 border-white object-cover">
-          <AvatarImage className="object-cover" src={user?.image || ""} alt={user?.name || "User"} />
-          <AvatarFallback className="bg-blue-100 text-2xl text-blue-800">
-            {user?.name?.charAt(0) || "U"}
-          </AvatarFallback>
-        </Avatar>
+                      <AvatarImage
+                        className="object-cover"
+                        src={user?.image || ""}
+                        alt={user?.name || "User"}
+                      />
+                      <AvatarFallback className="bg-blue-100 text-2xl text-blue-800">
+                        {user?.name?.charAt(0) || "U"}
+                      </AvatarFallback>
+                    </Avatar>
                     <div className="w-full truncate">{user?.name}</div>
                   </SidebarMenuButton>
                 </div>
