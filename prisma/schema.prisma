@@ -378,8 +378,8 @@ model MentorBankDetails {
   bankName          String
   accountNumber     String
   ifscCode          String
+  bankBranch        String @default("Not Provided")
   panNumber         String?
-  upiId             String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       accountNumber, 
       ifscCode, 
       panNumber, 
-      upiId,
+      bankBranch,
       mentorUserId 
     } = body;
     
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
         accountNumber,
         ifscCode,
         panNumber,
-        upiId,
+        bankBranch,
       },
       create: {
         mentorUserId,
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
         accountNumber,
         ifscCode,
         panNumber,
-        upiId,
+        bankBranch,
       }
     });
     

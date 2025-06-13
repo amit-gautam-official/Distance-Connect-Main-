@@ -694,7 +694,6 @@ getWorkshopLogs : adminProcedure
           paymentStatus: true,
           completed: true,
           receivedPaymentFromAdmin: false,
-          isFreeSession: false,
         },
         include: {
           mentor: {

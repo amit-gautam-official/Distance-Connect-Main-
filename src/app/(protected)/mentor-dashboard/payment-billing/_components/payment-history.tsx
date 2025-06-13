@@ -155,7 +155,7 @@ export function PaymentHistory({ paymentHistory }: PaymentHistoryProps) {
     .reduce((sum, payment) => sum + payment.amount, 0);
 
   const sessionsCount = paymentHistory.filter(
-    (payment) => payment.type === "session" && payment.status === "completed",
+    (payment) => payment.type === "session" && payment.completed === true,
   ).length;
 
   const workshopsCount = paymentHistory.filter(
@@ -171,8 +171,10 @@ export function PaymentHistory({ paymentHistory }: PaymentHistoryProps) {
     }));
   };
 
+//   console.log("Filtered Payments:", filteredPayments);
+
   return (
-    <div>
+    <div >
       <div className="mb-4 flex items-center gap-2">
         <HistoryIcon className="h-5 w-5 text-[#3D568F]" />
         <h2 className="text-xl font-semibold text-[#3D568F]">
@@ -181,7 +183,7 @@ export function PaymentHistory({ paymentHistory }: PaymentHistoryProps) {
       </div>
 
       {/* Payment summary cards */}
-      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 ">
         <Card className="border-[#5580D6]/20 bg-[#5580D6]/5">
           <CardContent className="p-4">
             <CardDescription className="text-sm font-medium text-[#5580D6]/70">
@@ -245,7 +247,7 @@ export function PaymentHistory({ paymentHistory }: PaymentHistoryProps) {
       {filteredPayments.length === 0 ? (
         <div className="rounded-lg border border-dashed bg-muted/10 py-16 text-center">
           <HistoryIcon className="mx-auto mb-4 h-10 w-10 text-muted-foreground/60" />
-          <h3 className="mb-2 text-lg font-medium text-muted-foreground">
+          <h3 className="mb-2 md:text-lg text-xs font-medium text-muted-foreground">
             No payment history found
           </h3>
           <p className="mx-auto max-w-md text-sm text-muted-foreground/70">
@@ -263,7 +265,7 @@ export function PaymentHistory({ paymentHistory }: PaymentHistoryProps) {
                 <TableHead className="w-[120px]">
                   <Button
                     variant="ghost"
-                    className="h-8 p-0 font-medium hover:bg-transparent"
+                    className="h-8 md:text-lg text-xs p-0 font-medium hover:bg-transparent"
                     onClick={() => handleSort("date")}
                   >
                     Date
@@ -273,7 +275,7 @@ export function PaymentHistory({ paymentHistory }: PaymentHistoryProps) {
                 <TableHead>
                   <Button
                     variant="ghost"
-                    className="h-8 p-0 font-medium hover:bg-transparent"
+                    className="h-8 md:text-lg text-xs p-0 font-medium hover:bg-transparent"
                     onClick={() => handleSort("type")}
                   >
                     Type
@@ -283,7 +285,7 @@ export function PaymentHistory({ paymentHistory }: PaymentHistoryProps) {
                 <TableHead>
                   <Button
                     variant="ghost"
-                    className="h-8 p-0 font-medium hover:bg-transparent"
+                    className="h-8 md:text-lg text-xs p-0 font-medium hover:bg-transparent"
                     onClick={() => handleSort("title")}
                   >
                     Title
@@ -294,7 +296,7 @@ export function PaymentHistory({ paymentHistory }: PaymentHistoryProps) {
                 <TableHead>
                   <Button
                     variant="ghost"
-                    className="h-8 p-0 font-medium hover:bg-transparent"
+                    className="h-8 md:text-lg text-xs p-0 font-medium hover:bg-transparent"
                     onClick={() => handleSort("amount")}
                   >
                     Amount
@@ -304,66 +306,43 @@ export function PaymentHistory({ paymentHistory }: PaymentHistoryProps) {
                 <TableHead>
                   <Button
                     variant="ghost"
-                    className="h-8 p-0 font-medium hover:bg-transparent"
+                    className="h-8 md:text-lg text-xs p-0 font-medium hover:bg-transparent"
                     onClick={() => handleSort("status")}
                   >
                     Status
                     <ArrowUpDownIcon className="ml-2 h-4 w-4" />
                   </Button>
                 </TableHead>
-                <TableHead className="text-right">Transaction ID</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredPayments.map((payment) => (
                 <TableRow key={payment.id} className="hover:bg-muted/20">
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium md:text-lg text-xs">
                     {format(new Date(payment.date), "PPP")}
                   </TableCell>
                   <TableCell className="capitalize">
-                    <Badge variant="outline" className="capitalize">
+                    <Badge variant="outline" className="capitalize md:text-lg text-xs">
                       {payment.type}
                     </Badge>
                   </TableCell>
-                  <TableCell>{payment.title}</TableCell>
+                  <TableCell className="md:text-lg text-xs">{payment.title}</TableCell>
                   <TableCell>
-                    <div className="font-medium">{payment.studentName}</div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="font-medium md:text-lg text-xs">{payment.studentName}</div>
+                    <div className=" text-muted-foreground md:text-lg text-xs">
                       {payment.studentEmail}
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium">
-                    {formatAmount(payment.amount)}
+                  <TableCell className="font-medium md:text-lg text-xs">
+                    {formatAmount(payment?.amount)}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="font-medium md:text-lg text-xs">
                     {getStatusBadge(
                       payment.status,
                       payment.receivedPaymentFromAdmin,
                     )}
                   </TableCell>
-                  <TableCell className="text-right font-mono text-xs">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="flex cursor-help items-center justify-end gap-1">
-                            {payment.razorpayPaymentId
-                              ? payment.razorpayPaymentId.substring(0, 8) +
-                                "..."
-                              : "N/A"}
-                            {payment.razorpayPaymentId && (
-                              <InfoIcon className="h-3 w-3 text-muted-foreground" />
-                            )}
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="font-mono text-xs">
-                            {payment.razorpayPaymentId ||
-                              "No transaction ID available"}
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </TableCell>
+                  
                 </TableRow>
               ))}
             </TableBody>

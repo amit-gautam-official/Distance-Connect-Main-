@@ -52,15 +52,7 @@ export default function RegisterForm({
               <div>How would you like to get started?</div>
             </h1>
             <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:gap-x-16 xl:gap-y-10">
-              {/* <button
-                onClick={() => {
-                  setRole("STARTUP");
-                  setStep(2);
-                }}
-                className="h-[45px] w-full flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] transition-colors hover:border-blue-400 hover:text-[#0A64BC] focus:border-blue-400 focus:text-[#0A64BC] xl:h-[65.66px]"
-              >
-                To Hire
-              </button> */}
+
               <button
                 onClick={() => {
                   setRole("MENTOR");
@@ -80,15 +72,6 @@ export default function RegisterForm({
               >
                 <User className="mr-2 h-6 w-6" />
                 Placement Preparation
-              </button>
-              <button
-                onClick={() => {
-                  setRole("STUDENT");
-                  setStep(2);
-                }}
-                className="h-[45px] w-full flex-shrink-0 rounded-[8px] border border-[#8A8A8A] shadow-[0px_2px_2px_2px_rgba(204,204,204,0.1)] transition-colors hover:border-blue-400 hover:text-[#0A64BC] focus:border-blue-400 focus:text-[#0A64BC] xl:h-[65.66px]"
-              >
-                Find Jobs
               </button>
             </div>
           </div>

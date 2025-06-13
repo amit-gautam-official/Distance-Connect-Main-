@@ -39,16 +39,16 @@ const HeroSection = () => {
             prepares them for top placements
           </h2>
           <div className="flex w-full justify-center gap-4 xl:justify-start">
-            {/* <button
+            <button
               onClick={() => {
                 router.push("/mentors");
               }}
               className="font-roboto flex shrink-0 items-center justify-center gap-[10px] rounded-[15px] bg-[#3D568F] px-4 py-2 text-[19px] font-medium not-italic leading-[24px] text-white shadow-md transition-all duration-300 hover:bg-[#334775] md:h-[50px] md:w-[199px]"
             >
               Try for free
-            </button> */}
+            </button>
             
-           {!session.data ?  <button
+           {/* {!session.data ?  <button
               onClick={openWaitlistModal}
               className="font-roboto flex shrink-0 items-center justify-center gap-[10px] rounded-[15px] bg-[#3D568F] px-4 py-2 text-[19px] font-medium not-italic leading-[24px] text-white shadow-md transition-all duration-300 hover:bg-[#334775] md:h-[50px] md:w-[199px]"
             >
@@ -59,7 +59,7 @@ const HeroSection = () => {
               className="font-roboto flex shrink-0 items-center justify-center gap-[10px] rounded-[15px] bg-[#3D568F] px-4 py-2 text-[19px] font-medium not-italic leading-[24px] text-white shadow-md transition-all duration-300 hover:bg-[#334775] md:h-[50px] md:w-[199px]"
             >
               Dashboard
-            </Link>}
+            </Link>} */}
             <button
               onClick={() => {
                 router.push("#roadmap");

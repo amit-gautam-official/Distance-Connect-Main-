@@ -149,18 +149,18 @@ const Navbar = ({
 
               <div className="flex h-full flex-col justify-between gap-4">
                 <div className="mt-4 flex flex-col items-center justify-start gap-4 text-left">
-                  {/* <Link
-                    href="pris
+                  <Link
+                    href="/mentors"
                     className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
                   >
                     Mentors
-                  </Link> */}
-                  {/* <Link
+                  </Link>
+                  <Link
                     href="/workshops"
                     className="mt-2 w-full text-[18px] font-normal leading-[18px] text-[#5D5A88]"
                   >
                     Workshops
-                  </Link> */}
+                  </Link>
                   <div className="relative mt-2 w-full">
                     <details className="group [&_summary::-webkit-details-marker]:hidden">
                       <summary className="flex cursor-pointer items-center justify-between text-[18px] font-normal leading-[18px] text-[#5D5A88]">
@@ -294,20 +294,20 @@ const Navbar = ({
         <div className="flex items-center justify-center font-inter font-[500] leading-normal text-white lg:gap-4 lg:text-[16px] xl:gap-8 xl:text-[16px]">
           <NavigationMenu>
             <NavigationMenuList className="text-[16px] font-[500] text-black">
-              {/* <NavigationMenuItem>
+              <NavigationMenuItem>
                 <Link href="/mentors" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     Mentors
                   </NavigationMenuLink>
                 </Link>
-              </NavigationMenuItem> */}
-              {/* <NavigationMenuItem>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
                 <Link href="/workshops" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     Workshops
                   </NavigationMenuLink>
                 </Link>
-              </NavigationMenuItem> */}
+              </NavigationMenuItem>
               <NavigationMenuItem className="">
                 <NavigationMenuTrigger>
                   <Link href="/solutions/student" className="cursor-pointer">

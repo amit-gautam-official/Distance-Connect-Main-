@@ -61,16 +61,12 @@ const formSchema = z
       .string()
       .regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, {
         message: "PAN number must be in valid format (e.g., ABCDE1234F).",
-      })
-      .optional()
-      .or(z.literal("")),
-    upiId: z
+      }),
+    bankBranch: z
       .string()
-      .regex(/^[\w\.\-]{3,}@[a-zA-Z]{3,}$/, {
-        message: "UPI ID must be in valid format (e.g., name@upi).",
-      })
-      .optional()
-      .or(z.literal("")),
+        .min(2, {
+            message: "Bank branch must be at least 2 characters.",
+        })
   })
   .refine((data) => data.accountNumber === data.confirmAccountNumber, {
     message: "Account numbers do not match",
@@ -104,7 +100,7 @@ export function PaymentBillingForm({
         confirmAccountNumber: "",
         ifscCode: "",
         panNumber: "",
-        upiId: "",
+        bankBranch: "",
       };
 
   const form = useForm<BankDetailsFormValues>({
@@ -148,7 +144,7 @@ export function PaymentBillingForm({
         <AlertTitle>Secure Information</AlertTitle>
         <AlertDescription>
           Please ensure your banking details are accurate. These details will be
-          used to transfer your earnings from mentoring sessions and workshops.
+          used to transfer your earnings.
           Your information is securely stored and protected.
         </AlertDescription>
       </Alert>
@@ -166,7 +162,7 @@ export function PaymentBillingForm({
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="John Doe"
+                      placeholder="Your Name as per Bank Account"
                       {...field}
                       className="border-input/50 focus-visible:ring-[#5580D6]"
                     />
@@ -184,7 +180,26 @@ export function PaymentBillingForm({
                   <FormLabel className="font-medium">Bank Name</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="HDFC Bank"
+                      placeholder="Your Bank Name"
+                      {...field}
+                      className="border-input/50 focus-visible:ring-[#5580D6]"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="bankBranch"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-medium">
+                    Branch Name
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Your Branch Name"
                       {...field}
                       className="border-input/50 focus-visible:ring-[#5580D6]"
                     />
@@ -301,25 +316,7 @@ export function PaymentBillingForm({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="upiId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-medium">
-                    UPI ID (Optional)
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="name@upi"
-                      {...field}
-                      className="border-input/50 focus-visible:ring-[#5580D6]"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
           </div>
 
           <Button
