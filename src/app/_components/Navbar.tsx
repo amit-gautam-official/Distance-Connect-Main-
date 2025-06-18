@@ -101,10 +101,10 @@ const Navbar = ({
         onClose={() => setIsWaitlistModalOpen(false)}
       />
       {/* Mobile nav */}
-      <div className="relative overflow-hidden flex h-[55px] w-full items-center justify-between bg-white p-6 shadow-[0px_1px_3.7px_0px_rgba(0,0,0,0.10)] lg:hidden">
+      <div className="relative  flex h-[55px] w-full items-center justify-between bg-white p-6 shadow-[0px_1px_3.7px_0px_rgba(0,0,0,0.10)] lg:hidden">
         <Sheet>
           <Link href="/" className="flex items-center justify-center gap-2">
-            <img src="/logo.svg" alt="logo" className="m-auto h-20" />
+            <img src="/logo.svg" alt="logo" className="m-auto max-h-10" />
           </Link>
           <SheetTrigger>
             <svg
@@ -280,7 +280,7 @@ const Navbar = ({
     xl--> desktop */}
 
       <div
-        className={`fixed left-[50%] z-[50] overflow-hidden m-auto hidden h-[78px] w-full translate-x-[-50%] items-center justify-between bg-white px-[10%] transition-transform duration-300 lg:flex ${
+        className={`fixed left-[50%] z-[50]  m-auto hidden h-[78px] w-full translate-x-[-50%] items-center justify-between bg-white px-[10%] transition-transform duration-300 lg:flex ${
           showNavbar
             ? "translate-y-[0px] transform"
             : "-translate-y-[100px] transform"
@@ -288,7 +288,7 @@ const Navbar = ({
       >
         <div className="flex items-center justify-center gap-2 ">
           <Link href="/" className="cursor-pointer">
-            <img src="/logo.svg" alt="logo" className="m-auto h-28" />
+            <img src="/logo.svg" alt="logo" className="m-auto h-12" />
           </Link>
         </div>
         <div className="flex items-center justify-center font-inter font-[500] leading-normal text-white lg:gap-4 lg:text-[16px] xl:gap-8 xl:text-[16px]">
@@ -318,11 +318,11 @@ const Navbar = ({
                   <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                     <li className="row-span-3">
                       <NavigationMenuLink asChild>
-                        <div className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-4 no-underline outline-none focus:shadow-md">
+                        <div className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-4  no-underline outline-none focus:shadow-md">
                           <img
                             src="/logo.svg"
                             alt="logo"
-                            className="w- h-28 object-cover"
+                            className="w- h-12 object-contain "
                           />
                           <div className="mb-2 mt-4 text-sm font-medium">
                             Solutions offered
