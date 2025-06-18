@@ -280,13 +280,13 @@ const Navbar = ({
     xl--> desktop */}
 
       <div
-        className={`fixed left-[50%] z-[50] m-auto hidden h-[78px] w-full translate-x-[-50%] items-center justify-between bg-white px-[10%] transition-transform duration-300 lg:flex ${
+        className={`fixed left-[50%] z-[50] overflow-hidden m-auto hidden h-[78px] w-full translate-x-[-50%] items-center justify-between bg-white px-[10%] transition-transform duration-300 lg:flex ${
           showNavbar
             ? "translate-y-[0px] transform"
             : "-translate-y-[100px] transform"
         }`}
       >
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-2 ">
           <Link href="/" className="cursor-pointer">
             <img src="/logo.svg" alt="logo" className="m-auto h-28" />
           </Link>
