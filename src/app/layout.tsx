@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     url: "https://distanceconnect.in",
     images: [
       {
-        url: "/logo.png",
+        url: "/logo.svg",
         width: 800,
         height: 600,
       },
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Distance Connect",
     description: "A platform for connecting students and mentors.",
-    images: ["/logo.png"],
+    images: ["/logo.svg"],
     creator: "@distanceconnect",
   },
   robots: {
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     capable: true,
     startupImage: [
       {
-        url: "/logo.png",
+        url: "/logo.svg",
        
       },
     ],

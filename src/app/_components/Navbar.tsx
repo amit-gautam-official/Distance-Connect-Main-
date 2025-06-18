@@ -101,10 +101,10 @@ const Navbar = ({
         onClose={() => setIsWaitlistModalOpen(false)}
       />
       {/* Mobile nav */}
-      <div className="relative flex h-[55px] w-full items-center justify-between bg-white p-6 shadow-[0px_1px_3.7px_0px_rgba(0,0,0,0.10)] lg:hidden">
+      <div className="relative overflow-hidden flex h-[55px] w-full items-center justify-between bg-white p-6 shadow-[0px_1px_3.7px_0px_rgba(0,0,0,0.10)] lg:hidden">
         <Sheet>
           <Link href="/" className="flex items-center justify-center gap-2">
-            <img src="/logo.png" alt="logo" className="m-auto h-[37px]" />
+            <img src="/logo.svg" alt="logo" className="m-auto h-20" />
           </Link>
           <SheetTrigger>
             <svg
@@ -288,7 +288,7 @@ const Navbar = ({
       >
         <div className="flex items-center justify-center gap-2">
           <Link href="/" className="cursor-pointer">
-            <img src="/logo.png" alt="logo" className="m-auto h-[80px]" />
+            <img src="/logo.svg" alt="logo" className="m-auto h-28" />
           </Link>
         </div>
         <div className="flex items-center justify-center font-inter font-[500] leading-normal text-white lg:gap-4 lg:text-[16px] xl:gap-8 xl:text-[16px]">
@@ -320,9 +320,9 @@ const Navbar = ({
                       <NavigationMenuLink asChild>
                         <div className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-4 no-underline outline-none focus:shadow-md">
                           <img
-                            src="/logo.png"
+                            src="/logo.svg"
                             alt="logo"
-                            className="w- h-20 object-cover"
+                            className="w- h-28 object-cover"
                           />
                           <div className="mb-2 mt-4 text-sm font-medium">
                             Solutions offered

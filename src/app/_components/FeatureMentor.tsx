@@ -102,28 +102,12 @@ export default function FeatureMentor() {
 
 // Typewriter animation component
 function TypewriterText({ text }: { text: string }) {
-  const [displayText, setDisplayText] = React.useState("");
-
-  React.useEffect(() => {
-    let i = 0;
-    const typingInterval = setInterval(() => {
-      if (i < text.length) {
-        setDisplayText((prev) => prev + text.charAt(i));
-        i++;
-      } else {
-        clearInterval(typingInterval);
-      }
-    }, 150);
-
-    return () => clearInterval(typingInterval);
-  }, [text]);
 
   return (
     <span 
       className="inline-block font-bold text-white"
-
     >
-      {displayText}
+      {text}
     </span>
 // Add this to your global CSS or use inline styles
 // This adds a text shadow to make text more visible against any background
