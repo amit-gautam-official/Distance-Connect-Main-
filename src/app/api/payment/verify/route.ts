@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { db } from '@/server/db';
 import { generateMeetLink } from '@/lib/services/generate-meet-link';
 import { PaymentEmailService } from '@/lib/emails/payment-failure-email';
+import { ReferralStatus } from '@prisma/client';
 
 
 function convertToDateTime(date: Date, time: string): Date {
@@ -58,6 +59,51 @@ export async function POST(req: NextRequest) {
               },
             });
       
+            // Handle referral payment
+            if (order && order.referralRequestId) {
+              const referralRequest = await db.razorpayOrder.findUnique({
+                where: { id: order.id },
+                include: {
+                  referralRequest: true,
+                },
+              });
+              
+              if (referralRequest?.referralRequest) {
+                // Check if this is initiation fee or final fee
+                const isInitiationFee = referralRequest.amount === referralRequest.referralRequest.initiationFeeAmount;
+                
+                await db.referralRequest.update({
+                  where: { id: referralRequest.referralRequestId! },
+                  data: {
+                    initiationFeePaid: isInitiationFee ? true : referralRequest.referralRequest.initiationFeePaid,
+                    finalFeePaid: !isInitiationFee ? true : referralRequest.referralRequest.finalFeePaid,
+                    status: isInitiationFee ? ReferralStatus.RESUME_REVIEW : ReferralStatus.COMPLETED,
+                  }
+                });
+                
+                // Create a chat room between student and mentor if this is the final payment
+                if (!isInitiationFee) {
+                  const existingChatRoom = await db.chatRoom.findFirst({
+                    where: {
+                      mentorUserId: referralRequest.referralRequest.mentorUserId,
+                      studentUserId: referralRequest.referralRequest.studentUserId,
+                    }
+                  });
+                  
+                  if (!existingChatRoom) {
+                    await db.chatRoom.create({
+                      data: {
+                        mentorUserId: referralRequest.referralRequest.mentorUserId,
+                        studentUserId: referralRequest.referralRequest.studentUserId,
+                        lastMessage: "Chat started for referral process.",
+                        mentorUnreadCount: 1,
+                        studentUnreadCount: 0,
+                      }
+                    });
+                  }
+                }
+              }
+            }
       
             if (order && order.scheduledMeetingId) {
       

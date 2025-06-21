@@ -555,6 +555,7 @@ getMentorFilterOptions : publicProcedure
         hiringFields: true,
         companyType: true,
         state : true,
+        user : true,
         meetingEvents : {
           select : {
             id : true,
@@ -562,6 +563,8 @@ getMentorFilterOptions : publicProcedure
           }
         }
       }
+      
+
     });
 
   }),

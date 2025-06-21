@@ -109,6 +109,7 @@ model Student {
   orders              RazorpayOrder[]
   workshopEnrollments WorkshopEnrollment[]
   hasUsedFreeSession  Boolean              @default(false)
+  referralRequests    ReferralRequest[] // New relation for referral requests
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -140,17 +141,18 @@ model Mentor {
   skills               String[]
   profileBanner        String?
   companyEmail         String?
-  companyEmailVerified Boolean  @default(false)
-  verified             Boolean  @default(false)
+  companyEmailVerified Boolean             @default(false)
+  verified             Boolean             @default(false)
   messageFromAdmin     String?
-  mentorPhoneNumber    String?  @default("XXXXXXXXXX")
-
-  meetingEvents     MeetingEvent[]
-  availability      Availability?
-  scheduledMeetings ScheduledMeetings[]
-  chatRooms         ChatRoom[]
-  workshops         Workshop[]
-  bankDetails       MentorBankDetails?
+  mentorPhoneNumber    String?             @default("XXXXXXXXXX")
+  meetingEvents        MeetingEvent[]
+  availability         Availability?
+  scheduledMeetings    ScheduledMeetings[]
+  chatRooms            ChatRoom[]
+  workshops            Workshop[]
+  bankDetails          MentorBankDetails?
+  referralRequests     ReferralRequest[] // New relation for referral requests
+  referralOfferings    ReferralOffering[] // Relation for referral offerings
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -171,6 +173,9 @@ model RazorpayOrder {
 
   workshopEnrollmentId String?             @db.ObjectId
   workshopEnrollment   WorkshopEnrollment? @relation(fields: [workshopEnrollmentId], references: [id], onDelete: SetNull)
+
+  referralRequestId String?          @db.ObjectId
+  referralRequest   ReferralRequest? @relation(fields: [referralRequestId], references: [id], onDelete: SetNull) // New relation for referral payments
 
   status            OrderStatus @default(pending)
   razorpayOrderId   String      @unique
@@ -378,9 +383,92 @@ model MentorBankDetails {
   bankName          String
   accountNumber     String
   ifscCode          String
-  bankBranch        String @default("Not Provided")
+  bankBranch        String  @default("Not Provided")
   panNumber         String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// 🎯 New Referral System Models
+
+// Status enum for referral requests
+enum ReferralStatus {
+  INITIATED // Initial state after payment of ₹99
+  RESUME_REVIEW // Mentor is reviewing the resume
+  CHANGES_REQUESTED // Mentor requested changes to resume
+  APPROVED_FOR_REFERRAL // Mentor approved to send referral
+  REFERRAL_SENT // Mentor has sent referral to company
+  UNDER_REVIEW // Company is reviewing the referral
+  REFERRAL_ACCEPTED // Company accepted the referral
+  REFERRAL_REJECTED // Company rejected the referral
+  PAYMENT_PENDING // Final payment pending from student
+  COMPLETED // Referral process complete
+}
+
+// Model for Referral Requests
+model ReferralRequest {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  student       Student @relation(fields: [studentUserId], references: [userId], onDelete: Cascade)
+  studentUserId String  @db.ObjectId
+
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId], onDelete: Cascade)
+  mentorUserId String @db.ObjectId
+
+  // Resume and other documents
+  resumeUrl      String?
+  coverLetterUrl String?
+
+  // Referral details
+  companyName        String?
+  positionName       String?
+  jobLink            String?
+  referralProofUrl   String? // URL to proof of referral (screenshot, email, etc.)
+  acceptanceProofUrl String? // URL to proof of acceptance
+
+  // Status tracking
+  status                 ReferralStatus @default(INITIATED)
+  mentorFeedback         String? // Feedback from mentor on resume
+  mentorChangesRequested String? // Specific changes requested by mentor
+
+  // Payment tracking
+  initiationFeeAmount Int     @default(9900) // ₹99 in paise
+  initiationFeePaid   Boolean @default(false)
+  finalFeeAmount      Int? // Final referral fee in paise (decided later)
+  finalFeePaid        Boolean @default(false)
+
+  // Related orders
+  orders RazorpayOrder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studentUserId, mentorUserId], name: "student_mentor_index")
+  @@index([status], name: "referral_status_index")
+}
+
+// Model for Referral Offerings
+model ReferralOffering {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  mentor       Mentor @relation(fields: [mentorUserId], references: [userId], onDelete: Cascade)
+  mentorUserId String @db.ObjectId
+
+  // Offering details
+  title               String
+  description         String
+  companiesCanReferTo String[] // List of companies mentor can refer to
+  positions           String[] // List of positions mentor can refer for
+  referralSuccess     Int      @default(0) // Number of successful referrals
+  isActive            Boolean  @default(true)
+
+  // Pricing
+  initiationFeeAmount Int @default(9900) // ₹99 in paise
+  finalFeeAmount      Int @default(199900) // ₹1999 in paise
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([mentorUserId], name: "referral_offering_mentor_index")
 }

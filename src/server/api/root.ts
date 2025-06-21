@@ -13,6 +13,7 @@ import { fileRouter } from "./routers/file";
 import { adminRouter } from "./routers/admin";
 import { razorpayOrderRouter } from "./routers/razorpayOrder";
 import { workshopRouter } from "./routers/workshop";
+import { referralRouter } from "./routers/referral";
 
 /**
  * This is the primary router for your server.
@@ -33,7 +34,8 @@ export const appRouter = createTRPCRouter({
   file: fileRouter,
   admin : adminRouter,
   razorpayOrder: razorpayOrderRouter,
-  workshop: workshopRouter
+  workshop: workshopRouter,
+  referral: referralRouter
 });
 
 // export type definition of API

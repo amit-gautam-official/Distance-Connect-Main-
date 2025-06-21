@@ -231,7 +231,7 @@ export default function WorkshopDetailPage() {
   const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [studentGmailId, setStudentGmailId] = useState<string>("");
-  // Unwrap params using React.use()
+  
   const params = useParams<{ workshopId: string }>();
   const workshopId = params.workshopId;
 
