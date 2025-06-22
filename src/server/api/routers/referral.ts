@@ -90,7 +90,6 @@ export const referralRouter = createTRPCRouter({
         throw new Error(`Failed to update referral documents: ${error.message}`);
       }
     }),
-
   // For mentors to review and update the status of a referral request
   updateReferralStatus: protectedProcedure
     .input(
@@ -99,8 +98,8 @@ export const referralRouter = createTRPCRouter({
         status: z.nativeEnum(ReferralStatus),
         mentorFeedback: z.string().optional(),
         mentorChangesRequested: z.string().optional(),
-        referralProofUrl: z.string().optional(),
-        acceptanceProofUrl: z.string().optional(),
+        referralProofUrl: z.string().url({ message: "Referral proof URL must be a valid URL" }).optional(),
+        acceptanceProofUrl: z.string().url({ message: "Acceptance proof URL must be a valid URL" }).optional(),
         finalFeeAmount: z.string().optional(),
       })
     )
@@ -113,11 +112,43 @@ export const referralRouter = createTRPCRouter({
       // Check if the referral request belongs to the mentor
       const referralRequest = await ctx.db.referralRequest.findUnique({
         where: { id: input.referralRequestId },
-        select: { mentorUserId: true, status: true }
+        select: { 
+          mentorUserId: true, 
+          status: true, 
+          initiationFeePaid: true,
+          finalFeePaid: true,
+          referralProofUrl: true
+        }
       });
 
       if (!referralRequest || referralRequest.mentorUserId !== ctx.dbUser.id) {
         throw new Error("Referral request not found or access denied");
+      }
+
+      // Validate status transitions
+      if (input.status === ReferralStatus.REFERRAL_SENT && !input.referralProofUrl) {
+        throw new Error("Referral proof URL is required when marking a referral as sent");
+      }
+
+      // Check if the status transition is valid
+      const validTransitions: Record<string, ReferralStatus[]> = {
+        [ReferralStatus.INITIATED]: [ReferralStatus.RESUME_REVIEW],
+        [ReferralStatus.RESUME_REVIEW]: [ReferralStatus.CHANGES_REQUESTED, ReferralStatus.APPROVED_FOR_REFERRAL],
+        [ReferralStatus.CHANGES_REQUESTED]: [ReferralStatus.RESUME_REVIEW, ReferralStatus.APPROVED_FOR_REFERRAL],
+        [ReferralStatus.APPROVED_FOR_REFERRAL]: [ReferralStatus.REFERRAL_SENT],
+        [ReferralStatus.REFERRAL_SENT]: [ReferralStatus.UNDER_REVIEW, ReferralStatus.REFERRAL_ACCEPTED, ReferralStatus.REFERRAL_REJECTED],
+        [ReferralStatus.UNDER_REVIEW]: [ReferralStatus.REFERRAL_ACCEPTED, ReferralStatus.REFERRAL_REJECTED],
+        [ReferralStatus.REFERRAL_ACCEPTED]: [ReferralStatus.PAYMENT_PENDING],
+        [ReferralStatus.PAYMENT_PENDING]: [ReferralStatus.COMPLETED],
+        [ReferralStatus.REFERRAL_REJECTED]: [],
+        [ReferralStatus.COMPLETED]: [],
+      };
+
+      if (
+        !validTransitions[referralRequest.status]?.includes(input.status) &&
+        input.status !== referralRequest.status // Allow updating with same status for other field updates
+      ) {
+        throw new Error(`Invalid status transition from ${referralRequest.status} to ${input.status}`);
       }
 
       // Update the referral request
@@ -238,7 +269,6 @@ export const referralRouter = createTRPCRouter({
 
       return referralRequest;
     }),
-
   // For updating payment status after successful payment
   updatePaymentStatus: protectedProcedure
     .input(
@@ -256,7 +286,11 @@ export const referralRouter = createTRPCRouter({
       // Check if the referral request belongs to the student
       const referralRequest = await ctx.db.referralRequest.findUnique({
         where: { id: input.referralRequestId },
-        select: { studentUserId: true, status: true }
+        select: { 
+          studentUserId: true, 
+          status: true, 
+          referralProofUrl: true 
+        }
       });
 
       if (!referralRequest || referralRequest.studentUserId !== ctx.dbUser.id) {
@@ -273,7 +307,12 @@ export const referralRouter = createTRPCRouter({
           }
         });
       } else {
-        // Final payment
+        // Final payment - check if proof is uploaded
+        if (!referralRequest.referralProofUrl) {
+          throw new Error("Mentor must upload proof of referral before final payment");
+        }
+        
+        // Final payment with proof uploaded, mark as completed
         return await ctx.db.referralRequest.update({
           where: { id: input.referralRequestId },
           data: {

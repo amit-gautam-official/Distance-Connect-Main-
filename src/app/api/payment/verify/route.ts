@@ -68,16 +68,21 @@ export async function POST(req: NextRequest) {
                 },
               });
               
-              if (referralRequest?.referralRequest) {
-                // Check if this is initiation fee or final fee
-                const isInitiationFee = referralRequest.amount === referralRequest.referralRequest.initiationFeeAmount;
-                
-                await db.referralRequest.update({
+              if (referralRequest?.referralRequest) {                // Check if this is initiation fee or final fee
+                // Convert both to numbers for comparison since initiationFeeAmount is stored as string
+                const isInitiationFee = referralRequest.amount === parseInt(referralRequest.referralRequest.initiationFeeAmount);
+                  await db.referralRequest.update({
                   where: { id: referralRequest.referralRequestId! },
                   data: {
                     initiationFeePaid: isInitiationFee ? true : referralRequest.referralRequest.initiationFeePaid,
                     finalFeePaid: !isInitiationFee ? true : referralRequest.referralRequest.finalFeePaid,
-                    status: isInitiationFee ? ReferralStatus.RESUME_REVIEW : ReferralStatus.COMPLETED,
+                    // If this is the initiation fee, set status to RESUME_REVIEW
+                    // If this is the final fee, check if proof has been uploaded before marking COMPLETED
+                    status: isInitiationFee 
+                      ? ReferralStatus.RESUME_REVIEW 
+                      : (referralRequest.referralRequest.referralProofUrl 
+                          ? ReferralStatus.COMPLETED 
+                          : ReferralStatus.PAYMENT_PENDING),
                   }
                 });
                 
