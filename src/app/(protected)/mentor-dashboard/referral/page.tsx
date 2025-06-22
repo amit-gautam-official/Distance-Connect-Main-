@@ -169,8 +169,8 @@ const referralOfferingSchema = z.object({
   positions: z.string().min(3, {
     message: "Add at least one position.",
   }),
-  initiationFeeAmount: z.number().default(99), // Default ₹99
-  finalFeeAmount: z.number().default(1999), // Default ₹1999
+  initiationFeeAmount: z.string().default("99").transform(val => String(parseInt(val) * 100)), 
+  finalFeeAmount: z.string().default("899").transform(val => String(parseInt(val) * 100)),
   isActive: z.boolean().default(true),
 });
 
@@ -305,8 +305,8 @@ const MentorReferralPage = () => {
       description: "",
       companiesCanReferTo: "",
       positions: "",
-      initiationFeeAmount: 99, // Default ₹99
-      finalFeeAmount: 1999, // Default ₹1999
+      initiationFeeAmount: "99", // Default ₹99
+      finalFeeAmount: "1999", // Default ₹1999
       isActive: true,
     },
   });
@@ -318,8 +318,8 @@ const MentorReferralPage = () => {
       description: "",
       companiesCanReferTo: "",
       positions: "",
-      initiationFeeAmount: 99, // Default ₹99
-      finalFeeAmount: 1999, // Default ₹1999
+      initiationFeeAmount: "99", // Default ₹99
+      finalFeeAmount: "899", // Default ₹899
       isActive: true,
     },
   });
@@ -353,8 +353,8 @@ const MentorReferralPage = () => {
       description: values.description,
       companiesCanReferTo: companies,
       positions: positions,
-      initiationFeeAmount: values.initiationFeeAmount * 100, // Convert to paise
-      finalFeeAmount: values.finalFeeAmount * 100, // Convert to paise
+      initiationFeeAmount: String(parseInt(values.initiationFeeAmount) * 100), // Convert to paise
+      finalFeeAmount: String(parseInt(values.finalFeeAmount) * 100), // Convert to paise
       isActive: values.isActive,
     });
   };
@@ -372,8 +372,8 @@ const MentorReferralPage = () => {
       description: offering.description,
       companiesCanReferTo: companiesStr,
       positions: positionsStr,
-      initiationFeeAmount: offering.initiationFeeAmount / 100, // Convert from paise to rupees
-      finalFeeAmount: offering.finalFeeAmount / 100, // Convert from paise to rupees
+      initiationFeeAmount: String(offering.initiationFeeAmount / 100), // Convert from paise to rupees as string
+      finalFeeAmount: String(offering.finalFeeAmount / 100), // Convert from paise to rupees as string
       isActive: offering.isActive,
     });
 
@@ -402,8 +402,8 @@ const MentorReferralPage = () => {
       description: values.description,
       companiesCanReferTo: companies,
       positions: positions,
-      initiationFeeAmount: values.initiationFeeAmount * 100, // Convert to paise
-      finalFeeAmount: values.finalFeeAmount * 100, // Convert to paise
+      initiationFeeAmount: String(parseInt(values.initiationFeeAmount) * 100), // Convert to paise as string
+      finalFeeAmount: String(parseInt(values.finalFeeAmount) * 100), // Convert to paise as string
       isActive: values.isActive,
     });
   };
@@ -774,7 +774,7 @@ const MentorReferralPage = () => {
                                     referralRequestId: selectedReferral.id,
                                     status: "REFERRAL_SENT",
                                     referralProofUrl: values.proofUrl,
-                                    finalFeeAmount: values.finalFeeAmount,
+                                    finalFeeAmount: values.finalFeeAmount ? String(values.finalFeeAmount) : undefined,
                                   });
                                 },
                               )}
@@ -856,7 +856,7 @@ const MentorReferralPage = () => {
                                       referralRequestId: selectedReferral.id,
                                       status: "REFERRAL_ACCEPTED",
                                       acceptanceProofUrl: values.proofUrl,
-                                      finalFeeAmount: values.finalFeeAmount,
+                                      finalFeeAmount: values.finalFeeAmount ? String(values.finalFeeAmount) : undefined,
                                     });
                                   })();
                                 }}
@@ -925,7 +925,7 @@ const MentorReferralPage = () => {
                                       referralRequestId: selectedReferral.id,
                                       status: "REFERRAL_REJECTED",
                                       acceptanceProofUrl: values.proofUrl,
-                                      finalFeeAmount: values.finalFeeAmount,
+                                      finalFeeAmount: values.finalFeeAmount ? String(values.finalFeeAmount) : undefined,
                                     });
                                   })();
                                 }}
@@ -1059,7 +1059,7 @@ const MentorReferralPage = () => {
                   Create Offering
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px]">
+              <DialogContent className="sm:max-w-[600px] overflow-auto h-[90%]">
                 <DialogHeader>
                   <DialogTitle>Create a Referral Offering</DialogTitle>
                   <DialogDescription>
@@ -1344,13 +1344,13 @@ const MentorReferralPage = () => {
                     <div className="flex items-center justify-between text-sm">
                       <div>
                         <span className="font-medium">
-                          ₹{offering.initiationFeeAmount / 100}
+                          ₹{Number(offering.initiationFeeAmount) / 100}
                         </span>{" "}
                         <span className="text-gray-500">initial</span>
                       </div>
                       <div>
                         <span className="font-medium">
-                          ₹{offering.finalFeeAmount / 100}
+                          ₹{Number(offering.finalFeeAmount) / 100}
                         </span>{" "}
                         <span className="text-gray-500">final</span>
                       </div>
@@ -1401,143 +1401,6 @@ const MentorReferralPage = () => {
           )}
         </TabsContent>
       </Tabs>
-
-      {/* Create Offering Dialog */}
-      <Dialog
-        open={isOfferingDialogOpen}
-        onOpenChange={setIsOfferingDialogOpen}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create Referral Offering</DialogTitle>
-            <DialogDescription>
-              Define the details of the referral offering you want to create.
-            </DialogDescription>
-          </DialogHeader>
-
-          <Form {...referralOfferingForm}>
-            <form
-              onSubmit={referralOfferingForm.handleSubmit(
-                onCreateReferralOffering,
-              )}
-              className="space-y-4"
-            >
-              <FormField
-                control={referralOfferingForm.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g., Software Engineer Referral"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={referralOfferingForm.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Describe the referral offering"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={referralOfferingForm.control}
-                name="companiesCanReferTo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Companies</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Google, Microsoft" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={referralOfferingForm.control}
-                name="positions"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Positions</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g., Frontend Developer, Backend Developer"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={referralOfferingForm.control}
-                name="initiationFeeAmount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Initiation Fee (₹)</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="0" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={referralOfferingForm.control}
-                name="finalFeeAmount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Final Fee Amount (₹)</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="0" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={referralOfferingForm.control}
-                name="isActive"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="ml-2">Is Active</FormLabel>
-                  </FormItem>
-                )}
-              />
-
-              <DialogFooter>
-                <Button type="submit">Create Offering</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
 
       {/* Edit Offering Dialog */}
       <Dialog

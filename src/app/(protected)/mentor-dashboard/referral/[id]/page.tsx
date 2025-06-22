@@ -76,24 +76,6 @@ const getReferralStatusBadge = (status: string) => {
           Referral Sent
         </Badge>
       );
-    case "UNDER_REVIEW":
-      return (
-        <Badge variant="outline" className="bg-cyan-100 text-cyan-800">
-          Under Review
-        </Badge>
-      );
-    case "REFERRAL_ACCEPTED":
-      return (
-        <Badge variant="outline" className="bg-emerald-100 text-emerald-800">
-          Referral Accepted
-        </Badge>
-      );
-    case "REFERRAL_REJECTED":
-      return (
-        <Badge variant="outline" className="bg-red-100 text-red-800">
-          Referral Rejected
-        </Badge>
-      );
     case "PAYMENT_PENDING":
       return (
         <Badge variant="outline" className="bg-orange-100 text-orange-800">
@@ -119,11 +101,8 @@ const getProgressPercentage = (status: string) => {
     CHANGES_REQUESTED: 30,
     APPROVED_FOR_REFERRAL: 40,
     REFERRAL_SENT: 60,
-    UNDER_REVIEW: 70,
-    REFERRAL_ACCEPTED: 80,
-    PAYMENT_PENDING: 90,
+    PAYMENT_PENDING: 80,
     COMPLETED: 100,
-    REFERRAL_REJECTED: 100,
   };
 
   return statusValues[status] || 0;
@@ -595,7 +574,6 @@ const ReferralDetailPage = () => {
                       {new Date(referral.createdAt).toLocaleString()}
                     </p>
                   </div>
-
                   {referral.initiationFeePaid && (
                     <div className="relative mb-8">
                       <div className="absolute -left-[30px] mt-1.5 h-4 w-4 rounded-full border border-white bg-purple-500"></div>
@@ -613,7 +591,6 @@ const ReferralDetailPage = () => {
                       </p>
                     </div>
                   )}
-
                   {referral.status !== "INITIATED" && (
                     <div className="relative mb-8">
                       <div
@@ -652,12 +629,8 @@ const ReferralDetailPage = () => {
                         </div>
                       )}
                     </div>
-                  )}
-
+                  )}{" "}
                   {(referral.status === "REFERRAL_SENT" ||
-                    referral.status === "UNDER_REVIEW" ||
-                    referral.status === "REFERRAL_ACCEPTED" ||
-                    referral.status === "REFERRAL_REJECTED" ||
                     referral.status === "PAYMENT_PENDING" ||
                     referral.status === "COMPLETED") && (
                     <div className="relative mb-8">
@@ -679,40 +652,17 @@ const ReferralDetailPage = () => {
                       )}
                     </div>
                   )}
-
-                  {(referral.status === "REFERRAL_ACCEPTED" ||
-                    referral.status === "PAYMENT_PENDING" ||
+                  {(referral.status === "PAYMENT_PENDING" ||
                     referral.status === "COMPLETED") && (
                     <div className="relative mb-8">
-                      <div className="absolute -left-[30px] mt-1.5 h-4 w-4 rounded-full border border-white bg-emerald-500"></div>
-                      <p className="font-medium">Referral Accepted</p>
+                      <div className="absolute -left-[30px] mt-1.5 h-4 w-4 rounded-full border border-white bg-orange-500"></div>
+                      <p className="font-medium">Payment Pending</p>
                       <p className="text-sm text-gray-500">
-                        The referral has been accepted by the company
-                      </p>
-                      {referral.acceptanceProofUrl && (
-                        <a
-                          href={referral.acceptanceProofUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-2 inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
-                        >
-                          <ExternalLink className="mr-1 h-3 w-3" />
-                          View Acceptance Proof
-                        </a>
-                      )}
-                    </div>
-                  )}
-
-                  {referral.status === "REFERRAL_REJECTED" && (
-                    <div className="relative mb-8">
-                      <div className="absolute -left-[30px] mt-1.5 h-4 w-4 rounded-full border border-white bg-red-500"></div>
-                      <p className="font-medium">Referral Rejected</p>
-                      <p className="text-sm text-gray-500">
-                        Unfortunately, the company rejected the referral
+                        Waiting for final fee payment from student
                       </p>
                     </div>
-                  )}
-
+                  )}{" "}
+                  {/* Removed "Referral Rejected" step as it's no longer part of the flow */}
                   {referral.status === "COMPLETED" && (
                     <div className="relative">
                       <div className="absolute -left-[30px] mt-1.5 h-4 w-4 rounded-full border border-white bg-green-500"></div>
@@ -867,9 +817,8 @@ const ReferralDetailPage = () => {
                       )}
                     </Button>
                   )}
-                </div>
-                {(referral.status === "REFERRAL_ACCEPTED" ||
-                  referral.status === "PAYMENT_PENDING" ||
+                </div>{" "}
+                {(referral.status === "PAYMENT_PENDING" ||
                   referral.status === "COMPLETED") && (
                   <div>
                     <p className="text-sm font-medium text-gray-500">
@@ -877,8 +826,8 @@ const ReferralDetailPage = () => {
                     </p>
                     <p>
                       {referral.finalFeePaid
-                        ? `✅ Paid (₹${referral.finalFeeAmount ? (referral.finalFeeAmount / 100).toFixed(2) : "---"})`
-                        : `❌ Not Paid (₹${referral.finalFeeAmount ? (referral.finalFeeAmount / 100).toFixed(2) : "---"})`}
+                        ? `✅ Paid (₹${referral.finalFeeAmount ? ( parseInt(referral.finalFeeAmount) / 100).toFixed(2) : "---"})`
+                        : `❌ Not Paid (₹${referral.finalFeeAmount ? ( parseInt(referral.finalFeeAmount) / 100).toFixed(2) : "---"})`}
                     </p>
                     {!referral.finalFeePaid && (
                       <Button
@@ -907,8 +856,7 @@ const ReferralDetailPage = () => {
             </CardContent>
           </Card>{" "}
           {/* Payment information card for final status */}
-          {(referral.status === "REFERRAL_ACCEPTED" ||
-            referral.status === "PAYMENT_PENDING" ||
+          {(referral.status === "PAYMENT_PENDING" ||
             referral.status === "COMPLETED") &&
             !referral.finalFeePaid && (
               <Card className="mt-4">
@@ -923,7 +871,7 @@ const ReferralDetailPage = () => {
                     <p className="mt-1 text-sm text-yellow-700">
                       Waiting for the student to complete the final payment of ₹
                       {referral.finalFeeAmount
-                        ? (referral.finalFeeAmount / 100).toFixed(2)
+                        ? (parseInt(referral.finalFeeAmount) / 100).toFixed(2)
                         : "---"}
                       .
                     </p>

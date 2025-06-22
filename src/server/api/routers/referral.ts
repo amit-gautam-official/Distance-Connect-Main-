@@ -10,74 +10,85 @@ export const referralRouter = createTRPCRouter({
         mentorUserId: z.string(),
         resumeUrl: z.string().optional(),
         coverLetterUrl: z.string().optional(),
-        companyName: z.string().optional(),
-        positionName: z.string().optional(),
-        jobLink: z.string().optional(),
+        positionName: z.string(),
+        jobLink: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       // Check if user is a student
       if (ctx.dbUser?.role !== "STUDENT") {
         throw new Error("Only students can request referrals");
-      }
-
-      // Create the referral request
+      }      // Create the referral request
       const referralRequest = await ctx.db.referralRequest.create({
         data: {
           studentUserId: ctx.dbUser.id,
           mentorUserId: input.mentorUserId,
           resumeUrl: input.resumeUrl,
           coverLetterUrl: input.coverLetterUrl,
-          companyName: input.companyName,
           positionName: input.positionName,
           jobLink: input.jobLink,
           status: ReferralStatus.INITIATED,
           initiationFeePaid: false, // Will be updated after payment
         }
-      });
-
-      return referralRequest;
-    }),
-  // For students to upload or update their resume for a referral request
+      });      return referralRequest;
+    }),  // For students to upload or update their resume for a referral request
   updateReferralDocuments: protectedProcedure
     .input(
       z.object({
         referralRequestId: z.string(),
-        resumeUrl: z.string().optional(),
-        coverLetterUrl: z.string().optional(),
-        companyName: z.string().optional(),
-        positionName: z.string().optional(),
-        jobLink: z.string().optional(),
+        resumeUrl: z.string()
+          .url({ message: "Resume URL must be a valid URL" })
+          .optional()
+          .or(z.literal("")),
+        coverLetterUrl: z.string()
+          .url({ message: "Cover letter URL must be a valid URL" })
+          .optional()
+          .or(z.literal("")),
+        positionName: z.string().min(2, { message: "Position name must be at least 2 characters" }),
+        jobLink: z.string().url({ message: "Job link must be a valid URL" }),
         status: z.nativeEnum(ReferralStatus).optional(),
       })
-    )
-    .mutation(async ({ ctx, input }) => {
-      // Check if user is a student
-      if (ctx.dbUser?.role !== "STUDENT") {
-        throw new Error("Only students can update referral documents");
-      }
-
-      // Check if the referral request belongs to the student
-      const referralRequest = await ctx.db.referralRequest.findUnique({
-        where: { id: input.referralRequestId },
-        select: { studentUserId: true }
-      });
-
-      if (!referralRequest || referralRequest.studentUserId !== ctx.dbUser.id) {
-        throw new Error("Referral request not found or access denied");
-      }      // Update the referral request
-      return await ctx.db.referralRequest.update({
-        where: { id: input.referralRequestId },
-        data: {
-          resumeUrl: input.resumeUrl,
-          coverLetterUrl: input.coverLetterUrl,
-          companyName: input.companyName,
-          positionName: input.positionName,
-          jobLink: input.jobLink,
-          status: input.status || ReferralStatus.RESUME_REVIEW, // Change status back to RESUME_REVIEW
-          updatedAt: new Date(), // Update the timestamp
+    )    .mutation(async ({ ctx, input }) => {
+      try {
+        // Check if user is a student
+        if (ctx.dbUser?.role !== "STUDENT") {
+          throw new Error("Only students can update referral documents");
         }
-      });
+
+        // Check if the referral request belongs to the student
+        const referralRequest = await ctx.db.referralRequest.findUnique({
+          where: { id: input.referralRequestId },
+          select: { studentUserId: true, status: true }
+        });      if (!referralRequest) {
+          throw new Error("Referral request not found");
+        }
+        
+        if (referralRequest.studentUserId !== ctx.dbUser.id) {
+          throw new Error("Access denied - you can only update your own referral requests");
+        }
+          // Ensure resume URL is provided
+        if (!input.resumeUrl) {
+          throw new Error("Resume URL is required");
+        }
+        
+        // Update the referral request
+        const updatedReferral = await ctx.db.referralRequest.update({
+          where: { id: input.referralRequestId },
+          data: {
+            resumeUrl: input.resumeUrl,
+            coverLetterUrl: input.coverLetterUrl,
+            positionName: input.positionName,
+            jobLink: input.jobLink,
+            status: input.status || ReferralStatus.RESUME_REVIEW, // Change status back to RESUME_REVIEW
+            updatedAt: new Date(), // Update the timestamp
+          }
+        });
+        
+        return updatedReferral;
+      } catch (error: any) {
+        // Re-throw with a more descriptive message
+        throw new Error(`Failed to update referral documents: ${error.message}`);
+      }
     }),
 
   // For mentors to review and update the status of a referral request
@@ -90,7 +101,7 @@ export const referralRouter = createTRPCRouter({
         mentorChangesRequested: z.string().optional(),
         referralProofUrl: z.string().optional(),
         acceptanceProofUrl: z.string().optional(),
-        finalFeeAmount: z.number().optional(),
+        finalFeeAmount: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -370,8 +381,8 @@ export const referralRouter = createTRPCRouter({
         description: z.string().min(10, "Description must be at least 10 characters"),
         companiesCanReferTo: z.array(z.string()).min(1, "Add at least one company"),
         positions: z.array(z.string()).min(1, "Add at least one position"),
-        initiationFeeAmount: z.number().default(9900), // Default ₹99 in paise
-        finalFeeAmount: z.number().default(199900), // Default ₹1999 in paise
+        initiationFeeAmount: z.string().default("9900"), // Default ₹99 in paise
+        finalFeeAmount: z.string().default("199900"), // Default ₹1999 in paise
         isActive: z.boolean().default(true),
       })
     )
@@ -407,8 +418,8 @@ export const referralRouter = createTRPCRouter({
         description: z.string().min(10, "Description must be at least 10 characters").optional(),
         companiesCanReferTo: z.array(z.string()).min(1, "Add at least one company").optional(),
         positions: z.array(z.string()).min(1, "Add at least one position").optional(),
-        initiationFeeAmount: z.number().optional(),
-        finalFeeAmount: z.number().optional(),
+        initiationFeeAmount: z.string().optional(),
+        finalFeeAmount: z.string().optional(),
         isActive: z.boolean().optional(),
       })
     )
@@ -528,5 +539,7 @@ export const referralRouter = createTRPCRouter({
       return await ctx.db.referralOffering.delete({
         where: { id: input.offeringId },
       });
-    }),
+    })
+
 });
+

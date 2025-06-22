@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    console.log('Referral Request:', referralRequest);
     if (!referralRequest) {
       return NextResponse.json({ error: 'Referral request not found' }, { status: 404 });
     }
@@ -37,13 +38,13 @@ export async function POST(req: NextRequest) {
     let description: string;
     
     if (isInitiationFee) {
-      amount = referralRequest.initiationFeeAmount;
+      amount = parseInt(referralRequest.initiationFeeAmount);
       description = 'Referral Request Initiation Fee';
     } else {
       if (!referralRequest.finalFeeAmount) {
         return NextResponse.json({ error: 'Final fee amount not set' }, { status: 400 });
       }
-      amount = referralRequest.finalFeeAmount;
+      amount = parseInt(referralRequest.finalFeeAmount);
       description = 'Referral Final Fee';
     }
 

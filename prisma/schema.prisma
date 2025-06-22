@@ -433,9 +433,9 @@ model ReferralRequest {
   mentorChangesRequested String? // Specific changes requested by mentor
 
   // Payment tracking
-  initiationFeeAmount Int     @default(9900) // ₹99 in paise
+  initiationFeeAmount String     @default("9900") // ₹99 in paise
   initiationFeePaid   Boolean @default(false)
-  finalFeeAmount      Int? // Final referral fee in paise (decided later)
+  finalFeeAmount      String? // Final referral fee in paise (decided later)
   finalFeePaid        Boolean @default(false)
 
   // Related orders
@@ -464,8 +464,8 @@ model ReferralOffering {
   isActive            Boolean  @default(true)
 
   // Pricing
-  initiationFeeAmount Int @default(9900) // ₹99 in paise
-  finalFeeAmount      Int @default(199900) // ₹1999 in paise
+  initiationFeeAmount String @default("9900") // ₹99 in paise
+  finalFeeAmount      String @default("199900") // ₹1999 in paise
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

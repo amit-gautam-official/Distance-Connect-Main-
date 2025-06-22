@@ -52,6 +52,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import FileSelector from "@/components/file-selector";
+import { convertFileToBase64 } from "@/lib/file-utils";
 
 // Helper function to get status badge
 const getReferralStatusBadge = (status: string) => {
@@ -129,11 +131,8 @@ const getProgressPercentage = (status: string) => {
     CHANGES_REQUESTED: 30,
     APPROVED_FOR_REFERRAL: 40,
     REFERRAL_SENT: 60,
-    UNDER_REVIEW: 70,
-    REFERRAL_ACCEPTED: 80,
-    PAYMENT_PENDING: 90,
+    PAYMENT_PENDING: 80,
     COMPLETED: 100,
-    REFERRAL_REJECTED: 100,
   };
 
   return statusValues[status] || 0;
@@ -295,32 +294,18 @@ const ReferralDetailPage = () => {
       setIsProcessingPayment(false);
     }
   };
-
   // Define form schema for update resume
   const updateResumeSchema = z.object({
-    resumeUrl: z.string().url({
-      message: "Please enter a valid URL for your resume.",
-    }),
-    coverLetterUrl: z
-      .string()
-      .url({
-        message: "Please enter a valid URL for your cover letter.",
-      })
-      .optional()
-      .or(z.literal("")),
-    companyName: z.string().min(2, {
-      message: "Company name must be at least 2 characters.",
-    }),
+    resumeUrl: z.string().optional(),
+    resumeFile: z.any().optional(),
+    coverLetterUrl: z.string().optional(),
+    coverLetterFile: z.any().optional(),
     positionName: z.string().min(2, {
       message: "Position name must be at least 2 characters.",
     }),
-    jobLink: z
-      .string()
-      .url({
-        message: "Please enter a valid job link URL.",
-      })
-      .optional()
-      .or(z.literal("")),
+    jobLink: z.string().url({
+      message: "Please enter a valid job link URL.",
+    }),
   });
 
   // Add update referral documents mutation
@@ -346,14 +331,14 @@ const ReferralDetailPage = () => {
         });
       },
     });
-
   // Initialize form with default values
   const updateResumeForm = useForm<z.infer<typeof updateResumeSchema>>({
     resolver: zodResolver(updateResumeSchema),
     defaultValues: {
       resumeUrl: referral?.resumeUrl || "",
+      resumeFile: undefined,
       coverLetterUrl: referral?.coverLetterUrl || "",
-      companyName: referral?.companyName || "",
+      coverLetterFile: undefined,
       positionName: referral?.positionName || "",
       jobLink: referral?.jobLink || "",
     },
@@ -364,23 +349,80 @@ const ReferralDetailPage = () => {
     if (referral) {
       updateResumeForm.reset({
         resumeUrl: referral.resumeUrl || "",
+        resumeFile: undefined,
         coverLetterUrl: referral.coverLetterUrl || "",
-        companyName: referral.companyName || "",
+        coverLetterFile: undefined,
         positionName: referral.positionName || "",
         jobLink: referral.jobLink || "",
       });
     }
   }, [referral, updateResumeForm]);
+  // File upload mutation
+  const fileUploadMutation = api.file.upload.useMutation({
+    onError: (error) => {
+      toast({
+        title: "Upload failed",
+        description:
+          error.message || "An error occurred while uploading your file.",
+        variant: "destructive",
+      });
+      setIsUpdatingResume(false);
+    },
+  });
 
   // Handle update resume form submission
-  const onUpdateResume = (values: z.infer<typeof updateResumeSchema>) => {
+  const onUpdateResume = async (values: z.infer<typeof updateResumeSchema>) => {
     setIsUpdatingResume(true);
-    updateReferralDocumentsMutation.mutate({
-      referralRequestId: referralId,
-      ...values,
-      // Set status back to RESUME_REVIEW to indicate it's been updated
-      status: "RESUME_REVIEW",
-    });
+
+    try {
+      // Upload resume file if selected
+      let resumeUrl = values.resumeUrl;
+      if (values.resumeFile) {
+        const base64 = await convertFileToBase64(values.resumeFile as File);
+        const result = await fileUploadMutation.mutateAsync({
+          fileContent: base64,
+          fileType: "application/pdf",
+          fileName: (values.resumeFile as File).name,
+          bucketName: "distance-connect-user-uploads",
+          folderName: "referrals/resumes",
+        });
+        resumeUrl = result.url;
+      }
+
+      // Upload cover letter file if selected
+      let coverLetterUrl = values.coverLetterUrl;
+      if (values.coverLetterFile) {
+        const base64 = await convertFileToBase64(
+          values.coverLetterFile as File,
+        );
+        const result = await fileUploadMutation.mutateAsync({
+          fileContent: base64,
+          fileType: "application/pdf",
+          fileName: (values.coverLetterFile as File).name,
+          bucketName: "distance-connect-user-uploads",
+          folderName: "referrals/cover-letters",
+        });
+        coverLetterUrl = result.url;
+      }
+
+      // Update referral with new URLs
+      await updateReferralDocumentsMutation.mutateAsync({
+        referralRequestId: referralId,
+        resumeUrl: resumeUrl || "",
+        coverLetterUrl: coverLetterUrl || "",
+        positionName: values.positionName,
+        jobLink: values.jobLink,
+        status: "RESUME_REVIEW",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description:
+          error.message || "An error occurred while updating your referral.",
+        variant: "destructive",
+      });
+      setIsUpdatingResume(false);
+    }
   };
 
   if (isLoading || userLoading) {
@@ -555,7 +597,6 @@ const ReferralDetailPage = () => {
                       {new Date(referral.createdAt).toLocaleString()}
                     </p>
                   </div>
-
                   {referral.initiationFeePaid && (
                     <div className="relative mb-8">
                       <div className="absolute -left-[30px] mt-1.5 h-4 w-4 rounded-full border border-white bg-purple-500"></div>
@@ -573,7 +614,6 @@ const ReferralDetailPage = () => {
                       </p>
                     </div>
                   )}
-
                   {referral.status !== "INITIATED" && (
                     <div className="relative mb-8">
                       <div
@@ -612,8 +652,7 @@ const ReferralDetailPage = () => {
                         </div>
                       )}
                     </div>
-                  )}
-
+                  )}{" "}
                   {(referral.status === "REFERRAL_SENT" ||
                     referral.status === "UNDER_REVIEW" ||
                     referral.status === "REFERRAL_ACCEPTED" ||
@@ -627,19 +666,57 @@ const ReferralDetailPage = () => {
                         Mentor has sent your referral to the company
                       </p>
                       {referral.referralProofUrl && (
-                        <a
-                          href={referral.referralProofUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-2 inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
-                        >
-                          <ExternalLink className="mr-1 h-3 w-3" />
-                          View Referral Proof
-                        </a>
+                        <div className="mt-2 flex flex-col gap-2">
+                          <a
+                            href={referral.referralProofUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+                          >
+                            <ExternalLink className="mr-1 h-3 w-3" />
+                            View Referral Proof
+                          </a>
+
+                          {referral.status === "REFERRAL_SENT" &&
+                            !referral.finalFeePaid &&
+                            isStudent && (
+                              <div className="mt-2 rounded-md border border-green-200 bg-green-50 p-3">
+                                <p className="mb-2 text-sm font-medium text-green-800">
+                                  Your referral has been sent! You can now
+                                  complete the process by paying the final fee.
+                                </p>
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  className="w-full bg-green-600 hover:bg-green-700"
+                                  onClick={() => handlePayment(false)}
+                                  disabled={isProcessingPayment}
+                                >
+                                  {isProcessingPayment ? (
+                                    <>
+                                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                                      Processing...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <CreditCard className="mr-2 h-3 w-3" />
+                                      Pay Final Fee (₹
+                                      {referral.finalFeeAmount
+                                        ? (
+                                            parseInt(referral.finalFeeAmount) /
+                                            100
+                                          ).toFixed(2)
+                                        : "---"}
+                                      )
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                            )}
+                        </div>
                       )}
                     </div>
                   )}
-
                   {(referral.status === "REFERRAL_ACCEPTED" ||
                     referral.status === "PAYMENT_PENDING" ||
                     referral.status === "COMPLETED") && (
@@ -662,7 +739,6 @@ const ReferralDetailPage = () => {
                       )}
                     </div>
                   )}
-
                   {referral.status === "REFERRAL_REJECTED" && (
                     <div className="relative mb-8">
                       <div className="absolute -left-[30px] mt-1.5 h-4 w-4 rounded-full border border-white bg-red-500"></div>
@@ -672,7 +748,6 @@ const ReferralDetailPage = () => {
                       </p>
                     </div>
                   )}
-
                   {referral.status === "COMPLETED" && (
                     <div className="relative">
                       <div className="absolute -left-[30px] mt-1.5 h-4 w-4 rounded-full border border-white bg-green-500"></div>
@@ -710,7 +785,7 @@ const ReferralDetailPage = () => {
                           </>
                         )}{" "}
                       </Button>
-                    )}
+                    )}{" "}
                   {referral.status === "CHANGES_REQUESTED" && (
                     <Button
                       variant="outline"
@@ -721,7 +796,8 @@ const ReferralDetailPage = () => {
                       Update Resume
                     </Button>
                   )}{" "}
-                  {referral.status === "REFERRAL_ACCEPTED" &&
+                  {(referral.status === "REFERRAL_SENT" ||
+                    referral.status === "REFERRAL_ACCEPTED") &&
                     !referral.finalFeePaid && (
                       <Button
                         variant="default"
@@ -739,7 +815,9 @@ const ReferralDetailPage = () => {
                             <CreditCard className="mr-2 h-4 w-4" />
                             Pay Final Fee (₹
                             {referral.finalFeeAmount
-                              ? (referral.finalFeeAmount / 100).toFixed(2)
+                              ? (
+                                  parseInt(referral.finalFeeAmount) / 100
+                                ).toFixed(2)
                               : "---"}
                             )
                           </>
@@ -843,12 +921,10 @@ const ReferralDetailPage = () => {
                   <p className="text-sm font-medium text-gray-500">Company</p>
                   <p>{referral.companyName || "Not specified"}</p>
                 </div>
-
                 <div>
                   <p className="text-sm font-medium text-gray-500">Position</p>
                   <p>{referral.positionName || "Not specified"}</p>
                 </div>
-
                 <div>
                   <p className="text-sm font-medium text-gray-500">
                     Current Status
@@ -857,7 +933,6 @@ const ReferralDetailPage = () => {
                     {getReferralStatusBadge(referral.status)}
                   </div>
                 </div>
-
                 <div>
                   <p className="text-sm font-medium text-gray-500">
                     Initiation Fee
@@ -867,9 +942,9 @@ const ReferralDetailPage = () => {
                       ? "✅ Paid (₹99)"
                       : "❌ Not Paid (₹99)"}
                   </p>
-                </div>
-
-                {(referral.status === "REFERRAL_ACCEPTED" ||
+                </div>{" "}
+                {(referral.status === "REFERRAL_SENT" ||
+                  referral.status === "REFERRAL_ACCEPTED" ||
                   referral.status === "PAYMENT_PENDING" ||
                   referral.status === "COMPLETED") && (
                   <div>
@@ -878,19 +953,17 @@ const ReferralDetailPage = () => {
                     </p>
                     <p>
                       {referral.finalFeePaid
-                        ? `✅ Paid (₹${referral.finalFeeAmount ? (referral.finalFeeAmount / 100).toFixed(2) : "---"})`
-                        : `❌ Not Paid (₹${referral.finalFeeAmount ? (referral.finalFeeAmount / 100).toFixed(2) : "---"})`}
+                        ? `✅ Paid (₹${referral.finalFeeAmount ? (parseInt(referral.finalFeeAmount) / 100).toFixed(2) : "---"})`
+                        : `❌ Not Paid (₹${referral.finalFeeAmount ? (parseInt(referral.finalFeeAmount) / 100).toFixed(2) : "---"})`}
                     </p>
                   </div>
                 )}
-
                 <div>
                   <p className="text-sm font-medium text-gray-500">
                     Created On
                   </p>
                   <p>{new Date(referral.createdAt).toLocaleDateString()}</p>
                 </div>
-
                 <div>
                   <p className="text-sm font-medium text-gray-500">
                     Last Updated
@@ -899,10 +972,10 @@ const ReferralDetailPage = () => {
                 </div>
               </div>
             </CardContent>
-          </Card>
-
-          {/* Payment information card for final status */}
-          {(referral.status === "REFERRAL_ACCEPTED" ||
+          </Card>{" "}
+          {/* Payment information card */}
+          {(referral.status === "REFERRAL_SENT" ||
+            referral.status === "REFERRAL_ACCEPTED" ||
             referral.status === "PAYMENT_PENDING" ||
             referral.status === "COMPLETED") && (
             <Card className="mt-4">
@@ -912,23 +985,39 @@ const ReferralDetailPage = () => {
               <CardContent>
                 {isStudent && !referral.finalFeePaid ? (
                   <div className="rounded-md border border-green-200 bg-green-50 p-4">
-                    <p className="font-medium text-green-800">Good News!</p>
+                    <p className="font-medium text-green-800">
+                      {referral.status === "REFERRAL_SENT"
+                        ? "Referral Sent!"
+                        : "Good News!"}
+                    </p>
                     <p className="mt-1 text-sm text-green-700">
-                      Your referral has been accepted. Please pay the final fee
-                      to complete the process and unlock direct communication
-                      with your mentor.
+                      {referral.status === "REFERRAL_SENT"
+                        ? "Your mentor has sent your referral. Please pay the final fee to complete the process and unlock direct communication with your mentor."
+                        : "Your referral has been accepted. Please pay the final fee to complete the process and unlock direct communication with your mentor."}
                     </p>
                     <Button
                       variant="default"
                       className="mt-4 w-full bg-green-600 hover:bg-green-700"
                       onClick={() => handlePayment(false)}
+                      disabled={isProcessingPayment}
                     >
-                      <CreditCard className="mr-2 h-4 w-4" />
-                      Pay Final Fee (₹
-                      {referral.finalFeeAmount
-                        ? (referral.finalFeeAmount / 100).toFixed(2)
-                        : "---"}
-                      )
+                      {isProcessingPayment ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard className="mr-2 h-4 w-4" />
+                          Pay Final Fee (₹
+                          {referral.finalFeeAmount
+                            ? (parseInt(referral.finalFeeAmount) / 100).toFixed(
+                                2,
+                              )
+                            : "---"}
+                          )
+                        </>
+                      )}
                     </Button>
                   </div>
                 ) : referral.finalFeePaid ? (
@@ -962,7 +1051,7 @@ const ReferralDetailPage = () => {
                     <p className="mt-1 text-sm text-yellow-700">
                       Waiting for the student to complete the final payment of ₹
                       {referral.finalFeeAmount
-                        ? (referral.finalFeeAmount / 100).toFixed(2)
+                        ? (parseInt(referral.finalFeeAmount) / 100).toFixed(2)
                         : "---"}
                       .
                     </p>
@@ -1002,61 +1091,69 @@ const ReferralDetailPage = () => {
               onSubmit={updateResumeForm.handleSubmit(onUpdateResume)}
               className="space-y-4"
             >
+              {" "}
               <FormField
                 control={updateResumeForm.control}
-                name="resumeUrl"
+                name="resumeFile"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Resume URL*</FormLabel>
+                    <FormLabel>
+                      Resume <span className="text-red-500">*</span>
+                    </FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="https://drive.google.com/your-resume.pdf"
-                        {...field}
-                      />
+                      <div className="flex items-center">
+                        <FileSelector
+                          fileType="resume"
+                          onFileSelected={(file) => {
+                            field.onChange(file);
+                            // Clear resumeUrl if a new file is selected
+                            if (file) {
+                              updateResumeForm.setValue("resumeUrl", "");
+                            }
+                          }}
+                          currentUrl={updateResumeForm.getValues("resumeUrl")}
+                          required={true}
+                        />
+                      </div>
                     </FormControl>
                     <FormDescription>
-                      Link to your updated resume (Google Drive, Dropbox, etc.)
+                      Upload your resume as a PDF file (max 5MB)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
-              />
-
+              />{" "}
               <FormField
                 control={updateResumeForm.control}
-                name="coverLetterUrl"
+                name="coverLetterFile"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cover Letter URL (Optional)</FormLabel>
+                    <FormLabel>Cover Letter (Optional)</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="https://drive.google.com/your-cover-letter.pdf"
-                        {...field}
-                      />
+                      <div className="flex items-center">
+                        <FileSelector
+                          fileType="coverLetter"
+                          onFileSelected={(file) => {
+                            field.onChange(file);
+                            // Clear coverLetterUrl if a new file is selected
+                            if (file) {
+                              updateResumeForm.setValue("coverLetterUrl", "");
+                            }
+                          }}
+                          currentUrl={updateResumeForm.getValues(
+                            "coverLetterUrl",
+                          )}
+                        />
+                      </div>
                     </FormControl>
                     <FormDescription>
-                      Link to your cover letter if you have one
+                      Upload your cover letter as a PDF file (max 5MB)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
-              />
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <FormField
-                  control={updateResumeForm.control}
-                  name="companyName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Company*</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Google, Meta, etc." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
+              />{" "}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-1">
                 <FormField
                   control={updateResumeForm.control}
                   name="positionName"
@@ -1073,28 +1170,36 @@ const ReferralDetailPage = () => {
                     </FormItem>
                   )}
                 />
-              </div>
-
+              </div>{" "}
               <FormField
                 control={updateResumeForm.control}
                 name="jobLink"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Job Link (Optional)</FormLabel>
+                    <FormLabel>
+                      Job Link <span className="text-red-500">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="https://jobs.google.com/job-posting"
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>
-                      Link to the job posting if available
-                    </FormDescription>
+                    <FormDescription>Link to the job posting</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
+              <div className="my-6 rounded-md border border-blue-200 bg-blue-50 p-4">
+                <p className="text-sm font-medium text-blue-800">
+                  Important Information
+                </p>
+                <p className="mt-1 text-sm text-blue-700">
+                  You can upload new files or provide URLs to your documents.
+                  Your files will be uploaded when you submit the form. Make
+                  sure your resume and job link are provided.
+                </p>
+              </div>
               <DialogFooter>
                 <Button
                   type="button"
